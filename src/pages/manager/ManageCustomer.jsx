@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { mockCustomer } from '@hooks/MockAccount'; // Update import to use mockCustomer
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import CustomerActivatePopup from '@components/manager/CustomerActivatePopup'; // Import the activate popup
-import CustomerDeactivatePopup from '@components/manager/CustomerDeactivatePopup'; // Import the deactivate popup
+import CustomerActivatePopup from '@components/ActivatePopup'; // Import the activate popup
+import CustomerDeactivatePopup from '@components/DeactivatePopup'; // Import the deactivate popup
 import Sidebar from '@layouts/Sidebar';
 
 const ManageCustomer = () => {

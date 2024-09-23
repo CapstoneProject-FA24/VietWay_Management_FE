@@ -3,7 +3,6 @@ import { mockCompany } from '@hooks/MockCompany';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CompanyUpdatePopup from '@components/admin/CompanyUpdatePopup';
-import CompanyHidePopup from '@components/admin/CompanyHidePopup'; // Import the delete popup
 import CompanyCreatePopup from '@components/admin/CompanyCreatePopup'; // Import the create popup
 import AddIcon from '@mui/icons-material/Add';
 import Sidebar from '@layouts/Sidebar';
@@ -12,7 +11,6 @@ const ManageCompany = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc'); // New state for sorting
   const [openUpdatePopup, setOpenUpdatePopup] = useState(false);
-  const [openDeletePopup, setOpenDeletePopup] = useState(false); // State for delete popup
   const [openCreatePopup, setOpenCreatePopup] = useState(false); // State for create popup
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true); // State to track sidebar open/close
@@ -37,18 +35,12 @@ const ManageCompany = () => {
   });
 
   const handleUpdateCompany = (updatedCompany) => {
-    // Update the company in your state or API
     console.log('Updated Company:', updatedCompany);
   };
 
   const handleOpenUpdatePopup = (company) => {
     setSelectedCompany(company);
     setOpenUpdatePopup(true);
-  };
-
-  const handleOpenDeletePopup = (company) => {
-    setSelectedCompany(company);
-    setOpenDeletePopup(true);
   };
 
   const handleOpenCreatePopup = () => {
@@ -132,12 +124,7 @@ const ManageCompany = () => {
                   </TableCell>
                   <TableCell sx={{ padding: '10px' }}>{new Date(company.createDate).toLocaleDateString()}</TableCell>
                   <TableCell sx={{ padding: '10px' }}>
-                    {company.status === 1 && (
-                      <>
-                        <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(company)}>Sửa</Button>
-                        <Button variant="contained" sx={{ backgroundColor: 'red', mt: 0.5 }} onClick={() => handleOpenDeletePopup(company)}>Ẩn</Button>
-                      </>
-                    )}
+                    <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(company)}>Sửa</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -159,16 +146,6 @@ const ManageCompany = () => {
           onClose={() => setOpenUpdatePopup(false)}
           company={selectedCompany}
           onUpdate={handleUpdateCompany}
-        />
-        {/* Popup for deleting company */}
-        <CompanyHidePopup
-          open={openDeletePopup}
-          onClose={() => setOpenDeletePopup(false)}
-          company={selectedCompany}
-          onDelete={(id) => {
-            console.log('Deleted Company ID:', id);
-            setOpenDeletePopup(false);
-          }}
         />
       </Box>
     </Box>

@@ -1,0 +1,38 @@
+.slick-dots.custom-dots {
+  bottom: 10px;
+}
+
+.custom-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  transition: background 0.3s, width 0.3s;
+  box-shadow: 0px 1px 3px #1a1a1a;
+}
+
+.slick-active .custom-dot {
+  background: #3572EF;
+  width: 20px;
+  border-radius: 10px;
+  margin-left: -5px;
+}
+
+.slideImg {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+}
+
+.slick-slider {
+  width: 430px;
+  margin: 0 auto;
+}
+
+.slider {
+  width: 480px;
+}
+
+.slider-dots {
+  margin-left: 15px;
+}

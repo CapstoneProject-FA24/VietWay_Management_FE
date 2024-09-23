@@ -73,7 +73,7 @@ export const mockManager = [
     phone: "0123456789",
     email: "nguyenvana@gmail.com",
     pass: "password123",
-    role: 0,
+    role: 3,
     status: 1,
     createDate: "2023-12-15"
   },
@@ -83,7 +83,7 @@ export const mockManager = [
     phone: "0987654321",
     email: "tranthib@gmail.com",
     pass: "password456",
-    role: 0,
+    role: 3,
     status: 0,
     createDate: "2023-11-15"
   },
@@ -93,7 +93,7 @@ export const mockManager = [
     phone: "0912345678",
     email: "levanc@gmail.com",
     pass: "password789",
-    role: 0,
+    role: 3,
     status: 1,
     createDate: "2023-04-15"
   },
@@ -103,7 +103,7 @@ export const mockManager = [
     phone: "0934567890",
     email: "phamthid@gmail.com",
     pass: "password101",
-    role: 0,
+    role: 3,
     status: 1,
     createDate: "2023-07-10"
   },
@@ -113,9 +113,66 @@ export const mockManager = [
     phone: "0945678901",
     email: "nguyenvane@gmail.com",
     pass: "password202",
-    role: 0,
+    role: 3,
     status: 0,
     createDate: "2023-11-12"
   }
 ];
 
+export const mockCompanyStaff = [
+  {
+    id: 1,
+    fullname: "Nguyễn Văn A",
+    phone: "0123456789",
+    email: "nguyenvana@gmail.com",
+    pass: "password123",
+    role: 2,
+    status: 1,
+    createDate: "2023-12-15",
+    company: "VietWay",
+  },
+  {
+    id: 2,
+    fullname: "Trần Thị B",
+    phone: "0987654321",
+    email: "tranthib@gmail.com",
+    pass: "password456",
+    role: 2,
+    status: 0,
+    createDate: "2023-11-15",
+    company: "Vietravel",
+  },
+  {
+    id: 3,
+    fullname: "Lê Văn C",
+    phone: "0912345678",
+    email: "levanc@gmail.com",
+    pass: "password789",
+    role: 2,
+    status: 1,
+    createDate: "2023-04-15",
+    company: "VietWay",
+  },
+  {
+    id: 4,
+    fullname: "Phạm Thị D",
+    phone: "0934567890",
+    email: "phamthid@gmail.com",
+    pass: "password101",
+    role: 2,
+    status: 1,
+    createDate: "2023-07-10",
+    company: "SaiGonTour",
+  },
+  {
+    id: 5,
+    fullname: "Nguyễn Văn E",
+    phone: "0945678901",
+    email: "nguyenvane@gmail.com",
+    pass: "password202",
+    role: 2,
+    status: 0,
+    createDate: "2023-11-12",
+    company: "Du Lịch Việt",
+  }
+];

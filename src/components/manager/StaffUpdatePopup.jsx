@@ -6,26 +6,26 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import ActivatePopup from '@components/ActivatePopup';
 import DeactivatePopup from '@components/DeactivatePopup';
 
-const ManagerUpdatePopup = ({ open, onClose, manager, onUpdate }) => {
-    const [updatedManager, setUpdatedManager] = useState({});
+const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
+    const [updatedStaff, setUpdatedStaff] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [openActivatePopup, setOpenActivatePopup] = useState(false);
     const [openDeactivatePopup, setOpenDeactivatePopup] = useState(false);
 
     useEffect(() => {
-        if (manager) {
-            setUpdatedManager(manager);
+        if (staff) {
+            setUpdatedStaff(staff);
         }
-    }, [manager]);
+    }, [staff]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setUpdatedManager({ ...updatedManager, [name]: value });
+        setUpdatedStaff({ ...updatedStaff, [name]: value });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onUpdate(updatedManager);
+        onUpdate(updatedStaff);
         onClose();
     };
 
@@ -47,25 +47,25 @@ const ManagerUpdatePopup = ({ open, onClose, manager, onUpdate }) => {
                 <Box sx={{ padding: 4, backgroundColor: 'white', borderRadius: 2, maxWidth: 600, margin: 'auto', position: 'relative' }}>
                     <CloseIcon onClick={onClose} sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }} />
                     <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
-                        Cập nhật thông tin quản lý
+                        Cập nhật thông tin nhân viên
                     </Typography>
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
-                                <TextField label="Họ tên" name="fullname" value={updatedManager.fullname || ''} onChange={handleChange} fullWidth margin="normal" />
+                                <TextField label="Họ tên" name="fullname" value={updatedStaff.fullname || ''} onChange={handleChange} fullWidth margin="normal" />
                             </Grid>
                             <Grid item xs={12}>
-                                <TextField label="Số điện thoại" name="phone" value={updatedManager.phone || ''} onChange={handleChange} fullWidth margin="normal" />
+                                <TextField label="Số điện thoại" name="phone" value={updatedStaff.phone || ''} onChange={handleChange} fullWidth margin="normal" />
                             </Grid>
                             <Grid item xs={12}>
-                                <TextField label="Email" name="email" value={updatedManager.email || ''} onChange={handleChange} fullWidth margin="normal" />
+                                <TextField label="Email" name="email" value={updatedStaff.email || ''} onChange={handleChange} fullWidth margin="normal" />
                             </Grid>
                             {/*<Grid item xs={12}>
                                 <TextField
                                     label="Mật khẩu"
                                     name="pass"
                                     type={showPassword ? 'text' : 'password'} // Kiểm soát loại hiển thị
-                                    value={updatedManager.pass || ''}
+                                    value={updatedStaff.pass || ''}
                                     onChange={handleChange}
                                     fullWidth
                                     margin="normal"
@@ -83,7 +83,7 @@ const ManagerUpdatePopup = ({ open, onClose, manager, onUpdate }) => {
                         </Grid>
                         <Grid>
                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
-                                {manager && manager.status === 1 ? (
+                                {staff && staff.status === 1 ? (
                                     <Button variant="contained" color="secondary" onClick={handleOpenDeactivatePopup} sx={{ backgroundColor: 'red', mr: 1, color: 'white' }}>
                                         Vô hiệu hóa
                                     </Button>
@@ -102,23 +102,23 @@ const ManagerUpdatePopup = ({ open, onClose, manager, onUpdate }) => {
 
                 </Box>
             </Modal>
-            {/* Popup for activating manager */}
+            {/* Popup for activating Staff */}
             <ActivatePopup
                 open={openActivatePopup}
                 onClose={() => setOpenActivatePopup(false)}
-                user={manager}
+                user={staff}
                 onActivate={(id) => {
-                    console.log('Activated Manager ID:', id);
+                    console.log('Activated Staff ID:', id);
                     setOpenActivatePopup(false);
                 }}
             />
-            {/* Popup for deactivating manager */}
+            {/* Popup for deactivating Staff */}
             <DeactivatePopup
                 open={openDeactivatePopup}
                 onClose={() => setOpenDeactivatePopup(false)}
-                user={manager}
+                user={staff}
                 onDeactivate={(id) => {
-                    console.log('Deactivated Manager ID:', id);
+                    console.log('Deactivated Staff ID:', id);
                     setOpenDeactivatePopup(false);
                 }}
             />
@@ -126,4 +126,4 @@ const ManagerUpdatePopup = ({ open, onClose, manager, onUpdate }) => {
     );
 };
 
-export default ManagerUpdatePopup;
+export default StaffUpdatePopup;

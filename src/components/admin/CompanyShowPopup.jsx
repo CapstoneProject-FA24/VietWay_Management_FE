@@ -2,10 +2,10 @@ import React from 'react';
 import { Modal, Box, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const CustomerDeactivatePopup = ({ open, onClose, user, onDeactivate }) => {
-    const handleDeactivate = () => {
-        if (user && user.id) {
-            onDeactivate(user.id); // Assuming user has an id property
+const CompanyShowPopup = ({ open, onClose, company, onDelete }) => {
+    const handleDelete = () => {
+        if (company && company.id) {
+            onDelete(company.id); // Assuming company has an id property
         }
         onClose();
     };
@@ -17,18 +17,18 @@ const CustomerDeactivatePopup = ({ open, onClose, user, onDeactivate }) => {
                     onClick={onClose} 
                     sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }}
                 />
-                <Typography variant="h5" component="h2" gutterBottom align='center' color='primary'>
-                    Xác nhận vô hiệu hóa người dùng
+                <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
+                    Xác nhận hiện công ty
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Bạn có xác nhận vô hiệu hóa người dùng <strong>{user ? user.fullname : 'người dùng không xác định'}</strong> không?
+                    Bạn có xác nhận hiện công ty <strong>{company ? company.name : 'công ty không xác định'}</strong> không?
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
                         Hủy
                     </Button>
-                    <Button onClick={handleDeactivate} variant="contained" sx={{ backgroundColor: 'red'}}>
-                        Vô hiệu hóa
+                    <Button onClick={handleDelete} variant="contained" sx={{ backgroundColor: 'red'}}>
+                        Xác nhận
                     </Button>
                 </Box>
             </Box>
@@ -36,4 +36,4 @@ const CustomerDeactivatePopup = ({ open, onClose, user, onDeactivate }) => {
     );
 };
 
-export default CustomerDeactivatePopup;
+export default CompanyShowPopup;

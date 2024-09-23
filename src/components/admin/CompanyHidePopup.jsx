@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Box, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const CompanyDeletePopup = ({ open, onClose, company, onDelete }) => {
+const CompanyHidePopup = ({ open, onClose, company, onDelete }) => {
     const handleDelete = () => {
         if (company && company.id) {
             onDelete(company.id); // Assuming company has an id property
@@ -36,4 +36,4 @@ const CompanyDeletePopup = ({ open, onClose, company, onDelete }) => {
     );
 };
 
-export default CompanyDeletePopup;
+export default CompanyHidePopup;

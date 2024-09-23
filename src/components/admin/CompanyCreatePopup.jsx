@@ -44,7 +44,7 @@ const CompanyCreatePopup = ({ open, onClose, onCreate }) => {
                     sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }}
                 />
                 <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
-                    Tạo mới công ty
+                    Tạo công ty mới
                 </Typography>
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
