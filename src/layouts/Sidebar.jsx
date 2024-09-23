@@ -9,11 +9,11 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled } from '@mui/material/styles';
 
-const SidebarContainer = styled(Box)(({ theme, isOpen }) => ({
+const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
   boxShadow: theme.shadows[1],
   position: 'fixed',
-  left: isOpen ? 0 : '-250px',
+  left: isopen ? 0 : '-250px',
   top: 0,
   bottom: 0,
   display: 'flex',
@@ -24,7 +24,7 @@ const SidebarContainer = styled(Box)(({ theme, isOpen }) => ({
   transition: 'left 0.3s',
 }));
 
-const ToggleButton = styled(Paper)(({ theme, isOpen }) => ({
+const ToggleButton = styled(Paper)(({ theme, isopen }) => ({
   position: 'fixed',
   width: '30px',
   height: '40px',
@@ -34,8 +34,8 @@ const ToggleButton = styled(Paper)(({ theme, isOpen }) => ({
   justifyContent: 'center',
   alignItems: 'center',
   marginRight: '12px',
-  marginLeft: isOpen ? '-35px' : '-5px',
-  left: isOpen ? '250px' : '10px',
+  marginLeft: isopen ? '-35px' : '-5px',
+  left: isopen ? '250px' : '10px',
   top: '50%',
   transform: 'translateY(-50%)',
   zIndex: 1300,
@@ -79,23 +79,16 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
   padding: '12px 16px',
 }));
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <>
-
-      <ToggleButton onClick={toggleSidebar} isOpen={isOpen}>
+      <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
         {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </ToggleButton>
 
-      <SidebarContainer isOpen={isOpen}>
+      <SidebarContainer isopen={isOpen}>
         <LogoLink to="/">
-          <img src="logo2_color.png" alt="VIETWAY" style={{ height: '55px' }} />
+          <img src="/logo2_color.png" alt="VIETWAY" style={{ height: '55px' }} />
         </LogoLink>
 
         <Divider />
@@ -103,7 +96,7 @@ const Sidebar = () => {
         <List sx={{ width: '100%' }}>
           <ListItem 
             component={Link} 
-            to="/dashboard" 
+            to="/admin/dashboard" 
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginBottom: 1, marginTop: 3 }}
           >
             <MenuItemPaper elevation={2}>
@@ -121,11 +114,14 @@ const Sidebar = () => {
         </List>
 
         <List sx={{ width: '100%' }}>
-          {['Công ty', 'Quản lí'].map((text, index) => (
+          {[
+            { text: 'Công ty', url: '/admin/cong-ty' },
+            { text: 'Quản lí', url: '/admin/quan-ly' }
+          ].map(({ text, url }, index) => (
             <ListItem 
               key={text}
               component={Link} 
-              to={`/${text.toLowerCase().replace(' ', '-')}`}
+              to={url}
               sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginBottom: 1 }}
             >
               <MenuItemPaper elevation={0}>
@@ -149,7 +145,7 @@ const Sidebar = () => {
         <List sx={{ width: '100%', mt: 2 }}>
           <ListItem 
             component={Link} 
-            to="/logout" 
+            to="/dang-xuat" 
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
           >
             <MenuItemPaper elevation={1}>
