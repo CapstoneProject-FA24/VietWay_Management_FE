@@ -2,9 +2,6 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
@@ -18,7 +15,6 @@ import "slick-carousel/slick/slick-theme.css";
 import '@styles/Slider.css';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
 export default function Login() {
   const settingLogin = {
@@ -64,10 +60,6 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const handleBackClick = () => {
-    navigate('/');
-  };
-
   return (
     <Box sx={{
       position: 'absolute',
@@ -93,14 +85,6 @@ export default function Login() {
             }}
           >
             <img style={{ width: 90, marginBottom: 20 }} src='/logo1_color.png' alt="Logo" />
-            <Button
-              variant="text"
-              startIcon={<ArrowBackIosNewIcon />}
-              onClick={handleBackClick}
-              sx={{ color: '#4B4B4B', marginBottom: 1, justifyContent: 'flex-start' }}
-            >
-              Quay lại
-            </Button>
             <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>
               Đăng nhập
             </Typography>
@@ -132,7 +116,7 @@ export default function Login() {
                         onClick={handleClickShowPassword}
                         edge="end"
                       >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
                       </IconButton>
                     </InputAdornment>
                   ),

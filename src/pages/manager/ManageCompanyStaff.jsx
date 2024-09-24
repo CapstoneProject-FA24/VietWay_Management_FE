@@ -13,8 +13,6 @@ const ManageCompanyStaff = () => {
   const [sortOrder, setSortOrder] = useState('name-asc');
   const [openUpdatePopup, setOpenUpdatePopup] = useState(false);
   const [openCreatePopup, setOpenCreatePopup] = useState(false);
-  const [openActivatePopup, setOpenActivatePopup] = useState(false);
-  const [openDeactivatePopup, setOpenDeactivatePopup] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
