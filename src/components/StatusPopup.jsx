@@ -2,10 +2,10 @@ import React from 'react';
 import { Modal, Box, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const ActivatePopup = ({ open, onClose, user, onActivate }) => {
-    const handleActivate = () => {
+const StatusPopup = ({ open, onClose, user, onOpen }) => {
+    const handleSubmit = () => {
         if (user && user.id) {
-            onActivate(user.id); 
+            onOpen(user.id); 
         }
         onClose();
     };
@@ -31,17 +31,17 @@ const ActivatePopup = ({ open, onClose, user, onActivate }) => {
                     sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }}
                 />
                 <Typography variant="h5" component="h2" gutterBottom align='center' color='primary'>
-                    Xác nhận kích hoạt {user ? getUserRoleText(user.role) : 'người dùng không xác định'}
+                    Xác nhận {user && user.status === 1 ? 'vô hiệu hóa' : 'kích hoạt'} {user ? getUserRoleText(user.role) : 'người dùng không xác định'}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Bạn có xác nhận kích hoạt {user ? getUserRoleText(user.role) : 'người dùng không xác định'} <strong>{user ? user.fullname : 'người dùng không xác định'}</strong> không?
+                    Bạn có xác nhận {user && user.status === 1 ? 'vô hiệu hóa' : 'kích hoạt'} {user ? getUserRoleText(user.role) : 'người dùng không xác định'} <strong>{user ? user.fullname : 'người dùng không xác định'}</strong> không?
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
                         Hủy
                     </Button>
-                    <Button onClick={handleActivate} variant="contained" sx={{ backgroundColor: 'green'}}>
-                        Kích hoạt
+                    <Button onClick={handleSubmit} variant="contained" sx={{ backgroundColor: user && user.status === 1 ? 'red' : 'green'}}>
+                        Xác nhận
                     </Button>
                 </Box>
             </Box>
@@ -49,4 +49,4 @@ const ActivatePopup = ({ open, onClose, user, onActivate }) => {
     );
 };
 
-export default ActivatePopup;
+export default StatusPopup;

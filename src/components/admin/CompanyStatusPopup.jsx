@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Box, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
-const CompanyShowPopup = ({ open, onClose, company, onDelete }) => {
+const CompanyStatusPopup = ({ open, onClose, company, onDelete }) => {
     const handleDelete = () => {
         if (company && company.id) {
             onDelete(company.id); // Assuming company has an id property
@@ -18,10 +18,10 @@ const CompanyShowPopup = ({ open, onClose, company, onDelete }) => {
                     sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }}
                 />
                 <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
-                    Xác nhận hiện công ty
+                    Xác nhận {company.status === 0 ? 'vô hiệu hóa' : 'kích hoạt'} công ty
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Bạn có xác nhận hiện công ty <strong>{company ? company.name : 'công ty không xác định'}</strong> không?
+                    Bạn có xác nhận {company.status === 0 ? 'vô hiệu hóa' : 'kích hoạt'} công ty <strong>{company ? company.name : 'công ty không xác định'}</strong> không?
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
@@ -36,4 +36,4 @@ const CompanyShowPopup = ({ open, onClose, company, onDelete }) => {
     );
 };
 
-export default CompanyShowPopup;
+export default CompanyStatusPopup;

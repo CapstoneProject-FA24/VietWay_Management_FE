@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import { mockCustomer } from '@hooks/MockAccount'; // Update import to use mockCustomer
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import CustomerActivatePopup from '@components/ActivatePopup'; // Import the activate popup
-import CustomerDeactivatePopup from '@components/DeactivatePopup'; // Import the deactivate popup
-import Sidebar from '@layouts/Sidebar';
+import StatusPopup from '@components/StatusPopup';
+import SidebarManager from '@layouts/SidebarManager';
 
 const ManageCustomer = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState('name-asc'); // New state for sorting
-  const [openActivatePopup, setOpenActivatePopup] = useState(false); // State for activate popup
-  const [openDeactivatePopup, setOpenDeactivatePopup] = useState(false); // State for deactivate popup
-  const [selectedCustomer, setSelectedCustomer] = useState(null); // Renamed to selectedCustomer
+  const [sortOrder, setSortOrder] = useState('name-asc');
+  const [openPopup, setOpenPopup] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const searchTermWithoutAccents = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -35,19 +33,14 @@ const ManageCustomer = () => {
     return 0;
   });
 
-  const handleOpenActivatePopup = (customer) => {
+  const handleOpenPopup = (customer) => {
     setSelectedCustomer(customer);
-    setOpenActivatePopup(true);
-  };
-
-  const handleOpenDeactivatePopup = (customer) => {
-    setSelectedCustomer(customer);
-    setOpenDeactivatePopup(true);
+    setOpenPopup(true);
   };
 
   return (
     <Box sx={{ width: '100%', display: 'flex' }}>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.5s', marginLeft: isSidebarOpen ? '250px' : 3 }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: isSidebarOpen ? '117%' : '141%' }}>
           <TextField
@@ -111,45 +104,26 @@ const ManageCustomer = () => {
                   </TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(customer.createDate).toLocaleDateString()}</TableCell>
                   <TableCell sx={{ padding: '10px' }}>
-                    {customer.status === 1 ? (
                       <Button
                         variant="contained"
-                        sx={{ backgroundColor: 'red', fontSize: '0.7rem', width: '7rem' }}
-                        onClick={() => handleOpenDeactivatePopup(customer)}
+                        sx={{ backgroundColor: customer.status === 1 ? 'red' : 'green', fontSize: '0.7rem', width: '7rem' }}
+                        onClick={() => handleOpenPopup(customer)}
                       >
-                        Vô hiệu hóa
+                        {customer.status === 1 ? 'Vô hiệu hóa' : 'Khôi phục'} 
                       </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        sx={{ backgroundColor: 'primary.main', fontSize: '0.7rem', width: '7rem' }}
-                        onClick={() => handleOpenActivatePopup(customer)}
-                      >
-                        Khôi phục
-                      </Button>
-                    )}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        <CustomerActivatePopup
-          open={openActivatePopup}
-          onClose={() => setOpenActivatePopup(false)}
+        <StatusPopup
+          open={openPopup}
+          onClose={() => setOpenPopup(false)}
           user={selectedCustomer}
-          onActivate={(id) => {
-            console.log('Activated Customer ID:', id);
-            setOpenActivatePopup(false);
-          }}
-        />
-        <CustomerDeactivatePopup
-          open={openDeactivatePopup}
-          onClose={() => setOpenDeactivatePopup(false)}
-          user={selectedCustomer}
-          onDeactivate={(id) => {
-            console.log('Deactivated Customer ID:', id);
-            setOpenDeactivatePopup(false);
+          onOpen={(id) => {
+            console.log('Customer ID:', id);
+            setOpenPopup(false);
           }}
         />
       </Box>

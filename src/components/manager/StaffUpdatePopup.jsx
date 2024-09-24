@@ -3,14 +3,12 @@ import { Modal, Box, TextField, Button, Typography, IconButton, InputAdornment }
 import Grid from '@mui/material/Grid';
 import CloseIcon from '@mui/icons-material/Close';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import ActivatePopup from '@components/ActivatePopup';
-import DeactivatePopup from '@components/DeactivatePopup';
+import StatusPopup from '@components/StatusPopup';
 
 const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
     const [updatedStaff, setUpdatedStaff] = useState({});
     const [showPassword, setShowPassword] = useState(false);
-    const [openActivatePopup, setOpenActivatePopup] = useState(false);
-    const [openDeactivatePopup, setOpenDeactivatePopup] = useState(false);
+    const [openPopup, setOpenPopup] = useState(false);
 
     useEffect(() => {
         if (staff) {
@@ -33,12 +31,8 @@ const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
         setShowPassword(!showPassword);
     };
 
-    const handleOpenActivatePopup = () => {
-        setOpenActivatePopup(true);
-    };
-
-    const handleOpenDeactivatePopup = () => {
-        setOpenDeactivatePopup(true);
+    const handleOpenPopup = () => {
+        setOpenPopup(true);
     };
 
     return (
@@ -83,15 +77,9 @@ const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
                         </Grid>
                         <Grid>
                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
-                                {staff && staff.status === 1 ? (
-                                    <Button variant="contained" color="secondary" onClick={handleOpenDeactivatePopup} sx={{ backgroundColor: 'red', mr: 1, color: 'white' }}>
-                                        Vô hiệu hóa
-                                    </Button>
-                                ) : (
-                                    <Button variant="contained" color="primary" onClick={handleOpenActivatePopup} sx={{ backgroundColor: 'green', mr: 1 }}>
-                                        Kích hoạt
-                                    </Button>
-                                )}
+                                <Button variant="contained" color="secondary" onClick={handleOpenPopup} sx={{ backgroundColor: staff && staff.status === 1 ? 'red' : 'green', mr: 1, color: 'white' }}>
+                                    {staff && staff.status === 1 ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                                </Button>
                                 <Box sx={{ display: 'flex' }}>
                                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>Hủy</Button>
                                     <Button type="submit" variant="contained" color="primary">Sửa</Button>
@@ -102,24 +90,13 @@ const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
 
                 </Box>
             </Modal>
-            {/* Popup for activating Staff */}
-            <ActivatePopup
-                open={openActivatePopup}
-                onClose={() => setOpenActivatePopup(false)}
+            <StatusPopup
+                open={openPopup}
+                onClose={() => setOpenPopup(false)}
                 user={staff}
-                onActivate={(id) => {
-                    console.log('Activated Staff ID:', id);
-                    setOpenActivatePopup(false);
-                }}
-            />
-            {/* Popup for deactivating Staff */}
-            <DeactivatePopup
-                open={openDeactivatePopup}
-                onClose={() => setOpenDeactivatePopup(false)}
-                user={staff}
-                onDeactivate={(id) => {
-                    console.log('Deactivated Staff ID:', id);
-                    setOpenDeactivatePopup(false);
+                onOpen={(id) => {
+                    console.log('Staff ID:', id);
+                    setOpenPopup(false);
                 }}
             />
         </>

@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Box, TextField, Button, Typography, Grid } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import CompanyHidePopup from './CompanyHidePopup';
-import CompanyShowPopup from './CompanyShowPopup';
+import CompanyPopup from './CompanyStatusPopup';
 
-const CompanyUpdatePopup = ({ open, onClose, company, onUpdate }) => {
+const StatusPopup = ({ open, onClose, company, onUpdate }) => {
     const [updatedCompany, setUpdatedCompany] = useState({});
     const [imageFile, setImageFile] = useState(null);
     const [imageUrl, setImageUrl] = useState('');
-    const [openHidePopup, setOpenHidePopup] = useState(false);
-    const [openShowPopup, setOpenShowPopup] = useState(false);
+    const [openPopup, setOpenPopup] = useState(false);
 
     useEffect(() => {
         if (company) {
@@ -132,15 +130,9 @@ const CompanyUpdatePopup = ({ open, onClose, company, onUpdate }) => {
                         </Grid>
                         <Grid>
                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
-                                {updatedCompany.status === 1 ? (
-                                    <Button variant="contained" color="secondary" onClick={setOpenHidePopup} sx={{ backgroundColor: 'red', mr: 1, color: 'white' }}>
-                                        Vô hiệu hóa
-                                    </Button>
-                                ) : (
-                                    <Button variant="contained" color="primary" onClick={setOpenShowPopup} sx={{ backgroundColor: 'green', mr: 1 }}>
-                                        Kích hoạt
-                                    </Button>
-                                )}
+                                <Button variant="contained" color="secondary" onClick={setOpenPopup} sx={{ backgroundColor: updatedCompany.status === 1 ? 'red' : 'green', mr: 1, color: 'white' }}>
+                                    {updatedCompany.status === 1 ? 'Vô hiệu hóa' : ' Kích hoạt'}
+                                </Button>
                                 <Box sx={{ display: 'flex' }}>
                                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>Hủy</Button>
                                     <Button type="submit" variant="contained" color="primary">Sửa</Button>
@@ -150,26 +142,17 @@ const CompanyUpdatePopup = ({ open, onClose, company, onUpdate }) => {
                     </form>
                 </Box>
             </Modal>
-            <CompanyHidePopup
-                open={openHidePopup}
-                onClose={() => setOpenHidePopup(false)}
-                company={updatedCompany}
-                onDelete={(id) => {
-                    console.log('Hidden Company ID:', id);
-                    setOpenHidePopup(false);
-                }}
-            />
-            <CompanyShowPopup
-                open={openShowPopup}
-                onClose={() => setOpenShowPopup(false)}
+            <CompanyPopup
+                open={openPopup}
+                onClose={() => setOpenPopup(false)}
                 company={updatedCompany}
                 onShow={(id) => {
                     console.log('Shown Company ID:', id);
-                    setOpenShowPopup(false);
+                    setOpenPopup(false);
                 }}
             />
         </>
     );
 };
 
-export default CompanyUpdatePopup;
+export default StatusPopup;

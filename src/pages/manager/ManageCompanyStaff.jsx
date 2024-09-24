@@ -6,7 +6,7 @@ import StaffUpdatePopup from '@components/manager/StaffUpdatePopup';
 import StaffCreatePopup from '@components/manager/StaffCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import Sidebar from '@layouts/Sidebar';
+import SidebarManager from '@layouts/SidebarManager';
 
 const ManageCompanyStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,7 +48,7 @@ const ManageCompanyStaff = () => {
 
   return (
     <Box sx={{ width: '100%', display: 'flex' }}>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.5s', marginLeft: isSidebarOpen ? '250px' : 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, width: isSidebarOpen ? '102%': '125%' }}>
           <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />}>

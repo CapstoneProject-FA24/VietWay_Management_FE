@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import PeopleIcon from '@mui/icons-material/People';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import MapIcon from '@mui/icons-material/Map';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PersonIcon from '@mui/icons-material/Person';
 import { styled } from '@mui/material/styles';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
@@ -80,7 +84,7 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
   padding: '12px 16px',
 }));
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const SidebarManager = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
 
   return (
@@ -100,7 +104,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <ListItem 
             component={Link} 
             to="/admin/dashboard" 
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginBottom: 1, marginTop: 3 }}
+            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginTop: 1 }}
           >
             <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
               <MenuItemBox>
@@ -118,19 +122,22 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <List sx={{ width: '100%' }}>
           {[
-            { text: 'Công ty', url: '/admin/cong-ty' },
-            { text: 'Quản lí', url: '/admin/quan-ly' }
-          ].map(({ text, url }, index) => (
+            { text: 'Điểm tham quan', url: '/quan-ly/diem-tham-quan', icon: <LocationOnIcon /> },
+            { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <MapIcon /> },
+            { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
+            { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> }
+          ].map(({ text, url, icon }) => (
             <ListItem 
               key={text}
               component={Link} 
               to={url}
-              sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginBottom: 1 }}
+              sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
             >
               <MenuItemPaper elevation={0} isSelected={location.pathname === url}>
                 <MenuItemBox>
                   <MenuItemPaper2 elevation={1}>
-                    {index % 2 === 0 ? <BusinessOutlinedIcon sx={{ color: '#2196f3' }} /> : <PeopleIcon sx={{ color: '#2196f3' }} />}
+                    {React.cloneElement(icon, { sx: { color: '#2196f3' } })}
                   </MenuItemPaper2>
                   <ListItemText 
                     primary={text} 
@@ -169,4 +176,4 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   );
 };
 
-export default Sidebar;
+export default SidebarManager;
