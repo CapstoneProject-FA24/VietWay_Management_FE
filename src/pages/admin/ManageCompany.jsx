@@ -6,6 +6,7 @@ import CompanyUpdatePopup from '@components/admin/CompanyUpdatePopup';
 import CompanyCreatePopup from '@components/admin/CompanyCreatePopup'; // Import the create popup
 import AddIcon from '@mui/icons-material/Add';
 import Sidebar from '@layouts/Sidebar';
+import { Helmet } from 'react-helmet';
 
 const ManageCompany = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -49,6 +50,9 @@ const ManageCompany = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <Helmet>
+        <title>Công ty</title>
+      </Helmet>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0' }}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>

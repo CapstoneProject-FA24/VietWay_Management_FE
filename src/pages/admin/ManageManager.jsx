@@ -7,6 +7,7 @@ import ManagerCreatePopup from '@components/admin/ManagerCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Sidebar from '@layouts/Sidebar';
+import { Helmet } from 'react-helmet';
 
 const ManageManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +48,9 @@ const ManageManager = () => {
 
   return (
     <Box sx={{ width: '100%', display: 'flex' }}>
+      <Helmet>
+        <title>Quản lý</title>
+      </Helmet>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.5s', marginLeft: isSidebarOpen ? '250px' : 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, width: isSidebarOpen ? '100%': '118%' }}>

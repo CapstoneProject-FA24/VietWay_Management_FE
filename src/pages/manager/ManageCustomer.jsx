@@ -4,6 +4,7 @@ import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRo
 import SearchIcon from '@mui/icons-material/Search';
 import StatusPopup from '@components/StatusPopup';
 import SidebarManager from '@layouts/SidebarManager';
+import { Helmet } from 'react-helmet';
 
 const ManageCustomer = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,6 +41,9 @@ const ManageCustomer = () => {
 
   return (
     <Box sx={{ width: '100%', display: 'flex' }}>
+      <Helmet>
+        <title>Khách hàng</title>
+      </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.5s', marginLeft: isSidebarOpen ? '250px' : 3 }}>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: isSidebarOpen ? '117%' : '141%' }}>
