@@ -6,7 +6,7 @@ import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
 import ManageCompanyStaff from '@pages/manager/ManageCompanyStaff.jsx';
 import ManageAttraction from '@pages/manager/ManageAttraction.jsx';
-
+import ManageTourTemplate from '@pages/manager/ManageTourTemplate.jsx';
 
 const App = () => {
   return (
@@ -21,6 +21,7 @@ const App = () => {
         <Route path="/admin/quan-ly" element={<ManageManager />} />
         <Route path="/dang-nhap" element={<Login/>} />
         <Route path="/quan-ly/diem-tham-quan" element={<ManageAttraction/>} />
+        <Route path="/quan-ly/tour-mau" element={<ManageTourTemplate/>} />
       </Routes>
     </Router>
   );

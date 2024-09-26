@@ -138,6 +138,25 @@ export const mockAttractions = [
   }
 ];
 
+export const mockAttractionTypes = [
+  {
+    TypeId: 1,
+    TypeName: 'Chợ'
+  },
+  {
+    TypeId: 2,
+    TypeName: 'Công trình tôn giáo'
+  },
+  {
+    TypeId: 3,
+    TypeName: 'Bảo tàng'
+  },
+  {
+    TypeId: 4,
+    TypeName: 'Công viên'
+  },
+]
+
 export const getAttractionById = (id) => {
   return mockAttractions.find(attraction => attraction.AttractionId === parseInt(id));
 };
