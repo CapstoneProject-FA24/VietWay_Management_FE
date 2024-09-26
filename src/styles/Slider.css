@@ -30,9 +30,25 @@
 }
 
 .slider {
-  width: 480px;
+  width: 520px;
+}
+
+.attraction-slider {
+  width: 182%;
+  height: 450px;
+  margin-left: -176px;
 }
 
 .slider-dots {
   margin-left: 15px;
+}
+
+.slider-attractions-homepage {
+  width: 100%;
+  height: 300px;
+}
+
+.slider-homepage {
+  width: 100%;
+  height: 3000px;
 }

@@ -1,0 +1,81 @@
+#root {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 60px;
+  }
+  
+  .logo {
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
+  }
+  .logo:hover {
+    filter: drop-shadow(0 0 2em #646cffaa);
+  }
+  .logo.react:hover {
+    filter: drop-shadow(0 0 2em #61dafbaa);
+  }
+  
+  @keyframes logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    a:nth-of-type(2) .logo {
+      animation: logo-spin infinite 20s linear;
+    }
+  }
+  
+  .card {
+    padding: 2em;
+  }
+  
+  .read-the-docs {
+    color: #888;
+  }  
+
+  .ql-container {
+    height: 200px; /* Set a specific height */
+    border: 1px solid #d9d9d9; /* Border styling */
+    border-radius: 8px; /* Rounded corners */
+    margin-top: 16px; /* Space above the editor */
+}
+
+/* Styling the Quill editor toolbar */
+.ql-toolbar {
+    background: #f5f5f5; /* Toolbar background color */
+    border-top-left-radius: 8px; /* Match editor corners */
+    border-top-right-radius: 8px; /* Match editor corners */
+    border-bottom: 1px solid #d9d9d9; /* Bottom border for separation */
+}
+
+/* Styling the Quill editor content */
+.ql-editor {
+    min-height: 150px; /* Minimum height for content area */
+    padding: 10px; /* Padding inside editor */
+    font-family: 'Inter', sans-serif; /* Font family */
+    font-size: 16px; /* Font size */
+    color: #05073C;/* Text color */
+}
+
+/* Custom button styles */
+.ql-picker {
+    color: #05073C; /* Icon color */
+}
+
+/* Customize the active button color */
+.ql-toolbar .ql-active {
+    color: #3572EF; /* Active button color */
+}
+
+/* Placeholder styling */
+.ql-editor.ql-blank::before {
+    color: #aaa; /* Placeholder text color */
+    opacity: 1; /* Ensure visibility */
+}

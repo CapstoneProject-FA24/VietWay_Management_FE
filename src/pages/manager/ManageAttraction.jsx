@@ -8,7 +8,6 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import AttractionCreatePopup from '@components/manager/AttractionCreatePopup';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -76,26 +75,6 @@ const ManageAttraction = () => {
 
     const animatedComponents = makeAnimated();
 
-    const handleOpenCreatePopup = () => {
-        setIsCreatePopupOpen(true);
-    };
-
-    const handleCloseCreatePopup = () => {
-        setIsCreatePopupOpen(false);
-    };
-
-    const handleCreateAttraction = (newAttraction) => {
-        const newAttractionWithId = {
-            ...newAttraction,
-            AttractionId: attractions.length + 1,
-            CreateDate: new Date(),
-            AttractionStatus: 1,
-            AttractionImages: [{ url: newAttraction.imageUrl }]
-        };
-        setAttractions([...attractions, newAttractionWithId]);
-        handleCloseCreatePopup();
-    };
-
     return (
         <Box sx={{ display: 'flex' }}>
             <Helmet>
@@ -134,7 +113,7 @@ const ManageAttraction = () => {
                         </Box>*/}
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                        <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
+                        <Button variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
                             Thêm điểm tham quan
                         </Button>
                     </Grid>
@@ -177,11 +156,6 @@ const ManageAttraction = () => {
                         </Grid>
                     ))}
                 </Grid>
-                <AttractionCreatePopup
-                    open={isCreatePopupOpen}
-                    onClose={handleCloseCreatePopup}
-                    onCreate={handleCreateAttraction}
-                />
             </Box>
         </Box>
     );
