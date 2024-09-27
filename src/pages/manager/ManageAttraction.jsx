@@ -8,6 +8,7 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+import { Link, useLocation } from 'react-router-dom';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -113,7 +114,13 @@ const ManageAttraction = () => {
                         </Box>*/}
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                        <Button variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
+                        <Button 
+                        component={Link} 
+                        to="/quan-ly/diem-tham-quan/them" 
+                        variant="contained" 
+                        color="primary" 
+                        startIcon={<AddIcon />} 
+                        sx={{ height: '55px', borderRadius: 2 }}>
                             Thêm điểm tham quan
                         </Button>
                     </Grid>
