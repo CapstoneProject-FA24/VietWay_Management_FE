@@ -5,7 +5,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import ManagerUpdatePopup from '@components/admin/ManagerUpdatePopup';
 import ManagerCreatePopup from '@components/admin/ManagerCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import Sidebar from '@layouts/Sidebar';
 import { Helmet } from 'react-helmet';
 
@@ -40,25 +39,19 @@ const ManageManager = () => {
     setOpenCreatePopup(true);
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <Box sx={{ width: '100%', display: 'flex' }}>
+    <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
         <title>Quản lý</title>
       </Helmet>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.5s', marginLeft: isSidebarOpen ? '250px' : 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, width: isSidebarOpen ? '100%': '118%' }}>
+      <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0', padding: 5, overflowY: 'auto' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
           <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />}>
             Thêm quản lý
           </Button>
         </Box>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: isSidebarOpen ? '100%': '118%' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <TextField
             variant="outlined"
             placeholder="Tìm kiếm quản lý..."
@@ -89,15 +82,14 @@ const ManageManager = () => {
             </Select>
           </Box>
         </Box>
-        <TableContainer component={Paper} sx={{ width: isSidebarOpen ? '100%': '118%' }}>
-          <Table sx={{ width: '100%' }}>
+        <TableContainer component={Paper}>
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ width: '3rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>ID</TableCell>
                 <TableCell sx={{ width: '12rem', fontWeight: 700, padding: '10px' }}>Họ tên</TableCell>
                 <TableCell sx={{ width: '11rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
                 <TableCell sx={{ width: '16rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Email</TableCell>
-                {/*<TableCell sx={{ width: '10rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Mật khẩu</TableCell> */}
                 <TableCell sx={{ width: '10rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Trạng thái</TableCell>
                 <TableCell sx={{ width: '7rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Ngày tạo</TableCell>
                 <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}></TableCell>
@@ -110,25 +102,18 @@ const ManageManager = () => {
                   <TableCell noWrap sx={{ padding: '10px' }}>{manager.fullname}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{manager.phone}</TableCell>
                   <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{manager.email}</TableCell>
-                  {/*<TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>
-                    {showPassword ? manager.pass : '••••••••'} 
-                    <IconButton onClick={togglePasswordVisibility}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />} 
-                    </IconButton>
-                  </TableCell>*/}
                   <TableCell noWrap sx={{ color: manager.status === 1 ? 'green' : 'red', padding: '10px', textAlign: 'center' }}>
                     {manager.status === 1 ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                   </TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(manager.createDate).toLocaleDateString()}</TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                    <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(manager)} >Sửa</Button>
+                    <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(manager)}>Sửa</Button>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        {/* Popup for creating manager */}
         <ManagerCreatePopup
           open={openCreatePopup}
           onClose={() => setOpenCreatePopup(false)}
@@ -137,7 +122,6 @@ const ManageManager = () => {
             setOpenCreatePopup(false);
           }}
         />
-        {/* Popup for updating manager */}
         <ManagerUpdatePopup
           open={openUpdatePopup}
           onClose={() => setOpenUpdatePopup(false)}
