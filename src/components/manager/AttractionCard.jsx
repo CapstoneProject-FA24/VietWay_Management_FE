@@ -1,8 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, Button, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
+import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 const AttractionCard = ({ attraction, isOpen }) => {
     return (
@@ -19,23 +17,23 @@ const AttractionCard = ({ attraction, isOpen }) => {
                         {attraction.AttractionType}
                     </Typography>
                     <Typography variant="subtitle2" color="text.secondary" component="div" sx={{ width: '45%', textAlign: 'right' }}>
-                        Tạo ngày: {attraction.CreateDate.toLocaleDateString()}
+                        Tạo ngày: {new Date(attraction.CreatedDate).toLocaleDateString()}
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', width: '100%', p: '0.5rem' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', width: '75%' }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', ml: 1 }}>
                             <Typography noWrap component="div" variant="h6" sx={{ fontSize: isOpen ? '1.8rem' : '1.42rem', mt: 0.5 }}>
-                                {attraction.AttractionName}
+                                {attraction.Name}
                             </Typography>
                             <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 1, display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem', height: isOpen ? '2.9rem' : '2.6rem' }}>
                                 <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                                    Địa chỉ: {attraction.AttractionAddress}
+                                    Địa chỉ: {attraction.Address}
                                 </Box>
                             </Typography>
                             <Typography variant="body2" color="text.secondary" component="div" sx={{ color: '#05073C', display: 'flex', fontSize: isOpen ? '1.1rem' : '1rem', height: isOpen ? '4.5rem' : '4.1rem' }}>
                                 <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
-                                    {attraction.AttractionDescription}
+                                    {attraction.Description}
                                 </Box>
                             </Typography>
                         </Box>
@@ -48,11 +46,11 @@ const AttractionCard = ({ attraction, isOpen }) => {
                             sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', width: isOpen ? '7rem' : '5.3rem', borderRadius: 1.5, mb: 1, mt: isOpen ? 1.2 : 0.5, color: 'red', borderColor: 'red' }}>
                             Xóa
                         </Button>
-                        <Button variant="outlined"
+                        <Button variant="outlined" component={Link}  to={"/quan-ly/diem-tham-quan/sua/" + attraction.AttractionId} 
                             sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', width: isOpen ? '7rem' : '5.3rem', mb: 1, borderRadius: 1.5 }}>
                             Sửa
                         </Button>
-                        <Button variant="outlined"
+                        <Button variant="outlined" component={Link}  to={"/quan-ly/diem-tham-quan/chi-tiet/" + attraction.AttractionId} 
                             sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', width: isOpen ? '7rem' : '5.3rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray' }}>
                             Chi tiết
                         </Button>

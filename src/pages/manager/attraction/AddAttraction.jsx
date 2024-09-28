@@ -11,6 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CloseIcon from '@mui/icons-material/Close';
 import { Link } from 'react-router-dom';
 import { mockAttractionTypes } from '@hooks/MockAttractions';
 
@@ -67,7 +68,6 @@ const AddAttraction = () => {
     slidesToScroll: 1,
     autoplay: true,
     className: 'attraction-slider',
-    afterChange: (current) => setCurrentSlide(current)
   };
 
   const handleThumbnailClick = (index) => {
@@ -96,6 +96,15 @@ const AddAttraction = () => {
     }
   };
 
+  const handleRemoveImage = (index) => {
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+    if (currentSlide >= newImages.length) {
+      setCurrentSlide(newImages.length - 1);
+    }
+  };
+
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -112,7 +121,7 @@ const AddAttraction = () => {
   };
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100vw' }}>
       <Helmet>
         <title>Thêm điểm tham quan</title>
       </Helmet>
@@ -196,19 +205,31 @@ const AddAttraction = () => {
             <IconButton onClick={() => handleFieldEdit('name')} sx={{ ml: 2 }}><EditIcon /></IconButton>
           </Box>
         )}
-        <Grid container spacing={1} sx={{  width: '100%'}}>
-          <Grid item xs={12} md={8}>
-            <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden' }}>
-              <Box className="slick-slider" sx={{ height: '450px' }}>
-                <Slider ref={sliderRef} {...settings}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={8} sx={{ width: '100%'}}>
+            <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
+              <Box className="slick-slider-container" sx={{ height: '450px' }}>
+                <Slider ref={setSliderRef} {...settings}>
                   {images.length > 0 ? (
                     images.map((image, index) => (
-                      <div key={index}>
+                      <div key={index} style={{ position: 'relative' }}>
                         <img
                           src={image.url}
                           alt={image.alt}
-                          style={{ width: '100%', height: 'auto', maxHeight: '450px', objectFit: 'cover' }}
+                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                         />
+                        <IconButton
+                          onClick={() => handleRemoveImage(index)}
+                          sx={{
+                            position: 'absolute',
+                            top: 10,
+                            right: 10,
+                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                            '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' },
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
                       </div>
                     ))
                   ) : (
@@ -216,18 +237,18 @@ const AddAttraction = () => {
                       <img
                         src="https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg"
                         alt="Default"
-                        style={{ width: '100%', height: 'auto', maxHeight: '450px', objectFit: 'cover' }}
+                        style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                       />
                     </div>
                   )}
                 </Slider>
               </Box>
             </Paper>
-            <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
+            <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3, maxWidth: '100%' }}>
               {images.map((image, index) => (
                 <Box
                   key={index}
-                  sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none' }}
+                  sx={{ maxWidth: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
                   onClick={() => handleThumbnailClick(index)}
                 >
                   <img
@@ -235,6 +256,22 @@ const AddAttraction = () => {
                     alt={image.alt}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage(index);
+                    }}
+                    sx={{
+                      position: 'absolute',
+                      top: 5,
+                      right: 5,
+                      backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                      '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' },
+                      padding: '2px',
+                    }}
+                  >
+                    <CloseIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
                 </Box>
               ))}
               <Box
@@ -327,7 +364,7 @@ const AddAttraction = () => {
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px', ml: 2 }}>
+            <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
               {editableFields.address.isEditing ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -390,6 +427,7 @@ const AddAttraction = () => {
                     onChange={(value) => handleFieldChange('contactInfo', value)}
                     theme="snow"
                     modules={modules}
+                    style={{ width: '100%' }}
                   />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
                     <Button
@@ -404,7 +442,7 @@ const AddAttraction = () => {
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
-                  <div dangerouslySetInnerHTML={{ __html: editableFields.contactInfo.value }} />
+                  <div style={{ width: '100%', wordBreak: 'break-all' }} dangerouslySetInnerHTML={{ __html: editableFields.contactInfo.value }} />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
                     <IconButton onClick={() => handleFieldEdit('contactInfo')}>
                       <EditIcon />
@@ -415,6 +453,10 @@ const AddAttraction = () => {
             </Paper>
           </Grid>
         </Grid>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5}}>
+          <Button variant="contained" sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+          <Button variant="contained" sx={{ p: 1.5 }}> Tạo mới </Button>
+        </Box>
       </Box>
     </Box >
   );

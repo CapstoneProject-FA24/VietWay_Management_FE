@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
-import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment } from '@mui/material';
-import { getFilteredAttractions } from '@hooks/MockAttractions';
+import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
+import { getFilteredAttractions, mockAttractionStatus } from '@hooks/MockAttractions';
 import AttractionCard from '@components/manager/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
@@ -19,6 +19,7 @@ const ManageAttraction = () => {
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
+    const [statusTab, setStatusTab] = useState('all');
 
     useEffect(() => {
         const fetchedAttractions = getFilteredAttractions({}, 'name');
@@ -28,7 +29,7 @@ const ManageAttraction = () => {
 
     useEffect(() => {
         filterAndSortAttractions();
-    }, [searchTerm, sortOrder, selectedProvinces, selectedTypes, attractions]);
+    }, [searchTerm, sortOrder, selectedProvinces, selectedTypes, attractions, statusTab]);
 
     const filterAndSortAttractions = () => {
         let filtered = [...attractions];
@@ -37,26 +38,23 @@ const ManageAttraction = () => {
         if (searchTerm) {
             const searchTermWithoutAccents = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             filtered = filtered.filter(a =>
-                a.AttractionName && a.AttractionName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents)
+                a.Name && a.Name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents)
             );
         }
-
-        // Filter by provinces
         if (selectedProvinces.length > 0) {
-            filtered = filtered.filter(a => selectedProvinces.some(p => p.value === a.AttractionProvince));
+            filtered = filtered.filter(a => selectedProvinces.some(p => p.value === a.Province));
         }
-
-        // Filter by types
         if (selectedTypes.length > 0) {
             filtered = filtered.filter(a => selectedTypes.some(t => t.value === a.AttractionType));
         }
-
-        // Sort
+        if (statusTab !== 'all') {
+            filtered = filtered.filter(a => a.AttractionStatus === statusTab);
+        }
         filtered.sort((a, b) => {
             if (sortOrder === 'name-asc') {
-                return a.AttractionName.localeCompare(b.AttractionName);
+                return a.Name.localeCompare(b.Name);
             } else if (sortOrder === 'name-desc') {
-                return b.AttractionName.localeCompare(a.AttractionName);
+                return b.Name.localeCompare(a.Name);
             }
             return 0;
         });
@@ -64,7 +62,7 @@ const ManageAttraction = () => {
         setFilteredAttractions(filtered);
     };
 
-    const provinceOptions = [...new Set(attractions.map(a => a.AttractionProvince))].map(province => ({
+    const provinceOptions = [...new Set(attractions.map(a => a.Province))].map(province => ({
         value: province,
         label: province
     }));
@@ -76,6 +74,10 @@ const ManageAttraction = () => {
 
     const animatedComponents = makeAnimated();
 
+    const handleStatusTabChange = (event, newValue) => {
+        setStatusTab(newValue);
+    };
+
     return (
         <Box sx={{ display: 'flex' }}>
             <Helmet>
@@ -85,33 +87,26 @@ const ManageAttraction = () => {
             <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 5 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={7} sx={{ mb: 1 }}>
-                        {/*<Box sx={{ borderRadius: 2, boxShadow: 3, overflow: 'hidden', width: '100%' }}>
-                             <Typography sx={{ backgroundColor: 'lightGrey', textAlign: 'center', p: 1.5, fontSize: '1.2rem', fontWeight: 700 }}>
-                                Bộ lọc
-                            </Typography>
-                            <Box sx={{ pl: 5, pr: 5, pt: 3, pb: 3 }}> */}
-                                <Typography>
-                                    Tỉnh thành phố
-                                </Typography>
-                                <ReactSelect
-                                    closeMenuOnSelect={false}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={provinceOptions}
-                                    onChange={setSelectedProvinces}
-                                />
-                                <Typography sx={{ mt: 2 }}>
-                                    Loại điểm tham quan
-                                </Typography>
-                                <ReactSelect
-                                    closeMenuOnSelect={false}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={typeOptions}
-                                    onChange={setSelectedTypes}
-                                />
-                            {/* </Box> 
-                        </Box>*/}
+                        <Typography>
+                            Tỉnh thành phố
+                        </Typography>
+                        <ReactSelect
+                            closeMenuOnSelect={false}
+                            components={animatedComponents}
+                            isMulti
+                            options={provinceOptions}
+                            onChange={setSelectedProvinces}
+                        />
+                        <Typography sx={{ mt: 2 }}>
+                            Loại điểm tham quan
+                        </Typography>
+                        <ReactSelect
+                            closeMenuOnSelect={false}
+                            components={animatedComponents}
+                            isMulti
+                            options={typeOptions}
+                            onChange={setSelectedTypes}
+                        />
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                         <Button 
@@ -155,8 +150,16 @@ const ManageAttraction = () => {
                             <MenuItem value="name-desc">Tên Z-A</MenuItem>
                         </Select>
                     </Grid>
+                    <Grid item xs={12}>
+                        <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="attraction status tabs">
+                            <Tab label="Tất cả" value="all" />
+                            {mockAttractionStatus.map((status) => (
+                                <Tab key={status} label={status} value={status} />
+                            ))}
+                        </Tabs>
+                    </Grid>
                 </Grid>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ minHeight: '15.2rem'}}>
                     {filteredAttractions.map(attraction => (
                         <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.AttractionId}>
                             <AttractionCard attraction={attraction} isOpen={isSidebarOpen} />

@@ -5,9 +5,11 @@ import ManageCustomer from '@pages/manager/ManageCustomer.jsx';
 import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
 import ManageCompanyStaff from '@pages/manager/ManageCompanyStaff.jsx';
-import ManageAttraction from '@pages/manager/ManageAttraction.jsx';
+import ManageAttraction from '@pages/manager/attraction/ManageAttraction.jsx';
 import ManageTourTemplate from '@pages/manager/ManageTourTemplate.jsx';
-import AddAttraction from '@pages/manager/AddAttraction.jsx';
+import AddAttraction from '@pages/manager/attraction/AddAttraction.jsx';
+import UpdateAttraction from '@pages/manager/attraction/UpdateAttraction.jsx';
+import AttractionDetail from '@pages/manager/attraction/AttractionDetail.jsx';
 
 const App = () => {
   return (
@@ -23,6 +25,8 @@ const App = () => {
         <Route path="/dang-nhap" element={<Login/>} />
         <Route path="/quan-ly/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/quan-ly/diem-tham-quan/them" element={<AddAttraction/>} />
+        <Route path="/quan-ly/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
+        <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail/>} />
         <Route path="/quan-ly/tour-mau" element={<ManageTourTemplate/>} />
       </Routes>
     </Router>

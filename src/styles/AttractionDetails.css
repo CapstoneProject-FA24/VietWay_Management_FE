@@ -101,3 +101,23 @@
    opacity: 1;
    /* Ensure visibility */
  }
+
+.slick-slider-container {
+  width: 100%;
+  height: 450px;
+  overflow: hidden;
+}
+
+.attraction-slider {
+  width: 100%;
+  height: 100%;
+}
+
+.attraction-slider .slick-list,
+.attraction-slider .slick-track {
+  height: 100%;
+}
+
+.attraction-slider .slick-slide > div {
+  height: 100%;
+}
