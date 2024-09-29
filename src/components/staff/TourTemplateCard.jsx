@@ -58,7 +58,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Button 
+                            <Button
                                 variant="outlined"
                                 onClick={handleDelete}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
@@ -76,7 +76,8 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                                 Chi tiết
                             </Button>
                             {isApproved && (
-                                <Button variant="contained"
+                                <Button variant="contained" component={Link}
+                                    to={currentPage + "/tao-tour/" + tour.TourTemplateId}
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'white', borderColor: 'gray' }}>
                                     Tạo tour
                                 </Button>
@@ -85,10 +86,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                         <Typography sx={{
                             alignItems: 'center',
                             fontSize: isOpen ? '1.05rem' : '1rem',
-                            color:
-                                tour.Status === 'Bản nháp' ? '#5d5d5d' :
-                                    tour.Status === 'Chờ duyệt' ? 'primary.main' :
-                                        tour.Status === 'Đã duyệt' ? 'green' : 'red',
+                            color: tour.Status === 'Bản nháp' ? '#5d5d5d' : tour.Status === 'Chờ duyệt' ? 'primary.main' : tour.Status === 'Đã duyệt' ? 'green' : 'red',
                             padding: '4px 8px',
                             borderRadius: '4px',
                             fontWeight: 700

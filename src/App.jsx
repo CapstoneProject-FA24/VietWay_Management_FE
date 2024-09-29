@@ -6,7 +6,7 @@ import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
 import ManageCompanyStaff from '@pages/manager/ManageCompanyStaff.jsx';
 import ManageTour from '@pages/staff/tour/ManageTour.jsx';
-import CreateTour from '@pages/staff/template/CreateTour.jsx';
+import CreateTour from '@pages/staff/tour/CreateTour.jsx';
 import ManageAttraction from '@pages/staff/attraction/ManageAttraction.jsx';
 import ManageTourTemplate from '@pages/staff/tourTemplate/ManageTourTemplate.jsx';
 import CreateAttraction from '@pages/staff/attraction/CreateAttraction.jsx';
