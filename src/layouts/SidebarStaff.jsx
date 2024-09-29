@@ -9,6 +9,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MapIcon from '@mui/icons-material/Map';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import PersonIcon from '@mui/icons-material/Person';
 import { styled } from '@mui/material/styles';
 
@@ -121,9 +122,10 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
 
         <List sx={{ width: '100%' }}>
           {[
-            { text: 'Điểm tham quan', url: '/nhan-vien/diem-tham-quan', icon: <LocationOnIcon /> },
-            { text: 'Tour mẫu', url: '/nhan-vien/tour-mau', icon: <MapIcon /> },
-            { text: 'Tour du lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Điểm Tham Quan', url: '/nhan-vien/diem-tham-quan', icon: <LocationOnIcon /> },
+            { text: 'Tour Mẫu', url: '/nhan-vien/tour-mau', icon: <MapIcon /> },
+            { text: 'Tour Du Lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Bài Đăng', url: '/nhan-vien/bai-dang', icon: <PostAddIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text}

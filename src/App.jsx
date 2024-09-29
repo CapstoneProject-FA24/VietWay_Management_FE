@@ -5,6 +5,8 @@ import ManageCustomer from '@pages/manager/ManageCustomer.jsx';
 import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
 import ManageCompanyStaff from '@pages/manager/ManageCompanyStaff.jsx';
+import ManageTour from '@pages/staff/tour/ManageTour.jsx';
+import CreateTour from '@pages/staff/tour/CreateTour.jsx';
 import ManageAttraction from '@pages/staff/attraction/ManageAttraction.jsx';
 import ManageTourTemplate from '@pages/staff/tourTemplate/ManageTourTemplate.jsx';
 import CreateAttraction from '@pages/staff/attraction/CreateAttraction.jsx';
@@ -26,6 +28,8 @@ const App = () => {
         <Route path="/quan-ly/khach-hang" element={<ManageCustomer />} />
         <Route path="/admin/quan-ly" element={<ManageManager />} />
         <Route path="/dang-nhap" element={<Login/>} />
+        <Route path="/nhan-vien/tour-du-lich" element={<ManageTour/>} />
+        <Route path="/nhan-vien/tour-mau/tao-tour/:id" element={<CreateTour/>} />
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
