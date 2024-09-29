@@ -46,18 +46,18 @@ const ManageCompanyStaff = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', display: 'flex' }}>
+    <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
         <title>Nhân viên</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.5s', marginLeft: isSidebarOpen ? '250px' : 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, width: isSidebarOpen ? '102%': '125%' }}>
+      <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0', padding: 5, overflowY: 'auto' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2  }}>
           <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />}>
             Thêm nhân viên
           </Button>
         </Box>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: isSidebarOpen ? '102%': '125%' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <TextField
             variant="outlined"
             placeholder="Tìm kiếm nhân viên..."
@@ -88,8 +88,8 @@ const ManageCompanyStaff = () => {
             </Select>
           </Box>
         </Box>
-        <TableContainer component={Paper} sx={{ width: isSidebarOpen ? '102%': '125%' }}>
-          <Table sx={{ width: '100%' }}>
+        <TableContainer>
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ width: '1rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>ID</TableCell>
