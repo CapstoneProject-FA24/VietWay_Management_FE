@@ -10,6 +10,8 @@ import QrCodeOutlinedIcon from '@mui/icons-material/QrCodeOutlined';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams } from 'react-router-dom';
+import { fetchTourTemplateById } from '@services/TourTemplateService';
+import { fetchProvinces } from '@services/ProvinceService';
 
 const TourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -17,22 +19,28 @@ const TourTemplateDetails = () => {
   const { id } = useParams();
   const pageTopRef = useRef(null);
   const [expandedDay, setExpandedDay] = useState(null);
+  const temId = id;
 
   useEffect(() => {
-    const fetchTourTemplateData = async () => {
+    const fetchData = async () => {
       try {
-        setLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const mockData = getTourTemplateById(id);
-        setTourTemplate(mockData);
+        const fetchedTourTemplate = await fetchTourTemplateById(id);
+        const fetchedProvinces = await fetchProvinces();
+        const mappedTourTemplate = {
+          ...fetchedTourTemplate,
+          TourTemplateProvinces: fetchedTourTemplate.TourTemplateProvinces.slice(0, 3).map(provinceId => {
+              const province = fetchedProvinces.find(p => p.ProvinceId === provinceId);
+              return province ? { ProvinceId: province.ProvinceId, ProvinceName: province.ProvinceName } : null;
+          }).filter(Boolean)
+        };
+        setTourTemplate(mappedTourTemplate);
       } catch (error) {
-        console.error("Error fetching tour template data:", error);
+        console.error('Error fetching tour template:', error);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchTourTemplateData();
+    fetchData();
   }, [id]);
 
   useEffect(() => {
@@ -79,18 +87,18 @@ const TourTemplateDetails = () => {
             <Container maxWidth="lg">
               <Box sx={{ display: 'flex', width: '100%', height: '450px', mb: 3, ml: -2.5 }}>
                 <Box sx={{ flex: '0 0 60%', mr: 2 }}>
-                  <img src={tourTemplate.TourTemplateImages[0].Path} alt={tourTemplate.TourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.TourTemplateImages[0]} alt={tourTemplate.TourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 43%', display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ flex: '0 0 50%', mb: 1.2 }}>
-                    <img src={tourTemplate.TourTemplateImages[1].Path} alt={tourTemplate.TourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.TourTemplateImages[1]} alt={tourTemplate.TourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                   </Box>
                   <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                     <Box sx={{ flex: '0 0 48.2%', mr: 2 }}>
-                      <img src={tourTemplate.TourTemplateImages[2].Path} alt={tourTemplate.TourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.TourTemplateImages[2]} alt={tourTemplate.TourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                     </Box>
                     <Box sx={{ flex: '0 0 48.2%' }}>
-                      <img src={tourTemplate.TourTemplateImages[3].Path} alt={tourTemplate.TourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.TourTemplateImages[3]} alt={tourTemplate.TourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                     </Box>
                   </Box>
                 </Box>
@@ -110,7 +118,7 @@ const TourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Khởi hành từ:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.DeparturePoint}</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.DeparturePoint ? tourTemplate.DeparturePoint : "Meicheng"}</Typography>
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -225,7 +233,7 @@ const TourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
                   Trạng thái:
-                  <Typography sx={{ color: '#05073C', ml: 1, color: tourTemplate.Status === 'Chờ duyệt' ? 'primary.main' : tourTemplate.Status === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.Status}</Typography>
+                  <Typography sx={{ color: '#05073C', ml: 1, color: tourTemplate.Status === 1 ? 'primary.main' : tourTemplate.Status === 2 ? 'green' : 'red', }}>{tourTemplate.StatusName}</Typography>
                 </Typography>
               </Box>
               {tourTemplate.Status === 'Đã duyệt' && (

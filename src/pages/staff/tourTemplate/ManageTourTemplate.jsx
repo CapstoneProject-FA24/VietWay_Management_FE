@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
-import { getFilteredTourTemplates, mockTourTemplateCategories, mockProvinces, mockTourStatus } from '@hooks/MockTourTemplate';
+import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
 import TourTemplateCard from '@components/staff/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
@@ -10,11 +10,14 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
 import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
+import { fetchTourTemplates } from '@services/TourTemplateService';
+import { fetchProvinces } from '@services/ProvinceService';
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
+    const [provinces, setProvinces] = useState([]);
     const [filteredTourTemplates, setFilteredTourTemplates] = useState([]);
     const [sortOrder, setSortOrder] = useState('name');
     const [selectedCategories, setSelectedCategories] = useState([]);
@@ -27,9 +30,25 @@ const ManageTourTemplate = () => {
     const [selectedTemplate, setSelectedTemplate] = useState(null);
 
     useEffect(() => {
-        const fetchedTourTemplates = getFilteredTourTemplates({}, 'name');
-        setTourTemplates(fetchedTourTemplates);
-        setFilteredTourTemplates(fetchedTourTemplates);
+        const fetchData = async () => {
+            try {
+                const fetchedTourTemplates = await fetchTourTemplates();
+                const fetchedProvinces = await fetchProvinces();
+                const mappedTourTemplates = fetchedTourTemplates.map(template => ({
+                    ...template,
+                    TourTemplateProvinces: template.TourTemplateProvinces.slice(0, 3).map(provinceId => {
+                        const province = fetchedProvinces.find(p => p.ProvinceId === provinceId);
+                        return province ? { ProvinceId: province.ProvinceId, ProvinceName: province.ProvinceName } : null;
+                    }).filter(Boolean)
+                }));
+                setProvinces(fetchedProvinces);
+                setTourTemplates(mappedTourTemplates);
+                setFilteredTourTemplates(mappedTourTemplates);
+            } catch (error) {
+                console.error('Error fetching tour templates:', error);
+            }
+        };
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -57,8 +76,9 @@ const ManageTourTemplate = () => {
         }
         if (selectedDuration.length > 0) {
             filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.Duration));
-        } if (statusTab !== 'all') {
-            filtered = filtered.filter(a => a.Status === statusTab);
+        }
+        if (statusTab !== 'all') {
+            filtered = filtered.filter(a => a.Status === parseInt(statusTab));
         }
         filtered.sort((a, b) => {
             if (sortOrder === 'name') {
@@ -81,7 +101,7 @@ const ManageTourTemplate = () => {
         label: duration
     }));
 
-    const provinceOptions = mockProvinces.map(province => ({
+    const provinceOptions = provinces.map(province => ({
         value: province.ProvinceName,
         label: province.ProvinceName
     }));
@@ -111,16 +131,16 @@ const ManageTourTemplate = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', width: '98vw' }}>
             <Helmet>
                 <title>Quản lý Tour mẫu</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 5 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px' }}>
-                <Grid container spacing={3} sx={{ mb: 3, ml: -2.7 }}>
-                    <Grid item xs={8.5} sx={{ mb: 1 }}>
-                        <Box sx={{ display: 'flex' }}>
-                            <Box sx={{ width: '50%', mr: 0.5, mb: 1.5 }}>
+            <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
+                <Grid container spacing={3} sx={{ mb: 3 }}>
+                    <Grid item xs={12} md={8.5} sx={{ mb: 1 }}>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
+                            <Box sx={{ width: { xs: '100%', md: '50%' }, mr: { md: 0.5 }, mb: 1.5 }}>
                                 <Typography sx={{ mt: 2 }}>
                                     Tỉnh/Thành phố
                                 </Typography>
@@ -132,7 +152,7 @@ const ManageTourTemplate = () => {
                                     onChange={setSelectedProvinces}
                                 />
                             </Box>
-                            <Box sx={{ width: '50%', ml: 0.5, mb: 1.5 }}>
+                            <Box sx={{ width: { xs: '100%', md: '50%' }, ml: { md: 0.5 }, mb: 1.5 }}>
                                 <Typography sx={{ mt: 2 }}>
                                     Thời lượng
                                 </Typography>
@@ -156,17 +176,17 @@ const ManageTourTemplate = () => {
                             onChange={setSelectedCategories}
                         />
                     </Grid>
-                    <Grid item xs={3.5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                    <Grid item xs={12} md={3.5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: { xs: 2, md: 3 } }}>
                         <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
                             Thêm Tour mẫu
                         </Button>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={12} md={7}>
                         <TextField
                             variant="outlined"
                             placeholder="Tìm kiếm tour mẫu..."
                             size="small"
-                            sx={{ width: '80%' }}
+                            sx={{ width: '100%', maxWidth: '400px' }}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             InputProps={{
@@ -178,7 +198,7 @@ const ManageTourTemplate = () => {
                             }}
                         />
                     </Grid>
-                    <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
                         <Typography>
                             Sắp xếp theo
                         </Typography>
@@ -193,17 +213,18 @@ const ManageTourTemplate = () => {
                         </Select>
                     </Grid>
                     <Grid item xs={12}>
-                        <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="tour template status tabs">
+                        <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="tour template status tabs" variant="scrollable" scrollButtons="auto">
                             <Tab label="Tất cả" value="all" />
-                            {mockTourStatus.map((status) => (
-                                <Tab key={status} label={status} value={status} />
-                            ))}
+                            <Tab label="Bản nháp" value="0" />
+                            <Tab label="Chờ duyệt" value="1" />
+                            <Tab label="Đã duyệt" value="2" />
+                            <Tab label="Từ chối" value="3" />
                         </Tabs>
                     </Grid>
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {filteredTourTemplates.map(tourTemplate => (
-                        <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
+                        <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
                             <TourTemplateCard 
                                 tour={tourTemplate} 
                                 isOpen={isSidebarOpen} 
