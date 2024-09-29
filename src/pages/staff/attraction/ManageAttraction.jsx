@@ -3,12 +3,13 @@ import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
 import { getFilteredAttractions, mockAttractionStatus } from '@hooks/MockAttractions';
-import AttractionCard from '@components/manager/AttractionCard';
+import AttractionCard from '@components/staff/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
+import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -20,6 +21,8 @@ const ManageAttraction = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
     const [statusTab, setStatusTab] = useState('all');
+    const [openDeletePopup, setOpenDeletePopup] = useState(false);
+    const [selectedAttraction, setSelectedAttraction] = useState(null);
 
     useEffect(() => {
         const fetchedAttractions = getFilteredAttractions({}, 'name');
@@ -78,6 +81,24 @@ const ManageAttraction = () => {
         setStatusTab(newValue);
     };
 
+    const handleOpenDeletePopup = (attraction) => {
+        setSelectedAttraction(attraction);
+        setOpenDeletePopup(true);
+    };
+
+    const handleCloseDeletePopup = () => {
+        setOpenDeletePopup(false);
+        setSelectedAttraction(null);
+    };
+
+    const handleDeleteAttraction = (attractionId) => {
+        /*  // Implement the delete logic here
+         console.log(`Deleting template with ID: ${templateId}`);
+         // After deletion, update the tourTemplates state and close the popup
+         setTourTemplates(prevTemplates => prevTemplates.filter(t => t.TourTemplateId !== templateId));
+         handleCloseDeletePopup(); */
+    };
+
     return (
         <Box sx={{ display: 'flex' }}>
             <Helmet>
@@ -109,13 +130,13 @@ const ManageAttraction = () => {
                         />
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                        <Button 
-                        component={Link} 
-                        to="/nhan-vien/diem-tham-quan/them" 
-                        variant="contained" 
-                        color="primary" 
-                        startIcon={<AddIcon />} 
-                        sx={{ height: '55px', borderRadius: 2 }}>
+                        <Button
+                            component={Link}
+                            to="/nhan-vien/diem-tham-quan/them"
+                            variant="contained"
+                            color="primary"
+                            startIcon={<AddIcon />}
+                            sx={{ height: '55px', borderRadius: 2 }}>
                             Thêm điểm tham quan
                         </Button>
                     </Grid>
@@ -136,7 +157,7 @@ const ManageAttraction = () => {
                             }}
                         />
                     </Grid>
-                    <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+                    <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                         <Typography>
                             Sắp xếp theo
                         </Typography>
@@ -159,13 +180,23 @@ const ManageAttraction = () => {
                         </Tabs>
                     </Grid>
                 </Grid>
-                <Grid container spacing={2} sx={{ minHeight: '15.2rem'}}>
+                <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {filteredAttractions.map(attraction => (
                         <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.AttractionId}>
-                            <AttractionCard attraction={attraction} isOpen={isSidebarOpen} />
+                            <AttractionCard
+                                attraction={attraction}
+                                isOpen={isSidebarOpen} F
+                                onOpenDeletePopup={handleOpenDeletePopup} />
+
                         </Grid>
                     ))}
                 </Grid>
+                <AttractionDeletePopup
+                    open={openDeletePopup}
+                    onClose={handleCloseDeletePopup}
+                    attraction={selectedAttraction}
+                    onDelete={handleDeleteAttraction}
+                />
             </Box>
         </Box>
     );

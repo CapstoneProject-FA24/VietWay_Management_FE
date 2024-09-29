@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Button, IconButton } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 
-const TourTemplateCard = ({ tour, isOpen }) => {
+const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     const isDraft = tour.Status === 'Bản nháp';
     const isEditable = tour.Status !== 'Đã duyệt' && tour.Status !== 'Chờ duyệt';
     const isApproved = tour.Status === 'Đã duyệt';
@@ -12,6 +12,10 @@ const TourTemplateCard = ({ tour, isOpen }) => {
 
     const truncateTourName = (name, maxLength) => {
         return name.length > maxLength ? `${name.substring(0, maxLength)}...` : name;
+    };
+
+    const handleDelete = () => {
+        onOpenDeletePopup(tour);
     };
 
     return (
@@ -54,24 +58,23 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            {isEditable && (
-                                <Button variant="outlined"
-                                    sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}>
-                                    Xóa
-                                </Button>
-                            )}
+                            <Button 
+                                variant="outlined"
+                                onClick={handleDelete}
+                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
+                            >
+                                Xóa
+                            </Button>
                             {isEditable && (
                                 <Button variant="outlined" component={Link} to={currentPage + "/sua/" + tour.TourTemplateId}
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, mr: 1 }}>
                                     Sửa
                                 </Button>
                             )}
-                            {!isDraft && (
-                                <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + tour.TourTemplateId}
-                                    sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
-                                    Chi tiết
-                                </Button>
-                            )}
+                            <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + tour.TourTemplateId}
+                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
+                                Chi tiết
+                            </Button>
                             {isApproved && (
                                 <Button variant="contained"
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'white', borderColor: 'gray' }}>
@@ -84,8 +87,8 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                             fontSize: isOpen ? '1.05rem' : '1rem',
                             color:
                                 tour.Status === 'Bản nháp' ? '#5d5d5d' :
-                                tour.Status === 'Chờ duyệt' ? 'primary.main' :
-                                tour.Status === 'Đã duyệt' ? 'green' : 'red',
+                                    tour.Status === 'Chờ duyệt' ? 'primary.main' :
+                                        tour.Status === 'Đã duyệt' ? 'green' : 'red',
                             padding: '4px 8px',
                             borderRadius: '4px',
                             fontWeight: 700

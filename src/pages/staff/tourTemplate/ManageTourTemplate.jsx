@@ -3,12 +3,13 @@ import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
 import { getFilteredTourTemplates, mockTourTemplateCategories, mockProvinces, mockTourStatus } from '@hooks/MockTourTemplate';
-import TourTemplateCard from '@components/manager/TourTemplateCard';
+import TourTemplateCard from '@components/staff/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
+import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -22,6 +23,8 @@ const ManageTourTemplate = () => {
     const [statusTab, setStatusTab] = useState('all');
     const location = useLocation();
     const currentPage = location.pathname;
+    const [openDeletePopup, setOpenDeletePopup] = useState(false);
+    const [selectedTemplate, setSelectedTemplate] = useState(null);
 
     useEffect(() => {
         const fetchedTourTemplates = getFilteredTourTemplates({}, 'name');
@@ -35,8 +38,6 @@ const ManageTourTemplate = () => {
 
     const filterAndSortTourTemplates = () => {
         let filtered = [...tourTemplates];
-
-        // Filter by search term
         if (searchTerm) {
             const searchTermLower = searchTerm.toLowerCase();
             filtered = filtered.filter(t =>
@@ -67,7 +68,6 @@ const ManageTourTemplate = () => {
             }
             return 0;
         });
-
         setFilteredTourTemplates(filtered);
     };
 
@@ -91,6 +91,24 @@ const ManageTourTemplate = () => {
     };
 
     const animatedComponents = makeAnimated();
+
+    const handleOpenDeletePopup = (template) => {
+        setSelectedTemplate(template);
+        setOpenDeletePopup(true);
+    };
+
+    const handleCloseDeletePopup = () => {
+        setOpenDeletePopup(false);
+        setSelectedTemplate(null);
+    };
+
+    const handleDeleteTemplate = (templateId) => {
+       /*  // Implement the delete logic here
+        console.log(`Deleting template with ID: ${templateId}`);
+        // After deletion, update the tourTemplates state and close the popup
+        setTourTemplates(prevTemplates => prevTemplates.filter(t => t.TourTemplateId !== templateId));
+        handleCloseDeletePopup(); */
+    };
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -186,10 +204,20 @@ const ManageTourTemplate = () => {
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {filteredTourTemplates.map(tourTemplate => (
                         <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
-                            <TourTemplateCard tour={tourTemplate} isOpen={isSidebarOpen} />
+                            <TourTemplateCard 
+                                tour={tourTemplate} 
+                                isOpen={isSidebarOpen} 
+                                onOpenDeletePopup={handleOpenDeletePopup}
+                            />
                         </Grid>
                     ))}
                 </Grid>
+                <TourTemplateDeletePopup
+                    open={openDeletePopup}
+                    onClose={handleCloseDeletePopup}
+                    template={selectedTemplate}
+                    onDelete={handleDeleteTemplate}
+                />
             </Box>
         </Box>
     );
