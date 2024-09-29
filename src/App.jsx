@@ -11,7 +11,8 @@ import AddAttraction from '@pages/manager/attraction/AddAttraction.jsx';
 import UpdateAttraction from '@pages/manager/attraction/UpdateAttraction.jsx';
 import AttractionDetail from '@pages/manager/attraction/AttractionDetail.jsx';
 import ManageTour from '@pages/staff/tour/ManageTour.jsx';
-import CreateTour from '@pages/staff/tour/CreateTour.jsx';
+import CreateTour from '@pages/staff/template/CreateTour.jsx';
+import ListTourTemplate from '@pages/staff/template/ListTourTemplate.jsx';
 
 const App = () => {
   return (
@@ -31,7 +32,8 @@ const App = () => {
         <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail/>} />
         <Route path="/quan-ly/tour-mau" element={<ManageTourTemplate/>} />
         <Route path="/nhan-vien/tour-du-lich" element={<ManageTour/>} />
-        <Route path="/nhan-vien/tour-du-lich/tao-tour" element={<CreateTour/>} />
+        <Route path="/nhan-vien/tour-mau/tao-tour/:id" element={<CreateTour/>} />
+        <Route path="/nhan-vien/tour-mau" element={<ListTourTemplate/>} />
       </Routes>
     </Router>
   );
