@@ -1,68 +1,267 @@
 export const mockTourTemplates = [
   {
     TourTemplateId: 1,
-    TourName: "Khám phá Sài Gòn 3 ngày 2 đêm",
-    Description: "Tour tham quan các địa điểm nổi tiếng tại TP.HCM trong 3 ngày 2 đêm.",
-    TourTemplateDuration: "3 ngày 2 đêm",
-    TourTemplateCategory: "Tour Thành phố",
-    TourTemplateFacility: "Khách sạn 4 sao, xe du lịch, hướng dẫn viên",
-    TourTemplatePolicy: "Hủy tour trước 3 ngày được hoàn 50% phí",
-    TourTemplateNote: "Không bao gồm vé máy bay",
-    TourTemplateStatus: "Đang hoạt động",
-    TourTemplateCreatedDate: "2023-01-15",
-    TourTemplateUpdatedDate: "2023-05-20",
-    TourTemplateCreatedBy: "admin",
-    TourTemplateUpdatedBy: "manager",
-    TourTemplateProvince: "Hồ Chí Minh",
-    TourTemplateDeparturePoint: "TP. Hồ Chí Minh",
+    TourCode: "TP01",
+    TourName: "Khám phá vẻ đẹp Sapa 4 ngày 3 đêm",
+    Description: "Chuyến du lịch đến Sapa, nơi du khách có thể trải nghiệm khung cảnh thiên nhiên hùng vĩ của núi rừng Tây Bắc và tìm hiểu văn hóa dân tộc thiểu số.",
+    Duration: "4 ngày 3 đêm",
+    TourCategory: "Tour Thiên nhiên",
+    Policy: "Hủy trước 10 ngày được hoàn 80%, hủy sau 10 ngày không hoàn tiền",
+    Note: "Mang theo áo ấm, giày đi bộ thoải mái.",
+    Status: "Đã duyệt",
+    CreatedDate: "2024-02-01",
+    CreatedBy: "Trần Thị C",
+    TourTemplateProvinces: [
+      {
+        ProvinceId: 4,
+        ProvinceName: "Lào Cai"
+      }
+    ],
+    DeparturePoint: "Hà Nội",
     TourTemplateImages: [
-      { url: "https://www.vietfuntravel.com.vn/image/data/sai-gon/tour-du-lich-sai-gon-khoi-hanh-hang-ngay-2.jpg" },
-      { url: "https://example.com/saigon2.jpg" }
+      { Path: "https://pttravel.vn/wp-content/uploads/2023/10/Kham-pha-ruong-bac-thang-Mu-Cang-Chai.jpg", ImageId: 1 },
+      { Path: "https://pttravel.vn/wp-content/uploads/2023/10/du-lich-sapa.jpg", ImageId: 2 },
+      { Path: "https://pttravel.vn/wp-content/uploads/2023/10/sapa-nhiep-anh.jpg", ImageId: 3 },
+      { Path: "https://pttravel.vn/wp-content/uploads/2023/10/cat-cat-village.jpg", ImageId: 4 }
+    ],
+    TourTemplateSchedule: [
+      {
+        Day: 1,
+        Title: "Bản làng H'Mông",
+        Description: "Tham quan bản làng của người H'Mông, tìm hiểu văn hóa và phong tục tập quán.",
+        AttractionSchedules: [
+          {
+            AttractionId: 4,
+            AttractionName: "Bản Cát Cát"
+          }
+        ]
+      },
+      {
+        Day: 2,
+        Title: "Núi Hàm Rồng",
+        Description: "Chinh phục đỉnh Hàm Rồng, ngắm nhìn toàn cảnh Sapa từ trên cao.",
+        AttractionSchedules: [
+          {
+            AttractionId: 5,
+            AttractionName: "Núi Hàm Rồng"
+          }
+        ]
+      },
+      {
+        Day: 3,
+        Title: "Đỉnh Fansipan",
+        Description: "Chinh phục đỉnh Fansipan, nóc nhà Đông Dương.",
+        AttractionSchedules: [
+          {
+            AttractionId: 6,
+            AttractionName: "Đỉnh Fansipan"
+          }
+        ]
+      }
     ]
   },
   {
     TourTemplateId: 2,
-    TourName: "Tour Mekong Delta 2 ngày",
-    Description: "Khám phá vẻ đẹp sông nước miền Tây trong 2 ngày. Khám phá vẻ đẹp sông nước miền Tây trong 2 ngày. Khám phá vẻ đẹp sông nước miền Tây trong miền Tây tr",
-    TourTemplateDuration: "2 ngày 1 đêm",
-    TourTemplateCategory: "Tour Sinh thái",
-    TourTemplateFacility: "Homestay, thuyền, hướng dẫn viên",
-    TourTemplatePolicy: "Không hoàn tiền khi hủy tour",
-    TourTemplateNote: "Mang theo thuốc chống côn trùng",
-    TourTemplateStatus: "Đang hoạt động",
-    TourTemplateCreatedDate: "2023-02-10",
-    TourTemplateUpdatedDate: "2023-06-01",
-    TourTemplateCreatedBy: "admin",
-    TourTemplateUpdatedBy: "admin",
-    TourTemplateProvince: "Tiền Giang",
-    TourTemplateDeparturePoint: "TP. Hồ Chí Minh",
+    TourCode: "MT01",
+    TourName: "Khám phá miền Tây sông nước 3 ngày 2 đêm",
+    Description: "Trải nghiệm cuộc sống dân dã miền Tây, tham quan các khu chợ nổi, thưởng thức đặc sản địa phương và khám phá văn hóa sông nước.",
+    Duration: "3 ngày 2 đêm",
+    TourCategory: "Tour Văn hóa",
+    Policy: "Hủy trước 5 ngày được hoàn 60%, hủy sau 5 ngày không hoàn tiền",
+    Note: "Chuẩn bị nón lá, giày dép thoải mái cho chuyến đi sông nước.",
+    Status: "Bản nháp",
+    CreatedDate: "2024-03-15",
+    CreatedBy: "Lê Văn D",
+    TourTemplateProvinces: [
+      {
+        ProvinceId: 7,
+        ProvinceName: "Cần Thơ"
+      },
+      {
+        ProvinceId: 8,
+        ProvinceName: "Tiền Giang"
+      }
+    ],
+    DeparturePoint: "Cần Thơ",
     TourTemplateImages: [
-      { url: "https://www.saigonesetourist.com/uploads/source//alltour/mekong-delta-floating-market-2-days-1-night/discover-mekong-delta-tour-11.jpg" },
-      { url: "https://example.com/mekong2.jpg" }
+      { Path: "https://quynhongrouptour.com.vn/wp-content/uploads/2020/04/mientay-3.jpg", ImageId: 1 },
+      { Path: "https://quynhongrouptour.com.vn/wp-content/uploads/2020/04/mientay-4.jpg", ImageId: 2 },
+      { Path: "https://quynhongrouptour.com.vn/wp-content/uploads/2020/04/mientay-5.jpg", ImageId: 3 },
+      { Path: "https://quynhongrouptour.com.vn/wp-content/uploads/2020/04/mientay-6.jpg", ImageId: 4 }
+    ],
+    TourTemplateSchedule: [
+      {
+        Day: 1,
+        Title: "Chợ nổi Cái Răng",
+        Description: "Tham quan chợ nổi Cái Răng, một trong những chợ nổi lớn nhất miền Tây.",
+        AttractionSchedules: [
+          {
+            AttractionId: 7,
+            AttractionName: "Chợ nổi Cái Răng"
+          }
+        ]
+      },
+      {
+        Day: 2,
+        Title: "Cù lao Thới Sơn",
+        Description: "Khám phá cù lao Thới Sơn, tham quan các vườn cây ăn trái và thưởng thức nhạc đờn ca tài tử.",
+        AttractionSchedules: [
+          {
+            AttractionId: 8,
+            AttractionName: "Cù lao Thới Sơn"
+          }
+        ]
+      }
     ]
   },
   {
     TourTemplateId: 3,
+    TourCode: "MTR01",
     TourName: "Hành trình di sản miền Trung 5 ngày",
-    Description: "Tour tham quan các di sản văn hóa tại miền Trung Việt Nam. Tour tham quan các di sản văn hóa tại miền Trung Việt Nam.",
-    TourTemplateDuration: "5 ngày 4 đêm",
-    TourTemplateCategory: "Tour Văn hóa",
-    TourTemplateFacility: "Khách sạn 3 sao, xe du lịch, hướng dẫn viên",
-    TourTemplatePolicy: "Hủy tour trước 7 ngày được hoàn 70% phí",
-    TourTemplateNote: "Chuẩn bị trang phục phù hợp khi vào các địa điểm tâm linh",
-    TourTemplateStatus: "Tạm ngưng",
-    TourTemplateCreatedDate: "2023-03-05",
-    TourTemplateUpdatedDate: "2023-07-15",
-    TourTemplateCreatedBy: "manager",
-    TourTemplateUpdatedBy: "admin",
-    TourTemplateProvince: "Thừa Thiên Huế",
-    TourTemplateDeparturePoint: "Đà Nẵng",
+    Description: "Khám phá những di sản văn hóa và cảnh quan đẹp nhất của miền Trung Việt Nam, bao gồm Huế, Hội An và Mỹ Sơn. Du khách sẽ có cơ hội tìm hiểu về lịch sử, văn hóa và kiến trúc truyền thống của khu vực.",
+    Duration: "5 ngày 4 đêm",
+    TourCategory: "Tour Văn hóa",
+    Policy: "Hủy trước 7 ngày được hoàn 70%, hủy trong vòng 7 ngày không hoàn tiền",
+    Note: "Mang theo quần áo trang nhã khi tham quan các địa điểm tôn giáo.",
+    Status: "Chờ duyệt",
+    CreatedDate: "2024-01-10",
+    CreatedBy: "Nguyễn Văn B",
+    TourTemplateProvinces: [
+      {
+        ProvinceId: 1,
+        ProvinceName: "Thừa Thiên Huế"
+      },
+      {
+        ProvinceId: 2,
+        ProvinceName: "Quảng Nam"
+      },
+      {
+        ProvinceId: 3,
+        ProvinceName: "Đà Nẵng"
+      }
+    ],
+    DeparturePoint: "Đà Nẵng",
     TourTemplateImages: [
-      { url: "https://ik.imagekit.io/tvlk/blog/2023/12/352521770_6922050131-1024x768.jpg?tr=dpr-2,w-675" },
-      { url: "https://example.com/hue2.jpg" }
+      { Path: "https://cits.asia/wp-content/uploads/2020/08/hoi-an.jpg", ImageId: 1 },
+      { Path: "https://vitracotour.com/wp-content/uploads/2024/01/codohue.jpg", ImageId: 2 },
+      { Path: "https://example.com/image3.jpg", ImageId: 3 },
+      { Path: "https://example.com/image4.jpg", ImageId: 4 }
+    ],
+    TourTemplateSchedule: [
+      {
+        Day: 1,
+        Title: "Đại Nội Huế",
+        Description: "Tham quan quần thể cung điện hoàng gia, nơi từng là trung tâm chính trị của triều Nguyễn.",
+        AttractionSchedules: [
+          {
+            AttractionId: 1,
+            AttractionName: "Đại Nội Huế"
+          }
+        ]
+      },
+      {
+        Day: 2,
+        Title: "Phố cổ Hội An",
+        Description: "Khám phá phố cổ Hội An, nơi lưu giữ nét kiến trúc cổ xưa và văn hóa giao thoa độc đáo.",
+        AttractionSchedules: [
+          {
+            AttractionId: 2,
+            AttractionName: "Phố cổ Hội An"
+          }
+        ]
+      },
+      {
+        Day: 3,
+        Title: "Thánh địa Mỹ Sơn",
+        Description: "Tham quan di sản văn hóa thế giới Mỹ Sơn, quần thể đền tháp của người Chăm Pa.",
+        AttractionSchedules: [
+          {
+            AttractionId: 3,
+            AttractionName: "Thánh địa Mỹ Sơn"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    TourTemplateId: 4,
+    TourCode: "MTR02",
+    TourName: "Hành trình di sản miền Trung 5 ngày",
+    Description: "Khám phá những di sản văn hóa và cảnh quan đẹp nhất của miền Trung Việt Nam, bao gồm Huế, Hội An và Mỹ Sơn. Du khách sẽ có cơ hội tìm hiểu về lịch sử, văn hóa và kiến trúc truyền thống của khu vực.",
+    Duration: "5 ngày 4 đêm",
+    TourCategory: "Tour Văn hóa",
+    Policy: "Hủy trước 7 ngày được hoàn 70%, hủy trong vòng 7 ngày không hoàn tiền",
+    Note: "Mang theo quần áo trang nhã khi tham quan các địa điểm tôn giáo.",
+    Status: "Đã bị từ chối",
+    CreatedDate: "2024-01-10",
+    CreatedBy: "Nguyễn Văn B",
+    TourTemplateProvinces: [
+      {
+        ProvinceId: 1,
+        ProvinceName: "Thừa Thiên Huế"
+      },
+      {
+        ProvinceId: 2,
+        ProvinceName: "Quảng Nam"
+      },
+      {
+        ProvinceId: 3,
+        ProvinceName: "Đà Nẵng"
+      }
+    ],
+    DeparturePoint: "Đà Nẵng",
+    TourTemplateImages: [
+      { Path: "https://cits.asia/wp-content/uploads/2020/08/hoi-an.jpg", ImageId: 1 },
+      { Path: "https://vitracotour.com/wp-content/uploads/2024/01/codohue.jpg", ImageId: 2 },
+      { Path: "https://example.com/image3.jpg", ImageId: 3 },
+      { Path: "https://example.com/image4.jpg", ImageId: 4 }
+    ],
+    TourTemplateSchedule: [
+      {
+        Day: 1,
+        Title: "Đại Nội Huế",
+        Description: "Tham quan quần thể cung điện hoàng gia, nơi từng là trung tâm chính trị của triều Nguyễn.",
+        AttractionSchedules: [
+          {
+            AttractionId: 1,
+            AttractionName: "Đại Nội Huế"
+          },
+          {
+            AttractionId: 1,
+            AttractionName: "Đại Nội Huế"
+          }
+        ]
+      },
+      {
+        Day: 2,
+        Title: "Phố cổ Hội An",
+        Description: "Khám phá phố cổ Hội An, nơi lưu giữ nét kiến trúc cổ xưa và văn hóa giao thoa độc đáo.",
+        AttractionSchedules: [
+          {
+            AttractionId: 2,
+            AttractionName: "Phố cổ Hội An"
+          }
+        ]
+      },
+      {
+        Day: 3,
+        Title: "Thánh địa Mỹ Sơn",
+        Description: "Tham quan di sản văn hóa thế giới Mỹ Sơn, quần thể đền tháp của người Chăm Pa.",
+        AttractionSchedules: [
+          {
+            AttractionId: 3,
+            AttractionName: "Thánh địa Mỹ Sơn"
+          }
+        ]
+      }
     ]
   }
 ];
+
+
+export const mockTourStatus = [
+  'Đã duyệt', 'Chờ duyệt', 'Bản nháp', 'Đã bị từ chối'
+]
 
 export const mockTourTemplateCategories = [
   {
@@ -81,6 +280,41 @@ export const mockTourTemplateCategories = [
     CategoryId: 4,
     CategoryName: 'Tour Mạo hiểm'
   },
+]
+
+export const mockProvinces = [
+  {
+    ProvinceId: 1,
+    ProvinceName: 'Thừa Thiên Huế'
+  },
+  {
+    ProvinceId: 2,
+    ProvinceName: 'Quảng Nam'
+  },
+  {
+    ProvinceId: 3,
+    ProvinceName: 'Đà Nẵng'
+  },
+  {
+    ProvinceId: 4,
+    ProvinceName: 'Lào Cai'
+  },
+  {
+    ProvinceId: 5,
+    ProvinceName: 'Hà Nội'
+  },
+  {
+    ProvinceId: 6,
+    ProvinceName: 'Tiền Giang'
+  },
+  {
+    ProvinceId: 7,
+    ProvinceName: 'Cần Thơ'
+  },
+  {
+    ProvinceId: 8,
+    ProvinceName: 'Kiên Giang'
+  }
 ]
 
 export const getTourTemplateById = (id) => {

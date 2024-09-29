@@ -5,11 +5,13 @@ import ManageCustomer from '@pages/manager/ManageCustomer.jsx';
 import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
 import ManageCompanyStaff from '@pages/manager/ManageCompanyStaff.jsx';
-import ManageAttraction from '@pages/manager/attraction/ManageAttraction.jsx';
-import ManageTourTemplate from '@pages/manager/ManageTourTemplate.jsx';
-import AddAttraction from '@pages/manager/attraction/AddAttraction.jsx';
-import UpdateAttraction from '@pages/manager/attraction/UpdateAttraction.jsx';
-import AttractionDetail from '@pages/manager/attraction/AttractionDetail.jsx';
+import ManageAttraction from '@pages/staff/attraction/ManageAttraction.jsx';
+import ManageTourTemplate from '@pages/staff/tourTemplate/ManageTourTemplate.jsx';
+import CreateAttraction from '@pages/staff/attraction/CreateAttraction.jsx';
+import UpdateAttraction from '@pages/staff/attraction/UpdateAttraction.jsx';
+import AttractionDetail from '@pages/staff/attraction/AttractionDetail.jsx';
+import TourTemplateDetail from '@pages/staff/tourTemplate/TourTemplateDetail.jsx';
+import CreateTourTemplate from '@pages/staff/tourTemplate/CreateTourTemplate.jsx';
 
 const App = () => {
   return (
@@ -23,11 +25,13 @@ const App = () => {
         <Route path="/quan-ly/khach-hang" element={<ManageCustomer />} />
         <Route path="/admin/quan-ly" element={<ManageManager />} />
         <Route path="/dang-nhap" element={<Login/>} />
-        <Route path="/quan-ly/diem-tham-quan" element={<ManageAttraction/>} />
-        <Route path="/quan-ly/diem-tham-quan/them" element={<AddAttraction/>} />
-        <Route path="/quan-ly/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
-        <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail/>} />
-        <Route path="/quan-ly/tour-mau" element={<ManageTourTemplate/>} />
+        <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
+        <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
+        <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
+        <Route path="/nhan-vien/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail/>} />
+        <Route path="/nhan-vien/tour-mau" element={<ManageTourTemplate/>} />
+        <Route path="/nhan-vien/tour-mau/chi-tiet/:id" element={<TourTemplateDetail/>} />
+        <Route path="/nhan-vien/tour-mau/them" element={<CreateTourTemplate/>} />
       </Routes>
     </Router>
   );

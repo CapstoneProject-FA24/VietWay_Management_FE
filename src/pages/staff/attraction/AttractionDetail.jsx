@@ -53,7 +53,7 @@ const AttractionDetail = () => {
       <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
           component={Link}
-          to="/quan-ly/diem-tham-quan"
+          to="/nhan-vien/diem-tham-quan"
           variant="contained"
           startIcon={<ArrowBackIosNewOutlinedIcon />}
           sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>

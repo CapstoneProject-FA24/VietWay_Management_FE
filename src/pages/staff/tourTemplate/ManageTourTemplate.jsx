@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import SidebarManager from '@layouts/SidebarManager';
+import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
-import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment } from '@mui/material';
-import { getFilteredTourTemplates, mockTourTemplateCategories } from '@hooks/MockTourTemplate';
+import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
+import { getFilteredTourTemplates, mockTourTemplateCategories, mockProvinces, mockTourStatus } from '@hooks/MockTourTemplate';
 import TourTemplateCard from '@components/manager/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
+import { Link, useLocation } from 'react-router-dom';
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,6 +19,9 @@ const ManageTourTemplate = () => {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedDuration, setSelectedDuration] = useState([]);
+    const [statusTab, setStatusTab] = useState('all');
+    const location = useLocation();
+    const currentPage = location.pathname;
 
     useEffect(() => {
         const fetchedTourTemplates = getFilteredTourTemplates({}, 'name');
@@ -27,7 +31,7 @@ const ManageTourTemplate = () => {
 
     useEffect(() => {
         filterAndSortTourTemplates();
-    }, [searchTerm, sortOrder, selectedCategories, selectedProvinces, selectedDuration, tourTemplates]);
+    }, [searchTerm, sortOrder, selectedCategories, selectedProvinces, selectedDuration, tourTemplates, statusTab]);
 
     const filterAndSortTourTemplates = () => {
         let filtered = [...tourTemplates];
@@ -40,27 +44,26 @@ const ManageTourTemplate = () => {
                 t.Description.toLowerCase().includes(searchTermLower)
             );
         }
-
-        // Filter by categories
         if (selectedCategories.length > 0) {
-            filtered = filtered.filter(t => selectedCategories.some(c => c.value === t.TourTemplateCategory));
+            filtered = filtered.filter(t => selectedCategories.some(c => c.value === t.TourCategory));
         }
-
-        // Filter by provinces
         if (selectedProvinces.length > 0) {
-            filtered = filtered.filter(t => selectedProvinces.some(p => p.value === t.TourTemplateProvince));
+            filtered = filtered.filter(t =>
+                selectedProvinces.some(p =>
+                    t.TourTemplateProvinces.some(province => province.ProvinceName === p.value)
+                )
+            );
         }
-
         if (selectedDuration.length > 0) {
-            filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.TourTemplateDuration));
+            filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.Duration));
+        } if (statusTab !== 'all') {
+            filtered = filtered.filter(a => a.Status === statusTab);
         }
-
-        // Sort
         filtered.sort((a, b) => {
             if (sortOrder === 'name') {
                 return a.TourName.localeCompare(b.TourName);
             } else if (sortOrder === 'date') {
-                return new Date(b.TourTemplateUpdatedDate) - new Date(a.TourTemplateUpdatedDate);
+                return new Date(b.CreatedDate) - new Date(a.CreatedDate);
             }
             return 0;
         });
@@ -73,15 +76,19 @@ const ManageTourTemplate = () => {
         label: category.CategoryName
     }));
 
-    const durationOptions = Array.from(new Set(tourTemplates.map(t => t.TourTemplateDuration))).map(duration => ({
+    const durationOptions = Array.from(new Set(tourTemplates.map(t => t.Duration))).map(duration => ({
         value: duration,
         label: duration
     }));
 
-    const provinceOptions = Array.from(new Set(tourTemplates.map(t => t.TourTemplateProvince))).map(province => ({
-        value: province,
-        label: province
+    const provinceOptions = mockProvinces.map(province => ({
+        value: province.ProvinceName,
+        label: province.ProvinceName
     }));
+
+    const handleStatusTabChange = (event, newValue) => {
+        setStatusTab(newValue);
+    };
 
     const animatedComponents = makeAnimated();
 
@@ -90,7 +97,7 @@ const ManageTourTemplate = () => {
             <Helmet>
                 <title>Quản lý Tour mẫu</title>
             </Helmet>
-            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 5 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -2.7 }}>
                     <Grid item xs={8.5} sx={{ mb: 1 }}>
@@ -132,7 +139,7 @@ const ManageTourTemplate = () => {
                         />
                     </Grid>
                     <Grid item xs={3.5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                        <Button variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
+                        <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
                             Thêm Tour mẫu
                         </Button>
                     </Grid>
@@ -167,8 +174,16 @@ const ManageTourTemplate = () => {
                             <MenuItem value="date">Ngày cập nhật</MenuItem>
                         </Select>
                     </Grid>
+                    <Grid item xs={12}>
+                        <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="tour template status tabs">
+                            <Tab label="Tất cả" value="all" />
+                            {mockTourStatus.map((status) => (
+                                <Tab key={status} label={status} value={status} />
+                            ))}
+                        </Tabs>
+                    </Grid>
                 </Grid>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {filteredTourTemplates.map(tourTemplate => (
                         <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
                             <TourTemplateCard tour={tourTemplate} isOpen={isSidebarOpen} />

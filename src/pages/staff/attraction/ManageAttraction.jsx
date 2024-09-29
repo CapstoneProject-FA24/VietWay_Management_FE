@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SidebarManager from '@layouts/SidebarManager';
+import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
 import { getFilteredAttractions, mockAttractionStatus } from '@hooks/MockAttractions';
@@ -83,7 +83,7 @@ const ManageAttraction = () => {
             <Helmet>
                 <title>Manage Attractions</title>
             </Helmet>
-            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 5 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={7} sx={{ mb: 1 }}>
@@ -111,7 +111,7 @@ const ManageAttraction = () => {
                     <Grid item xs={5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
                         <Button 
                         component={Link} 
-                        to="/quan-ly/diem-tham-quan/them" 
+                        to="/nhan-vien/diem-tham-quan/them" 
                         variant="contained" 
                         color="primary" 
                         startIcon={<AddIcon />} 
