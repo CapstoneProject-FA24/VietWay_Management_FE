@@ -8,17 +8,18 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import QrCodeOutlinedIcon from '@mui/icons-material/QrCodeOutlined';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import CheckIcon from '@mui/icons-material/Check';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { mockProvinces, mockTourTemplateCategories } from '@hooks/MockTourTemplate';
+import { mockProvinces, mockTourTemplateCategories, getTourTemplateById } from '@hooks/MockTourTemplate';
 import { mockAttractions } from '@hooks/MockAttractions';
 
-const CreateTourTemplate = () => {
+const UpdateTourTemplate = () => {
+  const { id } = useParams();
   const [tourTemplate, setTourTemplate] = useState({
     TourName: '',
     TourTemplateProvinces: [],
@@ -29,20 +30,43 @@ const CreateTourTemplate = () => {
     Policy: '',
     Note: '',
     TourTemplateImages: [null, null, null, null],
-    TourTemplateSchedule: [{ Day: 1, Title: '', Description: '', AttractionSchedules: [], isEditing: true }]
+    TourTemplateSchedule: []
   });
   const [editableFields, setEditableFields] = useState({
-    TourName: { value: '', isEditing: true },
-    Description: { value: '', isEditing: true },
-    Policy: { value: '', isEditing: true },
-    Note: { value: '', isEditing: true },
-    TourTemplateProvinces: { value: [], isEditing: true },
-    Duration: { value: '', isEditing: true },
-    DeparturePoint: { value: '', isEditing: true },
-    TourCategory: { value: '', isEditing: true },
+    TourName: { value: '', isEditing: false },
+    Description: { value: '', isEditing: false },
+    Policy: { value: '', isEditing: false },
+    Note: { value: '', isEditing: false },
+    TourTemplateProvinces: { value: [], isEditing: false },
+    Duration: { value: '', isEditing: false },
+    DeparturePoint: { value: '', isEditing: false },
+    TourCategory: { value: '', isEditing: false },
   });
-  const [expandedDay, setExpandedDay] = useState(1);
+  const [expandedDay, setExpandedDay] = useState(null);
   const pageTopRef = useRef(null);
+
+  useEffect(() => {
+    const fetchTourTemplateData = async () => {
+      try {
+        const mockData = getTourTemplateById(id);
+        setTourTemplate(mockData);
+        setEditableFields({
+          TourName: { value: mockData.TourName, isEditing: false },
+          Description: { value: mockData.Description, isEditing: false },
+          Policy: { value: mockData.Policy, isEditing: false },
+          Note: { value: mockData.Note, isEditing: false },
+          TourTemplateProvinces: { value: mockData.TourTemplateProvinces.map(province => ({ value: province.ProvinceId, label: province.ProvinceName })), isEditing: false },
+          Duration: { value: mockData.Duration, isEditing: false },
+          DeparturePoint: { value: mockData.DeparturePoint, isEditing: false },
+          TourCategory: { value: mockData.TourCategory, isEditing: false },
+        });
+      } catch (error) {
+        console.error("Error fetching tour template data:", error);
+      }
+    };
+
+    fetchTourTemplateData();
+  }, [id]);
 
   const handleFieldChange = (field, value) => {
     setEditableFields(prev => ({
@@ -76,7 +100,7 @@ const CreateTourTemplate = () => {
       reader.onloadend = () => {
         setTourTemplate(prev => ({
           ...prev,
-          TourTemplateImages: prev.TourTemplateImages.map((img, i) => i === index ? reader.result : img)
+          TourTemplateImages: prev.TourTemplateImages.map((img, i) => i === index ? { ...img, Path: reader.result } : img)
         }));
       };
       reader.readAsDataURL(file);
@@ -86,7 +110,7 @@ const CreateTourTemplate = () => {
   const handleImageRemove = (index) => {
     setTourTemplate(prev => ({
       ...prev,
-      TourTemplateImages: prev.TourTemplateImages.map((img, i) => i === index ? null : img)
+      TourTemplateImages: prev.TourTemplateImages.map((img, i) => i === index ? { ...img, Path: null } : img)
     }));
   };
 
@@ -169,7 +193,7 @@ const CreateTourTemplate = () => {
   return (
     <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} ref={pageTopRef}>
       <Helmet>
-        <title>Tạo tour mẫu mới</title>
+        <title>Cập nhật tour mẫu</title>
       </Helmet>
       <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
@@ -181,7 +205,7 @@ const CreateTourTemplate = () => {
           Quay lại
         </Button>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
-          Tạo tour mẫu mới
+          Cập nhật tour mẫu
         </Typography>
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
@@ -246,9 +270,9 @@ const CreateTourTemplate = () => {
             <Container maxWidth="lg">
               <Box sx={{ display: 'flex', width: '100%', height: '450px', mb: 3, ml: -2.5 }}>
                 <Box sx={{ flex: '0 0 60%', mr: 2, position: 'relative' }}>
-                  {tourTemplate.TourTemplateImages[0] ? (
+                  {tourTemplate.TourTemplateImages[0]?.Path ? (
                     <>
-                      <img src={tourTemplate.TourTemplateImages[0]} alt="Tour image 1" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.TourTemplateImages[0].Path} alt="Tour image 1" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
                       <IconButton onClick={() => handleImageRemove(0)}
                         sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                         <CloseIcon />
@@ -263,9 +287,9 @@ const CreateTourTemplate = () => {
                 </Box>
                 <Box sx={{ flex: '0 0 43%', display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                    {tourTemplate.TourTemplateImages[1] ? (
+                    {tourTemplate.TourTemplateImages[1]?.Path ? (
                       <>
-                        <img src={tourTemplate.TourTemplateImages[1]} alt="Tour image 2" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
+                        <img src={tourTemplate.TourTemplateImages[1].Path} alt="Tour image 2" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
                         <IconButton onClick={() => handleImageRemove(1)}
                           sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                           <CloseIcon />
@@ -280,9 +304,9 @@ const CreateTourTemplate = () => {
                   </Box>
                   <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                     <Box sx={{ flex: '0 0 48.2%', mr: 2, position: 'relative' }}>
-                      {tourTemplate.TourTemplateImages[2] ? (
+                      {tourTemplate.TourTemplateImages[2]?.Path ? (
                         <>
-                          <img src={tourTemplate.TourTemplateImages[2]} alt="Tour image 3" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
+                          <img src={tourTemplate.TourTemplateImages[2].Path} alt="Tour image 3" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
                           <IconButton onClick={() => handleImageRemove(2)}
                             sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                             <CloseIcon />
@@ -296,9 +320,9 @@ const CreateTourTemplate = () => {
                       )}
                     </Box>
                     <Box sx={{ flex: '0 0 48.2%', position: 'relative' }}>
-                      {tourTemplate.TourTemplateImages[3] ? (
+                      {tourTemplate.TourTemplateImages[3]?.Path ? (
                         <>
-                          <img src={tourTemplate.TourTemplateImages[3]} alt="Tour image 4" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
+                          <img src={tourTemplate.TourTemplateImages[3].Path} alt="Tour image 4" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
                           <IconButton onClick={() => handleImageRemove(3)}
                             sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                             <CloseIcon />
@@ -525,7 +549,7 @@ const CreateTourTemplate = () => {
                           {expandedDay === schedule.Day ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                         </IconButton>
                       </Box>
-                      <Collapse in={expandedDay === schedule.Day} sx={{ mt: 1, ml: 1 }}>
+                      <Collapse in={expandedDay === schedule.Day} sx={{ ml: 1 }}>
                         <Typography paragraph sx={{ mb: 2 }}>{schedule.Description}</Typography>
                         <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Điểm đến:</Typography>
                         <ul>
@@ -618,6 +642,29 @@ const CreateTourTemplate = () => {
           </Grid>
           <Grid item xs={12} md={4} >
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+              <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', display: 'flex' }}>
+                  Mã tour mẫu:
+                  <Typography sx={{ color: '#05073C', ml: 1, color: 'primary.main', fontWeight: 700 }}>{tourTemplate.TourCode}</Typography>
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.CreatedDate).toLocaleDateString('vi-VN')}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.CreatedBy}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', display: 'flex' }}>
+                  Trạng thái:
+                  <Typography sx={{ color: '#05073C', ml: 1, color: tourTemplate.Status === 'Chờ duyệt' ? 'primary.main' : tourTemplate.Status === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.Status}</Typography>
+                </Typography>
+              </Box>
               <Button variant="contained" fullWidth sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}>Lưu bản nháp</Button>
               <Button variant="contained" fullWidth sx={{ height: '50px' }}>Gửi</Button>
             </Paper>
@@ -628,4 +675,4 @@ const CreateTourTemplate = () => {
   );
 };
 
-export default CreateTourTemplate;
+export default UpdateTourTemplate;

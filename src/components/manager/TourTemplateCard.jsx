@@ -24,7 +24,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100%' }}>
                 <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', pl: '1rem', mb: 1.5 }}>
                     <Typography variant="h1" color="primary" component="div" sx={{ fontSize: isOpen ? '1.5rem' : '1.2rem' }}>
-                        ID: {tour.TourTemplateId}
+                        Mã: {tour.TourCode}
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>

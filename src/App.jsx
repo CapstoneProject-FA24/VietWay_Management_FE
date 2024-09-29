@@ -12,6 +12,7 @@ import UpdateAttraction from '@pages/staff/attraction/UpdateAttraction.jsx';
 import AttractionDetail from '@pages/staff/attraction/AttractionDetail.jsx';
 import TourTemplateDetail from '@pages/staff/tourTemplate/TourTemplateDetail.jsx';
 import CreateTourTemplate from '@pages/staff/tourTemplate/CreateTourTemplate.jsx';
+import UpdateTourTemplate from '@pages/staff/tourTemplate/UpdateTourTemplate.jsx';
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="/nhan-vien/tour-mau" element={<ManageTourTemplate/>} />
         <Route path="/nhan-vien/tour-mau/chi-tiet/:id" element={<TourTemplateDetail/>} />
         <Route path="/nhan-vien/tour-mau/them" element={<CreateTourTemplate/>} />
+        <Route path="/nhan-vien/tour-mau/sua/:id" element={<UpdateTourTemplate/>} />
       </Routes>
     </Router>
   );
