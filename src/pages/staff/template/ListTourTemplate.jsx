@@ -3,6 +3,7 @@ import { Box, Typography, TextField, Button, Chip, Select, MenuItem, FormControl
 import { styled } from '@mui/material/styles';
 import { mockTourTemplates } from '@hooks/MockTourTemplate';
 import SidebarStaff from '@layouts/SidebarStaff';
+import { useNavigate } from 'react-router-dom';
 
 // Styled components
 const StyledSelect = styled(Select)(({ theme }) => ({
@@ -41,6 +42,7 @@ const StyledCardContent = styled(CardContent)({
 });
 
 const ListTourTemplate = () => {
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [duration, setDuration] = useState([]);
@@ -74,8 +76,12 @@ const ListTourTemplate = () => {
     setLocation(event.target.value);
   };
 
+  const handleCreateTour = (tourTemplateId) => {
+    navigate(`/nhan-vien/tour-mau/tao-tour/${tourTemplateId}`);
+  };
+
   return (
-    <Box>
+    <Box sx={{ display: 'flex', width: '100vw' }}>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       
       <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: isSidebarOpen ? '250px' : 0, transition: 'margin 0.3s' }}>
@@ -188,7 +194,12 @@ const ListTourTemplate = () => {
                 </StyledCardContent>
                 <CardActions>
                   <Button size="small" variant='outlined'>Chi tiết</Button>
-                  <Button size="small" variant="contained" color="primary">
+                  <Button 
+                    size="small" 
+                    variant="contained" 
+                    color="primary"
+                    onClick={() => handleCreateTour(tour.TourTemplateId)}
+                  >
                     Tạo Tour
                   </Button>
                 </CardActions>
