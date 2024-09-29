@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
-const AttractionCard = ({ attraction, isOpen }) => {
+const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
+    const location = useLocation();
+    const currentPage = location.pathname;
+
+    const handleDelete = () => {
+        onOpenDeletePopup(attraction);
+    };
+
     return (
         <Card sx={{ display: 'flex', height: isOpen ? '15rem' : '13.3rem', p: '0.5rem', borderRadius: 1.5 }}>
             <CardMedia
@@ -42,15 +49,17 @@ const AttractionCard = ({ attraction, isOpen }) => {
                         <Typography variant="h6" color="text.secondary" component="div" sx={{ mt: isOpen ? 0.8 : 0 }}>
                             ID:  {attraction.AttractionId}
                         </Typography>
-                        <Button variant="outlined"
+                        <Button
+                            variant="outlined"
+                            onClick={handleDelete}
                             sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', width: isOpen ? '7rem' : '5.3rem', borderRadius: 1.5, mb: 1, mt: isOpen ? 1.2 : 0.5, color: 'red', borderColor: 'red' }}>
                             Xóa
                         </Button>
-                        <Button variant="outlined" component={Link}  to={"/quan-ly/diem-tham-quan/sua/" + attraction.AttractionId} 
+                        <Button variant="outlined" component={Link} to={currentPage + "/sua/" + attraction.AttractionId}
                             sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', width: isOpen ? '7rem' : '5.3rem', mb: 1, borderRadius: 1.5 }}>
                             Sửa
                         </Button>
-                        <Button variant="outlined" component={Link}  to={"/quan-ly/diem-tham-quan/chi-tiet/" + attraction.AttractionId} 
+                        <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + attraction.AttractionId}
                             sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', width: isOpen ? '7rem' : '5.3rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray' }}>
                             Chi tiết
                         </Button>

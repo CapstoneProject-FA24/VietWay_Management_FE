@@ -83,7 +83,7 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
   padding: '12px 16px',
 }));
 
-const SidebarStaff = ({ isOpen, toggleSidebar }) => {
+const SidebarManager = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
 
   return (
@@ -102,10 +102,10 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
         <List sx={{ width: '100%' }}>
           <ListItem 
             component={Link} 
-            to="/nhan-vien/dashboard" 
+            to="/admin/dashboard" 
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginTop: 1 }}
           >
-            <MenuItemPaper elevation={2} isSelected={location.pathname === '/nhan-vien'}>
+            <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <HomeIcon sx={{ color: '#2196f3' }} />
@@ -124,7 +124,6 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
             { text: 'Điểm tham quan', url: '/nhan-vien/diem-tham-quan', icon: <LocationOnIcon /> },
             { text: 'Tour mẫu', url: '/nhan-vien/tour-mau', icon: <MapIcon /> },
             { text: 'Tour du lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
-            { text: 'Bài đăng', url: '/nhan-vien/bai-dang', icon: <PeopleIcon /> },
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text}
@@ -174,4 +173,4 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   );
 };
 
-export default SidebarStaff;
+export default SidebarManager;
