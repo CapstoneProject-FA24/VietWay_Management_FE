@@ -32,18 +32,11 @@ const ManageTourTemplate = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const fetchedTourTemplates = await fetchTourTemplates();
+                const fetchedTourTemplates = await fetchTourTemplates(100, 1);
                 const fetchedProvinces = await fetchProvinces();
-                const mappedTourTemplates = fetchedTourTemplates.map(template => ({
-                    ...template,
-                    TourTemplateProvinces: template.TourTemplateProvinces.slice(0, 3).map(provinceId => {
-                        const province = fetchedProvinces.find(p => p.ProvinceId === provinceId);
-                        return province ? { ProvinceId: province.ProvinceId, ProvinceName: province.ProvinceName } : null;
-                    }).filter(Boolean)
-                }));
                 setProvinces(fetchedProvinces);
-                setTourTemplates(mappedTourTemplates);
-                setFilteredTourTemplates(mappedTourTemplates);
+                setTourTemplates(fetchedTourTemplates);
+                setFilteredTourTemplates(fetchedTourTemplates);
             } catch (error) {
                 console.error('Error fetching tour templates:', error);
             }
@@ -58,33 +51,32 @@ const ManageTourTemplate = () => {
     const filterAndSortTourTemplates = () => {
         let filtered = [...tourTemplates];
         if (searchTerm) {
-            const searchTermLower = searchTerm.toLowerCase();
+            const searchTermLower = searchTerm.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d");
             filtered = filtered.filter(t =>
-                t.TourName.toLowerCase().includes(searchTermLower) ||
-                t.Description.toLowerCase().includes(searchTermLower)
+                t.tourName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").includes(searchTermLower)
             );
         }
         if (selectedCategories.length > 0) {
-            filtered = filtered.filter(t => selectedCategories.some(c => c.value === t.TourCategory));
+            filtered = filtered.filter(t => selectedCategories.some(c => c.value === t.tourCategoryName));
         }
         if (selectedProvinces.length > 0) {
             filtered = filtered.filter(t =>
                 selectedProvinces.some(p =>
-                    t.TourTemplateProvinces.some(province => province.ProvinceName === p.value)
+                    t.provinces.some(province => province.provinceName === p.value)
                 )
             );
         }
         if (selectedDuration.length > 0) {
-            filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.Duration));
+            filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.duration));
         }
         if (statusTab !== 'all') {
-            filtered = filtered.filter(a => a.Status === parseInt(statusTab));
+            filtered = filtered.filter(a => a.status === parseInt(statusTab));
         }
         filtered.sort((a, b) => {
-            if (sortOrder === 'name') {
-                return a.TourName.localeCompare(b.TourName);
-            } else if (sortOrder === 'date') {
-                return new Date(b.CreatedDate) - new Date(a.CreatedDate);
+            if (sortOrder === 'tourName') {
+                return a.tourName.localeCompare(b.tourName);
+            } else if (sortOrder === 'createdDate') {
+                return new Date(b.createdDate) - new Date(a.createdDate);
             }
             return 0;
         });
@@ -92,18 +84,18 @@ const ManageTourTemplate = () => {
     };
 
     const categoryOptions = mockTourTemplateCategories.map(category => ({
-        value: category.CategoryName,
-        label: category.CategoryName
+        value: category.categoryName,
+        label: category.categoryName
     }));
 
-    const durationOptions = Array.from(new Set(tourTemplates.map(t => t.Duration))).map(duration => ({
+    const durationOptions = Array.from(new Set(tourTemplates.map(t => t.duration))).map(duration => ({
         value: duration,
         label: duration
     }));
 
     const provinceOptions = provinces.map(province => ({
-        value: province.ProvinceName,
-        label: province.ProvinceName
+        value: province.provinceName,
+        label: province.provinceName
     }));
 
     const handleStatusTabChange = (event, newValue) => {
@@ -224,7 +216,7 @@ const ManageTourTemplate = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {filteredTourTemplates.map(tourTemplate => (
-                        <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
+                        <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
                             <TourTemplateCard 
                                 tour={tourTemplate} 
                                 isOpen={isSidebarOpen} 

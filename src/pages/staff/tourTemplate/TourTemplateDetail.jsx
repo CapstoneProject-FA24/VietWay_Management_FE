@@ -3,15 +3,12 @@ import { Box, Typography, Grid, Paper, CircularProgress, Table, TableBody, Table
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faUser, faClock, faMoneyBill1, faLocationDot, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
-import { getTourTemplateById } from '@hooks/MockTourTemplate';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import QrCodeOutlinedIcon from '@mui/icons-material/QrCodeOutlined';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams } from 'react-router-dom';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchProvinces } from '@services/ProvinceService';
 
 const TourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -19,21 +16,12 @@ const TourTemplateDetails = () => {
   const { id } = useParams();
   const pageTopRef = useRef(null);
   const [expandedDay, setExpandedDay] = useState(null);
-  const temId = id;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
-        const fetchedProvinces = await fetchProvinces();
-        const mappedTourTemplate = {
-          ...fetchedTourTemplate,
-          TourTemplateProvinces: fetchedTourTemplate.TourTemplateProvinces.slice(0, 3).map(provinceId => {
-              const province = fetchedProvinces.find(p => p.ProvinceId === provinceId);
-              return province ? { ProvinceId: province.ProvinceId, ProvinceName: province.ProvinceName } : null;
-          }).filter(Boolean)
-        };
-        setTourTemplate(mappedTourTemplate);
+        setTourTemplate(fetchedTourTemplate);
       } catch (error) {
         console.error('Error fetching tour template:', error);
       } finally {
@@ -77,28 +65,28 @@ const TourTemplateDetails = () => {
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
-          {tourTemplate.TourTemplateProvinces.map(province => province.ProvinceName).join(' - ')}
+          {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
         </Typography>
         <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-          {tourTemplate.TourName}
+          {tourTemplate.tourName}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Container maxWidth="lg">
               <Box sx={{ display: 'flex', width: '100%', height: '450px', mb: 3, ml: -2.5 }}>
                 <Box sx={{ flex: '0 0 60%', mr: 2 }}>
-                  <img src={tourTemplate.TourTemplateImages[0]} alt={tourTemplate.TourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[0]} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 43%', display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ flex: '0 0 50%', mb: 1.2 }}>
-                    <img src={tourTemplate.TourTemplateImages[1]} alt={tourTemplate.TourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[1]} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                   </Box>
                   <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                     <Box sx={{ flex: '0 0 48.2%', mr: 2 }}>
-                      <img src={tourTemplate.TourTemplateImages[2]} alt={tourTemplate.TourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.imageUrls[2]} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                     </Box>
                     <Box sx={{ flex: '0 0 48.2%' }}>
-                      <img src={tourTemplate.TourTemplateImages[3]} alt={tourTemplate.TourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.imageUrls[3]} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                     </Box>
                   </Box>
                 </Box>
@@ -118,25 +106,25 @@ const TourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Khởi hành từ:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.DeparturePoint ? tourTemplate.DeparturePoint : "Meicheng"}</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.departurePoint ? tourTemplate.departurePoint : "Meicheng"}</Typography>
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.TourCategory}</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
                 </Box>
               </Box>
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.Description}</Typography>
+              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.description}</Typography>
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3 }}>Lịch trình</Typography>
-              {tourTemplate.TourTemplateSchedule.map((schedule, index, array) => (
-                <Box key={schedule.Day} sx={{ pl: 6, position: 'relative' }}>
+              {tourTemplate.schedule.map((s, index, array) => (
+                <Box key={s.dayNumber} sx={{ pl: 6, position: 'relative' }}>
                   {(index === 0 || index === array.length - 1) && (
                     <Box
                       sx={{
@@ -181,22 +169,24 @@ const TourTemplateDetails = () => {
                       }}
                     />
                   )}
-                  <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(schedule.Day)}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(s.dayNumber)}>
                     <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
-                      {`Ngày ${schedule.Day}: ${schedule.Title}`}
+                      {`Ngày ${s.dayNumber}: ${s.title}`}
                     </Typography>
                     <IconButton size="small">
-                      {expandedDay === schedule.Day ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </IconButton>
                   </Box>
-                  <Collapse in={expandedDay === schedule.Day} sx={{ ml: 1 }}>
+                  <Collapse in={expandedDay === s.dayNumber} sx={{ ml: 1 }}>
                     <ul>
-                      {schedule.AttractionSchedules.map((schedule) => (
-                        <li key={schedule.AttractionId}>{schedule.AttractionName}</li>
+                      {s.attractions.map((attraction, i) => (
+                        <li key={attraction.attractionId}>
+                          {attraction.name}
+                        </li>
                       ))}
                     </ul>
                     <Typography paragraph sx={{ textAlign: 'justify' }}>
-                      {schedule.Description}
+                      {s.description}
                     </Typography>
                   </Collapse>
                 </Box>
@@ -204,11 +194,11 @@ const TourTemplateDetails = () => {
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Chính sách</Typography>
-              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.Policy}</Typography>
+              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.policy}</Typography>
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
-              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.Note}</Typography>
+              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.note}</Typography>
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>
@@ -218,7 +208,7 @@ const TourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
                   Mã tour mẫu:
-                  <Typography sx={{ color: '#05073C', ml: 1, color: 'primary.main', fontWeight: 700 }}>{tourTemplate.TourCode}</Typography>
+                  <Typography sx={{ ml: 1, color: 'primary.main', fontWeight: 700 }}>{tourTemplate.TourCode}</Typography>
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -233,7 +223,7 @@ const TourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
                   Trạng thái:
-                  <Typography sx={{ color: '#05073C', ml: 1, color: tourTemplate.Status === 1 ? 'primary.main' : tourTemplate.Status === 2 ? 'green' : 'red', }}>{tourTemplate.StatusName}</Typography>
+                  <Typography sx={{ ml: 1, color: tourTemplate.Status === 0 ? 'gray' : tourTemplate.Status === 1 ? 'primary.main' : tourTemplate.Status === 2 ? 'green' : 'red', }}>{tourTemplate.StatusName}</Typography>
                 </Typography>
               </Box>
               {tourTemplate.Status === 'Đã duyệt' && (

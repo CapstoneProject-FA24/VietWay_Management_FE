@@ -1,6 +1,5 @@
+import axios from 'axios';
 import baseURL from '@api/baseURL'
-import { mockProvinces } from '@hooks/Provinces'
-import { mockTourTemplateCategories } from '@hooks/MockTourTemplate'
 
 const getStatusText = (status) => {
     switch (status) {
@@ -12,25 +11,34 @@ const getStatusText = (status) => {
     }
 };
 
-export const fetchTourTemplates = async () => {
+export const fetchTourTemplates = async (pageSize, pageIndex) => {
     try {
-        const response = await fetch(`${baseURL}/api/TourTemplate?pageSize=10&pageIndex=1`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        const response = await axios.get(`${baseURL}/api/TourTemplate`, {
+            params: {
+                pageSize: pageSize,
+                pageIndex: pageIndex
+            }
+        });
+
+        const items = response.data?.data?.items;
+        
+        if (!items || !Array.isArray(items)) {
+            throw new Error('Invalid response structure: items not found or not an array');
         }
-        const result = await response.json();
-        return result.data.items.map(item => ({
-            TourTemplateId: item.tourTemplateId,
-            TourCode: item.code,
-            TourName: item.tourName,
-            Duration: item.duration,
-            TourCategory: mockTourTemplateCategories.find(category => category.CategoryId === item.tourCategoryId)?.CategoryName || '',
-            Status: item.status,
-            StatusName: getStatusText(item.status),
-            CreatedDate: item.createdDate,
-            CreatedBy: item.creatorName,
-            TourTemplateProvinces: item.provinces,
-            TourTemplateImage: item.imageUrl
+
+        return items.map(item => ({
+            tourTemplateId: item.tourTemplateId,
+            code: item.code,
+            tourName: item.tourName,
+            duration: item.duration,
+            tourCategoryId: item.tourCategoryId,
+            tourCategoryName: item.tourCategoryName,
+            status: item.status,
+            statusName: getStatusText(item.status),
+            createdDate: item.createdDate,
+            creatorName: item.creatorName,
+            provinces: item.provinces,
+            imageUrl: item.imageUrl
         }));
     } catch (error) {
         console.error('Error fetching tour templates:', error);
@@ -40,30 +48,27 @@ export const fetchTourTemplates = async () => {
 
 export const fetchTourTemplateById = async (id) => {
     try {
-        const response = await fetch(`${baseURL}/api/TourTemplate/${id}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const result = await response.json();
+        const response = await axios.get(`${baseURL}/api/TourTemplate/${id}`);
         return {
-            TourTemplateId: result.data.tourTemplateId,
-            TourCode: result.data.code,
-            TourName: result.data.tourName,
-            Description: result.data.description,
-            Duration: result.data.duration,
-            TourCategory: mockTourTemplateCategories.find(category => category.CategoryId === result.data.tourCategoryId)?.CategoryName || '',
-            Policy: result.data.policy,
-            Note: result.data.note,
-            Status: result.data.status,
-            StatusName: getStatusText(result.data.status),
-            CreatedDate: result.data.createdDate,
-            CreatedBy: result.data.creatorName,
-            TourTemplateProvinces: result.data.provinces,
-            TourTemplateSchedule: result.data.schedule,
-            TourTemplateImages: result.data.imageUrls
+            tourTemplateId: response.data.data.tourTemplateId,
+            code: response.data.data.code,
+            tourName: response.data.data.tourName,
+            description: response.data.data.description,
+            duration: response.data.data.duration,
+            tourCategoryId: response.data.data.tourCategoryId,
+            tourCategoryName: response.data.data.tourCategoryName,
+            policy: response.data.data.policy,
+            note: response.data.data.note,
+            status: response.data.data.status,
+            statusName: getStatusText(response.data.data.status),
+            createdDate: response.data.data.createdDate,
+            creatorName: response.data.data.creatorName,
+            provinces: response.data.data.provinces,
+            schedule: response.data.data.schedule,
+            imageUrls: response.data.data.imageUrls
         };
     } catch (error) {
-        console.error('Error fetching tour templates:', error);
+        console.error('Error fetching tour template:', error);
         throw error;
     }
 };

@@ -121,7 +121,7 @@ const AddAttraction = () => {
   };
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: '100vw' }}>
       <Helmet>
         <title>Thêm điểm tham quan</title>
       </Helmet>
