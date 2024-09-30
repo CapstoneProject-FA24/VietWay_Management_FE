@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, Button, IconButton } from '@mui/material';
+import React from 'react';
+import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 
 const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
-    const isDraft = tour.Status === 'Bản nháp';
-    const isEditable = tour.Status !== 'Đã duyệt' && tour.Status !== 'Chờ duyệt';
-    const isApproved = tour.Status === 'Đã duyệt';
+    const isDraft = tour.status === 0;
+    const isEditable = tour.status !== 2 && tour.status !== 1;
+    const isApproved = tour.status === 2;
 
     const location = useLocation();
     const currentPage = location.pathname;
@@ -18,42 +18,57 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
         onOpenDeletePopup(tour);
     };
 
+    const getStatusText = (status) => {
+        switch(status) {
+            case 0: return 'Bản nháp';
+            case 1: return 'Chờ duyệt';
+            case 2: return 'Đã duyệt';
+            case 3: return 'Đã bị từ chối';
+            default: return 'Không xác định';
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch(status) {
+            case 0: return 'blue';
+            case 1: return 'orange';
+            case 2: return 'green';
+            case 3: return 'red';
+            default: return 'black';
+        }
+    };
+
     return (
         <Card sx={{ display: 'flex', height: isOpen ? '15.9rem' : '13.9rem', p: '0.7rem', borderRadius: 1.5 }}>
             <CardMedia
                 component="img"
                 sx={{ width: '33%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
-                image={tour.TourTemplateImages[0].Path}
+                image={tour.imageUrl}
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100%' }}>
                 <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', pl: '1rem', mb: 1.5 }}>
                     <Typography variant="h1" color="primary" component="div" sx={{ fontSize: isOpen ? '1.5rem' : '1.2rem' }}>
-                        Mã: {tour.TourCode}
+                        Mã: {tour.code}
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
-                            Tạo ngày: {new Date(tour.CreatedDate).toLocaleDateString()}
+                            Tạo ngày: {new Date(tour.createdDate).toLocaleDateString()}
                         </Typography>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
-                            Tạo bởi: {tour.CreatedBy}
+                            Tạo bởi: {tour.creatorName}
                         </Typography>
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? 0 : -1, ml: '0.5rem' }}>
                     <Typography variant="subtitle2" color="text.secondary" component="div" sx={{ fontSize: isOpen ? '1rem' : '0.9rem' }}>
-                        {tour.TourTemplateProvinces.map(province => province.ProvinceName).join(', ')} - {tour.TourCategory}
+                        {tour.provinces.join(', ')} - Tour Category {tour.tourCategoryId}
                     </Typography>
                     <Typography noWrap component="div" variant="h6" sx={{ fontSize: isOpen ? '1.60rem' : '1.3rem', wordSpacing: -2 }}>
-                        {truncateTourName(tour.TourName, isOpen ? 50 : 35)}
+                        {truncateTourName(tour.tourName, isOpen ? 50 : 35)}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem' }}>
                         <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            Thời lượng: {tour.Duration}
-                        </Box>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem' }}>
-                        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            Khởi hành từ: {tour.DeparturePoint}
+                            Thời lượng: {tour.duration}
                         </Box>
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
@@ -66,18 +81,18 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                                 Xóa
                             </Button>
                             {isEditable && (
-                                <Button variant="outlined" component={Link} to={currentPage + "/sua/" + tour.TourTemplateId}
+                                <Button variant="outlined" component={Link} to={`${currentPage}/sua/${tour.tourTemplateId}`}
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, mr: 1 }}>
                                     Sửa
                                 </Button>
                             )}
-                            <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + tour.TourTemplateId}
+                            <Button variant="outlined" component={Link} to={`${currentPage}/chi-tiet/${tour.tourTemplateId}`}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
                                 Chi tiết
                             </Button>
                             {isApproved && (
                                 <Button variant="contained" component={Link}
-                                    to={currentPage + "/tao-tour/" + tour.TourTemplateId}
+                                    to={`${currentPage}/tao-tour/${tour.tourTemplateId}`}
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'white', borderColor: 'gray' }}>
                                     Tạo tour
                                 </Button>
@@ -86,12 +101,12 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                         <Typography sx={{
                             alignItems: 'center',
                             fontSize: isOpen ? '1.05rem' : '1rem',
-                            color: tour.Status === 'Bản nháp' ? '#5d5d5d' : tour.Status === 'Chờ duyệt' ? 'primary.main' : tour.Status === 'Đã duyệt' ? 'green' : 'red',
+                            color: getStatusColor(tour.status),
                             padding: '4px 8px',
                             borderRadius: '4px',
                             fontWeight: 700
                         }}>
-                            {tour.Status}
+                            {getStatusText(tour.status)}
                         </Typography>
                     </Box>
                 </Box>

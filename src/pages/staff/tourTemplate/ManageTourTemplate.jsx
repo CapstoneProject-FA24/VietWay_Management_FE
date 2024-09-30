@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
-import { getFilteredTourTemplates, mockTourTemplateCategories, mockProvinces, mockTourStatus } from '@hooks/MockTourTemplate';
+import { mockTourTemplateCategories, mockProvinces, mockTourStatus } from '@hooks/MockTourTemplate';
 import TourTemplateCard from '@components/staff/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
@@ -21,16 +22,35 @@ const ManageTourTemplate = () => {
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedDuration, setSelectedDuration] = useState([]);
     const [statusTab, setStatusTab] = useState('all');
+    const [pageSize, setPageSize] = useState(10);
+    const [pageIndex, setPageIndex] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
     const location = useLocation();
     const currentPage = location.pathname;
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
+    const [statusOptions, setStatusOptions] = useState([]);
 
     useEffect(() => {
-        const fetchedTourTemplates = getFilteredTourTemplates({}, 'name');
-        setTourTemplates(fetchedTourTemplates);
-        setFilteredTourTemplates(fetchedTourTemplates);
-    }, []);
+        fetchTourTemplates();
+    }, [pageSize, pageIndex]);
+
+    const fetchTourTemplates = async () => {
+        try {
+            const response = await axios.get(`https://vietwayapi-e7dqcdgef5e2dxgn.southeastasia-01.azurewebsites.net/api/TourTemplate?pageSize=${pageSize}&pageIndex=${pageIndex}`);
+            if (response.data.statusCode === 200) {
+                setTourTemplates(response.data.data.items);
+                setFilteredTourTemplates(response.data.data.items);
+                setTotalItems(response.data.data.total);
+                
+                // Extract unique status values from the API response
+                const uniqueStatuses = [...new Set(response.data.data.items.map(item => item.status))];
+                setStatusOptions(uniqueStatuses);
+            }
+        } catch (error) {
+            console.error('Error fetching tour templates:', error);
+        }
+    };
 
     useEffect(() => {
         filterAndSortTourTemplates();
@@ -41,33 +61,35 @@ const ManageTourTemplate = () => {
         if (searchTerm) {
             const searchTermLower = searchTerm.toLowerCase();
             filtered = filtered.filter(t =>
-                t.TourName.toLowerCase().includes(searchTermLower) ||
-                t.Description.toLowerCase().includes(searchTermLower)
+                t.tourName.toLowerCase().includes(searchTermLower) ||
+                t.code.toLowerCase().includes(searchTermLower)
             );
         }
         if (selectedCategories.length > 0) {
-            filtered = filtered.filter(t => selectedCategories.some(c => c.value === t.TourCategory));
+            filtered = filtered.filter(t => selectedCategories.some(c => c.value === t.tourCategoryId));
         }
         if (selectedProvinces.length > 0) {
             filtered = filtered.filter(t =>
-                selectedProvinces.some(p =>
-                    t.TourTemplateProvinces.some(province => province.ProvinceName === p.value)
-                )
+                selectedProvinces.some(p => t.provinces.includes(p.value))
             );
         }
         if (selectedDuration.length > 0) {
-            filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.Duration));
-        } if (statusTab !== 'all') {
-            filtered = filtered.filter(a => a.Status === statusTab);
+            filtered = filtered.filter(t => selectedDuration.some(p => p.value === t.duration));
         }
+        if (statusTab !== 'all') {
+            filtered = filtered.filter(a => a.status === statusTab);
+        }
+
+        // Sorting
         filtered.sort((a, b) => {
             if (sortOrder === 'name') {
-                return a.TourName.localeCompare(b.TourName);
+                return a.tourName.localeCompare(b.tourName);
             } else if (sortOrder === 'date') {
-                return new Date(b.CreatedDate) - new Date(a.CreatedDate);
+                return new Date(b.createdDate) - new Date(a.createdDate);
             }
             return 0;
         });
+
         setFilteredTourTemplates(filtered);
     };
 
@@ -87,7 +109,18 @@ const ManageTourTemplate = () => {
     }));
 
     const handleStatusTabChange = (event, newValue) => {
-        setStatusTab(newValue);
+    setStatusTab(newValue);
+    filterTourTemplates(newValue);
+};
+
+    const filterTourTemplates = (status) => {
+        if (status === 'all') {
+            setFilteredTourTemplates(tourTemplates);
+        } else {
+            const statusNumber = parseInt(status);
+            const filtered = tourTemplates.filter(template => template.status === statusNumber);
+            setFilteredTourTemplates(filtered);
+        }
     };
 
     const animatedComponents = makeAnimated();
@@ -195,9 +228,10 @@ const ManageTourTemplate = () => {
                     <Grid item xs={12}>
                         <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="tour template status tabs">
                             <Tab label="Tất cả" value="all" />
-                            {mockTourStatus.map((status) => (
-                                <Tab key={status} label={status} value={status} />
-                            ))}
+                            <Tab label="Bản nháp" value="0" />
+                            <Tab label="Chờ duyệt" value="1" />
+                            <Tab label="Đã duyệt" value="2" />
+                            <Tab label="Đã bị từ chối" value="3" />
                         </Tabs>
                     </Grid>
                 </Grid>
@@ -221,6 +255,16 @@ const ManageTourTemplate = () => {
             </Box>
         </Box>
     );
+};
+
+const getStatusText = (status) => {
+    switch(status) {
+        case 0: return 'Bản nháp';
+        case 1: return 'Chờ duyệt';
+        case 2: return 'Đã duyệt';
+        case 3: return 'Đã bị từ chối';
+        default: return 'Không xác định';
+    }
 };
 
 export default ManageTourTemplate;
