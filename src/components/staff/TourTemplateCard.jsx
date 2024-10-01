@@ -38,6 +38,8 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
         }
     };
 
+    const status = parseInt(tour.status);
+
     return (
         <Card sx={{ display: 'flex', height: isOpen ? '15.9rem' : '13.9rem', p: '0.7rem', borderRadius: 1.5 }}>
             <CardMedia
