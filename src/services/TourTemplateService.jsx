@@ -72,3 +72,44 @@ export const fetchTourTemplateById = async (id) => {
         throw error;
     }
 };
+
+export const createTourTemplate = async (tourTemplateData) => {
+    try {
+        const formData = new FormData();
+        
+        formData.append("Code", tourTemplateData.code);
+        formData.append("TourName", tourTemplateData.tourName);
+        formData.append("Description", tourTemplateData.description);
+        formData.append("Duration", tourTemplateData.duration);
+        formData.append("TourCategoryId", tourTemplateData.tourCategoryId);
+        formData.append("Policy", tourTemplateData.policy);
+        formData.append("Note", tourTemplateData.note);
+
+        tourTemplateData.provinces.forEach((province) => {
+            formData.append("ProvinceId", province); // Correct naming
+        });
+
+        tourTemplateData.schedule.forEach((s, index) => {
+            formData.append(`Schedules[${index}].dayNumber`, s.dayNumber);
+            formData.append(`Schedules[${index}].title`, s.title);
+            formData.append(`Schedules[${index}].description`, s.description);
+            s.attractions.forEach((attraction, attIndex) => {
+                formData.append(`Schedules[${index}].attractionId[${attIndex}]`, attraction);
+            });
+        });
+
+        tourTemplateData.imageUrls.forEach((image) => {
+            formData.append("Images", image);
+        });
+
+        const response = await axios.post(`${baseURL}/api/TourTemplate`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.log(error.response);
+        throw error;
+    }
+};
