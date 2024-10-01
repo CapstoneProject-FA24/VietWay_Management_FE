@@ -153,7 +153,7 @@ const AddAttraction = () => {
                 sx={{ mr: 2 }}
               >
                 {mockAttractionTypes.map((type) => (
-                  <MenuItem key={type.TypeId} value={type.TypeId}>{type.TypeName}</MenuItem>
+                  <MenuItem key={type.typeId} value={type.typeId}>{type.typeName}</MenuItem>
                 ))}
               </Select>
               <Button

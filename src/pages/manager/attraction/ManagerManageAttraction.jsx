@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import SidebarStaff from '@layouts/SidebarStaff';
+import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
 import { getFilteredAttractions, mockAttractionStatus } from '@hooks/MockAttractions';
-import AttractionCard from '@components/staff/AttractionCard';
+import AttractionCard from '@components/manager/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
@@ -11,7 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
 import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
 
-const ManageAttraction = () => {
+const ManagerManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [attractions, setAttractions] = useState([]);
@@ -59,9 +59,9 @@ const ManageAttraction = () => {
             } else if (sortOrder === 'name-desc') {
                 return b.name.localeCompare(a.name);
             } else if (sortOrder === 'createdDate') {
-                return new Date(b.CreatedDate) - new Date(a.CreatedDate);
+                return new Date(b.createdDate) - new Date(a.createdDate);
             }else if (sortOrder === 'createdDateReverse') {
-                return new Date(a.CreatedDate) - new Date(b.CreatedDate);
+                return new Date(a.createdDate) - new Date(b.createdDate);
             }
             return 0;
         });
@@ -107,7 +107,7 @@ const ManageAttraction = () => {
             <Helmet>
                 <title>Manage Attractions</title>
             </Helmet>
-            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 5 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={7} sx={{ mb: 1 }}>
@@ -207,4 +207,4 @@ const ManageAttraction = () => {
     );
 };
 
-export default ManageAttraction;
+export default ManagerManageAttraction;

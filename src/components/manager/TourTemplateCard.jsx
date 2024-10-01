@@ -59,35 +59,15 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                     </Typography>
                     <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem' }}>
                         <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            Khởi hành từ: {tour.departurePoint? tour.departurePoint : "Meicheng"}
+                            Khởi hành từ: {tour.departurePoint ? tour.departurePoint : "Meicheng"}
                         </Box>
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Button
-                                variant="outlined"
-                                onClick={handleDelete}
-                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
-                            >
-                                Xóa
-                            </Button>
-                            {isEditable && (
-                                <Button variant="outlined" component={Link} to={currentPage + "/sua/" + tour.tourTemplateId}
-                                    sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, mr: 1 }}>
-                                    Sửa
-                                </Button>
-                            )}
                             <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + tour.tourTemplateId}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
                                 Chi tiết
                             </Button>
-                            {isApproved && (
-                                <Button variant="contained" component={Link}
-                                    to={currentPage + "/tao-tour/" + tour.tourTemplateId}
-                                    sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'white', borderColor: 'gray' }}>
-                                    Tạo tour
-                                </Button>
-                            )}
                         </Box>
                         <Typography sx={{
                             alignItems: 'center',

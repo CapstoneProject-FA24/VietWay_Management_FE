@@ -10,7 +10,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useParams } from 'react-router-dom';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 
-const TourTemplateDetails = () => {
+const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
@@ -53,7 +53,7 @@ const TourTemplateDetails = () => {
       <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
           component={Link}
-          to="/nhan-vien/tour-mau"
+          to="/quan-ly/tour-mau"
           variant="contained"
           startIcon={<ArrowBackIosNewOutlinedIcon />}
           sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
@@ -226,8 +226,11 @@ const TourTemplateDetails = () => {
                   <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                 </Typography>
               </Box>
-              {tourTemplate.status === 2 && (
-                <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#2954B5' } }}>Tạo tour từ mẫu</Button>
+              {tourTemplate.status === 1 && (
+                <>
+                  <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: 'green', '&:hover': { backgroundColor: '#2954B5' } }}>Chấp nhận</Button>
+                  <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: 'red', '&:hover': { backgroundColor: '#2954B5' } }}>Từ chối</Button>
+                </>
               )}
             </Paper>
           </Grid>
@@ -237,4 +240,4 @@ const TourTemplateDetails = () => {
   );
 };
 
-export default TourTemplateDetails;
+export default ManagerTourTemplateDetails;

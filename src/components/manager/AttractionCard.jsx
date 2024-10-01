@@ -61,17 +61,12 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Button
+                            {/* <Button
                                 variant="outlined"
                                 onClick={handleDelete}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
-                            >
-                                Xóa
-                            </Button>
-                            <Button variant="outlined" component={Link} to={currentPage + "/sua/" + attraction.attractionId}
-                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, mr: 1 }}>
-                                Sửa
-                            </Button>
+                            >Xóa
+                            </Button> */}
                             <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + attraction.attractionId}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
                                 Chi tiết

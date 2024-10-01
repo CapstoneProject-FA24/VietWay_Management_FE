@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import SidebarStaff from '@layouts/SidebarStaff';
+import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from '@mui/material';
 import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
-import TourTemplateCard from '@components/staff/TourTemplateCard';
+import TourTemplateCard from '@components/manager/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
@@ -13,13 +13,13 @@ import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 
-const ManageTourTemplate = () => {
+const ManagerManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
     const [provinces, setProvinces] = useState([]);
     const [filteredTourTemplates, setFilteredTourTemplates] = useState([]);
-    const [sortOrder, setSortOrder] = useState('tourNameA-Z');
+    const [sortOrder, setSortOrder] = useState('name');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedDuration, setSelectedDuration] = useState([]);
@@ -127,11 +127,11 @@ const ManageTourTemplate = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', width: '98vw' }}>
             <Helmet>
                 <title>Quản lý Tour mẫu</title>
             </Helmet>
-            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
                 <Grid container spacing={3} sx={{ mb: 3 }}>
                     <Grid item xs={12} md={8.5} sx={{ mb: 1 }}>
@@ -220,7 +220,7 @@ const ManageTourTemplate = () => {
                         </Tabs>
                     </Grid>
                 </Grid>
-                <Grid container spacing={2}>
+                <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {filteredTourTemplates.map(tourTemplate => (
                         <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
                             <TourTemplateCard 
@@ -242,4 +242,4 @@ const ManageTourTemplate = () => {
     );
 };
 
-export default ManageTourTemplate;
+export default ManagerManageTourTemplate;
