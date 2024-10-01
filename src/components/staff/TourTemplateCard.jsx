@@ -44,7 +44,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
         <Card sx={{ display: 'flex', height: isOpen ? '15.9rem' : '13.9rem', p: '0.7rem', borderRadius: 1.5 }}>
             <CardMedia
                 component="img"
-                sx={{ width: '33%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
+                sx={{ width: '33%', minWidth: '33%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
                 image={tour.imageUrl}
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100%' }}>

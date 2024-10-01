@@ -14,7 +14,7 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
         <Card sx={{ display: 'flex', height: isOpen ? '15rem' : '13.3rem', p: '0.5rem', borderRadius: 1.5 }}>
             <CardMedia
                 component="img"
-                sx={{ width: '33%', height: isOpen ? '14rem' : '12.3rem', borderRadius: 1.5 }}
+                sx={{ width: '33%', minWidth: '33%', height: isOpen ? '14rem' : '12.3rem', borderRadius: 1.5 }}
                 image={attraction.AttractionImages[0].url}
                 alt={attraction.AttractionImages[0].alt}
             />

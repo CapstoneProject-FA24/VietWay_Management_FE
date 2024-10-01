@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
+import { Box, Typography, TextField, Button,
   Select,
   MenuItem,
   Chip,
@@ -91,7 +87,7 @@ const ManageTour = () => {
   }, [filters]);
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ width: "98vw", minHeight: "100vh" }}>
       <SidebarStaff isOpen={isOpen} toggleSidebar={toggleSidebar} />
       <Box
         sx={{

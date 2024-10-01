@@ -2,23 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
-import {
-  Box,
-  Grid,
-  Typography,
-  Button,
-  MenuItem,
-  Select,
-  TextField,
-  InputAdornment,
-  Tabs,
-  Tab,
-} from "@mui/material";
-import {
-  mockTourTemplateCategories,
-  mockProvinces,
-  mockTourStatus,
-} from "@hooks/MockTourTemplate";
+import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab } from "@mui/material";
+import {mockTourTemplateCategories, mockProvinces, mockTourStatus } from "@hooks/MockTourTemplate";
 import TourTemplateCard from "@components/staff/TourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
@@ -73,15 +58,7 @@ const ManageTourTemplate = () => {
 
   useEffect(() => {
     filterAndSortTourTemplates();
-  }, [
-    searchTerm,
-    sortOrder,
-    selectedCategories,
-    selectedProvinces,
-    selectedDuration,
-    tourTemplates,
-    statusTab,
-  ]);
+  }, [searchTerm, sortOrder, selectedCategories, selectedProvinces, selectedDuration, tourTemplates, statusTab]);
 
   const filterAndSortTourTemplates = () => {
     let filtered = [...tourTemplates];
