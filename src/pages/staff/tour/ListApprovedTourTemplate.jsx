@@ -41,9 +41,6 @@ const ListApprovedTourTemplate = () => {
   const [totalItems, setTotalItems] = useState(0);
   const location = useLocation();
   const currentPage = location.pathname;
-  const [openDeletePopup, setOpenDeletePopup] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
 
   const fetchApprovedTourTemplates = async () => {
     try {
@@ -139,7 +136,7 @@ const ListApprovedTourTemplate = () => {
   const animatedComponents = makeAnimated();
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ width: "98vw", minHeight: "100vh" }}>
       <Helmet>
         <title>Danh sách Tour mẫu đã duyệt | VietWay</title>
       </Helmet>
@@ -201,16 +198,6 @@ const ListApprovedTourTemplate = () => {
               alignItems: "flex-end",
             }}
           >
-            <Button
-              component={Link}
-              to={currentPage + "/them"}
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              sx={{ height: "55px", borderRadius: 2 }}
-            >
-              Thêm Tour mẫu
-            </Button>
           </Grid>
           <Grid item xs={12} md={8}>
             <TextField

@@ -15,6 +15,8 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { mockTours } from "@hooks/MockTour";
 import SidebarStaff from "@layouts/SidebarStaff";
 import AddIcon from "@mui/icons-material/Add";
+import { Link, useLocation } from "react-router-dom";
+const currentPage = location.pathname;
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -107,7 +109,15 @@ const ManageTour = () => {
             variant="outlined"
             sx={{ width: "80%" }}
           />
-          <Button variant="contained" color="primary" startIcon={<AddIcon />}>
+          
+          <Button
+              component={Link}
+              to={currentPage + "/tour-mau-duoc-duyet"}
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              sx={{ height: "55px", borderRadius: 2 }}
+            >
             Tạo Tour Mới
           </Button>
         </Box>
