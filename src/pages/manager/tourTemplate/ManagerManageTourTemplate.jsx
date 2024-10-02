@@ -134,7 +134,7 @@ const ManagerManageTourTemplate = () => {
             <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
                 <Grid container spacing={3} sx={{ mb: 3 }}>
-                    <Grid item xs={12} md={8.5} sx={{ mb: 1 }}>
+                    <Grid item xs={12} md={12} sx={{ mb: 1 }}>
                         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, mr: { md: 0.5 }, mb: 1.5 }}>
                                 <Typography sx={{ mt: 2 }}>
@@ -171,11 +171,6 @@ const ManagerManageTourTemplate = () => {
                             options={categoryOptions}
                             onChange={setSelectedCategories}
                         />
-                    </Grid>
-                    <Grid item xs={12} md={3.5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: { xs: 2, md: 3 } }}>
-                        <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
-                            Thêm Tour mẫu
-                        </Button>
                     </Grid>
                     <Grid item xs={12} md={7}>
                         <TextField

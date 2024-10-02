@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
 import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
+import { fetchProvinces } from '@services/ProvinceService';
 
 const ManagerManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -23,8 +24,18 @@ const ManagerManageAttraction = () => {
     const [statusTab, setStatusTab] = useState('all');
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedAttraction, setSelectedAttraction] = useState(null);
+    const [provinces, setProvinces] = useState([]);
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const fetchedProvinces = await fetchProvinces();
+                setProvinces(fetchedProvinces);
+            } catch (error) {
+                console.error('Error fetching tour templates:', error);
+            }
+        };
+        fetchData();
         const fetchedAttractions = getFilteredAttractions({}, 'name');
         setAttractions(fetchedAttractions);
         setFilteredAttractions(fetchedAttractions);
@@ -60,7 +71,7 @@ const ManagerManageAttraction = () => {
                 return b.name.localeCompare(a.name);
             } else if (sortOrder === 'createdDate') {
                 return new Date(b.createdDate) - new Date(a.createdDate);
-            }else if (sortOrder === 'createdDateReverse') {
+            } else if (sortOrder === 'createdDateReverse') {
                 return new Date(a.createdDate) - new Date(b.createdDate);
             }
             return 0;
@@ -68,9 +79,9 @@ const ManagerManageAttraction = () => {
         setFilteredAttractions(filtered);
     };
 
-    const provinceOptions = [...new Set(attractions.map(a => a.province))].map(province => ({
-        value: province,
-        label: province
+    const provinceOptions = provinces.map(province => ({
+        value: province.provinceName,
+        label: province.provinceName
     }));
 
     const typeOptions = [...new Set(attractions.map(a => a.attractionType))].map(type => ({
@@ -110,7 +121,7 @@ const ManagerManageAttraction = () => {
             <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 5 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
-                    <Grid item xs={7} sx={{ mb: 1 }}>
+                    <Grid item xs={6} sx={{ mb: 1 }}>
                         <Typography>
                             Tỉnh thành phố
                         </Typography>
@@ -121,7 +132,10 @@ const ManagerManageAttraction = () => {
                             options={provinceOptions}
                             onChange={setSelectedProvinces}
                         />
-                        <Typography sx={{ mt: 2 }}>
+
+                    </Grid>
+                    <Grid item xs={6} sx={{ mb: 1 }}>
+                        <Typography>
                             Loại điểm tham quan
                         </Typography>
                         <ReactSelect
@@ -131,17 +145,6 @@ const ManagerManageAttraction = () => {
                             options={typeOptions}
                             onChange={setSelectedTypes}
                         />
-                    </Grid>
-                    <Grid item xs={5} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                        <Button
-                            component={Link}
-                            to="/nhan-vien/diem-tham-quan/them"
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            sx={{ height: '55px', borderRadius: 2 }}>
-                            Thêm điểm tham quan
-                        </Button>
                     </Grid>
                     <Grid item xs={7}>
                         <TextField

@@ -14,10 +14,10 @@ const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [tours, setTours] = useState(mockTours);
   const [filters, setFilters] = useState({ tourType: [], duration: [], location: [], status: "" });
-
   const [filteredTours, setFilteredTours] = useState(tours);
   const [page, setPage] = useState(1);
   const [toursPerPage] = useState(9);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const currentPage = location.pathname;
 
@@ -35,6 +35,10 @@ const ManageTour = () => {
     fetchApprovedTourTemplates();
   }, []);
 
+  useEffect(() => {
+    applyFilters();
+  }, [filters, searchTerm, tours]);
+
   const toggleSidebar = () => { setIsOpen(!isOpen); };
 
   const handleFilterChange = (selectedOptions, filterType) => {
@@ -48,7 +52,14 @@ const ManageTour = () => {
     setFilters((prevFilters) => ({ ...prevFilters, status: event.target.value }));
   };
 
-  const applyFilters = () => { let result = tours;
+  const applyFilters = () => {
+    let result = tours;
+
+    if (searchTerm) {
+      result = result.filter((tour) =>
+        tour.tourName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
 
     if (filters.tourType.length > 0) {
       result = result.filter((tour) => tour.tourType.some((type) => filters.tourType.includes(type)));
@@ -67,6 +78,7 @@ const ManageTour = () => {
     }
 
     setFilteredTours(result);
+    setPage(1);
   };
 
   const clearFilter = (filterType) => {
@@ -89,8 +101,6 @@ const ManageTour = () => {
     }));
   };
 
-  useEffect(() => { applyFilters(); }, [filters]);
-
   const indexOfLastTour = page * toursPerPage;
   const indexOfFirstTour = indexOfLastTour - toursPerPage;
   const currentTours = filteredTours.slice(indexOfFirstTour, indexOfLastTour);
@@ -108,6 +118,11 @@ const ManageTour = () => {
     }));
   };
 
+  const provinceOptions = provinces.map(province => ({
+    value: province.provinceName,
+    label: province.provinceName
+  }));
+
   // Prepare options for ReactSelect components
   const tourTypeOptions = [...new Set(tours.flatMap(tour => tour.tourType))].map(type => ({ value: type, label: type }));
   const durationOptions = [...new Set(tours.map(tour => tour.duration))].map(duration => ({ value: duration, label: duration }));
@@ -121,7 +136,13 @@ const ManageTour = () => {
         </Typography>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <TextField placeholder="Tìm theo tên tour du lịch..." variant="outlined" sx={{ width: "80%" }} />
+          <TextField
+            placeholder="Tìm theo tên tour du lịch..."
+            variant="outlined"
+            sx={{ width: "80%", height: '45px' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
 
           <Button component={Link} to={currentPage + "/tour-mau-duoc-duyet"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: "55px", borderRadius: 2 }}>
             Tạo Tour Mới
@@ -164,7 +185,7 @@ const ManageTour = () => {
                 closeMenuOnSelect={false}
                 components={animatedComponents}
                 isMulti
-                options={provinces.map(province => ({ value: province.provinceName, label: province.provinceName }))}
+                options={provinceOptions}
                 onChange={handleLocationChange}
                 value={filters.location.map(location => ({ value: location, label: location }))}
               />
@@ -172,9 +193,9 @@ const ManageTour = () => {
           </Grid>
 
           <Grid item xs={12} sm={6}>
+            <Typography>Trạng thái</Typography>
             <FormControl fullWidth>
-              <InputLabel>Trạng thái</InputLabel>
-              <Select value={filters.status} onChange={handleStatusChange}>
+              <Select value={filters.status} onChange={handleStatusChange}  sx={{ height: '38px' }}>
                 <MenuItem value="">Tất cả</MenuItem>
                 <MenuItem value="Đang nhận khách">Đang nhận khách</MenuItem>
                 <MenuItem value="Đã đầy chỗ">Đã đầy chỗ</MenuItem>
@@ -208,14 +229,14 @@ const ManageTour = () => {
                         tour.status === "Đang nhận khách"
                           ? "success"
                           : tour.status === "Đã đầy chỗ"
-                          ? "warning"
-                          : tour.status === "Hoàn thành"
-                          ? "info"
-                          : tour.status === "Bị Hủy"
-                          ? "error"
-                          : tour.status === "Đang diễn ra"
-                          ? "primary"
-                          : "default"
+                            ? "warning"
+                            : tour.status === "Hoàn thành"
+                              ? "info"
+                              : tour.status === "Bị Hủy"
+                                ? "error"
+                                : tour.status === "Đang diễn ra"
+                                  ? "primary"
+                                  : "default"
                       } size="small" sx={{ mt: 1 }} />
                     </CardContent>
                     <CardActions>
@@ -228,11 +249,11 @@ const ManageTour = () => {
               ))}
             </Grid>
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Pagination 
-                count={Math.ceil(filteredTours.length / toursPerPage)} 
-                page={page} 
-                onChange={handleChangePage} 
-                color="primary" 
+              <Pagination
+                count={Math.ceil(filteredTours.length / toursPerPage)}
+                page={page}
+                onChange={handleChangePage}
+                color="primary"
               />
             </Box>
           </>

@@ -24,6 +24,7 @@ const ManageAttraction = () => {
     const [statusTab, setStatusTab] = useState('all');
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedAttraction, setSelectedAttraction] = useState(null);
+    const [provinces, setProvinces] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -78,9 +79,9 @@ const ManageAttraction = () => {
         setFilteredAttractions(filtered);
     };
 
-    const provinceOptions = [...new Set(attractions.map(a => a.province))].map(province => ({
-        value: province,
-        label: province
+    const provinceOptions = provinces.map(province => ({
+        value: province.provinceName,
+        label: province.provinceName
     }));
 
     const typeOptions = [...new Set(attractions.map(a => a.attractionType))].map(type => ({
