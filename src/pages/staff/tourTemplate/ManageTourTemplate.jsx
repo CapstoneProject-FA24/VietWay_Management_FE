@@ -18,7 +18,6 @@ const ManageTourTemplate = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
     const [provinces, setProvinces] = useState([]);
-    const [filteredTourTemplates, setFilteredTourTemplates] = useState([]);
     const [sortOrder, setSortOrder] = useState('tourNameA-Z');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
@@ -36,7 +35,6 @@ const ManageTourTemplate = () => {
                 const fetchedProvinces = await fetchProvinces();
                 setProvinces(fetchedProvinces);
                 setTourTemplates(fetchedTourTemplates);
-                setFilteredTourTemplates(fetchedTourTemplates);
             } catch (error) {
                 console.error('Error fetching tour templates:', error);
             }
@@ -62,7 +60,7 @@ const ManageTourTemplate = () => {
         if (selectedProvinces.length > 0) {
             filtered = filtered.filter(t =>
                 selectedProvinces.some(p =>
-                    t.provinces.some(province => province.provinceName === p.value)
+                    t.provinces.some(province => province === p.value)
                 )
             );
         }
@@ -84,9 +82,11 @@ const ManageTourTemplate = () => {
             }
             return 0;
         });
-        setFilteredTourTemplates(filtered);
+        return filtered;
     };
 
+    const filteredTourTemplates = filterAndSortTourTemplates();
+    
     const categoryOptions = mockTourTemplateCategories.map(category => ({
         value: category.categoryName,
         label: category.categoryName
@@ -94,7 +94,7 @@ const ManageTourTemplate = () => {
 
     const durationOptions = Array.from(new Set(tourTemplates.map(t => t.duration))).map(duration => ({
         value: duration,
-        label: duration
+        label: duration + ' ngày'
     }));
 
     const provinceOptions = provinces.map(province => ({

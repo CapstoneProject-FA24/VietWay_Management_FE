@@ -75,18 +75,18 @@ const ManagerTourTemplateDetails = () => {
             <Container maxWidth="lg">
               <Box sx={{ display: 'flex', width: '100%', height: '450px', mb: 3, ml: -2.5 }}>
                 <Box sx={{ flex: '0 0 60%', mr: 2 }}>
-                  <img src={tourTemplate.imageUrls[0]} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[0].url} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 43%', display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ flex: '0 0 50%', mb: 1.2 }}>
-                    <img src={tourTemplate.imageUrls[1]} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[1].url} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                   </Box>
                   <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                     <Box sx={{ flex: '0 0 48.2%', mr: 2 }}>
-                      <img src={tourTemplate.imageUrls[2]} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.imageUrls[2].url} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                     </Box>
                     <Box sx={{ flex: '0 0 48.2%' }}>
-                      <img src={tourTemplate.imageUrls[3]} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.imageUrls[3].url} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                     </Box>
                   </Box>
                 </Box>

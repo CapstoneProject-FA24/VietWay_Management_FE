@@ -31,8 +31,7 @@ export const fetchTourTemplates = async (pageSize, pageIndex) => {
             code: item.code,
             tourName: item.tourName,
             duration: item.duration,
-            tourCategoryId: item.tourCategoryId,
-            tourCategoryName: item.tourCategoryName,
+            tourCategory: item.tourCategory,
             status: item.status,
             statusName: getStatusText(item.status),
             createdDate: item.createdDate,
@@ -40,6 +39,7 @@ export const fetchTourTemplates = async (pageSize, pageIndex) => {
             provinces: item.provinces,
             imageUrl: item.imageUrl
         }));
+        
     } catch (error) {
         console.error('Error fetching tour templates:', error);
         throw error;
@@ -49,14 +49,14 @@ export const fetchTourTemplates = async (pageSize, pageIndex) => {
 export const fetchTourTemplateById = async (id) => {
     try {
         const response = await axios.get(`${baseURL}/api/TourTemplate/${id}`);
-        return {
+        const a = {
             tourTemplateId: response.data.data.tourTemplateId,
             code: response.data.data.code,
             tourName: response.data.data.tourName,
             description: response.data.data.description,
             duration: response.data.data.duration,
-            tourCategoryId: response.data.data.tourCategoryId,
-            tourCategoryName: response.data.data.tourCategoryName,
+            tourCategoryId: response.data.data.tourCategory.tourCategoryId,
+            tourCategoryName: response.data.data.tourCategory.tourCategoryName,
             policy: response.data.data.policy,
             note: response.data.data.note,
             status: response.data.data.status,
@@ -64,9 +64,11 @@ export const fetchTourTemplateById = async (id) => {
             createdDate: response.data.data.createdDate,
             creatorName: response.data.data.creatorName,
             provinces: response.data.data.provinces,
-            schedule: response.data.data.schedule,
-            imageUrls: response.data.data.imageUrls
+            schedule: response.data.data.schedules,
+            imageUrls: response.data.data.images
         };
+        console.log(a);
+        return a;
     } catch (error) {
         console.error('Error fetching tour template:', error);
         throw error;

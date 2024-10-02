@@ -2,74 +2,55 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
-import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment } from "@mui/material";
+import { Box, Grid, Typography, MenuItem, Select, TextField, InputAdornment } from "@mui/material";
 import { mockTourTemplateCategories, mockProvinces } from "@hooks/MockTourTemplate";
 import ApprovedTourTemplateCard from "@components/staff/ApprovedTourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
-import AddIcon from "@mui/icons-material/Add";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { fetchTourTemplates } from '@services/TourTemplateService';
+import { fetchProvinces } from '@services/ProvinceService';
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [tourTemplates, setTourTemplates] = useState([]);
-  const [filteredTourTemplates, setFilteredTourTemplates] = useState([]);
   const [sortOrder, setSortOrder] = useState("name");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState([]);
-  const [statusTab] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const location = useLocation();
-  const currentPage = location.pathname;
+  const [provinces, setProvinces] = useState([]);
 
-  const fetchApprovedTourTemplates = async () => {
-    try {
-      const response = await axios.get(
-        `https://vietwayapi-e7dqcdgef5e2dxgn.southeastasia-01.azurewebsites.net/api/TourTemplate?pageSize=${pageSize}&pageIndex=${pageIndex}`
-      );
-      if (response.data.statusCode === 200) {
-        const approvedTemplates = response.data.data.items.filter(
+  useEffect(() => {
+    const fetchApprovedTourTemplates = async () => {
+      try {
+        const fetchedTourTemplates = await fetchTourTemplates(100, 1);
+        const fetchedProvinces = await fetchProvinces();
+        const filteredTemplates = fetchedTourTemplates.filter(
           (template) => template.status === 2
         );
-        setTourTemplates(approvedTemplates);
-        setFilteredTourTemplates(approvedTemplates);
-        setTotalItems(approvedTemplates.length);
+        setProvinces(fetchedProvinces);
+        setTourTemplates(filteredTemplates);
+        setTotalItems(fetchedTourTemplates.length);
+      } catch (error) {
+        console.error('Error fetching tour templates:', error);
       }
-    } catch (error) {
-      console.error("Error fetching approved tour templates:", error);
-    }
-  };
-
-  useEffect(() => {
+    };
     fetchApprovedTourTemplates();
-  }, [pageSize, pageIndex]);
+  }, []);
 
-  useEffect(() => {
-    filterAndSortTourTemplates();
-  }, [
-    searchTerm,
-    sortOrder,
-    selectedCategories,
-    selectedProvinces,
-    selectedDuration,
-    tourTemplates,
-    statusTab,
-  ]);
-
-  const filterAndSortTourTemplates = () => {
-    let filtered = [...tourTemplates]; // Đã chỉ chứa các template có status = 2
-
+  const getFilteredAndSortedTourTemplates = () => {
+    let filtered = [...tourTemplates];
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (t) =>
-          t.tourName.toLowerCase().includes(searchTermLower) ||
-          t.code.toLowerCase().includes(searchTermLower)
+      filtered = filtered.filter((t) =>
+        t.tourName.toLowerCase().includes(searchTermLower) ||
+        t.code.toLowerCase().includes(searchTermLower)
       );
     }
     if (selectedCategories.length > 0) {
@@ -87,18 +68,12 @@ const ListApprovedTourTemplate = () => {
         selectedDuration.some((p) => p.value === t.duration)
       );
     }
-
-    // Sorting
     filtered.sort((a, b) => {
-      if (sortOrder === "name") {
-        return a.tourName.localeCompare(b.tourName);
-      } else if (sortOrder === "date") {
-        return new Date(b.createdDate) - new Date(a.createdDate);
-      }
+      if (sortOrder === "name") return a.tourName.localeCompare(b.tourName);
+      if (sortOrder === "date") return new Date(b.createdDate) - new Date(a.createdDate);
       return 0;
     });
-
-    setFilteredTourTemplates(filtered);
+    return filtered;
   };
 
   const categoryOptions = mockTourTemplateCategories.map((category) => ({
@@ -107,18 +82,20 @@ const ListApprovedTourTemplate = () => {
   }));
 
   const durationOptions = Array.from(
-    new Set(tourTemplates.map((t) => t.Duration))
+    new Set(tourTemplates.map((t) => t.duration))
   ).map((duration) => ({
     value: duration,
-    label: duration,
+    label: duration + ' ngày',
   }));
 
-  const provinceOptions = mockProvinces.map((province) => ({
-    value: province.ProvinceName,
-    label: province.ProvinceName,
+  const provinceOptions = provinces.map(province => ({
+    value: province.provinceName,
+    label: province.provinceName
   }));
 
   const animatedComponents = makeAnimated();
+
+  const filteredTourTemplates = getFilteredAndSortedTourTemplates();
 
   return (
     <Box sx={{ width: "98vw", minHeight: "100vh" }}>
@@ -129,15 +106,12 @@ const ListApprovedTourTemplate = () => {
         isOpen={isSidebarOpen}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: { xs: 2, sm: 3 },
-          transition: "margin-left 0.3s",
-          marginLeft: isSidebarOpen ? "260px" : "20px",
-        }}
-      >
+      <Box component="main" sx={{
+        flexGrow: 1,
+        p: { xs: 2, sm: 3 },
+        transition: "margin-left 0.3s",
+        marginLeft: isSidebarOpen ? "260px" : "20px",
+      }}>
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} md={8}>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
@@ -173,20 +147,16 @@ const ListApprovedTourTemplate = () => {
               </Box>
             </Box>
           </Grid>
-          <Grid
-            item
-            xs={12}
-            md={4}
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "flex-end",
-            }}
-          >
-          </Grid>
           <Grid item xs={12} md={8}>
-            <TextField variant="outlined" placeholder="Tìm kiếm tour mẫu..." size="small" fullWidth value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)} InputProps={{ startAdornment: (
+            <TextField
+              variant="outlined"
+              placeholder="Tìm kiếm tour mẫu..."
+              size="small"
+              fullWidth
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon />
                   </InputAdornment>
@@ -204,7 +174,7 @@ const ListApprovedTourTemplate = () => {
         </Grid>
         <Grid container spacing={2} sx={{ minHeight: "15.2rem" }}>
           {filteredTourTemplates.map((tourTemplate) => (
-            <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
+            <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
               <ApprovedTourTemplateCard tour={tourTemplate} isOpen={isSidebarOpen} />
             </Grid>
           ))}

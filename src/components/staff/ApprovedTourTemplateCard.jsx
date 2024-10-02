@@ -9,16 +9,12 @@ const ApprovedTourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     const location = useLocation();
     const currentPage = location.pathname;
 
-    const truncateTourName = (name, maxLength) => {
-        return name.length > maxLength ? `${name.substring(0, maxLength)}...` : name;
-    };
-
     const handleDelete = () => {
         onOpenDeletePopup(tour);
     };
 
     const getStatusText = (status) => {
-        switch(status) {
+        switch (status) {
             case 0: return 'Bản nháp';
             case 1: return 'Chờ duyệt';
             case 2: return 'Đã duyệt';
@@ -28,9 +24,9 @@ const ApprovedTourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     };
 
     const getStatusColor = (status) => {
-        switch(status) {
-            case 0: return 'blue';
-            case 1: return 'orange';
+        switch (status) {
+            case 0: return 'gray';
+            case 1: return 'blue';
             case 2: return 'green';
             case 3: return 'red';
             default: return 'black';
@@ -49,7 +45,7 @@ const ApprovedTourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
             <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100%' }}>
                 <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', pl: '1rem', mb: 1.5 }}>
                     <Typography variant="h1" color="primary" component="div" sx={{ fontSize: isOpen ? '1.5rem' : '1.2rem' }}>
-                        Mã Template: {tour.code}
+                        Mã tour mẫu: {tour.code}
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
@@ -60,21 +56,23 @@ const ApprovedTourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                         </Typography>
                     </Box>
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? 0 : -1, ml: '0.5rem' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? -1 : -2, ml: '0.5rem' }}>
                     <Typography variant="subtitle2" color="text.secondary" component="div" sx={{ fontSize: isOpen ? '1rem' : '0.9rem' }}>
-                        {tour.provinces.join(', ')} - Tour Category {tour.tourCategoryId}
+                        {tour.provinces.join(', ')} - {tour.tourCategory}
                     </Typography>
-                    <Typography noWrap component="div" variant="h6" sx={{ fontSize: isOpen ? '1.60rem' : '1.3rem', wordSpacing: -2 }}>
-                        {truncateTourName(tour.tourName, isOpen ? 50 : 35)}
+                    <Typography component="div" variant="h6" sx={{ fontSize: isOpen ? '1.5rem' : '1.27rem', wordSpacing: -2, 
+                        textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', 
+                        lineHeight: 1.5, height: isOpen ? '4.55rem' : '3.8rem' }}>
+                        {tour.tourName}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem' }}>
+                    <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem', mb: 2 }}>
                         <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                             Thời lượng: {tour.duration}
                         </Box>
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', paddingTop: '2rem' }}>
-                            <Button variant="outlined" component={Link} to={`${currentPage}/chi-tiet/${tour.tourTemplateId}`}
+                        <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                            <Button variant="outlined" component={Link} to={`/nhan-vien/tour-mau/chi-tiet/${tour.tourTemplateId}`}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
                                 Chi tiết
                             </Button>

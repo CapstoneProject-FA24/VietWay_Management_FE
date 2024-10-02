@@ -16,8 +16,8 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 0: return '#5d5d5d';
-            case 1: return 'primary.main';
+            case 0: return 'gray';
+            case 1: return 'blue';
             case 2: return 'green';
             case 3: return 'red';
             default: return 'black';
@@ -45,21 +45,18 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                         </Typography>
                     </Box>
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? 0 : -1, ml: '0.5rem' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? -1 : -2, ml: '0.5rem' }}>
                     <Typography noWrap color="text.secondary" component="div" sx={{ fontSize: isOpen ? '1rem' : '0.9rem', width: '100%' }}>
-                        {tour.provinces.map(province => province.provinceName).join(', ')} - {tour.tourCategoryName}
+                        {tour.provinces.join(', ')} - {tour.tourCategory}
                     </Typography>
-                    <Typography noWrap component="div" variant="h6" sx={{ fontSize: isOpen ? '1.60rem' : '1.3rem', wordSpacing: -2, textOverflow: 'ellipsis' }}>
+                    <Typography component="div" variant="h6" sx={{ fontSize: isOpen ? '1.5rem' : '1.27rem', wordSpacing: -2, 
+                        textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', 
+                        lineHeight: 1.5, height: isOpen ? '4.55rem' : '3.8rem' }}>
                         {tour.tourName}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem' }}>
+                    <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem', mb: 2 }}>
                         <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                             Thời lượng: {tour.duration}
-                        </Box>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem' }}>
-                        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                            Khởi hành từ: {tour.departurePoint ? tour.departurePoint : "Meicheng"}
                         </Box>
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>

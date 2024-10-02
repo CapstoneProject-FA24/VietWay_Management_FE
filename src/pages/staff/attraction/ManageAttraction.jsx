@@ -10,6 +10,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation } from 'react-router-dom';
 import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
+import { fetchProvinces } from '@services/ProvinceService';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,6 +26,15 @@ const ManageAttraction = () => {
     const [selectedAttraction, setSelectedAttraction] = useState(null);
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const fetchedProvinces = await fetchProvinces();
+                setProvinces(fetchedProvinces);
+            } catch (error) {
+                console.error('Error fetching tour templates:', error);
+            }
+        };
+        fetchData();
         const fetchedAttractions = getFilteredAttractions({}, 'name');
         setAttractions(fetchedAttractions);
         setFilteredAttractions(fetchedAttractions);

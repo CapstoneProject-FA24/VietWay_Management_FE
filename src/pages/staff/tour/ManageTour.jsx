@@ -7,8 +7,6 @@ import AddIcon from "@mui/icons-material/Add";
 import { Link, useLocation } from "react-router-dom";
 import CloseIcon from '@mui/icons-material/Close';
 
-const currentPage = location.pathname;
-
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [tours, setTours] = useState(mockTours);
@@ -17,6 +15,8 @@ const ManageTour = () => {
   const [filteredTours, setFilteredTours] = useState(tours);
   const [page, setPage] = useState(1);
   const [toursPerPage] = useState(9); // Số tour hiển thị trên mỗi trang
+
+  const currentPage = location.pathname;
 
   const toggleSidebar = () => { setIsOpen(!isOpen); };
 
