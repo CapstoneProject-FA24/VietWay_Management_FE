@@ -2,11 +2,10 @@ import React from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 
-const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
+const ApprovedTourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     const isDraft = tour.status === 0;
     const isEditable = tour.status !== 2 && tour.status !== 1;
     const isApproved = tour.status === 2;
-
     const location = useLocation();
     const currentPage = location.pathname;
 
@@ -75,19 +74,6 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', paddingTop: '2rem' }}>
-                            <Button
-                                variant="outlined"
-                                onClick={handleDelete}
-                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
-                            >
-                                Xóa
-                            </Button>
-                            {isEditable && (
-                                <Button variant="outlined" component={Link} to={`${currentPage}/sua/${tour.tourTemplateId}`}
-                                    sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, mr: 1 }}>
-                                    Sửa
-                                </Button>
-                            )}
                             <Button variant="outlined" component={Link} to={`${currentPage}/chi-tiet/${tour.tourTemplateId}`}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
                                 Chi tiết
@@ -117,4 +103,4 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     );
 };
 
-export default TourTemplateCard;
+export default ApprovedTourTemplateCard;

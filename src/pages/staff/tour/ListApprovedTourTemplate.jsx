@@ -2,24 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
-import {
-  Box,
-  Grid,
-  Typography,
-  Button,
-  MenuItem,
-  Select,
-  TextField,
-  InputAdornment,
-  Tabs,
-  Tab,
-} from "@mui/material";
-import {
-  mockTourTemplateCategories,
-  mockProvinces,
-  mockTourStatus,
-} from "@hooks/MockTourTemplate";
-import TourTemplateCard from "@components/staff/TourTemplateCard";
+import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment } from "@mui/material";
+import { mockTourTemplateCategories, mockProvinces } from "@hooks/MockTourTemplate";
+import ApprovedTourTemplateCard from "@components/staff/ApprovedTourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
@@ -200,15 +185,8 @@ const ListApprovedTourTemplate = () => {
           >
           </Grid>
           <Grid item xs={12} md={8}>
-            <TextField
-              variant="outlined"
-              placeholder="Tìm kiếm tour mẫu..."
-              size="small"
-              fullWidth
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
+            <TextField variant="outlined" placeholder="Tìm kiếm tour mẫu..." size="small" fullWidth value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)} InputProps={{ startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon />
                   </InputAdornment>
@@ -216,23 +194,9 @@ const ListApprovedTourTemplate = () => {
               }}
             />
           </Grid>
-          <Grid
-            item
-            xs={12}
-            md={4}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
+          <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
             <Typography sx={{ mr: 2 }}>Sắp xếp theo</Typography>
-            <Select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              variant="outlined"
-              sx={{ minWidth: "150px" }}
-            >
+            <Select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} variant="outlined" sx={{ minWidth: "150px" }}>
               <MenuItem value="name">Tên A-Z</MenuItem>
               <MenuItem value="date">Ngày cập nhật</MenuItem>
             </Select>
@@ -240,12 +204,8 @@ const ListApprovedTourTemplate = () => {
         </Grid>
         <Grid container spacing={2} sx={{ minHeight: "15.2rem" }}>
           {filteredTourTemplates.map((tourTemplate) => (
-            <Grid
-              item
-              xs={isSidebarOpen ? 12 : 6}
-              key={tourTemplate.TourTemplateId}
-            >
-              <TourTemplateCard tour={tourTemplate} isOpen={isSidebarOpen} />
+            <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.TourTemplateId}>
+              <ApprovedTourTemplateCard tour={tourTemplate} isOpen={isSidebarOpen} />
             </Grid>
           ))}
         </Grid>

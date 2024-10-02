@@ -34,49 +34,18 @@ const App = () => {
         <Route path="/quan-ly/khach-hang" element={<ManageCustomer />} />
         <Route path="/admin/quan-ly" element={<ManageManager />} />
         <Route path="/dang-nhap" element={<Login />} />
-        <Route
-          path="/nhan-vien/diem-tham-quan"
-          element={<ManageAttraction />}
-        />
-        <Route
-          path="/nhan-vien/diem-tham-quan/them"
-          element={<CreateAttraction />}
-        />
-        <Route
-          path="/nhan-vien/diem-tham-quan/sua/:id"
-          element={<UpdateAttraction />}
-        />
-        <Route
-          path="/nhan-vien/diem-tham-quan/chi-tiet/:id"
-          element={<AttractionDetail />}
-        />
+        <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction />} />
+        <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction />} />
+        <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction />} />
+        <Route path="/nhan-vien/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail />} />
         <Route path="/nhan-vien/tour-mau" element={<ManageTourTemplate />} />
-        <Route
-          path="/nhan-vien/tour-mau/chi-tiet/:id"
-          element={<TourTemplateDetail />}
-        />
-        <Route
-          path="/nhan-vien/tour-mau/them"
-          element={<CreateTourTemplate />}
-        />
-        <Route
-          path="/nhan-vien/tour-mau/sua/:id"
-          element={<UpdateTourTemplate />}
-        />
-        <Route
-          path="/nhan-vien/tour-mau/sua/:id"
-          element={<UpdateTourTemplate />}
-        />
+        <Route path="/nhan-vien/tour-mau/chi-tiet/:id" element={<TourTemplateDetail />} />
+        <Route path="/nhan-vien/tour-mau/them" element={<CreateTourTemplate />} />
+        <Route path="/nhan-vien/tour-mau/sua/:id" element={<UpdateTourTemplate />} />
         <Route path="/nhan-vien/tour-du-lich" element={<ManageTour />} />
-        <Route path="/nhan-vien/tour-du-lich/them" element={<CreateTour />} />
-        <Route
-          path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet"
-          element={<ListApprovedTourTemplate />}
-        />
-        <Route
-          path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id"
-          element={<CreateTour />}
-        />
+        <Route path="/nhan-vien/tour-du-lich" element={<ManageTour />} />
+        <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet" element={<ListApprovedTourTemplate />} />
+        <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id" element={<CreateTour />} />
       </Routes>
     </Router>
   );

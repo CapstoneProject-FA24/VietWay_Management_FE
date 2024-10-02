@@ -4,8 +4,8 @@ import { Box, Typography, Paper, Button, Grid, TextField, List, ListItem, ListIt
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker, StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { getTourTemplateById } from '@hooks/MockTourTemplate';
 import SidebarStaff from '@layouts/SidebarStaff';
+import axios from 'axios'; // Thêm import axios
 
 const CreateTour = () => {
   const { id } = useParams();
@@ -17,8 +17,18 @@ const CreateTour = () => {
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
 
   useEffect(() => {
-    const template = getTourTemplateById(parseInt(id));
-    setTourTemplate(template);
+    const fetchTourTemplate = async () => {
+      try {
+        const response = await axios.get(`https://vietwayapi-e7dqcdgef5e2dxgn.southeastasia-01.azurewebsites.net/api/TourTemplate/${id}`);
+        if (response.data.statusCode === 200) {
+          setTourTemplate(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching tour template:", error);
+      }
+    };
+
+    fetchTourTemplate();
   }, [id]);
 
   const handleGoBack = () => {
@@ -34,6 +44,7 @@ const CreateTour = () => {
     setSelectedMonth(newMonth);
   };
 
+  console.log(tourTemplate);
   if (!tourTemplate) {
     return (
         <div style={{ display: 'flex', alignItems: 'center', height: '80vh' }}>
@@ -92,8 +103,7 @@ const CreateTour = () => {
                     </List>
                   </Box>
                   <Box>
-                    <StaticDatePicker
-                      displayStaticWrapperAs="desktop"
+                    <StaticDatePicker displayStaticWrapperAs="desktop"
                       openTo="day"
                       value={startDate}
                       onChange={handleDateChange}
