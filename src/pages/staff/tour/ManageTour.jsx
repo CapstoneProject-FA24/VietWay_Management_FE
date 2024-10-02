@@ -6,6 +6,9 @@ import SidebarStaff from "@layouts/SidebarStaff";
 import AddIcon from "@mui/icons-material/Add";
 import { Link, useLocation } from "react-router-dom";
 import CloseIcon from '@mui/icons-material/Close';
+import { fetchProvinces } from '@services/ProvinceService';
+import ReactSelect from 'react-select';
+import makeAnimated from 'react-select/animated';
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -14,15 +17,31 @@ const ManageTour = () => {
 
   const [filteredTours, setFilteredTours] = useState(tours);
   const [page, setPage] = useState(1);
-  const [toursPerPage] = useState(9); // Số tour hiển thị trên mỗi trang
+  const [toursPerPage] = useState(9);
 
   const currentPage = location.pathname;
 
+  const [provinces, setProvinces] = useState([]);
+
+  useEffect(() => {
+    const fetchApprovedTourTemplates = async () => {
+      try {
+        const fetchedProvinces = await fetchProvinces();
+        setProvinces(fetchedProvinces);
+      } catch (error) {
+        console.error('Error fetching tour templates:', error);
+      }
+    };
+    fetchApprovedTourTemplates();
+  }, []);
+
   const toggleSidebar = () => { setIsOpen(!isOpen); };
 
-  const handleFilterChange = (event, filterType) => {
-    const { value } = event.target;
-    setFilters((prevFilters) => ({ ...prevFilters, [filterType]: Array.isArray(value) ? value : [value] }));
+  const handleFilterChange = (selectedOptions, filterType) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
+    }));
   };
 
   const handleStatusChange = (event) => {
@@ -80,6 +99,19 @@ const ManageTour = () => {
     setPage(value);
   };
 
+  const animatedComponents = makeAnimated();
+
+  const handleLocationChange = (selectedOptions) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      location: selectedOptions.map(option => option.value)
+    }));
+  };
+
+  // Prepare options for ReactSelect components
+  const tourTypeOptions = [...new Set(tours.flatMap(tour => tour.tourType))].map(type => ({ value: type, label: type }));
+  const durationOptions = [...new Set(tours.map(tour => tour.duration))].map(duration => ({ value: duration, label: duration }));
+
   return (
     <Box sx={{ width: "98vw", minHeight: "100vh" }}>
       <SidebarStaff isOpen={isOpen} toggleSidebar={toggleSidebar} />
@@ -99,62 +131,43 @@ const ManageTour = () => {
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Loại tour</InputLabel>
-              <Select multiple value={filters.tourType} onChange={(e) => handleFilterChange(e, "tourType")} renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} onDelete={handleDelete({ filterType: "tourType", value })} deleteIcon={<CloseIcon />} />
-                    ))}
-                  </Box>
-                )}
-              >
-                <MenuItem value="Du lịch văn hóa">Du lịch văn hóa</MenuItem>
-                <MenuItem value="Tìm hiểu làng nghề">Tìm hiểu làng nghề</MenuItem>
-                <MenuItem value="Du lịch sinh thái">Du lịch sinh thái</MenuItem>
-                <MenuItem value="Du lịch nghỉ dưỡng">Du lịch nghỉ dưỡng</MenuItem>
-              </Select>
+              <Typography>Loại tour</Typography>
+              <ReactSelect
+                closeMenuOnSelect={false}
+                components={animatedComponents}
+                isMulti
+                options={tourTypeOptions}
+                onChange={(selectedOptions) => handleFilterChange(selectedOptions, "tourType")}
+                value={tourTypeOptions.filter(option => filters.tourType.includes(option.value))}
+              />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Thời Lượng</InputLabel>
-              <Select multiple value={filters.duration} onChange={(e) => handleFilterChange(e, "duration")} renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value} label={value} onDelete={handleDelete({ filterType: "duration", value })} deleteIcon={<CloseIcon />} />
-                  ))}
-                  </Box>
-                )}
-              >
-                <MenuItem value="Trong ngày">Trong ngày</MenuItem>
-                <MenuItem value="2N1Đ">2 ngày 1 đêm</MenuItem>
-                <MenuItem value="3N2Đ">3 ngày 2 đêm</MenuItem>
-                <MenuItem value="4N3Đ">4 ngày 3 đêm</MenuItem>
-                <MenuItem value="5N4Đ">5 ngày 4 đêm</MenuItem>
-              </Select>
+              <Typography>Thời Lượng</Typography>
+              <ReactSelect
+                closeMenuOnSelect={false}
+                components={animatedComponents}
+                isMulti
+                options={durationOptions}
+                onChange={(selectedOptions) => handleFilterChange(selectedOptions, "duration")}
+                value={durationOptions.filter(option => filters.duration.includes(option.value))}
+              />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Địa điểm</InputLabel>
-              <Select multiple value={filters.location} onChange={(e) => handleFilterChange(e, "location")} renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {selected.map((value) => (
-                      <Chip key={value} label={value} onDelete={handleDelete({ filterType: "location", value })} deleteIcon={<CloseIcon />} />
-                    ))}
-                  </Box>
-                )}
-              >
-                <MenuItem value="TP HCM">TP HCM</MenuItem>
-                <MenuItem value="Bình Dương">Bình Dương</MenuItem>
-                <MenuItem value="Quảng Ninh">Quảng Ninh</MenuItem>
-                <MenuItem value="Kiên Giang">Kiên Giang</MenuItem>
-                <MenuItem value="Lào Cai">Lào Cai</MenuItem>
-                <MenuItem value="Quảng Nam">Quảng Nam</MenuItem>
-                <MenuItem value="Khánh Hòa">Khánh Hòa</MenuItem>
-              </Select>
+              <Typography>Địa điểm</Typography>
+              <ReactSelect
+                closeMenuOnSelect={false}
+                components={animatedComponents}
+                isMulti
+                options={provinces.map(province => ({ value: province.provinceName, label: province.provinceName }))}
+                onChange={handleLocationChange}
+                value={filters.location.map(location => ({ value: location, label: location }))}
+              />
             </FormControl>
           </Grid>
 

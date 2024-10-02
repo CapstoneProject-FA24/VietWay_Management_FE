@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker, StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
-import axios from 'axios'; // Thêm import axios
+import { fetchTourTemplateById } from '@services/TourTemplateService';
 
 const CreateTour = () => {
   const { id } = useParams();
@@ -17,19 +17,17 @@ const CreateTour = () => {
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
 
   useEffect(() => {
-    const fetchTourTemplate = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`https://vietwayapi-e7dqcdgef5e2dxgn.southeastasia-01.azurewebsites.net/api/TourTemplate/${id}`);
-        if (response.data.statusCode === 200) {
-          setTourTemplate(response.data.data);
-        }
+        const fetchedTourTemplate = await fetchTourTemplateById(id);
+        setTourTemplate(fetchedTourTemplate);
       } catch (error) {
-        console.error("Error fetching tour template:", error);
+        console.error('Error fetching tour template:', error);
       }
     };
-
-    fetchTourTemplate();
+    fetchData();
   }, [id]);
+
 
   const handleGoBack = () => {
     navigate('/nhan-vien/tour-mau');
@@ -44,33 +42,32 @@ const CreateTour = () => {
     setSelectedMonth(newMonth);
   };
 
-  console.log(tourTemplate);
   if (!tourTemplate) {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', height: '80vh' }}>
-            <img src="/loading.gif" alt="Loading..." />
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', height: '80vh' }}>
+        <img src="/loading.gif" alt="Loading..." />
+      </div>
     );
   }
 
   return (
     <Box sx={{ display: 'flex', width: '100vw' }}>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      
+
       <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: isSidebarOpen ? '250px' : 0, transition: 'margin 0.3s' }}>
         <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
-              {tourTemplate.tourTemplateName}
+              {tourTemplate.code}
             </Typography>
             <Button variant="outlined" onClick={handleGoBack}>
               Quay lại
             </Button>
           </Box>
           <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-            {tourTemplate.TourName}
+            {tourTemplate.tourName}
           </Typography>
-          
+
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -82,9 +79,9 @@ const CreateTour = () => {
                         const month = dayjs().add(index, 'month');
                         const monthLabel = month.format('MM/YYYY');
                         return (
-                          <ListItem 
-                            button 
-                            key={index} 
+                          <ListItem
+                            button
+                            key={index}
                             onClick={() => handleMonthChange(month)}
                             sx={{
                               backgroundColor: selectedMonth.isSame(month, 'month') ? 'primary.main' : 'transparent',
@@ -121,7 +118,7 @@ const CreateTour = () => {
                 <Typography variant="h6" gutterBottom>Các thông tin khác</Typography>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2">Thời gian</Typography>
-                  <Typography variant="body1">Thời lượng chuyến đi: {tourTemplate.TourTemplateDuration}</Typography>
+                  <Typography variant="body1">Thời lượng chuyến đi: {tourTemplate.duration.durationName}</Typography>
                 </Box>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2">Ngày khởi hành và kết thúc</Typography>
@@ -179,7 +176,7 @@ const CreateTour = () => {
               </Paper>
             </Grid>
           </Grid>
-          
+
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
             <Button variant="contained" color="primary" sx={{ mr: 2 }}>
               Xác Nhận

@@ -99,14 +99,7 @@ const ManagerTourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                   <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.Duration}</Typography>
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Khởi hành từ:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.departurePoint ? tourTemplate.departurePoint : "Meicheng"}</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
                 </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
