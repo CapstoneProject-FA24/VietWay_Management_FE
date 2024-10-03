@@ -80,7 +80,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                             </Button>
                             {isApproved && (
                                 <Button variant="contained" component={Link}
-                                    to={currentPage + "/tao-tour/" + tour.tourTemplateId}
+                                    to={"/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/" + tour.tourTemplateId}
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'white', borderColor: 'gray' }}>
                                     Tạo tour
                                 </Button>

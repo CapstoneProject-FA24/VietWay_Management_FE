@@ -94,20 +94,16 @@ const ManagerTourTemplateDetails = () => {
             </Container>
           </Grid>
           <Grid item xs={12} md={8}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, ml: 4, mr: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
-                </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
+                <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
-                </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
+                <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
               </Box>
             </Box>
             <Box sx={{ mb: 5 }}>

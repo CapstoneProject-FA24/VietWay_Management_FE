@@ -61,7 +61,7 @@ const UpdateTourTemplate = () => {
           policy: { value: fetchedTourTemplate.policy, isEditing: false },
           note: { value: fetchedTourTemplate.note, isEditing: false },
           provinces: { value: fetchedTourTemplate.provinces.map(p => ({ value: p.provinceId, label: p.provinceName })), isEditing: false },
-          duration: { value: fetchedTourTemplate.duration, isEditing: false },
+          duration: { value: fetchedTourTemplate.duration.durationName, isEditing: false },
           departurePoint: { value: fetchedTourTemplate.departurePoint, isEditing: false },
           tourCategory: { value: fetchedTourTemplate.tourCategoryName, isEditing: false },
         });
@@ -280,9 +280,9 @@ const UpdateTourTemplate = () => {
             <Container maxWidth="lg">
               <Box sx={{ display: 'flex', width: '100%', height: '450px', mb: 3, ml: -2.5 }}>
                 <Box sx={{ flex: '0 0 60%', mr: 2, position: 'relative' }}>
-                  {tourTemplate.imageUrls[0]?(
+                  {tourTemplate.imageUrls[0].url?(
                     <>
-                      <img src={tourTemplate.imageUrls[0]} alt="Tour image 1" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                      <img src={tourTemplate.imageUrls[0].url} alt="Tour image 1" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
                       <IconButton onClick={() => handleImageRemove(0)}
                         sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                         <CloseIcon />
@@ -297,9 +297,9 @@ const UpdateTourTemplate = () => {
                 </Box>
                 <Box sx={{ flex: '0 0 43%', display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                    {tourTemplate.imageUrls[1]?(
+                    {tourTemplate.imageUrls[1].url?(
                       <>
-                        <img src={tourTemplate.imageUrls[1]} alt="Tour image 2" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
+                        <img src={tourTemplate.imageUrls[1].url} alt="Tour image 2" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
                         <IconButton onClick={() => handleImageRemove(1)}
                           sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                           <CloseIcon />
@@ -314,9 +314,9 @@ const UpdateTourTemplate = () => {
                   </Box>
                   <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                     <Box sx={{ flex: '0 0 48.2%', mr: 2, position: 'relative' }}>
-                      {tourTemplate.imageUrls[2]?(
+                      {tourTemplate.imageUrls[2].url?(
                         <>
-                          <img src={tourTemplate.imageUrls[2]} alt="Tour image 3" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
+                          <img src={tourTemplate.imageUrls[2].url} alt="Tour image 3" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
                           <IconButton onClick={() => handleImageRemove(2)}
                             sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                             <CloseIcon />
@@ -330,9 +330,9 @@ const UpdateTourTemplate = () => {
                       )}
                     </Box>
                     <Box sx={{ flex: '0 0 48.2%', position: 'relative' }}>
-                      {tourTemplate.imageUrls[3]?(
+                      {tourTemplate.imageUrls[3].url?(
                         <>
-                          <img src={tourTemplate.imageUrls[3]} alt="Tour image 4" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
+                          <img src={tourTemplate.imageUrls[3].url} alt="Tour image 4" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
                           <IconButton onClick={() => handleImageRemove(3)}
                             sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
                             <CloseIcon />
@@ -351,13 +351,13 @@ const UpdateTourTemplate = () => {
             </Container>
           </Grid>
           <Grid item xs={12} md={8}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, ml: 2, mr: 2, width: '100%' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
                 <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
                   {editableFields.duration.isEditing ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <>
                       <TextField
                         value={editableFields.duration.value}
                         onChange={(e) => handleFieldChange('duration', e.target.value)}
@@ -370,52 +370,21 @@ const UpdateTourTemplate = () => {
                         disabled={!editableFields.duration.value.trim()}
                         sx={{ minWidth: '40px', padding: '8px' }}
                       ><CheckIcon /></Button>
-                    </Box>
+                    </>
                   ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <>
                       <Typography sx={{ color: '#05073C' }}>{editableFields.duration.value}</Typography>
                       <IconButton onClick={() => handleFieldEdit('duration')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                    </Box>
+                    </>
                   )}
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Khởi hành từ:</Typography>
-                  {editableFields.departurePoint.isEditing ? (
-                    <Box sx={{ display: 'flex', mb: 2, width: '100%', alignItems: 'center', }}>
-                      <Select
-                        fullWidth
-                        sx={{ flexGrow: 1, mr: 1 }}
-                        value={editableFields.departurePoint.value}
-                        onChange={(e) => handleFieldChange('departurePoint', e.target.value)}
-                      >
-                        {provinces.map((departurePoint) => (
-                          <MenuItem key={departurePoint.provinceId} value={departurePoint.provinceName}>{departurePoint.provinceName}</MenuItem>
-                        ))}
-                      </Select>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleFieldSubmit('departurePoint')}
-                        disabled={!editableFields.departurePoint.value}
-                        sx={{ minWidth: '40px', padding: '8px' }}
-                      ><CheckIcon /></Button>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography sx={{ color: '#05073C' }}>{editableFields.departurePoint.value}</Typography>
-                      <IconButton onClick={() => handleFieldEdit('departurePoint')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
                 <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
                   {editableFields.tourCategory.isEditing ? (
-                    <Box sx={{ display: 'flex', mb: 2, width: '100%', alignItems: 'center', }}>
+                    <>
                       <Select
                         sx={{ width: '100%', mr: 1 }}
                         value={editableFields.tourCategory.value}
@@ -431,12 +400,12 @@ const UpdateTourTemplate = () => {
                         disabled={!editableFields.tourCategory.value}
                         sx={{ minWidth: '40px', padding: '8px' }}
                       ><CheckIcon /></Button>
-                    </Box>
+                    </>
                   ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <>
                       <Typography sx={{ color: '#05073C' }}>{editableFields.tourCategory.value}</Typography>
                       <IconButton onClick={() => handleFieldEdit('tourCategory')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                    </Box>
+                    </>
                   )}
                 </Box>
               </Box>

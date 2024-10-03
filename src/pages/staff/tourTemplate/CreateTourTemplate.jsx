@@ -345,13 +345,13 @@ const CreateTourTemplate = () => {
               </Box>
             </Container>          </Grid>
           <Grid item xs={12} md={8}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, ml: 2, mr: 2, width: '100%' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
                 <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
                   {editableFields.duration.isEditing ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <>
                       <TextField
                         value={editableFields.duration.value}
                         onChange={(e) => handleFieldChange('duration', e.target.value)}
@@ -364,52 +364,21 @@ const CreateTourTemplate = () => {
                         disabled={!editableFields.duration.value.trim()}
                         sx={{ minWidth: '40px', padding: '8px' }}
                       ><CheckIcon /></Button>
-                    </Box>
+                    </>
                   ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <>
                       <Typography sx={{ color: '#05073C' }}>{editableFields.duration.value}</Typography>
                       <IconButton onClick={() => handleFieldEdit('duration')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                    </Box>
+                    </>
                   )}
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faLocationDot} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Khởi hành từ:</Typography>
-                  {editableFields.departurePoint.isEditing ? (
-                    <Box sx={{ display: 'flex', mb: 2, width: '100%', alignItems: 'center', }}>
-                      <Select
-                        fullWidth
-                        sx={{ flexGrow: 1, mr: 1 }}
-                        value={editableFields.departurePoint.value}
-                        onChange={(e) => handleFieldChange('departurePoint', e.target.value)}
-                      >
-                        {mockProvinces.map((departurePoint) => (
-                          <MenuItem key={departurePoint.ProvinceId} value={departurePoint.ProvinceName}>{departurePoint.ProvinceName}</MenuItem>
-                        ))}
-                      </Select>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleFieldSubmit('departurePoint')}
-                        disabled={!editableFields.departurePoint.value}
-                        sx={{ minWidth: '40px', padding: '8px' }}
-                      ><CheckIcon /></Button>
-                    </Box>
-                  ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Typography sx={{ color: '#05073C' }}>{editableFields.departurePoint.value}</Typography>
-                      <IconButton onClick={() => handleFieldEdit('departurePoint')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%', ml: 5 }}>
                 <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width: '100%' }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
                   {editableFields.tourCategory.isEditing ? (
-                    <Box sx={{ display: 'flex', mb: 2, width: '100%', alignItems: 'center', }}>
+                    <>
                       <Select
                         sx={{ width: '100%', mr: 1 }}
                         value={editableFields.tourCategory.value}
@@ -425,12 +394,12 @@ const CreateTourTemplate = () => {
                         disabled={!editableFields.tourCategory.value}
                         sx={{ minWidth: '40px', padding: '8px' }}
                       ><CheckIcon /></Button>
-                    </Box>
+                    </>
                   ) : (
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <>
                       <Typography sx={{ color: '#05073C' }}>{editableFields.tourCategory.value}</Typography>
                       <IconButton onClick={() => handleFieldEdit('tourCategory')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                    </Box>
+                    </>
                   )}
                 </Box>
               </Box>
