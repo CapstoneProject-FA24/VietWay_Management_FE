@@ -1,184 +1,274 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
-import { Box, Grid, Typography, MenuItem, Select, TextField, InputAdornment } from "@mui/material";
-import { mockTourTemplateCategories, mockProvinces } from "@hooks/MockTourTemplate";
+import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Pagination } from '@mui/material';
 import ApprovedTourTemplateCard from "@components/staff/ApprovedTourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
-import { useLocation } from "react-router-dom";
 import { fetchTourTemplates } from '@services/TourTemplateService';
-import { fetchProvinces } from '@services/ProvinceService';
+import { fetchProvinces } from '@services/ProvinceService'; import FilterListIcon from '@mui/icons-material/FilterList';
+
+const tourCategories = [
+  { TourCategoryId: 1, Name: 'Du lịch biển' },
+  { TourCategoryId: 2, Name: 'Du lịch núi' },
+  { TourCategoryId: 3, Name: 'Du lịch văn hóa' },
+  { TourCategoryId: 4, Name: 'Du lịch sinh thái' },
+  { TourCategoryId: 5, Name: 'Du lịch nghỉ dưỡng' },
+];
+
+const durations = [
+  { DurationId: 1, DurationName: 'Trong ngày' },
+  { DurationId: 2, DurationName: '2 ngày 1 đêm' },
+  { DurationId: 3, DurationName: '3 ngày 2 đêm' },
+  { DurationId: 4, DurationName: '4 ngày 3 đêm' },
+  { DurationId: 5, DurationName: '5 ngày 4 đêm' },
+];
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [provinces, setProvinces] = useState([]);
   const [tourTemplates, setTourTemplates] = useState([]);
-  const [sortOrder, setSortOrder] = useState("name");
+  const [sortOrder, setSortOrder] = useState("tourNameA-Z");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [pageIndex, setPageIndex] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const location = useLocation();
-  const [provinces, setProvinces] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [tempSearchTerm, setTempSearchTerm] = useState('');
+  const [tempCategories, setTempCategories] = useState([]);
+  const [tempProvinces, setTempProvinces] = useState([]);
+  const [tempDuration, setTempDuration] = useState([]);
+  const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
 
   useEffect(() => {
-    const fetchApprovedTourTemplates = async () => {
-      try {
-        const fetchedTourTemplates = await fetchTourTemplates(100, 1);
-        const fetchedProvinces = await fetchProvinces();
-        const filteredTemplates = fetchedTourTemplates.filter(
-          (template) => template.status === 2
-        );
-        setProvinces(fetchedProvinces);
-        setTourTemplates(filteredTemplates);
-        setTotalItems(fetchedTourTemplates.length);
-      } catch (error) {
-        console.error('Error fetching tour templates:', error);
-      }
-    };
-    fetchApprovedTourTemplates();
-  }, []);
+    fetchData();
+  }, [page, pageSize, searchTerm, selectedCategories, selectedProvinces, selectedDuration]);
 
-  const getFilteredAndSortedTourTemplates = () => {
-    let filtered = [...tourTemplates];
-    if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase();
-      filtered = filtered.filter((t) =>
-        t.tourName.toLowerCase().includes(searchTermLower) ||
-        t.code.toLowerCase().includes(searchTermLower)
-      );
+  useEffect(() => {
+    sortTourTemplates();
+  }, [tourTemplates, sortOrder]);
+
+  const fetchData = async () => {
+    try {
+      const params = {
+        pageSize: pageSize,
+        pageIndex: page,
+        searchTerm: searchTerm,
+        templateCategoryIds: selectedCategories.map(c => c.value),
+        durationIds: selectedDuration.map(d => d.value),
+        provinceIds: selectedProvinces.map(p => p.value),
+        status: 2
+      };
+      const result = await fetchTourTemplates(params);
+      setTourTemplates(result.data);
+      setTotalPages(Math.ceil(result.total / pageSize));
+    } catch (error) {
+      console.error('Error fetching tour templates:', error);
     }
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter((t) =>
-        selectedCategories.some((c) => c.value === t.tourCategoryId)
-      );
-    }
-    if (selectedProvinces.length > 0) {
-      filtered = filtered.filter((t) =>
-        selectedProvinces.some((p) => t.provinces.includes(p.value))
-      );
-    }
-    if (selectedDuration.length > 0) {
-      filtered = filtered.filter((t) =>
-        selectedDuration.some((p) => p.value === t.duration)
-      );
-    }
-    filtered.sort((a, b) => {
-      if (sortOrder === "name") return a.tourName.localeCompare(b.tourName);
-      if (sortOrder === "date") return new Date(b.createdDate) - new Date(a.createdDate);
-      return 0;
-    });
-    return filtered;
   };
 
-  const categoryOptions = mockTourTemplateCategories.map((category) => ({
-    value: category.CategoryName,
-    label: category.CategoryName,
+  useEffect(() => {
+    const fetchProvincesData = async () => {
+      try {
+        const fetchedProvinces = await fetchProvinces();
+        setProvinces(fetchedProvinces);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      }
+    };
+    fetchProvincesData();
+  }, []);
+
+  const categoryOptions = tourCategories.map(category => ({
+    value: category.TourCategoryId,
+    label: category.Name
   }));
 
-  const durationOptions = Array.from(
-    new Set(tourTemplates.map((t) => t.duration))
-  ).map((duration) => ({
-    value: duration,
-    label: duration + ' ngày',
+  const durationOptions = durations.map(duration => ({
+    value: duration.DurationId,
+    label: duration.DurationName
   }));
 
   const provinceOptions = provinces.map(province => ({
-    value: province.provinceName,
+    value: province.provinceId,
     label: province.provinceName
   }));
 
   const animatedComponents = makeAnimated();
 
-  const filteredTourTemplates = getFilteredAndSortedTourTemplates();
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(parseInt(event.target.value));
+    setPage(1);
+  };
+
+  const handleSearch = () => {
+    setSearchTerm(tempSearchTerm);
+    setPage(1);
+  };
+
+  const handleApplyFilter = () => {
+    setSelectedCategories(tempCategories);
+    setSelectedProvinces(tempProvinces);
+    setSelectedDuration(tempDuration);
+    setPage(1);
+  };
+
+  const sortTourTemplates = () => {
+    const sorted = [...tourTemplates].sort((a, b) => {
+      switch (sortOrder) {
+        case 'tourNameA-Z':
+          return a.tourName.localeCompare(b.tourName);
+        case 'tourNameZ-A':
+          return b.tourName.localeCompare(a.tourName);
+        case 'createdDate':
+          return new Date(b.createdDate) - new Date(a.createdDate);
+        case 'createdDateReverse':
+          return new Date(a.createdDate) - new Date(b.createdDate);
+        default:
+          return 0;
+      }
+    });
+    setSortedTourTemplates(sorted);
+  };
 
   return (
-    <Box sx={{ width: "98vw", minHeight: "100vh" }}>
+    <Box sx={{ display: 'flex', width: "98vw", minHeight: "100vh" }}>
       <Helmet>
-        <title>Danh sách Tour mẫu đã duyệt | VietWay</title>
+        <title>Danh sách Tour mẫu đã duyệt</title>
       </Helmet>
       <SidebarStaff
         isOpen={isSidebarOpen}
         toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
-      <Box component="main" sx={{
-        flexGrow: 1,
-        p: { xs: 2, sm: 3 },
-        transition: "margin-left 0.3s",
-        marginLeft: isSidebarOpen ? "260px" : "20px",
-      }}>
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} md={8}>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-              <Box sx={{ flexGrow: 1, minWidth: "200px" }}>
-                <Typography sx={{ mb: 1 }}>Tỉnh/Thành phố</Typography>
+      <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
+        <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+          <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+            <Typography sx={{ fontSize: '2.8rem', fontWeight: 600, color: 'primary.main' }}> Danh sách Tour mẫu đã duyệt </Typography>
+          </Grid>
+          <Grid item xs={12} md={12}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
+              <Box sx={{ width: { xs: '100%', md: '50%' }, mr: 1.5 }}>
+                <Typography>
+                  Tỉnh/Thành phố
+                </Typography>
                 <ReactSelect
                   closeMenuOnSelect={false}
                   components={animatedComponents}
                   isMulti
                   options={provinceOptions}
-                  onChange={setSelectedProvinces}
+                  onChange={setTempProvinces}
+                  value={tempProvinces}
                 />
               </Box>
-              <Box sx={{ flexGrow: 1, minWidth: "200px" }}>
-                <Typography sx={{ mb: 1 }}>Thời lượng</Typography>
+              <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
+                <Typography>
+                  Thời lượng
+                </Typography>
                 <ReactSelect
                   closeMenuOnSelect={false}
                   components={animatedComponents}
                   isMulti
                   options={durationOptions}
-                  onChange={setSelectedDuration}
-                />
-              </Box>
-              <Box sx={{ flexGrow: 1, minWidth: "200px" }}>
-                <Typography sx={{ mb: 1 }}>Loại Tour</Typography>
-                <ReactSelect
-                  closeMenuOnSelect={false}
-                  components={animatedComponents}
-                  isMulti
-                  options={categoryOptions}
-                  onChange={setSelectedCategories}
+                  onChange={setTempDuration}
+                  value={tempDuration}
                 />
               </Box>
             </Box>
           </Grid>
-          <Grid item xs={12} md={8}>
-            <TextField
-              variant="outlined"
-              placeholder="Tìm kiếm tour mẫu..."
-              size="small"
-              fullWidth
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
+          <Grid item xs={12} md={9.3} sx={{ mb: 1, mt: -2 }}>
+            <Typography>
+              Loại Tour
+            </Typography>
+            <ReactSelect
+              closeMenuOnSelect={false}
+              components={animatedComponents}
+              isMulti
+              options={categoryOptions}
+              onChange={setTempCategories}
+              value={tempCategories}
             />
           </Grid>
-          <Grid item xs={12} md={4} sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
-            <Typography sx={{ mr: 2 }}>Sắp xếp theo</Typography>
-            <Select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} variant="outlined" sx={{ minWidth: "150px" }}>
-              <MenuItem value="name">Tên A-Z</MenuItem>
-              <MenuItem value="date">Ngày cập nhật</MenuItem>
+          <Grid item xs={12} md={2.7} sx={{ mb: 5 }}>
+            <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 1, backgroundColor: 'lightGray', color: 'black', width: '100%' }}>
+              Áp dụng bộ lọc
+            </Button>
+          </Grid>
+          <Grid item xs={12} md={7}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                variant="outlined"
+                placeholder="Tìm kiếm tour mẫu..."
+                size="small"
+                sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
+                value={tempSearchTerm}
+                onChange={(e) => setTempSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black' }} >
+                Tìm kiếm
+              </Button>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+            <Typography>
+              Sắp xếp theo
+            </Typography>
+            <Select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              variant="outlined"
+              sx={{ width: '200px', ml: 2, height: '40px' }}
+            >
+              <MenuItem value="tourNameA-Z">Tên A-Z</MenuItem>
+              <MenuItem value="tourNameZ-A">Tên Z-A</MenuItem>
+              <MenuItem value="createdDate">Mới nhất</MenuItem>
+              <MenuItem value="createdDateReverse">Cũ nhất</MenuItem>
             </Select>
           </Grid>
         </Grid>
-        <Grid container spacing={2} sx={{ minHeight: "15.2rem" }}>
-          {filteredTourTemplates.map((tourTemplate) => (
-            <Grid item xs={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
-              <ApprovedTourTemplateCard tour={tourTemplate} isOpen={isSidebarOpen} />
+        <Grid container spacing={2}>
+          {sortedTourTemplates.map(tourTemplate => (
+            <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
+              <ApprovedTourTemplateCard
+                tour={tourTemplate}
+                isOpen={isSidebarOpen}
+              />
             </Grid>
           ))}
         </Grid>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+            sx={{ m: '0 auto' }}
+          />
+          <Select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            variant="outlined"
+            sx={{ height: '40px' }}
+          >
+            <MenuItem value={5}>5 / trang</MenuItem>
+            <MenuItem value={10}>10 / trang</MenuItem>
+            <MenuItem value={20}>20 / trang</MenuItem>
+          </Select>
+        </Box>
       </Box>
     </Box>
   );

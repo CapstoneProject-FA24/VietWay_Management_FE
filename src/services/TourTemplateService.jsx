@@ -11,14 +11,18 @@ const getStatusText = (status) => {
     }
 };
 
-export const fetchTourTemplates = async (pageSize, pageIndex) => {
+export const fetchTourTemplates = async (params) => {
     try {
-        const response = await axios.get(`${baseURL}/api/TourTemplate`, {
-            params: {
-                pageSize: pageSize,
-                pageIndex: pageIndex
-            }
-        });
+        const queryParams = new URLSearchParams();
+        queryParams.append('pageSize', params.pageSize);
+        queryParams.append('pageIndex', params.pageIndex);
+        if (params.searchTerm) queryParams.append('nameSearch', params.searchTerm);
+        if (params.templateCategoryIds) params.templateCategoryIds.forEach(id => queryParams.append('templateCategoryIds', id));
+        if (params.durationIds) params.durationIds.forEach(id => queryParams.append('durationIds', id));
+        if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
+        if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
+
+        const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`);
 
         const items = response.data?.data?.items;
         
@@ -26,7 +30,7 @@ export const fetchTourTemplates = async (pageSize, pageIndex) => {
             throw new Error('Invalid response structure: items not found or not an array');
         }
 
-        return items.map(item => ({
+        const templates = items.map(item => ({
             tourTemplateId: item.tourTemplateId,
             code: item.code,
             tourName: item.tourName,
@@ -39,6 +43,13 @@ export const fetchTourTemplates = async (pageSize, pageIndex) => {
             provinces: item.provinces,
             imageUrl: item.imageUrl
         }));
+
+        return ({
+            data: templates,
+            pageIndex: response.data?.data?.pageIndex,
+            pageSize: response.data?.data?.pageSize,
+            total: response.data?.data?.total
+        })
         
     } catch (error) {
         console.error('Error fetching tour templates:', error);
@@ -49,7 +60,7 @@ export const fetchTourTemplates = async (pageSize, pageIndex) => {
 export const fetchTourTemplateById = async (id) => {
     try {
         const response = await axios.get(`${baseURL}/api/TourTemplate/${id}`);
-        const a = {
+        return {
             tourTemplateId: response.data.data.tourTemplateId,
             code: response.data.data.code,
             tourName: response.data.data.tourName,
@@ -67,8 +78,6 @@ export const fetchTourTemplateById = async (id) => {
             schedule: response.data.data.schedules,
             imageUrls: response.data.data.images
         };
-        console.log(a);
-        return a;
     } catch (error) {
         console.error('Error fetching tour template:', error);
         throw error;
@@ -111,7 +120,7 @@ export const createTourTemplate = async (tourTemplateData) => {
         });
         return response.data;
     } catch (error) {
-        console.log(error.response);
+        console.error('Error saving tour template:', error);
         throw error;
     }
 };
