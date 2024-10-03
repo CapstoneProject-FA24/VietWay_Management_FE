@@ -1,17 +1,26 @@
-import React, { useContext } from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, Button, IconButton } from '@mui/material';
+import React from 'react';
+import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 
-const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
+const ApprovedTourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     const isDraft = tour.status === 0;
     const isEditable = tour.status !== 2 && tour.status !== 1;
     const isApproved = tour.status === 2;
-
     const location = useLocation();
     const currentPage = location.pathname;
 
     const handleDelete = () => {
         onOpenDeletePopup(tour);
+    };
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 0: return 'Bản nháp';
+            case 1: return 'Chờ duyệt';
+            case 2: return 'Đã duyệt';
+            case 3: return 'Đã bị từ chối';
+            default: return 'Không xác định';
+        }
     };
 
     const getStatusColor = (status) => {
@@ -24,17 +33,19 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
         }
     };
 
+    const status = parseInt(tour.status);
+
     return (
         <Card sx={{ display: 'flex', height: isOpen ? '15.9rem' : '13.9rem', p: '0.7rem', borderRadius: 1.5 }}>
             <CardMedia
                 component="img"
-                sx={{ minWidth: '33%', width: '33%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
+                sx={{ width: '33%', minWidth: '33%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
                 image={tour.imageUrl}
             />
-            <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: '67%', width: '67%' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '100%' }}>
                 <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', pl: '1rem', mb: 1.5 }}>
                     <Typography variant="h1" color="primary" component="div" sx={{ fontSize: isOpen ? '1.5rem' : '1.2rem' }}>
-                        Mã: {tour.code}
+                        Mã tour mẫu: {tour.code}
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
@@ -46,7 +57,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? -1 : -2, ml: '0.5rem' }}>
-                    <Typography noWrap color="text.secondary" component="div" sx={{ fontSize: isOpen ? '1rem' : '0.9rem', width: '100%' }}>
+                    <Typography variant="subtitle2" color="text.secondary" component="div" sx={{ fontSize: isOpen ? '1rem' : '0.9rem' }}>
                         {tour.provinces.join(', ')} - {tour.tourCategory}
                     </Typography>
                     <Typography component="div" variant="h6" sx={{ fontSize: isOpen ? '1.5rem' : '1.27rem', wordSpacing: -2, 
@@ -60,27 +71,14 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                         </Box>
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Button
-                                variant="outlined"
-                                onClick={handleDelete}
-                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
-                            >
-                                Xóa
-                            </Button>
-                            {isEditable && (
-                                <Button variant="outlined" component={Link} to={currentPage + "/sua/" + tour.tourTemplateId}
-                                    sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, mr: 1 }}>
-                                    Sửa
-                                </Button>
-                            )}
-                            <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + tour.tourTemplateId}
+                        <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                            <Button variant="outlined" component={Link} to={`/nhan-vien/tour-mau/chi-tiet/${tour.tourTemplateId}`}
                                 sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
                                 Chi tiết
                             </Button>
                             {isApproved && (
                                 <Button variant="contained" component={Link}
-                                    to={"/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/" + tour.tourTemplateId}
+                                    to={`${currentPage}/tao-tour/${tour.tourTemplateId}`}
                                     sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'white', borderColor: 'gray' }}>
                                     Tạo tour
                                 </Button>
@@ -94,7 +92,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                             borderRadius: '4px',
                             fontWeight: 700
                         }}>
-                            {tour.statusName}
+                            {getStatusText(tour.status)}
                         </Typography>
                     </Box>
                 </Box>
@@ -103,4 +101,4 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
     );
 };
 
-export default TourTemplateCard;
+export default ApprovedTourTemplateCard;

@@ -93,10 +93,9 @@ const ManageCompanyStaff = () => {
             <TableHead>
               <TableRow>
                 <TableCell sx={{ width: '1rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>ID</TableCell>
-                <TableCell sx={{ width: '11rem', fontWeight: 700, padding: '10px' }}>Họ tên</TableCell>
-                <TableCell sx={{ width: '10rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Công ty</TableCell>
-                <TableCell sx={{ width: '7rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
-                <TableCell sx={{ width: '12rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Email</TableCell>
+                <TableCell sx={{ width: '10rem', fontWeight: 700, padding: '10px' }}>Họ tên</TableCell>
+                <TableCell sx={{ width: '8rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
+                <TableCell sx={{ width: '13rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Email</TableCell>
                 {/*<TableCell sx={{ width: '8.5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Mật khẩu</TableCell>*/}
                 <TableCell sx={{ width: '9rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Trạng thái</TableCell>
                 <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Ngày tạo</TableCell>
@@ -108,7 +107,6 @@ const ManageCompanyStaff = () => {
                 <TableRow key={staff.id}>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{staff.id}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullname}</TableCell>
-                  <TableCell noWrap sx={{ padding: '10px' }}>{staff.company}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{staff.phone}</TableCell>
                   <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{staff.email}</TableCell>
                   {/*

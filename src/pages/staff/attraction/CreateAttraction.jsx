@@ -121,7 +121,7 @@ const AddAttraction = () => {
   };
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: '100vw' }}>
       <Helmet>
         <title>Thêm điểm tham quan</title>
       </Helmet>
@@ -153,7 +153,7 @@ const AddAttraction = () => {
                 sx={{ mr: 2 }}
               >
                 {mockAttractionTypes.map((type) => (
-                  <MenuItem key={type.TypeId} value={type.TypeId}>{type.TypeName}</MenuItem>
+                  <MenuItem key={type.typeId} value={type.typeId}>{type.typeName}</MenuItem>
                 ))}
               </Select>
               <Button

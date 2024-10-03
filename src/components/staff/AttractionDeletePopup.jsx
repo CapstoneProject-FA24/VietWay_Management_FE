@@ -5,8 +5,8 @@ import CloseIcon from '@mui/icons-material/Close';
 const AttractionDeletePopup = ({ open, onClose, attraction, onDelete }) => {
     console.log(attraction);
     const handleSubmit = () => {
-        if (attraction && attraction.AttractionId) {
-            onDelete(attraction.AttractionId);
+        if (attraction && attraction.attractionId) {
+            onDelete(attraction.attractionId);
         }
         onClose();
     };
@@ -22,7 +22,7 @@ const AttractionDeletePopup = ({ open, onClose, attraction, onDelete }) => {
                     Xác nhận xóa điểm tham quan
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Bạn có xác nhận xóa điểm tham quan <strong>{attraction ? attraction.Name : 'Không tìm thấy'}</strong> không?
+                    Bạn có xác nhận xóa điểm tham quan <strong>{attraction ? attraction.name : 'Không tìm thấy'}</strong> không?
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>

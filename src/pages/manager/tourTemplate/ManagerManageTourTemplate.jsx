@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import SidebarStaff from '@layouts/SidebarStaff';
+import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import TourTemplateCard from '@components/staff/TourTemplateCard';
+import TourTemplateCard from '@components/manager/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
@@ -29,12 +29,12 @@ const durations = [
     { DurationId: 5, DurationName: '5 ngày 4 đêm' },
 ];
 
-const ManageTourTemplate = () => {
+const ManagerManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
     const [provinces, setProvinces] = useState([]);
-    const [sortOrder, setSortOrder] = useState('tourNameA-Z');
+    const [sortOrder, setSortOrder] = useState('name');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedDuration, setSelectedDuration] = useState([]);
@@ -170,20 +170,15 @@ const ManageTourTemplate = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', width: '98vw' }}>
             <Helmet>
-                <title>Quản lý Tour mẫu</title>
+                <title>Duyệt Tour mẫu</title>
             </Helmet>
-            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
                 <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
-                    <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-                        <Typography sx={{ fontSize: '3rem', fontWeight: 600, color:'primary.main' }}> Quản lý tour mẫu </Typography>
-                    </Grid>
-                    <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                        <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
-                            Thêm Tour mẫu
-                        </Button>
+                    <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                        <Typography sx={{ fontSize: '3rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour mẫu </Typography>
                     </Grid>
                     <Grid item xs={12} md={12}>
                         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
@@ -322,4 +317,4 @@ const ManageTourTemplate = () => {
     );
 };
 
-export default ManageTourTemplate;
+export default ManagerManageTourTemplate;

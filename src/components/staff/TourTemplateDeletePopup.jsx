@@ -4,8 +4,8 @@ import CloseIcon from '@mui/icons-material/Close';
 
 const TourTemplateDeletePopup = ({ open, onClose, template, onDelete }) => {
     const handleSubmit = () => {
-        if (template && template.TourTemplateId) {
-            onDelete(template.TourTemplateId);
+        if (template && template.tourTemplateId) {
+            onDelete(template.tourTemplateId);
         }
         onClose();
     };
@@ -21,7 +21,7 @@ const TourTemplateDeletePopup = ({ open, onClose, template, onDelete }) => {
                     Xác nhận xóa tour mẫu
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                    Bạn có xác nhận xóa tour mẫu <strong>{template ? template.TourName : 'Không tìm thấy'}</strong> không?
+                    Bạn có xác nhận xóa tour mẫu <strong>{template ? template.tourName : 'Không tìm thấy'}</strong> không?
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>

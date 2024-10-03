@@ -9,7 +9,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useParams } from 'react-router-dom';
 import { getAttractionById, mockAttractionTypes } from '@hooks/MockAttractions';
 
-const AttractionDetail = () => {
+const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [sliderRef, setSliderRef] = useState(null);
   const [attraction, setAttraction] = useState(null);
@@ -53,7 +53,7 @@ const AttractionDetail = () => {
       <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
           component={Link}
-          to="/nhan-vien/diem-tham-quan"
+          to="/quan-ly/diem-tham-quan"
           variant="contained"
           startIcon={<ArrowBackIosNewOutlinedIcon />}
           sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
@@ -79,15 +79,15 @@ const AttractionDetail = () => {
             <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
               <Box className="slick-slider-container" sx={{ height: '450px' }}>
                 <Slider ref={setSliderRef} {...settings}>
-                    {attraction.attractionImages.map((image, index) => (
-                      <div key={index} style={{ position: 'relative' }}>
-                        <img
-                          src={image.url}
-                          alt={image.alt}
-                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-                        />
-                      </div>
-                    ))}
+                  {attraction.attractionImages.map((image, index) => (
+                    <div key={index} style={{ position: 'relative' }}>
+                      <img
+                        src={image.url}
+                        alt={image.alt}
+                        style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                      />
+                    </div>
+                  ))}
                 </Slider>
               </Box>
             </Paper>
@@ -129,6 +129,12 @@ const AttractionDetail = () => {
 
               <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
               <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+              {attraction?.status === 1 && (
+                <>
+                <Button variant="contained" sx={{ width: '100%', p: 1.1, mb: 1, mt: 5, backgroundColor: 'green' }}>Chấp nhận</Button>
+                <Button variant="contained" sx={{ width: '100%', p: 1.1, backgroundColor: 'red' }}>Từ chối</Button>
+                </>)
+              }
             </Paper>
           </Grid>
         </Grid>
@@ -137,4 +143,4 @@ const AttractionDetail = () => {
   );
 };
 
-export default AttractionDetail;
+export default ManagerAttractionDetail;

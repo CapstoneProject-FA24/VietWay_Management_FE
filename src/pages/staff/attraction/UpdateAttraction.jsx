@@ -35,26 +35,26 @@ const UpdateAttraction = () => {
     if (attraction) {
       console.log(attraction);
       setEditableFields({
-        Name: { value: attraction.Name, isEditing: false },
-        ContactInfo: { value: attraction.ContactInfo, isEditing: false },
-        Description: { value: attraction.Description, isEditing: false },
-        Detail: { value: attraction.Detail, isEditing: false },
-        Address: { value: attraction.Address, isEditing: false },
-        Website: { value: attraction.Website, isEditing: false },
-        AttractionType: { value: attraction.AttractionType, isEditing: false }
+        name: { value: attraction.name, isEditing: false },
+        contactInfo: { value: attraction.contactInfo, isEditing: false },
+        description: { value: attraction.description, isEditing: false },
+        detail: { value: attraction.detail, isEditing: false },
+        address: { value: attraction.address, isEditing: false },
+        website: { value: attraction.website, isEditing: false },
+        attractionType: { value: attraction.attractionType, isEditing: false }
       });
-      setImages(attraction.AttractionImages);
+      setImages(attraction.attractionImages);
     }
   }, [attraction]);
 
   const [editableFields, setEditableFields] = useState({
-    Name: { value: '', isEditing: false },
-    ContactInfo: { value: '', isEditing: false },
-    Description: { value: '', isEditing: false },
-    Detail: { value: '', isEditing: false },
-    Address: { value: '', isEditing: false },
-    Website: { value: '', isEditing: false },
-    AttractionType: { value: '', isEditing: false }
+    name: { value: '', isEditing: false },
+    contactInfo: { value: '', isEditing: false },
+    description: { value: '', isEditing: false },
+    detail: { value: '', isEditing: false },
+    address: { value: '', isEditing: false },
+    website: { value: '', isEditing: false },
+    attractionType: { value: '', isEditing: false }
   });
 
   const handleFieldChange = (field, value) => {
@@ -165,27 +165,27 @@ const UpdateAttraction = () => {
         </Typography>
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        {editableFields.AttractionType.isEditing ? (
+        {editableFields.attractionType.isEditing ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
             <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
               Loại điểm tham quan
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Select
-                value={editableFields.AttractionType.value}
-                onChange={(e) => handleFieldChange('AttractionType', e.target.value)}
+                value={editableFields.attractionType.value}
+                onChange={(e) => handleFieldChange('attractionType', e.target.value)}
                 variant="outlined"
                 fullWidth
                 sx={{ mr: 2 }}
               >
                 {mockAttractionTypes.map((type) => (
-                  <MenuItem key={type.TypeId} value={type.TypeName}>{type.TypeName}</MenuItem>
+                  <MenuItem key={type.TypeId} value={type.typeName}>{type.typeName}</MenuItem>
                 ))}
               </Select>
               <Button
                 variant="contained"
-                onClick={() => handleFieldSubmit('AttractionType')}
-                disabled={!editableFields.AttractionType.value}
+                onClick={() => handleFieldSubmit('attractionType')}
+                disabled={!editableFields.attractionType.value}
                 sx={{ minWidth: '40px', padding: '8px' }}
               >
                 <CheckIcon />
@@ -195,30 +195,30 @@ const UpdateAttraction = () => {
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-              {editableFields.AttractionType.value}
+              {editableFields.attractionType.value}
             </Typography>
-            <IconButton onClick={() => handleFieldEdit('AttractionType')} sx={{ ml: 2 }}>
+            <IconButton onClick={() => handleFieldEdit('attractionType')} sx={{ ml: 2 }}>
               <EditIcon />
             </IconButton>
           </Box>
         )}
-        {editableFields.Name.isEditing ? (
+        {editableFields.name.isEditing ? (
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
               Tên điểm tham quan
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TextField
-                value={editableFields.Name.value}
-                onChange={(e) => handleFieldChange('Name', e.target.value)}
+                value={editableFields.name.value}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
                 variant="outlined"
                 fullWidth
                 sx={{ mr: 2 }}
               />
               <Button
                 variant="contained"
-                onClick={() => handleFieldSubmit('Name')}
-                disabled={!editableFields.Name.value.trim()}
+                onClick={() => handleFieldSubmit('name')}
+                disabled={!editableFields.name.value.trim()}
                 sx={{ minWidth: '40px', padding: '8px' }}
               ><CheckIcon /></Button>
             </Box>
@@ -226,9 +226,9 @@ const UpdateAttraction = () => {
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-              {editableFields.Name.value}
+              {editableFields.name.value}
             </Typography>
-            <IconButton onClick={() => handleFieldEdit('Name')} sx={{ ml: 2 }}><EditIcon /></IconButton>
+            <IconButton onClick={() => handleFieldEdit('name')} sx={{ ml: 2 }}><EditIcon /></IconButton>
           </Box>
         )}
         <Grid container spacing={3}>
@@ -319,14 +319,14 @@ const UpdateAttraction = () => {
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu</Typography>
-              {editableFields.Description.isEditing ? (
+              {editableFields.description.isEditing ? (
                 <Box >
                   <TextField
                     variant="outlined"
                     multiline
                     rows={5}
-                    value={editableFields.Description.value}
-                    onChange={(e) => handleFieldChange('Description', e.target.value)}
+                    value={editableFields.description.value}
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
                     fullWidth
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
@@ -337,8 +337,8 @@ const UpdateAttraction = () => {
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
                     <Button
                       variant="contained"
-                      onClick={() => handleFieldSubmit('Description')}
-                      disabled={!editableFields.Description.value.trim() || editableFields.Description.value.trim() === '<p><br></p>'}
+                      onClick={() => handleFieldSubmit('description')}
+                      disabled={!editableFields.description.value.trim() || editableFields.description.value.trim() === '<p><br></p>'}
                       sx={{ minWidth: '40px', padding: '8px' }}
                     >
                       <CheckIcon />
@@ -348,27 +348,27 @@ const UpdateAttraction = () => {
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: -4 }}>
-                    <IconButton onClick={() => handleFieldEdit('Description')}><EditIcon /></IconButton>
+                    <IconButton onClick={() => handleFieldEdit('description')}><EditIcon /></IconButton>
                   </Box>
-                  <div dangerouslySetInnerHTML={{ __html: editableFields.Description.value }} />
+                  <div dangerouslySetInnerHTML={{ __html: editableFields.description.value }} />
                 </Box>
               )}
             </Box>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-              {editableFields.Detail.isEditing ? (
+              {editableFields.detail.isEditing ? (
                 <Box sx={{ mt: 2 }}>
                   <ReactQuill
-                    value={editableFields.Detail.value}
-                    onChange={(value) => handleFieldChange('Detail', value)}
+                    value={editableFields.detail.value}
+                    onChange={(value) => handleFieldChange('detail', value)}
                     theme="snow"
                     modules={modules}
                   />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
                     <Button
                       variant="contained"
-                      onClick={() => handleFieldSubmit('Detail')}
-                      disabled={!editableFields.Detail.value.trim() || editableFields.Detail.value.trim() === '<p><br></p>'}
+                      onClick={() => handleFieldSubmit('detail')}
+                      disabled={!editableFields.detail.value.trim() || editableFields.detail.value.trim() === '<p><br></p>'}
                       sx={{ minWidth: '40px', padding: '8px' }}
                     >
                       <CheckIcon />
@@ -378,9 +378,9 @@ const UpdateAttraction = () => {
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', mt: -7 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2.5 }}>
-                    <IconButton onClick={() => handleFieldEdit('Detail')}><EditIcon /></IconButton>
+                    <IconButton onClick={() => handleFieldEdit('detail')}><EditIcon /></IconButton>
                   </Box>
-                  <div dangerouslySetInnerHTML={{ __html: editableFields.Detail.value }} />
+                  <div dangerouslySetInnerHTML={{ __html: editableFields.detail.value }} />
                 </Box>
               )}
             </Box>
@@ -388,65 +388,65 @@ const UpdateAttraction = () => {
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-              {editableFields.Address.isEditing ? (
+              {editableFields.address.isEditing ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
                     <TextField
-                      value={editableFields.Address.value}
-                      onChange={(e) => handleFieldChange('Address', e.target.value)}
+                      value={editableFields.address.value}
+                      onChange={(e) => handleFieldChange('address', e.target.value)}
                       variant="outlined"
                       fullWidth
                       sx={{ mr: 1 }}
                     />
                     <Button
                       variant="contained"
-                      onClick={() => handleFieldSubmit('Address')}
-                      disabled={!editableFields.Address.value.trim()}
+                      onClick={() => handleFieldSubmit('address')}
+                      disabled={!editableFields.address.value.trim()}
                       sx={{ minWidth: '40px', padding: '8px', mr: -1.5 }}
                     ><CheckIcon /></Button>
                   </Box>
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <Typography>{editableFields.Address.value}</Typography>
-                  <IconButton onClick={() => handleFieldEdit('Address')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
+                  <Typography>{editableFields.address.value}</Typography>
+                  <IconButton onClick={() => handleFieldEdit('address')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
                 </Box>
               )}
 
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-              {editableFields.Website.isEditing ? (
+              {editableFields.website.isEditing ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
                     <TextField
-                      value={editableFields.Website.value}
-                      onChange={(e) => handleFieldChange('Website', e.target.value)}
+                      value={editableFields.website.value}
+                      onChange={(e) => handleFieldChange('website', e.target.value)}
                       variant="outlined"
                       fullWidth
                       sx={{ mr: 1 }}
                     />
                     <Button
                       variant="contained"
-                      onClick={() => handleFieldSubmit('Website')}
-                      disabled={!editableFields.Website?.value?.trim()}
+                      onClick={() => handleFieldSubmit('website')}
+                      disabled={!editableFields.website?.value?.trim()}
                       sx={{ minWidth: '40px', padding: '8px', mr: -1.5 }}
                     ><CheckIcon /></Button>
                   </Box>
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                  <a href={editableFields.Website.value} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                    {editableFields.Website.value}
+                  <a href={editableFields.website.value} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
+                    {editableFields.website.value}
                   </a>
-                  <IconButton onClick={() => handleFieldEdit('Website')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
+                  <IconButton onClick={() => handleFieldEdit('website')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
                 </Box>
               )}
 
               <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
-              {editableFields.ContactInfo.isEditing ? (
+              {editableFields.contactInfo.isEditing ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: -1, mr: -1, mt: 2 }}>
                   <ReactQuill
-                    value={editableFields.ContactInfo.value}
-                    onChange={(value) => handleFieldChange('ContactInfo', value)}
+                    value={editableFields.contactInfo.value}
+                    onChange={(value) => handleFieldChange('contactInfo', value)}
                     theme="snow"
                     modules={modules}
                     style={{ width: '100%' }}
@@ -454,8 +454,8 @@ const UpdateAttraction = () => {
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
                     <Button
                       variant="contained"
-                      onClick={() => handleFieldSubmit('ContactInfo')}
-                      disabled={!editableFields.ContactInfo.value.trim() || editableFields.ContactInfo.value.trim() === '<p><br></p>'}
+                      onClick={() => handleFieldSubmit('contactInfo')}
+                      disabled={!editableFields.contactInfo.value.trim() || editableFields.contactInfo.value.trim() === '<p><br></p>'}
                       sx={{ minWidth: '40px', padding: '8px' }}
                     >
                       <CheckIcon />
@@ -464,9 +464,9 @@ const UpdateAttraction = () => {
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
-                  <div style={{ width: '100%', wordBreak: 'break-all' }} dangerouslySetInnerHTML={{ __html: editableFields.ContactInfo.value }} />
+                  <div style={{ width: '100%', wordBreak: 'break-all' }} dangerouslySetInnerHTML={{ __html: editableFields.contactInfo.value }} />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                    <IconButton onClick={() => handleFieldEdit('ContactInfo')}>
+                    <IconButton onClick={() => handleFieldEdit('contactInfo')}>
                       <EditIcon />
                     </IconButton>
                   </Box>

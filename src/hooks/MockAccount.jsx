@@ -129,7 +129,6 @@ export const mockCompanyStaff = [
     role: 2,
     status: 1,
     createDate: "2023-12-15",
-    company: "VietWay",
   },
   {
     id: 2,
@@ -140,7 +139,6 @@ export const mockCompanyStaff = [
     role: 2,
     status: 0,
     createDate: "2023-11-15",
-    company: "Vietravel",
   },
   {
     id: 3,
@@ -151,7 +149,6 @@ export const mockCompanyStaff = [
     role: 2,
     status: 1,
     createDate: "2023-04-15",
-    company: "VietWay",
   },
   {
     id: 4,
@@ -162,7 +159,6 @@ export const mockCompanyStaff = [
     role: 2,
     status: 1,
     createDate: "2023-07-10",
-    company: "SaiGonTour",
   },
   {
     id: 5,
@@ -173,6 +169,5 @@ export const mockCompanyStaff = [
     role: 2,
     status: 0,
     createDate: "2023-11-12",
-    company: "Du Lịch Việt",
   }
 ];
