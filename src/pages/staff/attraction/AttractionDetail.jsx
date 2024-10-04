@@ -79,7 +79,7 @@ const AttractionDetail = () => {
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-            {attraction.attractionType.name}
+            {attraction.attractionTypeName}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>

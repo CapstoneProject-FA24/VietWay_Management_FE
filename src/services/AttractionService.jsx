@@ -58,7 +58,28 @@ export const fetchAttractions = async (params) => {
 export const getAttractionById = async (id) => {
     try {
         const response = await axios.get(`${baseURL}/api/Attraction/${id}`);
-        return response.data.data;
+        const data = response.data.data;
+        return {
+            attractionId: data.attractionId,
+            name: data.name,
+            address: data.address,
+            contactInfo: data.contactInfo,
+            website: data.website,
+            description: data.description,
+            googlePlaceId: data.googlePlaceId,
+            status: data.status,
+            statusName: getStatusText(data.status),
+            createdDate: data.createdDate,
+            creatorName: data.creatorName,
+            provinceId: data.province.provinceId,
+            provinceName: data.province.provinceName,
+            attractionTypeId: data.attractionType.attractionTypeId,
+            attractionTypeName: data.attractionType.attractionTypeName,
+            images: data.images.map(image => ({
+                imageId: image.imageId,
+                url: image.url
+            }))
+        };
     } catch (error) {
         console.error('Error fetching attraction:', error);
         throw error;
