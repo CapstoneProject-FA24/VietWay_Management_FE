@@ -13,6 +13,7 @@ const getStatusText = (status) => {
 
 export const fetchAttractions = async (params) => {
     try {
+        console.log(params);
         const queryParams = new URLSearchParams();
         queryParams.append('pageSize', params.pageSize);
         queryParams.append('pageIndex', params.pageIndex);
@@ -60,6 +61,72 @@ export const getAttractionById = async (id) => {
         return response.data.data;
     } catch (error) {
         console.error('Error fetching attraction:', error);
+        throw error;
+    }
+};
+
+export const createAttraction = async (attractionData) => {
+    try {
+        const formData = new FormData();
+        formData.append("ProvinceId", attractionData.provinceId);
+        formData.append("AttractionTypeId", attractionData.attractionTypeId);
+        formData.append("IsDraft", attractionData.isDraft);
+        if (attractionData.name) formData.append("Name", attractionData.name);
+        if (attractionData.address) formData.append("Address", attractionData.address);
+        if (attractionData.contactInfo) formData.append("ContactInfo", attractionData.contactInfo);
+        if (attractionData.website) formData.append("Website", attractionData.website);
+        if (attractionData.description) formData.append("Description", attractionData.description);
+        if (attractionData.images) {
+            attractionData.images.forEach((image) => {
+                formData.append("Images", image);
+            });
+        }
+
+        const response = await axios.post(`${baseURL}/api/Attraction`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        console.log(response);
+        return response.data;
+    } catch (error) {
+        console.error('**Error saving attraction:', error.response);
+        throw error;
+    }
+};
+
+export const updateAttraction = async (attractionData) => {
+    try {
+        const formData = new FormData();
+        formData.append("ProvinceId", attractionData.provinceId);
+        formData.append("AttractionTypeId", attractionData.attractionTypeId);
+        formData.append("IsDraft", attractionData.isDraft);
+        if (attractionData.name) formData.append("Name", attractionData.name);
+        if (attractionData.address) formData.append("Address", attractionData.address);
+        if (attractionData.contactInfo) formData.append("ContactInfo", attractionData.contactInfo);
+        if (attractionData.website) formData.append("Website", attractionData.website);
+        if (attractionData.description) formData.append("Description", attractionData.description);
+        if (attractionData.googlePlaceId) formData.append("GooglePlaceId", attractionData.googlePlaceId);
+        if (attractionData.newImages) {
+            attractionData.newImages.forEach((image) => {
+                formData.append("NewImages", image);
+            });
+        }
+        if (attractionData.removedImageIds) {
+            attractionData.removedImageIds.forEach((imageId) => {
+                formData.append("RemovedImageIds", imageId);
+            });
+        }
+
+        const response = await axios.put(`${baseURL}/api/Attraction/${attractionData.id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        console.log(response);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating attraction:', error.response);
         throw error;
     }
 };

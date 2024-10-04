@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Button, IconButton, Select, MenuItem } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
@@ -12,24 +12,42 @@ import CheckIcon from '@mui/icons-material/Check';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
-import { Link } from 'react-router-dom';
-import { mockAttractionTypes } from '@hooks/MockAttractions';
+import { Link, useNavigate } from 'react-router-dom';
+import { fetchAttractionType, createAttraction } from '@services/AttractionService';
+import { fetchProvinces } from '@services/ProvinceService';
 
 const AddAttraction = () => {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [sliderRef, setSliderRef] = useState(null);
   const [images, setImages] = useState([]);
   const fileInputRef = useRef(null);
+  const [provinces, setProvinces] = useState([]);
+  const [attractionTypes, setAttractionTypes] = useState([]);
 
+  const [selectedProvince, setSelectedProvince] = useState('');
   const [editableFields, setEditableFields] = useState({
     name: { value: '', isEditing: true },
     contactInfo: { value: '', isEditing: true },
     description: { value: '', isEditing: true },
-    details: { value: '', isEditing: true },
     address: { value: '', isEditing: true },
     website: { value: '', isEditing: true },
     type: { value: '', isEditing: true }
   });
+
+  useEffect(() => {
+    const fetchProvincesData = async () => {
+      try {
+        const fetchedProvinces = await fetchProvinces();
+        const fetchedAttractionType = await fetchAttractionType();
+        setProvinces(fetchedProvinces);
+        setAttractionTypes(fetchedAttractionType);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      }
+    };
+    fetchProvincesData();
+  }, []);
 
   const handleFieldChange = (field, value) => {
     setEditableFields(prev => ({
@@ -82,27 +100,12 @@ const AddAttraction = () => {
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const newImage = {
-          url: e.target.result,
-          alt: file.name
-        };
-        setImages([...images, newImage]);
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(event.target.files);
+    setImages(prevImages => [...prevImages, ...files]);
   };
 
   const handleRemoveImage = (index) => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
-    if (currentSlide >= newImages.length) {
-      setCurrentSlide(newImages.length - 1);
-    }
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
   };
 
   const modules = {
@@ -120,8 +123,62 @@ const AddAttraction = () => {
     }
   };
 
+  const handleProvinceChange = (event) => {
+    setSelectedProvince(event.target.value);
+  };
+
+  const handleSave = async (isDraft) => {
+    try {
+      const attractionData = {
+        name: editableFields.name.value,
+        address: editableFields.address.value,
+        description: editableFields.description.value,
+        contactInfo: editableFields.contactInfo.value,
+        website: editableFields.website.value,
+        provinceId: selectedProvince,
+        attractionTypeId: editableFields.type.value,
+        isDraft: isDraft,
+        images: images.length > 0 ? images : null
+      };
+      if (!isDraft) {
+        const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
+        const missingFields = requiredFields.filter(field => !attractionData[field]);
+        if (missingFields.length > 0) {
+          alert(`Vui lòng điền đầy đủ thông tin trước khi tạo mới.`);
+          return;
+        }
+        if (images.length === 0) {
+          alert('Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.');
+          return;
+        }
+      }
+      else{
+        const requiredFields = ['provinceId', 'attractionTypeId'];
+        const missingFields = requiredFields.filter(field => !attractionData[field]);
+        if (missingFields.length > 0) {
+          alert(`Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.`);
+          return;
+        }
+      }
+
+      const response = await createAttraction(attractionData);
+      if (response.statusCode === 200) {
+        navigate('/nhan-vien/diem-tham-quan');
+      }
+      console.log('Attraction created:', response);
+    } catch (error) {
+      if (error.response && error.response.data.message === 'Incomplete attraction information') {
+        alert('Vui lòng điền đầy đủ thông tin trước khi tạo mới.');
+      } else {
+        alert('Đã xảy ra lỗi khi lưu điểm tham quan. Vui lòng thử lại sau.');
+      }
+      console.error('Error creating attraction:', error);
+    }
+  };
+
+
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98vw', maxWidth: '98vw' }}>
       <Helmet>
         <title>Thêm điểm tham quan</title>
       </Helmet>
@@ -152,8 +209,8 @@ const AddAttraction = () => {
                 fullWidth
                 sx={{ mr: 2 }}
               >
-                {mockAttractionTypes.map((type) => (
-                  <MenuItem key={type.typeId} value={type.typeId}>{type.typeName}</MenuItem>
+                {attractionTypes.map((type) => (
+                  <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
                 ))}
               </Select>
               <Button
@@ -169,7 +226,7 @@ const AddAttraction = () => {
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-              {mockAttractionTypes.find(type => type.TypeId === editableFields.type.value)?.TypeName || ''}
+              {attractionTypes.find(type => type.attractionTypeId === editableFields.type.value)?.attractionTypeName || ''}
             </Typography>
             <IconButton onClick={() => handleFieldEdit('type')} sx={{ ml: 2 }}>
               <EditIcon />
@@ -206,7 +263,7 @@ const AddAttraction = () => {
           </Box>
         )}
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8} sx={{ width: '100%'}}>
+          <Grid item xs={12} md={8} sx={{ width: '100%' }}>
             <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
               <Box className="slick-slider-container" sx={{ height: '450px' }}>
                 <Slider ref={setSliderRef} {...settings}>
@@ -214,8 +271,8 @@ const AddAttraction = () => {
                     images.map((image, index) => (
                       <div key={index} style={{ position: 'relative' }}>
                         <img
-                          src={image.url}
-                          alt={image.alt}
+                          src={image instanceof File ? URL.createObjectURL(image) : image}
+                          alt={`Attraction image ${index + 1}`}
                           style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                         />
                         <IconButton
@@ -252,8 +309,8 @@ const AddAttraction = () => {
                   onClick={() => handleThumbnailClick(index)}
                 >
                   <img
-                    src={image.url}
-                    alt={image.alt}
+                    src={image instanceof File ? URL.createObjectURL(image) : image}
+                    alt={`Thumbnail ${index + 1}`}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                   <IconButton
@@ -289,24 +346,18 @@ const AddAttraction = () => {
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
                 accept="image/*"
+                multiple
               />
             </Box>
             <Box>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu</Typography>
+              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
               {editableFields.description.isEditing ? (
                 <Box >
-                  <TextField
-                    variant="outlined"
-                    multiline
-                    rows={5}
+                  <ReactQuill
                     value={editableFields.description.value}
-                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                    fullWidth
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                      }
-                    }}
+                    onChange={(value) => handleFieldChange('description', value)}
+                    theme="snow"
+                    modules={modules}
                   />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
                     <Button
@@ -320,7 +371,7 @@ const AddAttraction = () => {
                   </Box>
                 </Box>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', mt: -3 }}>
                   <div dangerouslySetInnerHTML={{ __html: editableFields.description.value }} />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
                     <IconButton onClick={() => handleFieldEdit('description')}>
@@ -330,41 +381,21 @@ const AddAttraction = () => {
                 </Box>
               )}
             </Box>
-            <Box>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-              {editableFields.details.isEditing ? (
-                <Box >
-                  <ReactQuill
-                    value={editableFields.details.value}
-                    onChange={(value) => handleFieldChange('details', value)}
-                    theme="snow"
-                    modules={modules}
-                  />
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                    <Button
-                      variant="contained"
-                      onClick={() => handleFieldSubmit('details')}
-                      disabled={!editableFields.details.value.trim() || editableFields.details.value.trim() === '<p><br></p>'}
-                      sx={{ minWidth: '40px', padding: '8px' }}
-                    >
-                      <CheckIcon />
-                    </Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', mt: -3 }}>
-                  <div dangerouslySetInnerHTML={{ __html: editableFields.details.value }} />
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                    <IconButton onClick={() => handleFieldEdit('details')}>
-                      <EditIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-              )}
-            </Box>
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
+              <Select
+                value={selectedProvince}
+                onChange={handleProvinceChange}
+                variant="outlined"
+                fullWidth
+                sx={{ mr: 2, mb: 2 }}
+              >
+                {provinces.map((province) => (
+                  <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
+                ))}
+              </Select>
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
               {editableFields.address.isEditing ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -374,7 +405,7 @@ const AddAttraction = () => {
                       onChange={(e) => handleFieldChange('address', e.target.value)}
                       variant="outlined"
                       fullWidth
-                      sx={{ mr: 1 }}
+                      sx={{ mr: 1, mt: -1 }}
                     />
                     <Button
                       variant="contained"
@@ -400,7 +431,7 @@ const AddAttraction = () => {
                       onChange={(e) => handleFieldChange('website', e.target.value)}
                       variant="outlined"
                       fullWidth
-                      sx={{ mr: 1 }}
+                      sx={{ mr: 1, mt: -1 }}
                     />
                     <Button
                       variant="contained"
@@ -453,9 +484,9 @@ const AddAttraction = () => {
             </Paper>
           </Grid>
         </Grid>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5}}>
-          <Button variant="contained" sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-          <Button variant="contained" sx={{ p: 1.5 }}> Tạo mới </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
+          <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+          <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Tạo mới </Button>
         </Box>
       </Box>
     </Box >
