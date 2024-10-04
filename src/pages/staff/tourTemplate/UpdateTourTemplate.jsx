@@ -159,7 +159,7 @@ const UpdateTourTemplate = () => {
       ...prev,
       schedule: prev.schedule.map(item =>
         item.dayNumber === dayNumber
-          ? { ...item, attractions: item.attractions.filter(attr => attr.attractionId !== attractionId) }
+          ? { ...item, attractions: item.attractions.filter(attr => attr.attractionId !== attractions) }
           : item
       )
     }));

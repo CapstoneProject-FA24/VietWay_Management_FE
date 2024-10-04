@@ -14,11 +14,9 @@ import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
 import { createTourTemplate } from '@services/TourTemplateService';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchProvinces } from '@services/ProvinceService';
-import { getFilteredAttractions } from '@hooks/MockAttractions';
 
 const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
-  const [attractions, setAttractions] = useState([]);
   const [tourTemplate, setTourTemplate] = useState({
     tourName: '', provinces: [], duration: '', departurePoint: '', tourCategory: '',
     description: '', policy: '', note: '', imageUrls: [null, null, null, null],
@@ -48,9 +46,6 @@ const CreateTourTemplate = () => {
       try {
         const fetchedProvinces = await fetchProvinces();
         setProvinces(fetchedProvinces);
-
-        const fetchedAttractions = await getFilteredAttractions({ status: 2 }, 'name');
-        setAttractions(fetchedAttractions);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -557,7 +552,6 @@ const CreateTourTemplate = () => {
         onClose={() => setIsAttractionPopupOpen(false)}
         onSelectAttraction={handleAttractionSelect}
         provinces={provinces}
-        attractions={attractions}
         selectedAttractions={tourTemplate.schedule.find(s => s.dayNumber === currentEditingDay)?.attractions || []}
       />
     </Box>

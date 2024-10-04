@@ -44,7 +44,7 @@ const ManageTourTemplate = () => {
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(12);
     const [totalPages, setTotalPages] = useState(1);
     const [tempSearchTerm, setTempSearchTerm] = useState('');
     const [tempCategories, setTempCategories] = useState([]);
@@ -178,7 +178,7 @@ const ManageTourTemplate = () => {
             <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
                 <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
                     <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-                        <Typography sx={{ fontSize: '3rem', fontWeight: 600, color:'primary.main' }}> Quản lý tour mẫu </Typography>
+                        <Typography sx={{ fontSize: '3rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour mẫu </Typography>
                     </Grid>
                     <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                         <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
@@ -191,27 +191,15 @@ const ManageTourTemplate = () => {
                                 <Typography>
                                     Tỉnh/Thành phố
                                 </Typography>
-                                <ReactSelect
-                                    closeMenuOnSelect={false}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={provinceOptions}
-                                    onChange={setTempProvinces}
-                                    value={tempProvinces}
-                                />
+                                <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                                    isMulti options={provinceOptions} onChange={setTempProvinces} value={tempProvinces} />
                             </Box>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
                                 <Typography>
                                     Thời lượng
                                 </Typography>
-                                <ReactSelect
-                                    closeMenuOnSelect={false}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={durationOptions}
-                                    onChange={setTempDuration}
-                                    value={tempDuration}
-                                />
+                                <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                                    isMulti options={durationOptions} onChange={setTempDuration} value={tempDuration} />
                             </Box>
                         </Box>
                     </Grid>
@@ -233,27 +221,21 @@ const ManageTourTemplate = () => {
                             Áp dụng bộ lọc
                         </Button>
                     </Grid>
-                    <Grid item xs={12} md={7}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <TextField
-                                variant="outlined"
-                                placeholder="Tìm kiếm tour mẫu..."
-                                size="small"
-                                sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
-                                value={tempSearchTerm}
-                                onChange={(e) => setTempSearchTerm(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black' }} >
-                                Tìm kiếm
-                            </Button>
-                        </Box>
+                    <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <TextField variant="outlined" placeholder="Tìm kiếm tour mẫu..."
+                            size="small" sx={{ width: '100%', mr: 1 }}
+                            value={tempSearchTerm} onChange={(e) => setTempSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
+                            Tìm kiếm
+                        </Button>
                     </Grid>
                     <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
                         <Typography>
@@ -306,9 +288,9 @@ const ManageTourTemplate = () => {
                         variant="outlined"
                         sx={{ height: '40px' }}
                     >
-                        <MenuItem value={5}>5 / trang</MenuItem>
-                        <MenuItem value={10}>10 / trang</MenuItem>
-                        <MenuItem value={20}>20 / trang</MenuItem>
+                        <MenuItem value={6}>6 / trang</MenuItem>
+                        <MenuItem value={12}>12 / trang</MenuItem>
+                        <MenuItem value={24}>24 / trang</MenuItem>
                     </Select>
                 </Box>
                 <TourTemplateDeletePopup

@@ -23,7 +23,6 @@ export const fetchTourTemplates = async (params) => {
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
 
         const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`);
-
         const items = response.data?.data?.items;
         
         if (!items || !Array.isArray(items)) {
