@@ -21,7 +21,7 @@ export const fetchAttractions = async (params) => {
         if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
 
-        const response = await axios.get(`${baseURL}/api/Attraction?${queryParams.toString()}`);
+        const response = await axios.get(`${baseURL}/api/Attraction?${id}`);
         const items = response.data?.data?.items;
         
         if (!items || !Array.isArray(items)) {
@@ -50,6 +50,16 @@ export const fetchAttractions = async (params) => {
         
     } catch (error) {
         console.error('Error fetching tour attractions:', error);
+        throw error;
+    }
+};
+
+export const getAttractionById = async (id) => {
+    try {
+        const response = await axios.get(`${baseURL}/api/Attraction/${id}`);
+        return response.data.data;
+    } catch (error) {
+        console.error('Error fetching attraction:', error);
         throw error;
     }
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, IconButton, Button } from '@mui/material';
+import { Box, Typography, Grid, Paper, Button } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,17 +7,26 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams } from 'react-router-dom';
-import { getAttractionById, mockAttractionTypes } from '@hooks/MockAttractions';
+import { getAttractionById } from '@services/AttractionService';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [sliderRef, setSliderRef] = useState(null);
   const [attraction, setAttraction] = useState(null);
+  const [error, setError] = useState(null);
   const { id } = useParams();
 
   useEffect(() => {
-    const fetchedAttraction = getAttractionById(id);
-    setAttraction(fetchedAttraction);
+    const fetchAttraction = async () => {
+      try {
+        const fetchedAttraction = await getAttractionById(id);
+        setAttraction(fetchedAttraction);
+      } catch (error) {
+        console.error('Error fetching attraction:', error);
+        setError(error.message || 'An error occurred while fetching data');
+      }
+    };
+    fetchAttraction();
   }, [id]);
 
   const settings = {
@@ -40,6 +49,10 @@ const AttractionDetail = () => {
       sliderRef.slickGoTo(index);
     }
   };
+
+  if (error) {
+    return <Typography color="error">Error: {error}</Typography>;
+  }
 
   if (!attraction) {
     return <Typography>Loading...</Typography>;
@@ -66,7 +79,7 @@ const AttractionDetail = () => {
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-            {mockAttractionTypes.find(type => type.typeName === attraction.attractionType)?.typeName || ''}
+            {attraction.attractionType.name}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -79,20 +92,20 @@ const AttractionDetail = () => {
             <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
               <Box className="slick-slider-container" sx={{ height: '450px' }}>
                 <Slider ref={setSliderRef} {...settings}>
-                    {attraction.attractionImages.map((image, index) => (
-                      <div key={index} style={{ position: 'relative' }}>
-                        <img
-                          src={image.url}
-                          alt={image.alt}
-                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-                        />
-                      </div>
-                    ))}
+                  {attraction.images.map((image, index) => (
+                    <div key={index} style={{ position: 'relative' }}>
+                      <img
+                        src={image.url}
+                        alt={`Attraction ${index + 1}`}
+                        style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                      />
+                    </div>
+                  ))}
                 </Slider>
               </Box>
             </Paper>
             <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
-              {attraction.attractionImages.map((image, index) => (
+              {attraction.images.map((image, index) => (
                 <Box
                   key={index}
                   sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
@@ -100,7 +113,7 @@ const AttractionDetail = () => {
                 >
                   <img
                     src={image.url}
-                    alt={image.alt}
+                    alt={`Thumbnail ${index + 1}`}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                 </Box>
@@ -133,7 +146,7 @@ const AttractionDetail = () => {
           </Grid>
         </Grid>
       </Box>
-    </Box >
+    </Box>
   );
 };
 
