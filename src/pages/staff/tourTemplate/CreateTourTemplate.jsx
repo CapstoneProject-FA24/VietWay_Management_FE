@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Grid, Paper, TextField, Button, Container, Collapse, IconButton, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Grid, Paper, TextField, Button, Collapse, IconButton, Select, MenuItem } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faMoneyBill1, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faMoneyBill1, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -14,14 +14,15 @@ import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
 import { createTourTemplate } from '@services/TourTemplateService';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchProvinces } from '@services/ProvinceService';
+import { getFilteredAttractions } from '@hooks/MockAttractions';
 
 const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
+  const [attractions, setAttractions] = useState([]);
   const [tourTemplate, setTourTemplate] = useState({
     tourName: '', provinces: [], duration: '', departurePoint: '', tourCategory: '',
     description: '', policy: '', note: '', imageUrls: [null, null, null, null],
-    schedule: [{ dayNumber: 1, title: '', description: '', attractionId: [], isEditing: true }],
-    code: ''
+    schedule: [{ dayNumber: 1, title: '', description: '', attractions: [], isEditing: true }], code: ''
   });
 
   const [editableFields, setEditableFields] = useState({
@@ -43,15 +44,18 @@ const CreateTourTemplate = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProvincesData = async () => {
+    const fetchData = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();
         setProvinces(fetchedProvinces);
+
+        const fetchedAttractions = await getFilteredAttractions({ status: 2 }, 'name');
+        setAttractions(fetchedAttractions);
       } catch (error) {
-        console.error('Error fetching provinces:', error);
+        console.error('Error fetching data:', error);
       }
     };
-    fetchProvincesData();
+    fetchData();
   }, []);
 
   const handleFieldChange = (field, value) => {
@@ -84,7 +88,7 @@ const CreateTourTemplate = () => {
 
   const handleAddDay = () => {
     const newDay = tourTemplate.schedule.length + 1;
-    setTourTemplate(prev => ({ ...prev, schedule: [...prev.schedule, { dayNumber: newDay, title: '', description: '', attractionId: [], isEditing: true }] }));
+    setTourTemplate(prev => ({ ...prev, schedule: [...prev.schedule, { dayNumber: newDay, title: '', description: '', attractions: [], isEditing: true }] }));
     setExpandedDay(newDay);
   };
 
@@ -106,19 +110,19 @@ const CreateTourTemplate = () => {
     setIsAttractionPopupOpen(true);
   };
 
-  const handleAttractionSelect = (selectedAttractions) => {
+  const handleAttractionSelect = (selectedAttraction) => {
     setTourTemplate(prev => ({
-      ...prev, schedule: prev.schedule.map(item =>
-        item.dayNumber === currentEditingDay ? {
-          ...item, attractionId: selectedAttractions
-        } : item)
+      ...prev, schedule: prev.schedule.map(item => item.dayNumber === currentEditingDay ? {
+        ...item, attractions: [...item.attractions, selectedAttraction]
+      } : item)
     }));
+    console.log(tourTemplate);
     setIsAttractionPopupOpen(false);
   };
 
   const handleScheduleSubmit = (day) => {
     const schedule = tourTemplate.schedule.find(item => item.dayNumber === day);
-    const isValid = schedule.title.trim() !== '' && schedule.description.trim() !== '' && schedule.attractionId.length > 0;
+    const isValid = schedule.title.trim() !== '' && schedule.description.trim() !== '' && schedule.attractions.length > 0;
 
     if (isValid) {
       setTourTemplate(prev => ({
@@ -151,7 +155,7 @@ const CreateTourTemplate = () => {
           dayNumber: s.dayNumber,
           title: s.title,
           description: s.description,
-          attractions: s.attractionId.map(attr => attr.attractionId)
+          attractions: s.attractions.map(attr => attr.attractionId)
         })),
         imageUrls: tourTemplate.imageUrls.filter(url => url !== null)
       };
@@ -161,6 +165,17 @@ const CreateTourTemplate = () => {
     } catch (error) {
       console.error('Error creating tour template:', error);
     }
+  };
+
+  const handleRemoveAttraction = (dayNumber, attractions) => {
+    setTourTemplate(prev => ({
+      ...prev,
+      schedule: prev.schedule.map(item =>
+        item.dayNumber === dayNumber
+          ? { ...item, attractions: item.attractions.filter(attr => attr.attractionId !== attractions) }
+          : item
+      )
+    }));
   };
 
   return (
@@ -187,7 +202,7 @@ const CreateTourTemplate = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <ReactSelect isMulti name="provinces" options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
                 className="basic-multi-select" classNamePrefix="select" placeholder="Chọn tỉnh/thành phố" value={editableFields.provinces.value}
-                onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}/>
+                onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)} />
               <Button variant="contained" onClick={() => handleFieldSubmit('provinces')} disabled={!editableFields.provinces.value.length} sx={{ minWidth: '40px', p: 1, ml: 2 }}>
                 <CheckIcon />
               </Button>
@@ -420,10 +435,26 @@ const CreateTourTemplate = () => {
                           <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
                             Chọn điểm đến
                           </Button>
+                          {s.attractions.length > 0 && (
+                            <Box sx={{ mt: 1 }}>
+                              <Typography variant="subtitle2">Đã chọn:</Typography>
+                              <ul style={{ listStyleType: 'none', padding: 0 }}>
+                                {s.attractions.map((attraction) => (
+                                  <li key={attraction.attractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                    <Typography>{attraction.name}</Typography>
+                                    <IconButton size="small" sx={{ ml: 1 }}
+                                      onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
+                                      <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                  </li>
+                                ))}
+                              </ul>
+                            </Box>
+                          )}
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                           <Button variant="contained" onClick={() => handleScheduleSubmit(s.dayNumber)} sx={{ minWidth: '40px', padding: '8px' }}
-                            disabled={!s.title.trim() || !s.description.trim() || s.attractionId.length === 0}>
+                            disabled={!s.title.trim() || !s.description.trim() || s.attractions.length === 0}>
                             <CheckIcon />
                           </Button>
                         </Box>
@@ -443,11 +474,15 @@ const CreateTourTemplate = () => {
                       <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
                         <Typography paragraph sx={{ mb: 2 }}>{s.description}</Typography>
                         <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Điểm đến:</Typography>
-                        <ul>
-                          {s.attractionId.map((attraction) => (
-                            <li key={attraction.AttractionId}>{attraction.AttractionName}</li>
-                          ))}
-                        </ul>
+                        {s.attractions.length > 0 ? (
+                          <ul>
+                            {s.attractions.map((attraction) => (
+                              <li key={attraction.attractionId}>{attraction.name}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <Typography variant="body2">Chưa có điểm đến nào được chọn</Typography>
+                        )}
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                           <IconButton onClick={() => handleScheduleEdit(s.dayNumber)}><EditIcon /></IconButton>
                         </Box>
@@ -497,17 +532,18 @@ const CreateTourTemplate = () => {
           <Grid item xs={12} md={4} >
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Typography sx={{ minWidth: '4rem', mr: 1 }}>Mã tour:</Typography>
+                <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
                 {editableFields.code.isEditing ? (
                   <>
                     <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth sx={{ mr: 2 }} placeholder="Nhập mã tour" />
                     <Button variant="contained" onClick={() => handleFieldSubmit('code')} disabled={!editableFields.code.value.trim()} sx={{ minWidth: '40px', padding: '8px' }}><CheckIcon /></Button>
                   </>
                 ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography sx={{ flexGrow: 1, color: 'primary.main', fontWeight: '700' }}>{editableFields.code.value}</Typography>
+                  <>
+                    <Typography sx={{ ml: 1, color: 'primary.main', fontWeight: 700 }}>{tourTemplate.code}</Typography>
                     <IconButton onClick={() => handleFieldEdit('code')}><EditIcon /></IconButton>
-                  </Box>
+                  </>
                 )}
               </Box>
               <Button variant="contained" fullWidth sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}>Lưu bản nháp</Button>
@@ -518,12 +554,11 @@ const CreateTourTemplate = () => {
       </Box>
       <TemplateAddAttractionPopup
         open={isAttractionPopupOpen}
-        provinceList={provinces}
         onClose={() => setIsAttractionPopupOpen(false)}
-        onSelectAttraction={(selectedAttraction) => {
-          console.log('Selected Attraction:', selectedAttraction);
-          setIsAttractionPopupOpen(false);
-        }}
+        onSelectAttraction={handleAttractionSelect}
+        provinces={provinces}
+        attractions={attractions}
+        selectedAttractions={tourTemplate.schedule.find(s => s.dayNumber === currentEditingDay)?.attractions || []}
       />
     </Box>
   );
