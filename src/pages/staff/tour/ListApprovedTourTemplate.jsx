@@ -7,23 +7,10 @@ import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
 import { fetchTourTemplates } from '@services/TourTemplateService';
-import { fetchProvinces } from '@services/ProvinceService'; import FilterListIcon from '@mui/icons-material/FilterList';
-
-const tourCategories = [
-  { TourCategoryId: 1, Name: 'Du lịch biển' },
-  { TourCategoryId: 2, Name: 'Du lịch núi' },
-  { TourCategoryId: 3, Name: 'Du lịch văn hóa' },
-  { TourCategoryId: 4, Name: 'Du lịch sinh thái' },
-  { TourCategoryId: 5, Name: 'Du lịch nghỉ dưỡng' },
-];
-
-const durations = [
-  { DurationId: 1, DurationName: 'Trong ngày' },
-  { DurationId: 2, DurationName: '2 ngày 1 đêm' },
-  { DurationId: 3, DurationName: '3 ngày 2 đêm' },
-  { DurationId: 4, DurationName: '4 ngày 3 đêm' },
-  { DurationId: 5, DurationName: '5 ngày 4 đêm' },
-];
+import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourCategory } from '@services/TourCategoryService';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -75,6 +62,8 @@ const ListApprovedTourTemplate = () => {
     const fetchProvincesData = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();
+        const duration = await fetchTourDuration();
+        const categories = await fetchTourCategory();
         setProvinces(fetchedProvinces);
       } catch (error) {
         console.error('Error fetching provinces:', error);
@@ -84,13 +73,13 @@ const ListApprovedTourTemplate = () => {
   }, []);
 
   const categoryOptions = tourCategories.map(category => ({
-    value: category.TourCategoryId,
-    label: category.Name
+    value: category.tourCategoryId,
+    label: category.tourCategoryName
   }));
 
-  const durationOptions = durations.map(duration => ({
-    value: duration.DurationId,
-    label: duration.DurationName
+  const durationOptions = tourDurations.map(duration => ({
+    value: duration.durationId,
+    label: duration.durationName
   }));
 
   const provinceOptions = provinces.map(province => ({
@@ -172,14 +161,8 @@ const ListApprovedTourTemplate = () => {
                 <Typography>
                   Thời lượng
                 </Typography>
-                <ReactSelect
-                  closeMenuOnSelect={false}
-                  components={animatedComponents}
-                  isMulti
-                  options={durationOptions}
-                  onChange={setTempDuration}
-                  value={tempDuration}
-                />
+                <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                             isMulti options={durationOptions} onChange={setTempDuration} value={tempDuration} />
               </Box>
             </Box>
           </Grid>
@@ -187,14 +170,8 @@ const ListApprovedTourTemplate = () => {
             <Typography>
               Loại Tour
             </Typography>
-            <ReactSelect
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              isMulti
-              options={categoryOptions}
-              onChange={setTempCategories}
-              value={tempCategories}
-            />
+            <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                isMulti options={categoryOptions} onChange={setTempCategories} value={tempCategories} />
           </Grid>
           <Grid item xs={12} md={2.7} sx={{ mb: 5 }}>
             <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 1, backgroundColor: 'lightGray', color: 'black', width: '100%' }}>

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Box, Typography, TextField, Button, Select, MenuItem, Chip, InputLabel, FormControl, Grid, Card, CardContent, CardMedia, CardActions, Pagination } from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
+import React, { useState, useEffect, useMemo } from "react";
+import { Box, Typography, TextField, Button, Select, MenuItem, Chip, FormControl, Grid, Card, CardContent, CardMedia, CardActions, Pagination } from "@mui/material";
 import { mockTours } from "@hooks/MockTour";
 import SidebarStaff from "@layouts/SidebarStaff";
 import AddIcon from "@mui/icons-material/Add";
-import { Link, useLocation } from "react-router-dom";
-import CloseIcon from '@mui/icons-material/Close';
+import { Link } from "react-router-dom";
 import { fetchProvinces } from '@services/ProvinceService';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
+import { fetchTourCategory } from '@services/TourCategoryService';
+import { fetchTourDuration } from '@services/DurationService';
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -22,6 +22,8 @@ const ManageTour = () => {
   const currentPage = location.pathname;
 
   const [provinces, setProvinces] = useState([]);
+  const [tourCategories, setTourCategories] = useState([]);
+  const [tourDurations, setTourDurations] = useState([]);
 
   useEffect(() => {
     const fetchApprovedTourTemplates = async () => {
@@ -36,13 +38,27 @@ const ManageTour = () => {
   }, []);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await fetchTourCategory();
+        const duration = await fetchTourDuration();
+        setTourCategories(categories);
+        setTourDurations(duration);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
     applyFilters();
   }, [filters, searchTerm, tours]);
 
   const toggleSidebar = () => { setIsOpen(!isOpen); };
 
   const handleFilterChange = (selectedOptions, filterType) => {
-    setFilters((prevFilters) => ({
+    setFilters(prevFilters => ({
       ...prevFilters,
       [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
     }));
@@ -62,11 +78,15 @@ const ManageTour = () => {
     }
 
     if (filters.tourType.length > 0) {
-      result = result.filter((tour) => tour.tourType.some((type) => filters.tourType.includes(type)));
+      result = result.filter((tour) => 
+        tour.tourCategories.some((category) => filters.tourType.includes(category.tourCategoryId))
+      );
     }
 
     if (filters.duration.length > 0) {
-      result = result.filter((tour) => filters.duration.includes(tour.duration));
+      result = result.filter(tour => 
+        filters.duration.includes(tour.tourDuration.tourDurationId)
+      );
     }
 
     if (filters.location.length > 0) {
@@ -79,26 +99,6 @@ const ManageTour = () => {
 
     setFilteredTours(result);
     setPage(1);
-  };
-
-  const clearFilter = (filterType) => {
-    setFilters((prevFilters) => ({ ...prevFilters, [filterType]: filterType === "status" ? "" : [] }));
-  };
-
-  const handleDeleteChip = (filterType, value) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      [filterType]: prevFilters[filterType].filter(item => item !== value)
-    }));
-  };
-
-  const handleDelete = (chipToDelete) => () => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [chipToDelete.filterType]: prevFilters[chipToDelete.filterType].filter(
-        (chip) => chip !== chipToDelete.value
-      ),
-    }));
   };
 
   const indexOfLastTour = page * toursPerPage;
@@ -123,9 +123,18 @@ const ManageTour = () => {
     label: province.provinceName
   }));
 
-  // Prepare options for ReactSelect components
-  const tourTypeOptions = [...new Set(tours.flatMap(tour => tour.tourType))].map(type => ({ value: type, label: type }));
-  const durationOptions = [...new Set(tours.map(tour => tour.duration))].map(duration => ({ value: duration, label: duration }));
+  const durationOptions = tourDurations.map(duration => ({
+    value: duration.durationId,
+    label: duration.durationName
+  }));
+
+  const tourTypeOptions = useMemo(() => 
+    tourCategories.map(category => ({
+      value: category.tourCategoryId,
+      label: category.tourCategoryName
+    })),
+    [tourCategories]
+  );
 
   return (
     <Box sx={{ width: "98vw", minHeight: "100vh" }}>
@@ -166,7 +175,7 @@ const ManageTour = () => {
 
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <Typography>Thời Lượng</Typography>
+              <Typography>Thời lượng</Typography>
               <ReactSelect
                 closeMenuOnSelect={false}
                 components={animatedComponents}

@@ -199,14 +199,8 @@ const ManageTourTemplate = () => {
                         <Typography>
                             Loại Tour
                         </Typography>
-                        <ReactSelect
-                            closeMenuOnSelect={false}
-                            components={animatedComponents}
-                            isMulti
-                            options={categoryOptions}
-                            onChange={setTempCategories}
-                            value={tempCategories}
-                        />
+                        <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                            isMulti options={categoryOptions} onChange={setTempCategories} value={tempCategories} />
                     </Grid>
                     <Grid item xs={12} md={2.7} sx={{ mb: 5 }}>
                         <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 1, backgroundColor: 'lightGray', color: 'black', width: '100%' }}>
