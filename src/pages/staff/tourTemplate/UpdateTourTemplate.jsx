@@ -14,12 +14,10 @@ import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
-import { getFilteredAttractions } from '@hooks/MockAttractions';
 
 const UpdateTourTemplate = () => {
   const { id } = useParams();
   const [provinces, setProvinces] = useState([]);
-  const [attractions, setAttractions] = useState([]);
   const [tourTemplate, setTourTemplate] = useState({
     tourName: '', provinces: [], duration: '', departurePoint: '',
     tourCategory: '', description: '', policy: '', note: '',
@@ -41,16 +39,12 @@ const UpdateTourTemplate = () => {
   const [isAttractionPopupOpen, setIsAttractionPopupOpen] = useState(false);
   const [currentEditingDay, setCurrentEditingDay] = useState(null);
   const pageTopRef = useRef(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
         setTourTemplate(fetchedTourTemplate);
-
-        const fetchedAttractions = await getFilteredAttractions({ status: 2 }, 'name');
-        setAttractions(fetchedAttractions);
 
         const fetchedProvinces = await fetchProvinces();
         setProvinces(fetchedProvinces);
@@ -551,7 +545,6 @@ const UpdateTourTemplate = () => {
         onClose={() => setIsAttractionPopupOpen(false)}
         onSelectAttraction={handleAttractionSelect}
         provinces={provinces}
-        attractions={attractions}
         selectedAttractions={tourTemplate.schedule.find(s => s.dayNumber === currentEditingDay)?.attractions || []}
       />
     </Box>

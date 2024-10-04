@@ -7,7 +7,6 @@ import { fetchAttractions } from '@services/AttractionService';
 
 const attractionTypes = [
     { AttractionTypeId: 1, Name: 'Công viên giải trí' }, { AttractionTypeId: 10, Name: 'Khu du lịch văn hóa' },
-    // ... (rest of the attraction types)
 ];
 
 const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinces, selectedAttractions }) => {
@@ -31,8 +30,7 @@ const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinc
                 status: 2
             };
             const result = await fetchAttractions(params);
-            console.log(result);
-            setAttractions(result.data.sort((a, b) => a.name.localeCompare(b.name))); // Sort by name A-Z
+            setAttractions(result.data.sort((a, b) => a.name.localeCompare(b.name)));
             setTotalPages(Math.ceil(result.total / 3));
         } catch (error) {
             console.error('Error fetching attractions:', error);
@@ -50,8 +48,13 @@ const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinc
     }));
 
     const handleAttractionClick = (attraction) => {
-        onSelectAttraction(attraction);
-        onClose();
+        if (selectedAttractions.some(selectedAttraction => selectedAttraction.attractionId === attraction.attractionId)) {
+            alert(attraction.name + " đã được thêm vào danh sách.");
+            return;
+        }else{
+            onSelectAttraction(attraction);
+            onClose();
+        }
     };
 
     const handlePageChange = (event, value) => {
@@ -96,9 +99,7 @@ const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinc
                 </Box>
                 <Box sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
                     <Grid container spacing={0.5}>
-                        {attractions.filter(attraction =>
-                            !selectedAttractions.some(selected => selected.attractionId === attraction.attractionId)
-                        ).map(attraction => (
+                        {attractions.map(attraction => (
                             <Grid item xs={12} key={attraction.attractionId}>
                                 <Card sx={{ display: 'flex', height: '6.5rem', p: '0.5rem', borderRadius: 1 }}
                                     onClick={() => handleAttractionClick(attraction)}>

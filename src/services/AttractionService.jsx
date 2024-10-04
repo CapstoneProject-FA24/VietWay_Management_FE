@@ -41,8 +41,6 @@ export const fetchAttractions = async (params) => {
             imageUrl: item.imageUrl
         }));
 
-        console.log(attractions);
-
         return ({
             data: attractions,
             pageIndex: response.data?.data?.pageIndex,
