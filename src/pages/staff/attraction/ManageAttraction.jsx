@@ -7,19 +7,11 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
-import { fetchAttractions } from '@services/AttractionService';
+import { fetchAttractions, fetchAttractionType } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
-const attractionTypes = [
-    { AttractionTypeId: 1, Name: 'Công viên giải trí' }, { AttractionTypeId: 10, Name: 'Khu du lịch văn hóa' }, { AttractionTypeId: 11, Name: 'Danh lam thắng cảnh' },
-    { AttractionTypeId: 12, Name: 'Khu bảo tồn thiên nhiên' }, { AttractionTypeId: 13, Name: 'Chợ' }, { AttractionTypeId: 14, Name: 'Bãi biển' },
-    { AttractionTypeId: 15, Name: 'Khu tưởng niệm lịch sử' }, { AttractionTypeId: 16, Name: 'Thảo cầm viên' }, { AttractionTypeId: 2, Name: 'Thủy cung' },
-    { AttractionTypeId: 3, Name: 'Phòng trưng bày nghệ thuật' }, { AttractionTypeId: 4, Name: 'Khu cắm trại' }, { AttractionTypeId: 5, Name: 'Công trình tôn giáo' },
-    { AttractionTypeId: 6, Name: 'Bảo tàng' }, { AttractionTypeId: 7, Name: 'Công viên' }, { AttractionTypeId: 8, Name: 'Công trình công cộng' }, { AttractionTypeId: 9, Name: 'Khu du lịch sinh thái' }
-];
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -32,6 +24,7 @@ const ManageAttraction = () => {
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedAttraction, setSelectedAttraction] = useState(null);
     const [provinces, setProvinces] = useState([]);
+    const [attractionTypes, setAttractionTypes] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
     const [totalPages, setTotalPages] = useState(1);
@@ -70,7 +63,9 @@ const ManageAttraction = () => {
         const fetchProvincesData = async () => {
             try {
                 const fetchedProvinces = await fetchProvinces();
+                const fetchedAttractionType = await fetchAttractionType();
                 setProvinces(fetchedProvinces);
+                setAttractionTypes(fetchedAttractionType);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
             }
@@ -122,8 +117,8 @@ const ManageAttraction = () => {
     }));
 
     const typeOptions = attractionTypes.map(type => ({
-        value: type.AttractionTypeId,
-        label: type.Name
+        value: type.attractionTypeId,
+        label: type.attractionTypeName
     }));
 
     const animatedComponents = makeAnimated();

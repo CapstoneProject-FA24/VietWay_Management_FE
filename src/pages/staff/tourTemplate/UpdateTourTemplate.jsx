@@ -7,13 +7,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourCategory } from '@services/TourCategoryService';
 
 const UpdateTourTemplate = () => {
   const { id } = useParams();
@@ -23,6 +24,8 @@ const UpdateTourTemplate = () => {
     tourCategory: '', description: '', policy: '', note: '',
     imageUrls: [null, null, null, null], schedule: [], code: ''
   });
+  const [tourCategories, setTourCategories] = useState([]);
+  const [tourDurations, setTourDurations] = useState([]);
 
   const [editableFields, setEditableFields] = useState({
     tourName: { value: '', isEditing: false },
@@ -47,16 +50,21 @@ const UpdateTourTemplate = () => {
         setTourTemplate(fetchedTourTemplate);
 
         const fetchedProvinces = await fetchProvinces();
+        const duration = await fetchTourDuration();
+        const categories = await fetchTourCategory();
         setProvinces(fetchedProvinces);
+        setTourDurations(duration);
+        setTourCategories(categories);
+
         setEditableFields({
           tourName: { value: fetchedTourTemplate.tourName, isEditing: false },
           description: { value: fetchedTourTemplate.description, isEditing: false },
           policy: { value: fetchedTourTemplate.policy, isEditing: false },
           note: { value: fetchedTourTemplate.note, isEditing: false },
           provinces: { value: fetchedTourTemplate.provinces.map(p => ({ value: p.provinceId, label: p.provinceName })), isEditing: false },
-          duration: { value: fetchedTourTemplate.duration.durationName, isEditing: false },
+          duration: { value: fetchedTourTemplate.duration.durationId, isEditing: false },
           departurePoint: { value: fetchedTourTemplate.departurePoint, isEditing: false },
-          tourCategory: { value: fetchedTourTemplate.tourCategoryName, isEditing: false },
+          tourCategory: { value: fetchedTourTemplate.tourCategoryId, isEditing: false },
           code: { value: fetchedTourTemplate.code, isEditing: false },
         });
       } catch (error) {
@@ -300,9 +308,13 @@ const UpdateTourTemplate = () => {
                   <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
                   {editableFields.duration.isEditing ? (
                     <>
-                      <TextField
-                        value={editableFields.duration.value} onChange={(e) => handleFieldChange('duration', e.target.value)}
-                        variant="outlined" sx={{ mr: 1 }} />
+                      <Select sx={{ width: '100%', mr: 1 }}
+                        value={editableFields.duration.value}
+                        onChange={(e) => handleFieldChange('duration', e.target.value)}>
+                        {tourDurations.map((tourDuration) => (
+                          <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>{tourDuration.durationName}</MenuItem>
+                        ))}
+                      </Select>
                       <Button
                         variant="contained" onClick={() => handleFieldSubmit('duration')}
                         disabled={!editableFields.duration.value.trim()}
@@ -310,7 +322,9 @@ const UpdateTourTemplate = () => {
                     </>
                   ) : (
                     <>
-                      <Typography sx={{ color: '#05073C' }}>{editableFields.duration.value}</Typography>
+                      <Typography sx={{ color: '#05073C' }}>
+                        {tourDurations.find(duration => duration.durationId === editableFields.duration.value)?.durationName || ''}
+                      </Typography>
                       <IconButton onClick={() => handleFieldEdit('duration')} sx={{ ml: 2 }}><EditIcon /></IconButton>
                     </>
                   )}
@@ -325,8 +339,8 @@ const UpdateTourTemplate = () => {
                       <Select sx={{ width: '100%', mr: 1 }}
                         value={editableFields.tourCategory.value}
                         onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
-                        {mockTourTemplateCategories.map((tourCategory) => (
-                          <MenuItem key={tourCategory.CategoryId} value={tourCategory.CategoryName}>{tourCategory.CategoryName}</MenuItem>
+                        {tourCategories.map((tourCategory) => (
+                          <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>{tourCategory.tourCategoryName}</MenuItem>
                         ))}
                       </Select>
                       <Button
@@ -336,7 +350,9 @@ const UpdateTourTemplate = () => {
                     </>
                   ) : (
                     <>
-                      <Typography sx={{ color: '#05073C' }}>{editableFields.tourCategory.value}</Typography>
+                      <Typography sx={{ color: '#05073C' }}>
+                        {tourCategories.find(category => category.tourCategoryId === editableFields.tourCategory.value)?.tourCategoryName || ''}
+                      </Typography>
                       <IconButton onClick={() => handleFieldEdit('tourCategory')} sx={{ ml: 2 }}><EditIcon /></IconButton>
                     </>
                   )}

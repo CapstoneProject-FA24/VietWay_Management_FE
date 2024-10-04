@@ -11,29 +11,17 @@ import { Link, useLocation } from 'react-router-dom';
 import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
-const tourCategories = [
-    { TourCategoryId: 1, Name: 'Du lịch biển' },
-    { TourCategoryId: 2, Name: 'Du lịch núi' },
-    { TourCategoryId: 3, Name: 'Du lịch văn hóa' },
-    { TourCategoryId: 4, Name: 'Du lịch sinh thái' },
-    { TourCategoryId: 5, Name: 'Du lịch nghỉ dưỡng' },
-];
-
-const durations = [
-    { DurationId: 1, DurationName: 'Trong ngày' },
-    { DurationId: 2, DurationName: '2 ngày 1 đêm' },
-    { DurationId: 3, DurationName: '3 ngày 2 đêm' },
-    { DurationId: 4, DurationName: '4 ngày 3 đêm' },
-    { DurationId: 5, DurationName: '5 ngày 4 đêm' },
-];
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
     const [provinces, setProvinces] = useState([]);
+    const [tourCategories, setTourCategories] = useState([]);
+    const [tourDurations, setTourDurations] = useState([]);
     const [sortOrder, setSortOrder] = useState('tourNameA-Z');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
@@ -83,7 +71,11 @@ const ManageTourTemplate = () => {
         const fetchProvincesData = async () => {
             try {
                 const fetchedProvinces = await fetchProvinces();
+                const duration = await fetchTourDuration();
+                const categories = await fetchTourCategory();
                 setProvinces(fetchedProvinces);
+                setTourDurations(duration);
+                setTourCategories(categories);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
             }
@@ -92,13 +84,13 @@ const ManageTourTemplate = () => {
     }, []);
 
     const categoryOptions = tourCategories.map(category => ({
-        value: category.TourCategoryId,
-        label: category.Name
+        value: category.tourCategoryId,
+        label: category.tourCategoryName
     }));
 
-    const durationOptions = durations.map(duration => ({
-        value: duration.DurationId,
-        label: duration.DurationName
+    const durationOptions = tourDurations.map(duration => ({
+        value: duration.durationId,
+        label: duration.durationName
     }));
 
     const provinceOptions = provinces.map(province => ({

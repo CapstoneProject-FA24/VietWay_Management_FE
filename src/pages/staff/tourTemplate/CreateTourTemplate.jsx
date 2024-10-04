@@ -10,10 +10,11 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { mockTourTemplateCategories } from '@hooks/MockTourTemplate';
 import { createTourTemplate } from '@services/TourTemplateService';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourCategory } from '@services/TourCategoryService';
 
 const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
@@ -22,6 +23,8 @@ const CreateTourTemplate = () => {
     description: '', policy: '', note: '', imageUrls: [null, null, null, null],
     schedule: [{ dayNumber: 1, title: '', description: '', attractions: [], isEditing: true }], code: ''
   });
+  const [tourCategories, setTourCategories] = useState([]);
+  const [tourDurations, setTourDurations] = useState([]);
 
   const [editableFields, setEditableFields] = useState({
     tourName: { value: '', isEditing: true },
@@ -45,7 +48,11 @@ const CreateTourTemplate = () => {
     const fetchData = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();
+        const duration = await fetchTourDuration();
+        const categories = await fetchTourCategory();
         setProvinces(fetchedProvinces);
+        setTourDurations(duration);
+        setTourCategories(categories);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -142,7 +149,7 @@ const CreateTourTemplate = () => {
         tourName: editableFields.tourName.value,
         description: editableFields.description.value,
         duration: editableFields.duration.value,
-        tourCategoryId: mockTourTemplateCategories.find(cat => cat.CategoryName === editableFields.tourCategory.value)?.CategoryId,
+        tourCategoryId: editableFields.tourCategory.value,
         policy: editableFields.policy.value,
         note: editableFields.note.value,
         provinces: editableFields.provinces.value.map(province => province.value),
@@ -155,8 +162,10 @@ const CreateTourTemplate = () => {
         imageUrls: tourTemplate.imageUrls.filter(url => url !== null)
       };
       const response = await createTourTemplate(tourTemplateData);
+      if (response.statusCode == 200) {
+        navigate('/nhan-vien/tour-mau');
+      }
       console.log('Tour template created:', response);
-      navigate('/nhan-vien/tour-mau');
     } catch (error) {
       console.error('Error creating tour template:', error);
     }
@@ -312,13 +321,17 @@ const CreateTourTemplate = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
                 <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
                   {editableFields.duration.isEditing ? (
                     <>
-                      <TextField
-                        value={editableFields.duration.value} onChange={(e) => handleFieldChange('duration', e.target.value)}
-                        variant="outlined" sx={{ mr: 1 }} />
+                      <Select sx={{ width: '100%', mr: 1 }}
+                        value={editableFields.duration.value}
+                        onChange={(e) => handleFieldChange('duration', e.target.value)}>
+                        {tourDurations.map((tourDuration) => (
+                          <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>{tourDuration.durationName}</MenuItem>
+                        ))}
+                      </Select>
                       <Button
                         variant="contained" onClick={() => handleFieldSubmit('duration')}
                         disabled={!editableFields.duration.value.trim()}
@@ -326,7 +339,9 @@ const CreateTourTemplate = () => {
                     </>
                   ) : (
                     <>
-                      <Typography sx={{ color: '#05073C' }}>{editableFields.duration.value}</Typography>
+                      <Typography sx={{ color: '#05073C' }}>
+                        {tourDurations.find(duration => duration.durationId === editableFields.duration.value)?.durationName || ''}
+                      </Typography>
                       <IconButton onClick={() => handleFieldEdit('duration')} sx={{ ml: 2 }}><EditIcon /></IconButton>
                     </>
                   )}
@@ -341,8 +356,8 @@ const CreateTourTemplate = () => {
                       <Select sx={{ width: '100%', mr: 1 }}
                         value={editableFields.tourCategory.value}
                         onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
-                        {mockTourTemplateCategories.map((tourCategory) => (
-                          <MenuItem key={tourCategory.CategoryId} value={tourCategory.CategoryName}>{tourCategory.CategoryName}</MenuItem>
+                        {tourCategories.map((tourCategory) => (
+                          <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>{tourCategory.tourCategoryName}</MenuItem>
                         ))}
                       </Select>
                       <Button
@@ -352,7 +367,9 @@ const CreateTourTemplate = () => {
                     </>
                   ) : (
                     <>
-                      <Typography sx={{ color: '#05073C' }}>{editableFields.tourCategory.value}</Typography>
+                      <Typography sx={{ color: '#05073C' }}>
+                        {tourCategories.find(category => category.tourCategoryId === editableFields.tourCategory.value)?.tourCategoryName || ''}
+                      </Typography>
                       <IconButton onClick={() => handleFieldEdit('tourCategory')} sx={{ ml: 2 }}><EditIcon /></IconButton>
                     </>
                   )}
