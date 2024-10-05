@@ -59,7 +59,7 @@ const AttractionDetail = () => {
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98vw' }}>
       <Helmet>
         <title>Chi tiết điểm tham quan</title>
       </Helmet>
@@ -119,13 +119,9 @@ const AttractionDetail = () => {
                 </Box>
               ))}
             </Box>
-            <Box>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu</Typography>
-              <Typography>{attraction.description}</Typography>
-            </Box>
             <Box sx={{ mt: 3 }}>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.detail }} />
+              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
+              <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>

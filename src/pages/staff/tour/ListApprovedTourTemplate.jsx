@@ -16,12 +16,14 @@ const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [provinces, setProvinces] = useState([]);
+  const [tourCategories, setTourCategories] = useState([]);
+  const [tourDurations, setTourDurations] = useState([]);
   const [tourTemplates, setTourTemplates] = useState([]);
   const [sortOrder, setSortOrder] = useState("tourNameA-Z");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  //const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -65,6 +67,8 @@ const ListApprovedTourTemplate = () => {
         const duration = await fetchTourDuration();
         const categories = await fetchTourCategory();
         setProvinces(fetchedProvinces);
+        setTourCategories(categories);
+        setTourDurations(duration);
       } catch (error) {
         console.error('Error fetching provinces:', error);
       }
@@ -162,7 +166,7 @@ const ListApprovedTourTemplate = () => {
                   Thời lượng
                 </Typography>
                 <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
-                             isMulti options={durationOptions} onChange={setTempDuration} value={tempDuration} />
+                  isMulti options={durationOptions} onChange={setTempDuration} value={tempDuration} />
               </Box>
             </Box>
           </Grid>
@@ -171,7 +175,7 @@ const ListApprovedTourTemplate = () => {
               Loại Tour
             </Typography>
             <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
-                isMulti options={categoryOptions} onChange={setTempCategories} value={tempCategories} />
+              isMulti options={categoryOptions} onChange={setTempCategories} value={tempCategories} />
           </Grid>
           <Grid item xs={12} md={2.7} sx={{ mb: 5 }}>
             <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 1, backgroundColor: 'lightGray', color: 'black', width: '100%' }}>
