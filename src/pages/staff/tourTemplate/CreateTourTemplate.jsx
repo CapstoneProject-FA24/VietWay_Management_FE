@@ -10,7 +10,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { createTourTemplate } from '@services/TourTemplateService';
+import { createTourTemplate, editImages } from '@services/TourTemplateService';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
@@ -142,7 +142,7 @@ const CreateTourTemplate = () => {
     setExpandedDay(day);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isDraft) => {
     try {
       const tourTemplateData = {
         code: editableFields.code.value,
@@ -159,10 +159,11 @@ const CreateTourTemplate = () => {
           description: s.description,
           attractions: s.attractions.map(attr => attr.attractionId)
         })),
-        imageUrls: tourTemplate.imageUrls.filter(url => url !== null)
+        isDraft: isDraft
       };
       const response = await createTourTemplate(tourTemplateData);
       if (response.statusCode == 200) {
+        const response = await createTourTemplate(tourTemplateData);
         navigate('/nhan-vien/tour-mau');
       }
       console.log('Tour template created:', response);
@@ -558,8 +559,8 @@ const CreateTourTemplate = () => {
                   </>
                 )}
               </Box>
-              <Button variant="contained" fullWidth sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}>Lưu bản nháp</Button>
-              <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={handleSubmit}>Gửi</Button>
+              <Button variant="contained" fullWidth sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }}} onClick={() => {handleSubmit(true)}}>Lưu bản nháp</Button>
+              <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => {handleSubmit(false)}}>Gửi</Button>
             </Paper>
           </Grid>
         </Grid>

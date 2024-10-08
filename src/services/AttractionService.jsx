@@ -87,21 +87,36 @@ export const getAttractionById = async (id) => {
 };
 
 export const createAttraction = async (attractionData) => {
+  try {
+    const response = await axios.post(`${baseURL}/api/Attraction`, {
+      name: attractionData.name,
+      address: attractionData.address,
+      contactInfo: attractionData.contactInfo,
+      website: attractionData.website,
+      description: attractionData.description,
+      provinceId: attractionData.provinceId,
+      attractionTypeId: attractionData.attractionTypeId,
+      googlePlaceId: attractionData.googlePlaceId,
+      isDraft: attractionData.isDraft
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating attraction:', error);
+    throw error;
+  }
+};
+
+
+export const attractionImages = async (attractionData) => {
     try {
         const formData = new FormData();
-        formData.append("ProvinceId", attractionData.provinceId);
-        formData.append("AttractionTypeId", attractionData.attractionTypeId);
-        formData.append("IsDraft", attractionData.isDraft);
-        if (attractionData.name) formData.append("Name", attractionData.name);
-        if (attractionData.address) formData.append("Address", attractionData.address);
-        if (attractionData.contactInfo) formData.append("ContactInfo", attractionData.contactInfo);
-        if (attractionData.website) formData.append("Website", attractionData.website);
-        if (attractionData.description) formData.append("Description", attractionData.description);
         if (attractionData.images) {
             attractionData.images.forEach((image) => {
                 formData.append("Images", image);
             });
         }
+
+        console.log(formData);
 
         const response = await axios.post(`${baseURL}/api/Attraction`, formData, {
             headers: {
@@ -111,7 +126,7 @@ export const createAttraction = async (attractionData) => {
         console.log(response);
         return response.data;
     } catch (error) {
-        console.error('**Error saving attraction:', error.response);
+        console.error('Error saving attraction`s images:', error.response);
         throw error;
     }
 };
