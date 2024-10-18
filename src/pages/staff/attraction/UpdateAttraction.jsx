@@ -13,7 +13,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionType, getAttractionById, updateAttraction } from '@services/AttractionService';
+import { fetchAttractionType, getAttractionById, updateAttraction, updateAttractionImages } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 
 const UpdateAttraction = () => {
@@ -153,17 +153,15 @@ const UpdateAttraction = () => {
   const handleSave = async (isDraft) => {
     try {
       const attractionData = {
-        id: id, // The attraction ID from the URL params
+        id: id,
+        name: editableFields.name.value,
+        address: editableFields.address.value,
+        description: editableFields.description.value,
+        contactInfo: editableFields.contactInfo.value,
+        website: editableFields.website.value,
         provinceId: selectedProvince,
         attractionTypeId: editableFields.type.value,
         isDraft: isDraft,
-        name: editableFields.name.value,
-        address: editableFields.address.value,
-        contactInfo: editableFields.contactInfo.value,
-        website: editableFields.website.value,
-        description: editableFields.description.value,
-        newImages: images.filter(img => img instanceof File), // Only new images (File objects)
-        removedImageIds: removedImageIds
       };
 
       if (!isDraft) {
@@ -186,8 +184,23 @@ const UpdateAttraction = () => {
         }
       }
 
+      // Update attraction details
       const response = await updateAttraction(attractionData);
+      
       if (response.statusCode === 200) {
+        // Update images
+        const newImages = images.filter(img => img instanceof File);
+        if (newImages.length > 0 || removedImageIds.length > 0) {
+          const imagesResponse = await updateAttractionImages(
+            id,
+            newImages.length > 0 ? newImages : null,
+            removedImageIds.length > 0 ? removedImageIds : null
+          );
+          if (imagesResponse.statusCode !== 200) {
+            alert('Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.');
+            return;
+          }
+        }
         navigate('/nhan-vien/diem-tham-quan');
       } else {
         alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');

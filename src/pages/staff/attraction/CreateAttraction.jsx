@@ -13,7 +13,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchAttractionType, createAttraction, attractionImages } from '@services/AttractionService';
+import { fetchAttractionType, createAttraction, updateAttractionImages } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 
 const AddAttraction = () => {
@@ -161,9 +161,13 @@ const AddAttraction = () => {
       }
 
       const response = await createAttraction(attractionData);
+      console.log(response);
       if (response.statusCode === 200) {
         if (images.length > 0) {
-          const imagesResponse = await attractionImages({ images: images.length > 0 ? images : null });
+          const imagesResponse = await updateAttractionImages(
+            response.data,
+            images.length > 0 ? images : null
+          );
           if (imagesResponse.statusCode === 200) {
             navigate('/nhan-vien/diem-tham-quan');
           }

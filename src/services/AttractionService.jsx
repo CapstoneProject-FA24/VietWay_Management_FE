@@ -24,7 +24,7 @@ export const fetchAttractions = async (params) => {
 
         const response = await axios.get(`${baseURL}/api/Attraction?${queryParams.toString()}`);
         const items = response.data?.data?.items;
-        
+
         if (!items || !Array.isArray(items)) {
             throw new Error('Invalid response structure: items not found or not an array');
         }
@@ -48,7 +48,7 @@ export const fetchAttractions = async (params) => {
             pageSize: response.data?.data?.pageSize,
             total: response.data?.data?.total
         })
-        
+
     } catch (error) {
         console.error('Error fetching tour attractions:', error);
         throw error;
@@ -59,7 +59,8 @@ export const getAttractionById = async (id) => {
     try {
         const response = await axios.get(`${baseURL}/api/Attraction/${id}`);
         const data = response.data.data;
-        return {
+        console.log(data);
+        const attraction = {
             attractionId: data.attractionId,
             name: data.name,
             address: data.address,
@@ -73,6 +74,7 @@ export const getAttractionById = async (id) => {
             creatorName: data.creatorName,
             provinceId: data.province.provinceId,
             provinceName: data.province.provinceName,
+            imageURL: data.province.imageURL,
             attractionTypeId: data.attractionType.attractionTypeId,
             attractionTypeName: data.attractionType.attractionTypeName,
             images: data.images.map(image => ({
@@ -80,6 +82,7 @@ export const getAttractionById = async (id) => {
                 url: image.url
             }))
         };
+        return attraction;
     } catch (error) {
         console.error('Error fetching attraction:', error);
         throw error;
@@ -87,38 +90,43 @@ export const getAttractionById = async (id) => {
 };
 
 export const createAttraction = async (attractionData) => {
-  try {
-    const response = await axios.post(`${baseURL}/api/Attraction`, {
-      name: attractionData.name,
-      address: attractionData.address,
-      contactInfo: attractionData.contactInfo,
-      website: attractionData.website,
-      description: attractionData.description,
-      provinceId: attractionData.provinceId,
-      attractionTypeId: attractionData.attractionTypeId,
-      googlePlaceId: attractionData.googlePlaceId,
-      isDraft: attractionData.isDraft
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error creating attraction:', error);
-    throw error;
-  }
+    try {
+        const response = await axios.post(`${baseURL}/api/Attraction`, {
+            name: attractionData.name,
+            address: attractionData.address,
+            contactInfo: attractionData.contactInfo,
+            website: attractionData.website,
+            description: attractionData.description,
+            provinceId: attractionData.provinceId,
+            attractionTypeId: attractionData.attractionTypeId,
+            googlePlaceId: attractionData.googlePlaceId,
+            isDraft: attractionData.isDraft
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating attraction:', error);
+        throw error;
+    }
 };
 
 
-export const attractionImages = async (attractionData) => {
+export const updateAttractionImages = async (attractionId, newImages, deletedImageIds) => {
     try {
+        console.log(attractionId);
+        console.log(newImages);
         const formData = new FormData();
-        if (attractionData.images) {
-            attractionData.images.forEach((image) => {
-                formData.append("Images", image);
+        if (newImages) {
+            newImages.forEach((image) => {
+                formData.append("NewImages", image);
+            });
+        }
+        if (deletedImageIds) {
+            deletedImageIds.forEach((imageId) => {
+                formData.append("DeletedImageIds", imageId);
             });
         }
 
-        console.log(formData);
-
-        const response = await axios.post(`${baseURL}/api/Attraction`, formData, {
+        const response = await axios.patch(`${baseURL}/api/Attraction/${attractionId}/images`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
@@ -126,38 +134,23 @@ export const attractionImages = async (attractionData) => {
         console.log(response);
         return response.data;
     } catch (error) {
-        console.error('Error saving attraction`s images:', error.response);
+        console.error('Error updating attraction images:', error.response);
         throw error;
     }
 };
 
 export const updateAttraction = async (attractionData) => {
     try {
-        const formData = new FormData();
-        formData.append("ProvinceId", attractionData.provinceId);
-        formData.append("AttractionTypeId", attractionData.attractionTypeId);
-        formData.append("IsDraft", attractionData.isDraft);
-        if (attractionData.name) formData.append("Name", attractionData.name);
-        if (attractionData.address) formData.append("Address", attractionData.address);
-        if (attractionData.contactInfo) formData.append("ContactInfo", attractionData.contactInfo);
-        if (attractionData.website) formData.append("Website", attractionData.website);
-        if (attractionData.description) formData.append("Description", attractionData.description);
-        if (attractionData.googlePlaceId) formData.append("GooglePlaceId", attractionData.googlePlaceId);
-        if (attractionData.newImages) {
-            attractionData.newImages.forEach((image) => {
-                formData.append("NewImages", image);
-            });
-        }
-        if (attractionData.removedImageIds) {
-            attractionData.removedImageIds.forEach((imageId) => {
-                formData.append("RemovedImageIds", imageId);
-            });
-        }
-
-        const response = await axios.put(`${baseURL}/api/Attraction/${attractionData.id}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+        const response = await axios.put(`${baseURL}/api/Attraction/${attractionData.id}`, {
+            name: attractionData.name,
+            address: attractionData.address,
+            contactInfo: attractionData.contactInfo,
+            website: attractionData.website,
+            description: attractionData.description,
+            provinceId: attractionData.provinceId,
+            attractionTypeId: attractionData.attractionTypeId,
+            googlePlaceId: attractionData.googlePlaceId,
+            isDraft: attractionData.isDraft
         });
         console.log(response);
         return response.data;

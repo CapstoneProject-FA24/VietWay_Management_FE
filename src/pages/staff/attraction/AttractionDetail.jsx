@@ -20,6 +20,7 @@ const AttractionDetail = () => {
     const fetchAttraction = async () => {
       try {
         const fetchedAttraction = await getAttractionById(id);
+        console.log(fetchedAttraction);
         setAttraction(fetchedAttraction);
       } catch (error) {
         console.error('Error fetching attraction:', error);
@@ -138,6 +139,23 @@ const AttractionDetail = () => {
 
               <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
               <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+            </Paper>
+            <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+              <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px', mb: 2 }}>
+                Thông tin tạo điểm tham quan
+              </Typography>
+              <Box sx={{ display: 'flex', width: '100%' }}>
+                <Typography sx={{ fontWeight: 700 }}>Mã: </Typography>
+                <Typography sx={{ mb: 1, ml: 1, color: 'primary.main' }}>{attraction.attractionId}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', width: '100%' }}>
+                <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
+                <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', width: '100%' }}>
+                <Typography sx={{ fontWeight: 700 }}>Tạo bởi: </Typography>
+                <Typography sx={{ mb: 1, ml: 1 }}>{attraction.creatorName}</Typography>
+              </Box>
             </Paper>
           </Grid>
         </Grid>
