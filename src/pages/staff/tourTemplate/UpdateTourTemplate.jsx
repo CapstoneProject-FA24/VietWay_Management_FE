@@ -7,11 +7,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
-import { fetchTourTemplateById } from '@services/TourTemplateService';
+import { fetchTourTemplateById, updateTourTemplate, updateTemplateImages } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
@@ -42,6 +42,8 @@ const UpdateTourTemplate = () => {
   const [isAttractionPopupOpen, setIsAttractionPopupOpen] = useState(false);
   const [currentEditingDay, setCurrentEditingDay] = useState(null);
   const pageTopRef = useRef(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,6 +167,68 @@ const UpdateTourTemplate = () => {
           : item
       )
     }));
+  };
+
+  const handleSubmit = async (isDraft) => {
+    try {
+      const tourTemplateData = {
+        tourTemplateId: id,
+        code: editableFields.code.value,
+        tourName: editableFields.tourName.value,
+        description: editableFields.description.value,
+        durationId: editableFields.duration.value,
+        tourCategoryId: editableFields.tourCategory.value,
+        policy: editableFields.policy.value,
+        note: editableFields.note.value,
+        provinceIds: editableFields.provinces.value.map(province => province.value),
+        schedules: tourTemplate.schedule.map(s => ({
+          dayNumber: s.dayNumber,
+          title: s.title,
+          description: s.description,
+          attractionIds: s.attractions.map(attr => attr.attractionId)
+        })),
+        isDraft: isDraft
+      };
+
+      if (!isDraft) {
+        const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'policy', 'note', 'provinceIds', 'schedules'];
+        const missingFields = requiredFields.filter(field => {
+          if (Array.isArray(tourTemplateData[field])) {
+            return tourTemplateData[field].length === 0;
+          }
+          return !tourTemplateData[field];
+        });
+
+        if (missingFields.length > 0) {
+          alert('Vui lòng điền đầy đủ thông tin trước khi gửi.');
+          return;
+        }
+      } else {
+        if (!tourTemplateData.durationId || !tourTemplateData.tourCategoryId) {
+          alert('Vui lòng chọn thời lượng và loại tour trước khi lưu bản nháp.');
+          return;
+        }
+      }
+
+      const response = await updateTourTemplate(id, tourTemplateData);
+
+      if (response.statusCode === 200) {
+        const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
+        const deletedImageIds = []; 
+
+        if (newImages.length > 0 || deletedImageIds.length > 0) {
+          await updateTemplateImages(id, newImages, deletedImageIds);
+        }
+
+        alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã cập nhật và gửi tour mẫu thành công.');
+        navigate('/nhan-vien/tour-mau');
+      } else {
+        alert('Có lỗi xảy ra khi cập nhật tour mẫu.');
+      }
+    } catch (error) {
+      console.error('Error updating tour template:', error);
+      alert('Đã xảy ra lỗi khi cập nhật tour mẫu.');
+    }
   };
 
   return (
@@ -550,8 +614,22 @@ const UpdateTourTemplate = () => {
                   <Typography sx={{ ml: 1, color: tourTemplate.statusName === 'Bản nháp' ? 'gray' : tourTemplate.statusName === 'Chờ duyệt' ? 'primary.main' : tourTemplate.statusName === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                 </Typography>
               </Box>
-              <Button variant="contained" fullWidth sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}>Lưu bản nháp</Button>
-              <Button variant="contained" fullWidth sx={{ height: '50px' }}>Gửi</Button>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}
+                onClick={() => handleSubmit(true)}
+              >
+                Lưu bản nháp
+              </Button>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                sx={{ height: '50px' }}
+                onClick={() => handleSubmit(false)}
+              >
+                Gửi
+              </Button>
             </Paper>
           </Grid>
         </Grid>

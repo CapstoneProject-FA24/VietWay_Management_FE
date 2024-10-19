@@ -10,7 +10,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { createTourTemplate, editImages } from '@services/TourTemplateService';
+import { createTourTemplate, updateTemplateImages } from '@services/TourTemplateService';
 import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
@@ -144,31 +144,77 @@ const CreateTourTemplate = () => {
 
   const handleSubmit = async (isDraft) => {
     try {
+      // Check if duration and category are selected for both draft and send
+      if (!editableFields.duration.value || !editableFields.tourCategory.value) {
+        alert('Vui lòng chọn thời lượng và loại tour trước khi lưu.');
+        return;
+      }
+
       const tourTemplateData = {
         code: editableFields.code.value,
         tourName: editableFields.tourName.value,
         description: editableFields.description.value,
-        duration: editableFields.duration.value,
+        durationId: editableFields.duration.value,
         tourCategoryId: editableFields.tourCategory.value,
         policy: editableFields.policy.value,
         note: editableFields.note.value,
-        provinces: editableFields.provinces.value.map(province => province.value),
-        schedule: tourTemplate.schedule.map(s => ({
+        provinceIds: editableFields.provinces.value.map(province => province.value),
+        schedules: tourTemplate.schedule.map(s => ({
           dayNumber: s.dayNumber,
           title: s.title,
           description: s.description,
-          attractions: s.attractions.map(attr => attr.attractionId)
+          attractionIds: s.attractions.map(attr => attr.attractionId)
         })),
         isDraft: isDraft
       };
-      const response = await createTourTemplate(tourTemplateData);
-      if (response.statusCode == 200) {
-        const response = await createTourTemplate(tourTemplateData);
-        navigate('/nhan-vien/tour-mau');
+
+      if (!isDraft) {
+        // Additional checks for sending (not draft)
+        const requiredFields = ['tourName', 'description', 'policy', 'note', 'provinceIds', 'schedules'];
+        const missingFields = requiredFields.filter(field => {
+          if (Array.isArray(tourTemplateData[field])) {
+            return tourTemplateData[field].length === 0;
+          }
+          return !tourTemplateData[field];
+        });
+
+        if (missingFields.length > 0) {
+          alert('Vui lòng điền đầy đủ thông tin trước khi gửi.');
+          return;
+        }
+
+        const invalidSchedules = tourTemplateData.schedules.filter(s => 
+          !s.title || !s.description || s.attractionIds.length === 0
+        );
+
+        if (invalidSchedules.length > 0) {
+          alert('Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình.');
+          return;
+        }
       }
-      console.log('Tour template created:', response);
+
+      const response = await createTourTemplate(tourTemplateData);
+
+      if (response.statusCode === 200) {
+        const tourTemplateId = response.data;
+
+        const imagesToUpload = tourTemplate.imageUrls.filter(img => img instanceof File);
+        if (imagesToUpload.length > 0) {
+          const imagesResponse = await updateTemplateImages(tourTemplateId, imagesToUpload);
+          if (imagesResponse.statusCode !== 200) {
+            console.error('Error uploading images:', imagesResponse);
+          }
+        }
+
+        alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo tour mẫu thành công.');
+        navigate('/nhan-vien/tour-mau');
+      } else {
+        console.error('Error creating tour template:', response);
+        alert('Có lỗi xảy ra khi tạo tour mẫu. Vui lòng thử lại.');
+      }
     } catch (error) {
       console.error('Error creating tour template:', error);
+      alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
     }
   };
 
@@ -559,8 +605,22 @@ const CreateTourTemplate = () => {
                   </>
                 )}
               </Box>
-              <Button variant="contained" fullWidth sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }}} onClick={() => {handleSubmit(true)}}>Lưu bản nháp</Button>
-              <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => {handleSubmit(false)}}>Gửi</Button>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }}}
+                onClick={() => handleSubmit(true)}
+              >
+                Lưu bản nháp
+              </Button>
+              <Button 
+                variant="contained" 
+                fullWidth 
+                sx={{ height: '50px' }}
+                onClick={() => handleSubmit(false)}
+              >
+                Gửi
+              </Button>
             </Paper>
           </Grid>
         </Grid>

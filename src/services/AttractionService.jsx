@@ -112,8 +112,6 @@ export const createAttraction = async (attractionData) => {
 
 export const updateAttractionImages = async (attractionId, newImages, deletedImageIds) => {
     try {
-        console.log(attractionId);
-        console.log(newImages);
         const formData = new FormData();
         if (newImages) {
             newImages.forEach((image) => {
@@ -131,7 +129,6 @@ export const updateAttractionImages = async (attractionId, newImages, deletedIma
                 'Content-Type': 'multipart/form-data'
             }
         });
-        console.log(response);
         return response.data;
     } catch (error) {
         console.error('Error updating attraction images:', error.response);

@@ -89,16 +89,16 @@ export const createTourTemplate = async (tourTemplateData) => {
             code: tourTemplateData.code,
             tourName: tourTemplateData.tourName,
             description: tourTemplateData.description,
-            durationId: tourTemplateData.duration,
+            durationId: tourTemplateData.durationId,
             tourCategoryId: tourTemplateData.tourCategoryId,
             policy: tourTemplateData.policy,
             note: tourTemplateData.note,
-            provinceIds: tourTemplateData.provinces,
-            schedules: tourTemplateData.schedule.map(s => ({
+            provinceIds: tourTemplateData.provinceIds,
+            schedules: tourTemplateData.schedules.map(s => ({
                 dayNumber: s.dayNumber,
                 title: s.title,
                 description: s.description,
-                attractionIds: s.attractions
+                attractionIds: s.attractionIds
             })),
             isDraft: tourTemplateData.isDraft
         };
@@ -111,19 +111,56 @@ export const createTourTemplate = async (tourTemplateData) => {
     }
 };
 
-export const editImages = async (tourTemplateData) => {
+export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
+    try {
+        const requestData = {
+            code: tourTemplateData.code,
+            tourName: tourTemplateData.tourName,
+            description: tourTemplateData.description,
+            durationId: tourTemplateData.durationId,
+            tourCategoryId: tourTemplateData.tourCategoryId,
+            policy: tourTemplateData.policy,
+            note: tourTemplateData.note,
+            provinceIds: tourTemplateData.provinceIds,
+            schedules: tourTemplateData.schedules.map(s => ({
+                dayNumber: s.dayNumber,
+                title: s.title,
+                description: s.description,
+                attractionIds: s.attractionIds
+            })),
+            isDraft: tourTemplateData.isDraft
+        };
+        console.log(requestData);
+        const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating tour template:', error);
+        throw error;
+    }
+};
+
+export const updateTemplateImages = async (tourTemplateId, newImages, deletedImageIds) => {
     try {
         const formData = new FormData();
-        tourTemplateData.imageUrls.forEach((image) => {
-            formData.append("Images", image);
-        });
+        if (newImages) {
+            newImages.forEach((image) => {
+                formData.append("NewImages", image);
+            });
+        }
+        if (deletedImageIds) {
+            deletedImageIds.forEach((imageId) => {
+                formData.append("DeletedImageIds", imageId);
+            });
+        }
 
-        const response = await axios.post(`${baseURL}/api/TourTemplate`, formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        const response = await axios.patch(`${baseURL}/api/TourTemplate/${tourTemplateId}/images`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
         });
         return response.data;
     } catch (error) {
-        console.error('Error saving tour template:', error);
+        console.error('Error updating tour template images:', error.response);
         throw error;
     }
 };
