@@ -6,17 +6,10 @@ import AttractionCard from '@components/manager/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchAttractions } from '@services/AttractionService';
+import { fetchAttractions, fetchAttractionType } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
-const attractionTypes = [
-    { AttractionTypeId: 1, Name: 'Công viên giải trí' }, { AttractionTypeId: 10, Name: 'Khu du lịch văn hóa' }, { AttractionTypeId: 11, Name: 'Danh lam thắng cảnh' },
-    { AttractionTypeId: 12, Name: 'Khu bảo tồn thiên nhiên' }, { AttractionTypeId: 13, Name: 'Chợ' }, { AttractionTypeId: 14, Name: 'Bãi biển' },
-    { AttractionTypeId: 15, Name: 'Khu tưởng niệm lịch sử' }, { AttractionTypeId: 16, Name: 'Thảo cầm viên' }, { AttractionTypeId: 2, Name: 'Thủy cung' },
-    { AttractionTypeId: 3, Name: 'Phòng trưng bày nghệ thuật' }, { AttractionTypeId: 4, Name: 'Khu cắm trại' }, { AttractionTypeId: 5, Name: 'Công trình tôn giáo' },
-    { AttractionTypeId: 6, Name: 'Bảo tàng' }, { AttractionTypeId: 7, Name: 'Công viên' }, { AttractionTypeId: 8, Name: 'Công trình công cộng' }, { AttractionTypeId: 9, Name: 'Khu du lịch sinh thái' }
-];
+import { useNavigate } from 'react-router-dom';
 
 const ManagerManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -27,6 +20,7 @@ const ManagerManageAttraction = () => {
     const [sortOrder, setSortOrder] = useState('nameA-Z');
     const [statusTab, setStatusTab] = useState('all');
     const [provinces, setProvinces] = useState([]);
+    const [attractionTypes, setAttractionTypes] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
     const [totalPages, setTotalPages] = useState(1);
@@ -34,6 +28,13 @@ const ManagerManageAttraction = () => {
     const [attrTypes, setAttrTypes] = useState([]);
     const [attrProvinces, setAttrProvinces] = useState([]);
     const [sortedAttractions, setSortedAttractions] = useState([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const role = localStorage.getItem('role');
+        const token = localStorage.getItem('token');
+        if (!role || !token) { navigate(`/dang-nhap`); }
+      }, []);
 
     useEffect(() => {
         fetchData();
@@ -62,15 +63,17 @@ const ManagerManageAttraction = () => {
     };
 
     useEffect(() => {
-        const fetchProvincesData = async () => {
+        const fetchFilterData = async () => {
             try {
                 const fetchedProvinces = await fetchProvinces();
+                const fetchedAttractionType = await fetchAttractionType();
                 setProvinces(fetchedProvinces);
+                setAttractionTypes(fetchedAttractionType);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
             }
         };
-        fetchProvincesData();
+        fetchFilterData();
     }, []);
 
     const sortAttractions = () => {
@@ -81,9 +84,9 @@ const ManagerManageAttraction = () => {
                 case 'nameZ-A':
                     return b.name.localeCompare(a.name);
                 case 'createdDate':
-                    return new Date(b.createdDate) - new Date(a.createdDate);
+                    return new Date(b.createdAt) - new Date(a.createdAt);
                 case 'createdDateReverse':
-                    return new Date(a.createdDate) - new Date(b.createdDate);
+                    return new Date(a.createdAt) - new Date(b.createdAt);
                 default:
                     return 0;
             }
@@ -115,10 +118,10 @@ const ManagerManageAttraction = () => {
         value: province.provinceId,
         label: province.provinceName
     }));
-
+    
     const typeOptions = attractionTypes.map(type => ({
-        value: type.AttractionTypeId,
-        label: type.Name
+        value: type.attractionTypeId,
+        label: type.name
     }));
 
     const animatedComponents = makeAnimated();
@@ -210,7 +213,7 @@ const ManagerManageAttraction = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedAttractions.map(attraction => (
-                        <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.AttractionId}>
+                        <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.attractionId}>
                             <AttractionCard attraction={attraction} isOpen={isSidebarOpen}/>
                         </Grid>
                     ))}

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
+import { getAttractionStatusInfo } from '@services/StatusService';
 
 const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
     const location = useLocation();
@@ -8,16 +9,6 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
 
     const handleDelete = () => {
         onOpenDeletePopup(attraction);
-    };
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 0: return '#5d5d5d';
-            case 1: return 'blue';
-            case 2: return 'green';
-            case 3: return 'red';
-            default: return 'black';
-        }
     };
 
     return (
@@ -75,12 +66,12 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
                         <Typography sx={{
                             alignItems: 'center',
                             fontSize: isOpen ? '1.05rem' : '1rem',
-                            color: getStatusColor(attraction.status),
+                            color: getAttractionStatusInfo(attraction.status).color,
                             padding: '4px 8px',
                             borderRadius: '4px',
                             fontWeight: 700
                         }}>
-                            {attraction.statusName}
+                            {getAttractionStatusInfo(attraction.status).text}
                         </Typography>
                     </Box>
                 </Box>

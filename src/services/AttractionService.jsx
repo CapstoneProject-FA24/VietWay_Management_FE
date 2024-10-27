@@ -1,19 +1,9 @@
 import axios from 'axios';
 import baseURL from '@api/baseURL'
-
-const getStatusText = (status) => {
-    switch (status) {
-        case 0: return 'Bản nháp';
-        case 1: return 'Chờ duyệt';
-        case 2: return 'Đã duyệt';
-        case 3: return 'Từ chối';
-        default: return 'Không xác định';
-    }
-};
+const token = localStorage.getItem('token');
 
 export const fetchAttractions = async (params) => {
     try {
-        console.log(params);
         const queryParams = new URLSearchParams();
         queryParams.append('pageSize', params.pageSize);
         queryParams.append('pageIndex', params.pageIndex);
@@ -21,8 +11,11 @@ export const fetchAttractions = async (params) => {
         if (params.attractionTypeIds) params.attractionTypeIds.forEach(id => queryParams.append('attractionTypeIds', id));
         if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
-
-        const response = await axios.get(`${baseURL}/api/Attraction?${queryParams.toString()}`);
+        const response = await axios.get(`${baseURL}/api/attractions?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const items = response.data?.data?.items;
 
         if (!items || !Array.isArray(items)) {
@@ -31,12 +24,11 @@ export const fetchAttractions = async (params) => {
 
         const attractions = items.map(item => ({
             attractionId: item.attractionId,
-            name: item.name,
-            address: item.address,
+            name: item.name || "Không có",
+            address: item.address || "Không có",
             status: item.status,
-            statusName: getStatusText(item.status),
             attractionType: item.attractionType,
-            createdDate: item.createdDate,
+            createdDate: item.createdAt,
             creatorName: item.creatorName,
             province: item.province,
             imageUrl: item.imageUrl
@@ -55,28 +47,31 @@ export const fetchAttractions = async (params) => {
     }
 };
 
-export const getAttractionById = async (id) => {
+export const fetchAttractionById = async (id) => {
     try {
-        const response = await axios.get(`${baseURL}/api/Attraction/${id}`);
+        const response = await axios.get(`${baseURL}/api/attractions/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const data = response.data.data;
         console.log(data);
         const attraction = {
             attractionId: data.attractionId,
-            name: data.name,
-            address: data.address,
-            contactInfo: data.contactInfo,
-            website: data.website,
-            description: data.description,
-            googlePlaceId: data.googlePlaceId,
+            name: data.name || "Không có",
+            address: data.address || "Không có",
+            contactInfo: data.contactInfo || "Không có",
+            website: data.website || "Không có",
+            description: data.description || "Không có",
+            googlePlaceId: data.googlePlaceId || "Không có",
             status: data.status,
-            statusName: getStatusText(data.status),
             createdDate: data.createdDate,
-            creatorName: data.creatorName,
-            provinceId: data.province.provinceId,
-            provinceName: data.province.provinceName,
+            creatorName: data.creatorName || "Không có",
+            provinceId: data.province.provinceId || "Không có",
+            provinceName: data.province.provinceName || "Không có",
             imageURL: data.province.imageURL,
-            attractionTypeId: data.attractionType.attractionTypeId,
-            attractionTypeName: data.attractionType.attractionTypeName,
+            attractionTypeId: data.attractionType.attractionCategoryId || "Không có",
+            attractionTypeName: data.attractionType.name || "Không có",
             images: data.images.map(image => ({
                 imageId: image.imageId,
                 url: image.url
@@ -101,6 +96,10 @@ export const createAttraction = async (attractionData) => {
             attractionTypeId: attractionData.attractionTypeId,
             googlePlaceId: attractionData.googlePlaceId,
             isDraft: attractionData.isDraft
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
         return response.data;
     } catch (error) {
@@ -124,9 +123,10 @@ export const updateAttractionImages = async (attractionId, newImages, deletedIma
             });
         }
 
-        const response = await axios.patch(`${baseURL}/api/Attraction/${attractionId}/images`, formData, {
+        const response = await axios.patch(`${baseURL}/api/attractions/${attractionId}/images`, formData, {
             headers: {
-                'Content-Type': 'multipart/form-data'
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
             }
         });
         return response.data;
@@ -138,7 +138,7 @@ export const updateAttractionImages = async (attractionId, newImages, deletedIma
 
 export const updateAttraction = async (attractionData) => {
     try {
-        const response = await axios.put(`${baseURL}/api/Attraction/${attractionData.id}`, {
+        const response = await axios.put(`${baseURL}/api/attractions/${attractionData.id}`, {
             name: attractionData.name,
             address: attractionData.address,
             contactInfo: attractionData.contactInfo,
@@ -148,8 +148,11 @@ export const updateAttraction = async (attractionData) => {
             attractionTypeId: attractionData.attractionTypeId,
             googlePlaceId: attractionData.googlePlaceId,
             isDraft: attractionData.isDraft
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
         });
-        console.log(response);
         return response.data;
     } catch (error) {
         console.error('Error updating attraction:', error.response);
@@ -159,8 +162,16 @@ export const updateAttraction = async (attractionData) => {
 
 export const fetchAttractionType = async () => {
     try {
-        const response = await axios.get(`${baseURL}/api/AttractionType`);
-        return response.data.data;
+        const response = await axios.get(`${baseURL}/api/attraction-types`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data.data.map(item => ({
+            attractionTypeId: item.attractionCategoryId,
+            name: item.name,
+            description: item.description
+        }));
     } catch (error) {
         console.error('Error fetching tour templates:', error);
         throw error;

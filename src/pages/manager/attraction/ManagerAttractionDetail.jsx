@@ -6,19 +6,33 @@ import "slick-carousel/slick/slick-theme.css";
 import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { Link, useParams } from 'react-router-dom';
-import { getAttractionById, mockAttractionTypes } from '@hooks/MockAttractions';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { fetchAttractionById } from '@services/AttractionService';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [sliderRef, setSliderRef] = useState(null);
   const [attraction, setAttraction] = useState(null);
   const { id } = useParams();
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
-    const fetchedAttraction = getAttractionById(id);
-    setAttraction(fetchedAttraction);
-  }, [id]);
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token) { navigate(`/dang-nhap`); }
+    
+    const fetchAttraction = async () => {
+      try {
+        const fetchedAttraction = await fetchAttractionById(id);
+        setAttraction(fetchedAttraction);
+      } catch (error) {
+        console.error('Error fetching attraction:', error);
+        // Handle error (e.g., show error message to user)
+      }
+    };
+
+    fetchAttraction();
+  }, [id, navigate]);
 
   const settings = {
     dots: true,
@@ -66,7 +80,7 @@ const ManagerAttractionDetail = () => {
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-            {mockAttractionTypes.find(type => type.typeName === attraction.attractionType)?.typeName || ''}
+            {attraction.attractionTypeName}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -79,11 +93,11 @@ const ManagerAttractionDetail = () => {
             <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
               <Box className="slick-slider-container" sx={{ height: '450px' }}>
                 <Slider ref={setSliderRef} {...settings}>
-                  {attraction.attractionImages.map((image, index) => (
+                  {attraction.images.map((image, index) => (
                     <div key={index} style={{ position: 'relative' }}>
                       <img
                         src={image.url}
-                        alt={image.alt}
+                        alt={`Attraction image ${index + 1}`}
                         style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                       />
                     </div>
@@ -92,7 +106,7 @@ const ManagerAttractionDetail = () => {
               </Box>
             </Paper>
             <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
-              {attraction.attractionImages.map((image, index) => (
+              {attraction.images.map((image, index) => (
                 <Box
                   key={index}
                   sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
@@ -106,13 +120,9 @@ const ManagerAttractionDetail = () => {
                 </Box>
               ))}
             </Box>
-            <Box>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu</Typography>
-              <Typography>{attraction.description}</Typography>
-            </Box>
             <Box sx={{ mt: 3 }}>
               <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.detail }} />
+              <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { mockCustomer } from '@hooks/MockAccount'; // Update import to use mockCustomer
+import React, { useState, useEffect } from 'react';
+import { mockCustomer } from '@hooks/MockAccount'; 
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import StatusPopup from '@components/StatusPopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 const ManageCustomer = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,13 +13,18 @@ const ManageCustomer = () => {
   const [openPopup, setOpenPopup] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+  const navigate = useNavigate();
   const searchTermWithoutAccents = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const filteredCustomers = mockCustomer.filter(customer =>
     customer.fullname && customer.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
   );
 
-  // Sorting function
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token) { navigate(`/dang-nhap`); }
+  }, []);
+
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
     const aName = a.fullname || '';
     const bName = b.fullname || '';

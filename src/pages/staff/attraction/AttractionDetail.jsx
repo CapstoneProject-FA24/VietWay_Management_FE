@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams } from 'react-router-dom';
-import { getAttractionById } from '@services/AttractionService';
+import { fetchAttractionById } from '@services/AttractionService';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);

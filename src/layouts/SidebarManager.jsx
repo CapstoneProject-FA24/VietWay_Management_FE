@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -85,6 +85,14 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 
 const SidebarManager = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    
+    navigate('/dang-nhap');
+  };
 
   return (
     <>
@@ -153,11 +161,10 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
         <Divider />
         <List sx={{ width: '100%', mt: 2 }}>
           <ListItem 
-            component={Link} 
-            to="/dang-xuat" 
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
+            onClick={handleLogout}
+            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}
           >
-            <MenuItemPaper elevation={1} isSelected={location.pathname === '/dang-xuat'}>
+            <MenuItemPaper elevation={1}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <ExitToAppIcon sx={{ color: '#2196f3', transform: 'rotate(180deg)' }} />

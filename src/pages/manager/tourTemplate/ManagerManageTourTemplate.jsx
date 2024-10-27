@@ -7,7 +7,7 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
@@ -51,6 +51,12 @@ const ManagerManageTourTemplate = () => {
     const [tempProvinces, setTempProvinces] = useState([]);
     const [tempDuration, setTempDuration] = useState([]);
     const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
+
+    useEffect(() => {
+        const role = localStorage.getItem('role');
+        const token = localStorage.getItem('token');
+        if (!role || !token) { navigate(`/dang-nhap`); }
+      }, []);
 
     useEffect(() => {
         fetchData();
