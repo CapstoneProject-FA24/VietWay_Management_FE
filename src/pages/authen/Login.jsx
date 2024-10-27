@@ -56,7 +56,7 @@ export default function Login() {
   useEffect(() => {
     const role = localStorage.getItem('role');
     const token = localStorage.getItem('token');
-    if (role && token) { navigate(`/${role}/dash-board`); }
+    if (role && token) { navigate(`/${role}/diem-tham-quan`); } //dash-board
   }, [location]);
 
   const validateEmailOrPhone = (input) => {

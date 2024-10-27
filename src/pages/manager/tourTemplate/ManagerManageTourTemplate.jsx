@@ -176,7 +176,7 @@ const ManagerManageTourTemplate = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', width: '98vw' }}>
+        <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
                 <title>Duyệt Tour mẫu</title>
             </Helmet>
@@ -292,6 +292,13 @@ const ManagerManageTourTemplate = () => {
                             />
                         </Grid>
                     ))}
+                    {sortedTourTemplates.length === 0 && (
+                        <Grid item xs={12}>
+                            <Typography variant="body1" align="center" color="error">
+                                Không tìm thấy tour phù hợp.
+                            </Typography>
+                        </Grid>
+                    )}
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                     <Pagination

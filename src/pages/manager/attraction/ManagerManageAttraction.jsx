@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SidebarStaff from '@layouts/SidebarStaff';
+import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
 import AttractionCard from '@components/manager/AttractionCard';
@@ -34,7 +34,7 @@ const ManagerManageAttraction = () => {
         const role = localStorage.getItem('role');
         const token = localStorage.getItem('token');
         if (!role || !token) { navigate(`/dang-nhap`); }
-      }, []);
+    }, []);
 
     useEffect(() => {
         fetchData();
@@ -118,7 +118,7 @@ const ManagerManageAttraction = () => {
         value: province.provinceId,
         label: province.provinceName
     }));
-    
+
     const typeOptions = attractionTypes.map(type => ({
         value: type.attractionTypeId,
         label: type.name
@@ -140,7 +140,7 @@ const ManagerManageAttraction = () => {
             <Helmet>
                 <title>Duyệt điểm tham quan</title>
             </Helmet>
-            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
@@ -214,9 +214,16 @@ const ManagerManageAttraction = () => {
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedAttractions.map(attraction => (
                         <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.attractionId}>
-                            <AttractionCard attraction={attraction} isOpen={isSidebarOpen}/>
+                            <AttractionCard attraction={attraction} isOpen={isSidebarOpen} />
                         </Grid>
                     ))}
+                    {sortedAttractions.length === 0 && (
+                        <Grid item xs={12}>
+                            <Typography variant="body1" align="center" color="error">
+                                Không tìm thấy điểm tham quan phù hợp.
+                            </Typography>
+                        </Grid>
+                    )}
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                     <Pagination
