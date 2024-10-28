@@ -9,6 +9,8 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
+import Helmet from 'react-helmet';
+import TourCard from '@components/staff/TourCard';
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -143,12 +145,18 @@ const ManageTour = () => {
   );
 
   return (
-    <Box sx={{ width: "98vw", minHeight: "100vh" }}>
-      <SidebarStaff isOpen={isOpen} toggleSidebar={toggleSidebar} />
-      <Box sx={{ flexGrow: 1, p: 3, marginLeft: isOpen ? "250px" : 0, transition: "margin-left 0.3s" }}>
-        <Typography variant="h4" sx={{ mb: 3 }}>
-          Tour du lịch
-        </Typography>
+    <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
+      <Helmet>
+        <title>Quản lý Tour</title>
+      </Helmet>
+      <SidebarStaff 
+        isOpen={isOpen} 
+        toggleSidebar={() => setIsOpen(!isOpen)}
+      />
+      <Box sx={{ flexGrow: 1, mt: 1.5, p: isOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
+        <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
+        </Grid>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <TextField
@@ -231,35 +239,13 @@ const ManageTour = () => {
             <Grid container spacing={2}>
               {currentTours.map((tour) => (
                 <Grid item xs={12} sm={6} md={4} key={tour.tourId}>
-                  <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                    <CardMedia component="img" height="140" image={tour.images[0].url} alt={tour.tourName} />
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography variant="h6" component="div"> {tour.tourName} </Typography>
-                      <Typography variant="body2" color="text.secondary"> Mã tour: {tour.tourId} </Typography>
-                      <Typography variant="body2"> Khởi hành: {tour.startDate} </Typography>
-                      <Typography variant="body2"> Thời lượng: {tour.duration} </Typography>
-                      <Typography variant="body2"> Số chỗ còn nhận: {tour.maxParticipant} </Typography>
-                      <Typography variant="h6" color="primary"> {tour.price.adult.toLocaleString()} đ </Typography>
-                      <Chip label={tour.status} color={
-                        tour.status === "Đang nhận khách"
-                          ? "success"
-                          : tour.status === "Đã đầy chỗ"
-                            ? "warning"
-                            : tour.status === "Hoàn thành"
-                              ? "info"
-                              : tour.status === "Bị Hủy"
-                                ? "error"
-                                : tour.status === "Đang diễn ra"
-                                  ? "primary"
-                                  : "default"
-                      } size="small" sx={{ mt: 1 }} />
-                    </CardContent>
-                    <CardActions>
-                      {tour.status === "Hoàn thành" && (
-                        <Button size="small" color="primary"> Xem đánh giá </Button>
-                      )}
-                    </CardActions>
-                  </Card>
+                  <TourCard 
+                    tour={tour}
+                    onViewDetails={() => {
+                      // Handle view details click
+                      console.log('View details for tour:', tour.tourId);
+                    }}
+                  />
                 </Grid>
               ))}
             </Grid>
@@ -273,7 +259,9 @@ const ManageTour = () => {
             </Box>
           </>
         ) : (
-          <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}> Không có kết quả nào </Typography>
+          <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
+            Không có kết quả nào
+          </Typography>
         )}
       </Box>
     </Box>

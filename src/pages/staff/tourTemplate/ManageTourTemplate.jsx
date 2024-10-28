@@ -171,13 +171,13 @@ const ManageTourTemplate = () => {
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
-                <title>Quản lý Tour mẫu</title>
+                <title>Manage Tour Template</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
-                <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+            <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+                <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-                        <Typography sx={{ fontSize: '3rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour mẫu </Typography>
+                        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour mẫu </Typography>
                     </Grid>
                     <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                         <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
