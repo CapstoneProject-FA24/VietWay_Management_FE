@@ -1,5 +1,6 @@
 import baseURL from '@api/BaseURL';
 import axios from 'axios';
+import { getRole } from '@services/StatusService';
 
 export const login = async (credentials) => {
     try {
@@ -8,14 +9,14 @@ export const login = async (credentials) => {
             password: credentials.password
         };
         const response = await axios.post(`${baseURL}/api/account/login`, loginRequest);
-        const data = response.data;
-        if (data.data) {
-            localStorage.setItem('token', data.data/*data.data.token */);
-            localStorage.setItem('role', 'quan-ly'/* data.data.role */);
+        const data = response.data.data;
+        if (data) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('role', getRole(data.role));
         }
         return {
-            token: data.data,
-            role: 'quan-ly'/* data.data.role */
+            token: data.token,
+            role: getRole(data.role)
         };
     } catch (error) {
         console.error('Login failed:', error);

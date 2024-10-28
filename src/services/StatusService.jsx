@@ -1,4 +1,4 @@
-import { BookingStatus, AttractionStatus } from "@hooks/Statuses";
+import { BookingStatus, AttractionStatus, UserRole } from "@hooks/Statuses";
 
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
@@ -27,5 +27,18 @@ export const getAttractionStatusInfo = (statusCode) => {
       return { text: "Đã từ chối", color: "red" }; 
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
+  }
+};
+
+export const getRole = (role) => {
+  switch (role) {
+    case UserRole.Manager:
+      return "quan-ly";
+    case UserRole.Staff:
+      return "nhan-vien";
+    case UserRole.Admin:
+      return "admin";
+    default:
+      return "Không xác định";
   }
 };
