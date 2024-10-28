@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Select, MenuItem, Chip, FormControl
 import { mockTours } from "@hooks/MockTour";
 import SidebarStaff from "@layouts/SidebarStaff";
 import AddIcon from "@mui/icons-material/Add";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchProvinces } from '@services/ProvinceService';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
@@ -18,7 +18,7 @@ const ManageTour = () => {
   const [page, setPage] = useState(1);
   const [toursPerPage] = useState(9);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const navigate = useNavigate();
   const currentPage = location.pathname;
 
   const [provinces, setProvinces] = useState([]);

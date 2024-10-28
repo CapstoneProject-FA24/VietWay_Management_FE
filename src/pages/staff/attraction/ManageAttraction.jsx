@@ -7,7 +7,7 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
 import { fetchAttractions, fetchAttractionType } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
@@ -32,7 +32,8 @@ const ManageAttraction = () => {
     const [attrTypes, setAttrTypes] = useState([]);
     const [attrProvinces, setAttrProvinces] = useState([]);
     const [sortedAttractions, setSortedAttractions] = useState([]);
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         const role = localStorage.getItem('role');
         const token = localStorage.getItem('token');

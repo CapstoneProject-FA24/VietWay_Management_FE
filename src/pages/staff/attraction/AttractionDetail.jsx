@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick-theme.css";
 import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById } from '@services/AttractionService';
 
 const AttractionDetail = () => {
@@ -15,6 +15,7 @@ const AttractionDetail = () => {
   const [attraction, setAttraction] = useState(null);
   const [error, setError] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const role = localStorage.getItem('role');
