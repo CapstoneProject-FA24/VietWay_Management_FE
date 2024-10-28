@@ -23,6 +23,12 @@ const ManageCompanyStaff = () => {
     staff.fullname && staff.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
   );
 
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
+  }, []);
+
   const sortedStaff = [...filteredStaff].sort((a, b) => {
     if (sortOrder === 'name-asc') {
       return a.fullname.localeCompare(b.fullname);

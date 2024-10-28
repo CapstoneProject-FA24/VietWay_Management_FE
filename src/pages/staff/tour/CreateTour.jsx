@@ -29,6 +29,12 @@ const CreateTour = () => {
   const [shownDate, setShownDate] = useState(new Date());
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);

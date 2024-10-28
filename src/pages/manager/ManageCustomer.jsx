@@ -22,7 +22,7 @@ const ManageCustomer = () => {
   useEffect(() => {
     const role = localStorage.getItem('role');
     const token = localStorage.getItem('token');
-    if (!role || !token) { navigate(`/dang-nhap`); }
+    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
   }, []);
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {

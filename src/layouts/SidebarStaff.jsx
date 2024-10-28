@@ -87,6 +87,13 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 const SidebarManager = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    
+    navigate('/dang-nhap');
+  };
+
   return (
     <>
       <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
@@ -164,6 +171,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
                 </ListItemIcon>
                 <ListItemText 
                   primary="Đăng xuất" 
+                  onClick={handleLogout}
                   primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
                 />
               </MenuItemBox>

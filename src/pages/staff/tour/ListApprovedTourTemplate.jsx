@@ -41,6 +41,12 @@ const ListApprovedTourTemplate = () => {
     sortTourTemplates();
   }, [tourTemplates, sortOrder]);
 
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+  }, []);
+
   const fetchData = async () => {
     try {
       const params = {

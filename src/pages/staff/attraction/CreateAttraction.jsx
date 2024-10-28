@@ -36,6 +36,12 @@ const AddAttraction = () => {
   });
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+  }, []);
+
+  useEffect(() => {
     const fetchProvincesData = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();

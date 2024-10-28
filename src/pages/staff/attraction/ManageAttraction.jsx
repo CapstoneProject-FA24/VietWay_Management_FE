@@ -34,6 +34,12 @@ const ManageAttraction = () => {
     const [sortedAttractions, setSortedAttractions] = useState([]);
 
     useEffect(() => {
+        const role = localStorage.getItem('role');
+        const token = localStorage.getItem('token');
+        if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+      }, []);
+
+    useEffect(() => {
         fetchData();
     }, [page, pageSize, searchTerm, selectedTypes, selectedProvinces, statusTab]);
 

@@ -45,6 +45,12 @@ const CreateTourTemplate = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();

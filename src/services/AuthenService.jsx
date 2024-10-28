@@ -1,6 +1,7 @@
 import baseURL from '@api/BaseURL';
 import axios from 'axios';
 import { getRole } from '@services/StatusService';
+import { UserRole } from "@hooks/Statuses";
 
 export const login = async (credentials) => {
     try {
@@ -11,6 +12,9 @@ export const login = async (credentials) => {
         const response = await axios.post(`${baseURL}/api/account/login`, loginRequest);
         const data = response.data.data;
         if (data) {
+            if(data.role !== UserRole.Admin && data.role !== UserRole.Manager && data.role !== UserRole.Staff){
+                throw new Error('Không có quyền truy cập');
+            }
             localStorage.setItem('token', data.token);
             localStorage.setItem('role', getRole(data.role));
         }

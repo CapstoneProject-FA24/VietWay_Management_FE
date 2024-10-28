@@ -26,6 +26,12 @@ const ManageTour = () => {
   const [tourDurations, setTourDurations] = useState([]);
 
   useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+  }, []);
+
+  useEffect(() => {
     const fetchApprovedTourTemplates = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();
