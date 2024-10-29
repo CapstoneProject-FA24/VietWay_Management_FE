@@ -1,6 +1,6 @@
 export const mockCustomer = [
   {
-    id: 1,
+    id: "1298280622971682817",
     fullname: "Nguyễn Văn A",
     phone: "0123456789",
     email: "nguyenvana@gmail.com",
@@ -13,7 +13,7 @@ export const mockCustomer = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 2,
+    id: "1298280622971682812",
     fullname: "Trần Thị B",
     phone: "0987654321",
     email: "tranthib@gmail.com",
@@ -26,7 +26,7 @@ export const mockCustomer = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 3,
+    id: "1298280622971611111",
     fullname: "Lê Văn C",
     phone: "0912345678",
     email: "levanc@gmail.com",
@@ -39,7 +39,7 @@ export const mockCustomer = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 4,
+    id: "1298280622971682818",
     fullname: "Phạm Thị D",
     phone: "0934567890",
     email: "phamthid@gmail.com",
@@ -52,7 +52,7 @@ export const mockCustomer = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 5,
+    id: "1298280622971682814",
     fullname: "Nguyễn Văn E",
     phone: "0945678901",
     email: "nguyenvane@gmail.com",
