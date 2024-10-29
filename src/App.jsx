@@ -18,6 +18,7 @@ import ManagerManageTourTemplate from '@pages/manager/tourTemplate/ManagerManage
 import ManagerTourTemplateDetail from '@pages/manager/tourTemplate/ManagerTourTemplateDetail.jsx';
 import ManagerManageAttraction from '@pages/manager/attraction/ManagerManageAttraction.jsx';
 import ManagerAttractionDetail from '@pages/manager/attraction/ManagerAttractionDetail.jsx';
+import ManagerManageProvince from '@pages/manager/province/ManagerManageProvince.jsx';
 import ListApprovedTourTemplate from "@pages/staff/tour/ListApprovedTourTemplate.jsx";
 import Profile from '@pages/Profile';
 
@@ -36,7 +37,8 @@ const App = () => {
         <Route path="/quan-ly/tour-mau/chi-tiet/:id" element={<ManagerTourTemplateDetail/>} />
         <Route path="/quan-ly/diem-tham-quan" element={<ManagerManageAttraction/>} />
         <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<ManagerAttractionDetail/>} />
-        
+        <Route path="/quan-ly/tinh-thanh" element={<ManagerManageProvince/>} />
+
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
