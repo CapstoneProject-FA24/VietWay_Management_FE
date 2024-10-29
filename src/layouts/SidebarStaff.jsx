@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import DirectionsBusIcon  from '@mui/icons-material/DirectionsBus';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import MapIcon from '@mui/icons-material/Map';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import PostAddIcon from '@mui/icons-material/PostAdd';
-import PersonIcon from '@mui/icons-material/Person';
+import AttractionsIcon from '@mui/icons-material/Attractions';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import ArticleIcon from '@mui/icons-material/Article';
+import EventIcon from '@mui/icons-material/Event';
+import SettingsIcon from '@mui/icons-material/Settings';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
@@ -86,6 +88,18 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 
 const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -127,18 +141,19 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
           </ListItem>
         </List>
 
-        <List sx={{ width: '100%' }}>
+        <List sx={{ width: '110%', maxHeight: '60vh', overflow: 'auto', ml: -1 }}>
           {[
-            { text: 'Điểm Tham Quan', url: '/nhan-vien/diem-tham-quan', icon: <LocationOnIcon /> },
-            { text: 'Tour Mẫu', url: '/nhan-vien/tour-mau', icon: <MapIcon /> },
+            { text: 'Điểm Tham Quan', url: '/nhan-vien/diem-tham-quan', icon: <AttractionsIcon /> },
+            { text: 'Tour Mẫu', url: '/nhan-vien/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour Du Lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
-            { text: 'Bài Đăng', url: '/nhan-vien/bai-dang', icon: <PostAddIcon /> }
+            { text: 'Bài viết', url: '/nhan-vien/bai-viet', icon: <ArticleIcon /> },
+            { text: 'Sự kiện', url: '/nhan-vien/su-kien', icon: <EventIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text}
               component={Link} 
               to={url}
-              sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
+              sx={{ textDecoration: 'none', color: 'inherit', p: 0 }}
             >
               <MenuItemPaper elevation={0} isSelected={location.pathname === url}>
                 <MenuItemBox>
@@ -147,7 +162,10 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
                   </MenuItemPaper2>
                   <ListItemText 
                     primary={text} 
-                    primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
+                    primaryTypographyProps={{ 
+                      fontWeight: location.pathname === url ? 'bold' : 'normal', 
+                      fontSize: '0.97rem' 
+                    }}
                   />
                 </MenuItemBox>
               </MenuItemPaper>
@@ -160,23 +178,43 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
         <Divider />
         <List sx={{ width: '100%', mt: 2 }}>
           <ListItem 
-            component={Link} 
-            to="/dang-xuat" 
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
+            onClick={handleClick}
+            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}
           >
-            <MenuItemPaper elevation={1} isSelected={location.pathname === '/dang-xuat'}>
+            <MenuItemPaper elevation={1}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
-                  <ExitToAppIcon sx={{ color: '#2196f3', transform: 'rotate(180deg)' }} />
+                  <SettingsIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Đăng xuất" 
-                  onClick={handleLogout}
-                  primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
+                  primary="Tài khoản" 
+                  primaryTypographyProps={{ fontSize: '0.97rem' }}
                 />
               </MenuItemBox>
             </MenuItemPaper>
           </ListItem>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+          >
+            <MenuItem onClick={() => {
+              handleClose();
+              navigate('/thong-tin-tai-khoan');
+            }}>Thông tin tài khoản</MenuItem>
+            <MenuItem sx={{ color: 'red' }} onClick={() => {
+              handleClose();
+              handleLogout();
+            }}>Đăng xuất</MenuItem>
+          </Menu>
         </List>
       </SidebarContainer>
     </>

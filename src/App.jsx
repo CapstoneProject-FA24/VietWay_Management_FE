@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import ManagerHomepage from '@pages/ManagerHomepage.jsx';
-import ManageCompany from '@pages/admin/ManageCompany.jsx';
 import ManageCustomer from '@pages/manager/ManageCustomer.jsx';
 import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
-import ManageCompanyStaff from '@pages/manager/ManageCompanyStaff.jsx';
+import ManageStaff from '@pages/manager/ManageStaff.jsx';
 import ManageTour from '@pages/staff/tour/ManageTour.jsx';
 import CreateTour from '@pages/staff/tour/CreateTour.jsx';
 import ManageAttraction from '@pages/staff/attraction/ManageAttraction.jsx';
@@ -29,10 +28,9 @@ const App = () => {
         <Route path="/dang-nhap" element={<Login />} />
         <Route path="/" element={<Navigate to="/dang-nhap" />} />
         <Route path="*" element={<Navigate to="/dang-nhap" />} />
-        <Route path="/admin/cong-ty" element={<ManageCompany />} />
         <Route path="/admin/quan-ly" element={<ManageManager />} />
 
-        <Route path="/quan-ly/nhan-vien" element={<ManageCompanyStaff />} />
+        <Route path="/quan-ly/nhan-vien" element={<ManageStaff />} />
         <Route path="/quan-ly/khach-hang" element={<ManageCustomer />} />
         <Route path="/quan-ly/tour-mau" element={<ManagerManageTourTemplate/>} />
         <Route path="/quan-ly/tour-mau/chi-tiet/:id" element={<ManagerTourTemplateDetail/>} />
