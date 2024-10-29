@@ -112,7 +112,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
 
   return (
     <>
-      <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
+      <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' }}}>
         {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </ToggleButton>
 

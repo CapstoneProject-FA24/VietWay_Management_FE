@@ -53,7 +53,7 @@ const ToggleButton = styled(Paper)(({ theme, isopen }) => ({
 }));
 
 const LogoLink = styled(Link)(({ theme }) => ({
-  marginBottom: '30px',
+  marginBottom: '10px',
   textDecoration: 'none',
   display: 'flex',
   justifyContent: 'center',
@@ -110,7 +110,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
 
   return (
     <>
-      <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
+      <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' }}}>
         {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </ToggleButton>
 
