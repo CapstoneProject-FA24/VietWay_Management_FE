@@ -68,7 +68,7 @@ export const mockCustomer = [
 
 export const mockManager = [
   {
-    id: 1,
+    id: "1298280622971682800",
     fullname: "Nguyễn Văn A",
     phone: "0123456789",
     email: "nguyenvana@gmail.com",
@@ -78,7 +78,7 @@ export const mockManager = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 2,
+    id: "1298280622971682811",
     fullname: "Trần Thị B",
     phone: "0987654321",
     email: "tranthib@gmail.com",
@@ -88,7 +88,7 @@ export const mockManager = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 3,
+    id: "1298280622971682822",
     fullname: "Lê Văn C",
     phone: "0912345678",
     email: "levanc@gmail.com",
@@ -98,7 +98,7 @@ export const mockManager = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 4,
+    id: "1298280622971682833",
     fullname: "Phạm Thị D",
     phone: "0934567890",
     email: "phamthid@gmail.com",
@@ -108,7 +108,7 @@ export const mockManager = [
     avatar: "https://www.shareicon.net/data/512x512/2016/05/24/770079_people_512x512.png"
   },
   {
-    id: 5,
+    id: "1298280622971682844",
     fullname: "Nguyễn Văn E",
     phone: "0945678901",
     email: "nguyenvane@gmail.com",
@@ -121,7 +121,7 @@ export const mockManager = [
 
 export const mockCompanyStaff = [
   {
-    id: 1,
+    id: "1298280622971682835",
     fullname: "Nguyễn Văn A",
     phone: "0123456789",
     email: "nguyenvana@gmail.com",
@@ -130,7 +130,7 @@ export const mockCompanyStaff = [
     createDate: "2023-12-15"
   },
   {
-    id: 2,
+    id: "1298280622971502814",
     fullname: "Trần Thị B",
     phone: "0987654321",
     email: "tranthib@gmail.com",
@@ -139,7 +139,7 @@ export const mockCompanyStaff = [
     createDate: "2023-11-15"
   },
   {
-    id: 3,
+    id: "1298670622971682814",
     fullname: "Lê Văn C",
     phone: "0912345678",
     email: "levanc@gmail.com",
@@ -148,7 +148,7 @@ export const mockCompanyStaff = [
     createDate: "2023-04-15"
   },
   {
-    id: 4,
+    id: "2298280622971682814",
     fullname: "Phạm Thị D",
     phone: "0934567890",
     email: "phamthid@gmail.com",
@@ -157,7 +157,7 @@ export const mockCompanyStaff = [
     createDate: "2023-07-10"
   },
   {
-    id: 5,
+    id: "1295580622971682814",
     fullname: "Nguyễn Văn E",
     phone: "0945678901",
     email: "nguyenvane@gmail.com",

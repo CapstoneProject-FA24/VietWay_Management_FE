@@ -58,7 +58,7 @@ const ManageCustomer = () => {
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <TextField
             variant="outlined"
-            placeholder="Tìm kiếm công ty..."
+            placeholder="Tìm kiếm khách hàng..."
             size="small"
             sx={{ width: '300px' }}
             value={searchTerm}
@@ -125,10 +125,7 @@ const ManageCustomer = () => {
                   <TableCell sx={{ textAlign: 'center', padding: '7px' }}>{customer.gender === 1 ? 'Nam' : 'Nữ'}</TableCell>
                   <TableCell sx={{ padding: '7px' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
-                      <Box sx={{
-                        width: 15, height: 15, borderRadius: '50%',
-                        backgroundColor: customer.status === 1 ? '#4caf50' : '#ea4747'
-                      }} />
+                      <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: customer.status === 1 ? '#4caf50' : '#ea4747' }} />
                       <Typography sx={{ fontSize: '0.9rem' }}> {customer.status === 1 ? 'Hoạt động' : 'Đã xóa'}</Typography>
                     </Box>
                   </TableCell>
