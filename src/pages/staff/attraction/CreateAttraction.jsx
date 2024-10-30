@@ -13,8 +13,9 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import { Link, useNavigate } from 'react-router-dom';
-import { fetchAttractionType, createAttraction, updateAttractionImages } from '@services/AttractionService';
+import { createAttraction, updateAttractionImages } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchAttractionType } from '@services/AttractionTypeService';
 
 const AddAttraction = () => {
   const navigate = useNavigate();

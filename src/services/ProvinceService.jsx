@@ -1,25 +1,22 @@
 import baseURL from '@api/BaseURL'
 import axios from 'axios';
 
-export const fetchProvinces = async (params) => {
+export const fetchProvinces = async () => {
     try {
-        const { pageSize, pageIndex, nameSearch } = params;
+        /* const { pageSize, pageIndex, nameSearch } = params;
         const queryParams = new URLSearchParams({
             pageSize: pageSize || 12,
             pageIndex: pageIndex || 1,
             ...(nameSearch && { nameSearch })
-        }).toString();
-
-        const response = await axios.get(`${baseURL}/api/Province?${queryParams}`);
-        
-        return {
-            data: response.data.data.map(province => ({
-                provinceId: province.provinceId,
-                provinceName: province.provinceName,
-                imageURL: province.imageUrl
-            })),
-            total: response.data.total || response.data.data.length
-        };
+        }).toString(); */
+        //To do: api => Province -> provinces
+        const response = await axios.get(`${baseURL}/api/Province?`);
+        const data = response.data.data.map(province => ({
+            provinceId: province.provinceId,
+            provinceName: province.provinceName,
+            imageURL: province.imageUrl
+        }));
+        return data;
     } catch (error) {
         console.error('Error fetching provinces:', error);
         throw error;

@@ -6,10 +6,11 @@ import AttractionCard from '@components/manager/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchAttractions, fetchAttractionType } from '@services/AttractionService';
+import { fetchAttractions } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useNavigate } from 'react-router-dom';
+import { fetchAttractionType } from '@services/AttractionTypeService';
 
 const ManagerManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -121,7 +122,7 @@ const ManagerManageAttraction = () => {
 
     const typeOptions = attractionTypes.map(type => ({
         value: type.attractionTypeId,
-        label: type.name
+        label: type.attractionTypeName
     }));
 
     const animatedComponents = makeAnimated();

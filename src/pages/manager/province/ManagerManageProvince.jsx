@@ -38,13 +38,13 @@ const ManagerManageProvince = () => {
 
     const fetchData = async () => {
         try {
-            const params = {
+            /* const params = {
                 pageSize: pageSize,
                 pageIndex: page,
                 nameSearch: searchTerm,
-            };
-            const result = await fetchProvinces(params);
-            setProvinces(result.data);
+            }; */
+            const result = await fetchProvinces();
+            setProvinces(result);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
             console.error('Error fetching provinces:', error);

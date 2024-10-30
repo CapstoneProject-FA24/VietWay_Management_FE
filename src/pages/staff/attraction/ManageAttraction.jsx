@@ -9,8 +9,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useNavigate } from 'react-router-dom';
 import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
-import { fetchAttractions, fetchAttractionType } from '@services/AttractionService';
+import { fetchAttractions } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchAttractionType } from '@services/AttractionTypeService';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
 const ManageAttraction = () => {
