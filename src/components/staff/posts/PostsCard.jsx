@@ -15,10 +15,28 @@ import {
   Category,
   Launch
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
-const PostsCard = ({ post, onViewDetails }) => {
+const getStatusColor = (status) => {
+  switch(status) {
+    case '0': return { color: 'warning', label: 'Bản nháp' };
+    case '1': return { color: 'info', label: 'Chờ duyệt' };
+    case '2': return { color: 'success', label: 'Đã duyệt' };
+    case '3': return { color: 'error', label: 'Từ chối' };
+    default: return { color: 'default', label: 'Không xác định' };
+  }
+};
+
+const PostsCard = ({ post }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
+
+  const statusInfo = getStatusColor(post.status);
+
+  const handleViewDetails = (postId) => {
+    navigate(`/nhan-vien/bai-viet/${postId}`);
+  };
 
   return (
     <Card
@@ -29,12 +47,30 @@ const PostsCard = ({ post, onViewDetails }) => {
         borderRadius: theme.shape.borderRadius,
         transition: 'all 0.2s ease',
         bgcolor: 'background.paper',
+        position: 'relative',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[3],
         },
       }}
     >
+      <Chip
+        label={statusInfo.label}
+        color={statusInfo.color}
+        size="small"
+        sx={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          fontWeight: 500,
+          fontSize: '0.75rem',
+          '& .MuiChip-label': {
+            px: 1,
+          },
+          boxShadow: theme.shadows[2],
+        }}
+      />
+
       <CardMedia
         component="img"
         height={isMobile ? "140" : "180"}
@@ -87,7 +123,6 @@ const PostsCard = ({ post, onViewDetails }) => {
           />
         </Box>
 
-        {/* Title */}
         <Typography 
           variant={isMobile ? "h6" : "h5"}
           sx={{
@@ -132,10 +167,7 @@ const PostsCard = ({ post, onViewDetails }) => {
           <Button
             variant="contained"
             size={isMobile ? "small" : "medium"}
-            onClick={(e) => {
-              e.stopPropagation();
-              onViewDetails();
-            }}
+            onClick={() => handleViewDetails(post.id)}
             endIcon={<Launch />}
             sx={{ 
               borderRadius: theme.shape.borderRadius,
