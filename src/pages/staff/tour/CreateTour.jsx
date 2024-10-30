@@ -1,30 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, TextField, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, TextField, List, ListItem, ListItemText, Badge } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, StaticDatePicker, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 import { fetchToursByTemplateId } from '@services/TourService';
+import { PickersDay } from '@mui/x-date-pickers/PickersDay';
+import Calendar from 'react-calendar';
+import '@styles/Calendar.css';
+import 'react-calendar/dist/Calendar.css';
+import { getTourStatusInfo } from '@services/StatusService';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import TourCalendar from '@components/staff/TourCalendar';
 
 const CreateTour = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [tourTemplate, setTourTemplate] = useState(null);
-  const [startDate, setStartDate] = useState(dayjs());
-  const [startTime, setStartTime] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const [tours, setTours] = useState([]);
   const [newTourData, setNewTourData] = useState({
-    startDate: dayjs(),
-    startTime: null,
-    maxParticipants: '',
-    minParticipants: '',
-    adultPrice: '',
-    childPrice: '',
-    infantPrice: ''
+    startDate: dayjs(), startTime: null, maxParticipants: 20,
+    minParticipants: 10, adultPrice: '', childPrice: '', infantPrice: ''
   });
 
   useEffect(() => {
@@ -37,7 +37,6 @@ const CreateTour = () => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
-        console.log(fetchedTourTemplate);
         setTourTemplate(fetchedTourTemplate);
       } catch (error) {
         console.error('Error fetching tour template:', error);
@@ -58,10 +57,6 @@ const CreateTour = () => {
     fetchTours();
   }, [id]);
 
-  const handleGoBack = () => {
-    navigate('/nhan-vien/tour-mau');
-  };
-
   const handleMonthChange = (newMonth) => {
     setSelectedMonth(newMonth);
     if (newMonth !== 'all') {
@@ -77,13 +72,6 @@ const CreateTour = () => {
     }
   };
 
-  const handleStartDateChange = (newValue) => {
-    setStartDate(newValue);
-    if (newValue.isAfter(endDate)) {
-      setEndDate(newValue);
-    }
-  };
-
   const handleNewTourChange = (field, value) => {
     setNewTourData(prev => ({
       ...prev,
@@ -96,8 +84,6 @@ const CreateTour = () => {
 
     try {
       const durationStr = duration.durationName;
-
-      // Extract number of nights (đêm) and days (ngày)
       const nights = parseInt(durationStr.match(/\d+(?=\s*đêm)/)[0]);
       const days = parseInt(durationStr.match(/\d+(?=\s*ngày)/)[0]);
 
@@ -106,82 +92,86 @@ const CreateTour = () => {
         return null;
       }
 
-      // Validate days >= nights
-      if (days < nights) {
-        console.error('Invalid duration: days must be >= nights');
-        return null;
+      let totalDuration;
+      let recommendationMessage = '';
+
+      if (days > nights) {
+        totalDuration = days;
+        if (startTime.hour() >= 18) {
+          recommendationMessage = 'Khuyến nghị: Tour nên bắt đầu trước 18:00';
+        }
+      } else if (days === nights) {
+        totalDuration = days + 1;
+      } else {
+        totalDuration = days + 1;
+        if (startTime.hour() < 18) {
+          recommendationMessage = 'Khuyến nghị: Tour nên bắt đầu sau 18:00';
+        }
       }
 
-      // If days > nights, validate start time < 18:00
-      if (days > nights && startTime.hour() >= 18) {
-        console.error('Invalid start time: must be before 18:00 when days > nights');
-        return null;
-      }
-
-      // Calculate end date
       const startDateTime = dayjs(startDate)
         .hour(startTime.hour())
         .minute(startTime.minute());
 
-      return startDateTime.add(nights, 'day');
+      return {
+        endDate: startDateTime.add(totalDuration, 'day'),
+        recommendationMessage
+      };
     } catch (error) {
       console.error('Error calculating end date:', error);
       return null;
     }
   };
 
-  const ToursList = () => (
-    <Box sx={{ ml: 4 }}>
-      <Typography variant="h6" gutterBottom>
-        {selectedMonth === 'all' ? 'Tất cả các tour' : `Tours trong tháng ${selectedMonth.format('MM/YYYY')}`}
-      </Typography>
-      <List>
-        {tours
-          .filter(tour => selectedMonth === 'all' ? true : dayjs(tour.startDate).isSame(selectedMonth, 'month'))
-          .map((tour, index) => (
-            <ListItem
-              key={index}
-              sx={{
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                mb: 1,
-                backgroundColor: '#f5f5f5'
-              }}
-            >
-              <ListItemText
-                primary={`${dayjs(tour.startDate).format('DD/MM/YYYY')} - ${dayjs(tour.endDate).format('DD/MM/YYYY')}`}
-                secondary={`Khởi hành: ${tour.startTime} | Số người: ${tour.currentParticipant}/${tour.maxParticipant}`}
-              />
-            </ListItem>
-          ))}
-      </List>
-    </Box>
-  );
+  const getTourInfo = (date) => {
+    const toursOnThisDay = tours.filter(tour =>
+      dayjs(tour.startDate).isSame(date, 'day') ||
+      (dayjs(tour.startDate).isBefore(date) && dayjs(tour.endDate).isAfter(date)) ||
+      dayjs(tour.endDate).isSame(date, 'day')
+    );
+    console.log(toursOnThisDay);
+
+    return toursOnThisDay.map(tour => ({
+      status: tour.status,
+      participants: `${tour.currentParticipant}/${tour.maxParticipant}`
+    }));
+  };
+
+  const calculatePrices = (adultPrice) => {
+    const childPrice = Math.round(adultPrice * 0.6);
+    const infantPrice = Math.round(adultPrice * 0.3);
+    return { childPrice, infantPrice };
+  };
+
+  const validatePrice = (price, minPrice, maxPrice) => {
+    const numPrice = Number(price);
+    if (isNaN(numPrice)) return false;
+    if (!price) return true;
+    return numPrice >= minPrice && numPrice <= maxPrice;
+  };
 
   if (!tourTemplate) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', height: '80vh' }}>
-        <img src="/loading.gif" alt="Loading..." />
-      </div>
+      <div style={{ display: 'flex', alignItems: 'center', height: '80vh' }}> <img src="/loading.gif" alt="Loading..." /></div>
     );
   }
 
   return (
-    <Box sx={{ display: 'flex', width: '100vw' }}>
+    <Box sx={{ display: 'flex', width: '98vw' }}>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginLeft: isSidebarOpen ? '250px' : 3, transition: 'margin 0.3s', mt: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={8}>
-            <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 3 }}>
-              Tạo tour mới
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <ToursList />
-            </Box>
+          <Grid item xs={12} md={12}>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={() => navigate('/nhan-vien/tour-du-lich/tour-mau-duoc-duyet')} sx={{ color: 'grey' }}
+            >
+              Quay lại
+            </Button>
+            <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 2 }}> Tạo tour mới </Typography>
           </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={2} sx={{ p: 2 }}>
+          <Grid item xs={12} md={8.5}>
+            <Paper elevation={2} sx={{ p: 2, mb: 2, ml: 1 }}>
               <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 1, color: 'primary.main' }}>
                 Thông tin tour mẫu
               </Typography>
@@ -197,124 +187,148 @@ const CreateTour = () => {
                 </Typography>
               </Box>
             </Paper>
-            <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <TourCalendar
+                tours={tours}
+                selectedMonth={selectedMonth}
+                handleMonthChange={handleMonthChange}
+              />
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={3.5}>
+            <Paper elevation={2} sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 2, color: 'primary.main' }}>
                 Thông tin tour mới
               </Typography>
               <Box sx={{ mb: 3 }}>
-                <Typography sx={{ mb: 1, fontSize: '1.2rem', fontWeight: 700 }}>Thời gian</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
+                <TextField
+                  label="Khởi hành từ" fullWidth variant="outlined" sx={{ mb: 1, mt: 1.5 }}
+                  value={newTourData.startAddress} inputProps={{ style: { height: '15px' } }}
+                  onChange={(e) => handleNewTourChange('startAddress', e.target.value)}
+                />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Box sx={{ mb: 2 }}>
+                  <Box sx={{ mb: 2, mt: 1.5 }}>
                     <DatePicker
-                      label="Ngày khởi hành"
-                      value={newTourData.startDate}
                       onChange={(value) => handleNewTourChange('startDate', value)}
-                      format="DD/MM/YYYY"
-                      minDate={dayjs()}
-                      slotProps={{ textField: { fullWidth: true } }}
+                      format="DD/MM/YYYY" minDate={dayjs()} label="Ngày khởi hành" value={newTourData.startDate}
+                      slotProps={{ textField: { fullWidth: true, inputProps: { style: { height: '15px' } } } }}
+                    />
+                  </Box>
+                  <Box sx={{ mb: 1 }}>
+                    <TimePicker
+                      label="Giờ khởi hành" value={newTourData.startTime} onChange={(value) => handleNewTourChange('startTime', value)}
+                      slotProps={{ textField: { fullWidth: true, inputProps: { style: { height: '15px', textAlign: "center" } } } }}
                     />
                   </Box>
                   <Box sx={{ mb: 2 }}>
-                    <TimePicker
-                      label="Giờ khởi hành"
-                      value={newTourData.startTime}
-                      onChange={(value) => handleNewTourChange('startTime', value)}
-                      slotProps={{ textField: { fullWidth: true } }}
-                    />
-                  </Box>
-                  {newTourData.startDate && newTourData.startTime && tourTemplate.duration && (
-                    <Box sx={{ mb: 2 }}>
-                      {(() => {
-                        const durationStr = tourTemplate.duration.durationName;
-                        const nights = parseInt(durationStr.match(/\d+(?=\s*đêm)/)[0]);
-                        const days = parseInt(durationStr.match(/\d+(?=\s*ngày)/)[0]);
-
-                        if (days < nights) {
-                          return (
-                            <Typography variant="body1" color="error">
-                              Thời lượng không hợp lệ: Số ngày phải lớn hơn hoặc bằng số đêm
-                            </Typography>
-                          );
+                    <Typography variant="body1">
+                      Ngày kết thúc: {(() => {
+                        if (!newTourData.startDate || !newTourData.startTime || !tourTemplate.duration) {
+                          return '';
                         }
-
-                        if (days > nights && newTourData.startTime.hour() >= 18) {
-                          return (
-                            <Typography variant="body1" color="error">
-                              Giờ khởi hành không hợp lệ: Tour phải bắt đầu trước 18:00
-                            </Typography>
-                          );
-                        }
-
-                        const endDate = calculateEndDate(newTourData.startDate, newTourData.startTime, tourTemplate.duration);
-                        return endDate ? (
-                          <>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                              Bắt đầu: {newTourData.startDate.format('DD/MM/YYYY')} {newTourData.startTime.format('HH:mm')}
-                            </Typography>
-                            <Typography variant="body1">
-                              Kết thúc: {endDate.format('DD/MM/YYYY')}
-                            </Typography>
-                          </>
-                        ) : (
-                          <Typography variant="body1" color="error">
-                            Không thể tính ngày kết thúc
-                          </Typography>
-                        );
+                        const result = calculateEndDate(newTourData.startDate, newTourData.startTime, tourTemplate.duration);
+                        return result ? result.endDate.format('DD/MM/YYYY') : '';
                       })()}
-                    </Box>
-                  )}
+                    </Typography>
+                    {(() => {
+                      if (!newTourData.startDate || !newTourData.startTime || !tourTemplate.duration) return null;
+                      const result = calculateEndDate(newTourData.startDate, newTourData.startTime, tourTemplate.duration);
+                      return result?.recommendationMessage ? (
+                        <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}> {result.recommendationMessage}</Typography>
+                      ) : null;
+                    })()}
+                  </Box>
                 </LocalizationProvider>
               </Box>
 
               <Box sx={{ mb: 2 }}>
-                <TextField label="Số khách tối đa" fullWidth type="number" variant="outlined" sx={{ mb: 1 }} />
-                <TextField label="Số khách tối thiểu" fullWidth type="number" variant="outlined" sx={{ mb: 1 }} />
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
+                <TextField
+                  label="Số khách tối đa" fullWidth type="number" variant="outlined" sx={{ mb: 2, mt: 1.5 }} value={newTourData.maxParticipants}
+                  onChange={(e) => {
+                    const newMaxParticipants = Number(e.target.value);
+                    if (newMaxParticipants > 0) {
+                      handleNewTourChange('maxParticipants', e.target.value);
+                    }
+                  }}
+                  error={Number(newTourData.maxParticipants) <= Number(newTourData.minParticipants) || Number(newTourData.maxParticipants) <= 0}
+                  helperText={Number(newTourData.maxParticipants) <= Number(newTourData.minParticipants)
+                    ? "Số khách tối đa phải lớn hơn số khách tối thiểu" : ""}
+                  inputProps={{ min: 1, style: { height: '15px' } }}
+                />
+                <TextField
+                  label="Số khách tối thiểu" fullWidth type="number" variant="outlined" sx={{ mb: 1 }} value={newTourData.minParticipants}
+                  onChange={(e) => {
+                    const newMinParticipants = Number(e.target.value);
+                    if (newMinParticipants > 0 && (!newTourData.maxParticipants || newMinParticipants < Number(newTourData.maxParticipants))) {
+                      handleNewTourChange('minParticipants', e.target.value);
+                    }
+                  }}
+                  error={Number(newTourData.minParticipants) >= Number(newTourData.maxParticipants) || Number(newTourData.minParticipants) <= 0}
+                  helperText={Number(newTourData.minParticipants) >= Number(newTourData.maxParticipants)
+                    ? "Số khách tối thiểu phải nhỏ hơn số khách tối đa" : ""}
+                  inputProps={{ min: 1, style: { height: '15px' } }}
+                />
               </Box>
 
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2">Giá tour (VND)</Typography>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Người lớn (trên 12 tuổi)"
-                  variant="outlined"
-                  sx={{ mb: 1 }}
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
+                <TextField fullWidth type="number" label="Người lớn (trên 12 tuổi)" variant="outlined" value={newTourData.adultPrice}
+                  onChange={(e) => {
+                    const newAdultPrice = e.target.value;
+                    if (Number(newAdultPrice) >= 0) {
+                      handleNewTourChange('adultPrice', newAdultPrice);
+                      if (validatePrice(newAdultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
+                        const { childPrice, infantPrice } = calculatePrices(Number(newAdultPrice));
+                        handleNewTourChange('childPrice', childPrice.toString());
+                        handleNewTourChange('infantPrice', infantPrice.toString());
+                      }
+                    }
+                  }}
+                  error={newTourData.adultPrice && (!validatePrice(newTourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice) || Number(newTourData.adultPrice) < 0)}
+                  helperText={`Giá phải từ ${tourTemplate?.minPrice?.toLocaleString() || 0} đến ${tourTemplate?.maxPrice?.toLocaleString() || 0} VND`}
+                  sx={{ mb: 2, mt: 1.5 }}
+                  inputProps={{ min: 0, style: { height: '15px' } }}
+                />
+                <TextField fullWidth type="number" label="Trẻ em (5-12 tuổi)" variant="outlined" value={newTourData.childPrice}
+                  onChange={(e) => {
+                    const newChildPrice = Number(e.target.value);
+                    const adultPrice = Number(newTourData.adultPrice);
+                    if (newChildPrice >= 0 && (!adultPrice || newChildPrice <= adultPrice)) {
+                      handleNewTourChange('childPrice', e.target.value);
+                    }
+                  }}
+                  sx={{ mb: 2 }}
+                  inputProps={{ min: 0, style: { height: '15px' } }}
+                  error={Number(newTourData.childPrice) > Number(newTourData.adultPrice) || Number(newTourData.childPrice) < 0}
+                  helperText={Number(newTourData.childPrice) > Number(newTourData.adultPrice) ? "Giá trẻ em phải thấp hơn giá người lớn" : ""}
                 />
                 <TextField
-                  fullWidth
-                  type="number"
-                  label="Trẻ em (5-12 tuổi)"
-                  variant="outlined"
-                  sx={{ mb: 1 }}
-                />
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Em bé (dưới 5 tuổi)"
-                  variant="outlined"
+                  fullWidth type="number" label="Em bé (dưới 5 tuổi)" variant="outlined" value={newTourData.infantPrice}
+                  onChange={(e) => {
+                    const newInfantPrice = Number(e.target.value);
+                    const childPrice = Number(newTourData.childPrice);
+                    if (newInfantPrice >= 0 && (!childPrice || newInfantPrice <= childPrice)) {
+                      handleNewTourChange('infantPrice', e.target.value);
+                    }
+                  }}
+                  inputProps={{ min: 0, style: { height: '15px' } }}
+                  error={Number(newTourData.infantPrice) > Number(newTourData.childPrice) || Number(newTourData.infantPrice) < 0}
+                  helperText={Number(newTourData.infantPrice) > Number(newTourData.childPrice) ? "Giá em bé phải thấp hơn giá em bé" : ""}
                 />
               </Box>
-
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2">Phụ thu (VND)</Typography>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Phụ thu phòng đơn"
-                  variant="outlined"
-                />
-              </Box>
+              {/* <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>Phụ thu (VND)</Typography>
+                <TextField fullWidth type="number" label="Phụ thu phòng đơn" variant="outlined" inputProps={{ min: 0, style: { height: '15px' } }} />
+              </Box> */}
             </Paper>
           </Grid>
         </Grid>
 
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Button variant="contained" color="primary" sx={{ mr: 2 }}>
-            Xác Nhận
-          </Button>
-          <Button variant="contained" color="error">
-            Hủy
-          </Button>
+          <Button variant="contained" color="primary" sx={{ mr: 2 }}> Xác Nhận </Button>
+          <Button variant="contained" color="error"> Hủy </Button>
         </Box>
       </Box>
     </Box>
