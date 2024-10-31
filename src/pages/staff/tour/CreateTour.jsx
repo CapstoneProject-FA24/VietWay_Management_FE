@@ -12,7 +12,6 @@ import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TourCalendar from '@components/staff/tour/createTour/TourCalendar';
 import TourTemplateInfo from '@components/staff/tour/createTour/TourTemplateInfo';
-import { getCookie } from '@services/AuthenService';
 
 const CreateTour = () => {
   const { id } = useParams();
@@ -27,12 +26,6 @@ const CreateTour = () => {
     registerOpenDate: null, registerCloseDate: null
   });
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

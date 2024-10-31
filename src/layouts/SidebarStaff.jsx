@@ -215,7 +215,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
           >
             <MenuItem onClick={() => {
               handleClose();
-              navigate('/thong-tin-tai-khoan');
+              navigate('/nhan-vien/thong-tin-tai-khoan');
             }}>Thông tin tài khoản</MenuItem>
             <MenuItem sx={{ color: 'red' }} onClick={() => {
               handleClose();

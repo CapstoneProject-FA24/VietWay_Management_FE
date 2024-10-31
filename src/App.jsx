@@ -20,7 +20,8 @@ import ManagerManageAttraction from '@pages/manager/attraction/ManagerManageAttr
 import ManagerAttractionDetail from '@pages/manager/attraction/ManagerAttractionDetail.jsx';
 import ManagerManageProvince from '@pages/manager/province/ManagerManageProvince.jsx';
 import ListApprovedTourTemplate from "@pages/staff/tour/ListApprovedTourTemplate.jsx";
-import Profile from '@pages/Profile';
+import ManagerProfile from '@pages/manager/ManagerProfile.jsx';
+import StaffProfile from '@pages/staff/StaffProfile.jsx';
 import PostDetail from '@pages/staff/post/PostDetail.jsx';
 import ManagePost from '@pages/staff/post/ManagePost.jsx';
 
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/quan-ly/diem-tham-quan" element={<ManagerManageAttraction/>} />
         <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<ManagerAttractionDetail/>} />
         <Route path="/quan-ly/tinh-thanh" element={<ManagerManageProvince/>} />
+        <Route path="/quan-ly/thong-tin-tai-khoan" element={<ManagerProfile />} />
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
@@ -54,8 +56,8 @@ const App = () => {
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id" element={<CreateTour />} />
         <Route path="/nhan-vien/bai-viet" element={<ManagePost />} />
         <Route path="/nhan-vien/bai-viet/:id" element={<PostDetail />} />
-
-        <Route path="/thong-tin-tai-khoan" element={<Profile />} />
+        <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
+        
       </Routes>
     </Router>
   );
