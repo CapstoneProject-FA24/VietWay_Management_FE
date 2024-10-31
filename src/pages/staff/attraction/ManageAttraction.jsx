@@ -166,7 +166,7 @@ const ManageAttraction = () => {
                     </Grid>
                     <Grid item xs={4.7}>
                         <Typography sx={{ fontWeight: 600 }}>
-                            Tỉnh thành phố
+                            Tỉnh/Thành phố
                         </Typography>
                         <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
                             isMulti options={provinceOptions} onChange={setAttrProvinces} value={attrProvinces}
