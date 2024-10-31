@@ -12,7 +12,7 @@ import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
+import { getCookie } from '@services/AuthenService';
 const tourCategories = [
     { TourCategoryId: 1, Name: 'Du lịch biển' },
     { TourCategoryId: 2, Name: 'Du lịch núi' },
@@ -53,8 +53,8 @@ const ManagerManageTourTemplate = () => {
     const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
 
     useEffect(() => {
-        const role = localStorage.getItem('role');
-        const token = localStorage.getItem('token');
+        const role = getCookie('role');
+        const token = getCookie('token');
         if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
       }, []);
 

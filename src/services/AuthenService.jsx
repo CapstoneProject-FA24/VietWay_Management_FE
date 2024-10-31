@@ -12,11 +12,11 @@ export const login = async (credentials) => {
         const response = await axios.post(`${baseURL}/api/account/login`, loginRequest);
         const data = response.data.data;
         if (data) {
-            if(data.role !== UserRole.Admin && data.role !== UserRole.Manager && data.role !== UserRole.Staff){
+            if (data.role !== UserRole.Admin && data.role !== UserRole.Manager && data.role !== UserRole.Staff) {
                 throw new Error('Không có quyền truy cập');
             }
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('role', getRole(data.role));
+            setCookie('token', data.token);
+            setCookie('role', getRole(data.role));
         }
         return {
             token: data.token,
@@ -46,4 +46,31 @@ export const register = async (userData) => {
         console.error('Registration failed:', error);
         throw error;
     }
+};
+
+export const setCookie = (name, value, days = 1) => {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = `expires=${date.toUTCString()}`;
+    document.cookie = `${name}=${value};${expires};path=/;secure;samesite=strict`;
+};
+
+export const getCookie = (name) => {
+    const cookieName = `${name}=`;
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookies = decodedCookie.split(';');
+
+    for (let cookie of cookies) {
+        while (cookie.charAt(0) === ' ') {
+            cookie = cookie.substring(1);
+        }
+        if (cookie.indexOf(cookieName) === 0) {
+            return cookie.substring(cookieName.length);
+        }
+    }
+    return null;
+};
+
+export const removeCookie = (name) => {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
 };

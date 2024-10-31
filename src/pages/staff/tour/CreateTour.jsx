@@ -12,6 +12,7 @@ import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TourCalendar from '@components/staff/tour/createTour/TourCalendar';
 import TourTemplateInfo from '@components/staff/tour/createTour/TourTemplateInfo';
+import { getCookie } from '@services/AuthenService';
 
 const CreateTour = () => {
   const { id } = useParams();
@@ -28,8 +29,8 @@ const CreateTour = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
   }, []);
 
@@ -144,7 +145,7 @@ const CreateTour = () => {
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={12}>
+          <Grid item xs={12} md={12} sx={{ ml: 3 }}>
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate('/nhan-vien/tour-du-lich/tour-mau-duoc-duyet')} sx={{ color: 'grey' }}

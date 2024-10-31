@@ -9,7 +9,7 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-
+import { getCookie } from '@services/AuthenService';
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,8 +18,8 @@ const ManagerTourTemplateDetails = () => {
   const [expandedDay, setExpandedDay] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
     const fetchData = async () => {
       try {

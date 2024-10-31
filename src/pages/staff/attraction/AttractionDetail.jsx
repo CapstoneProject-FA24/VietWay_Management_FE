@@ -8,6 +8,7 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById } from '@services/AttractionService';
+import { getCookie } from '@services/AuthenService';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -18,8 +19,8 @@ const AttractionDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
   }, []);
 

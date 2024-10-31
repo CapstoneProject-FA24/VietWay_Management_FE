@@ -8,7 +8,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import SidebarManager from '../layouts/SidebarManager';
 import { mockManager } from '../hooks/MockAccount';
 import TodayIcon from '@mui/icons-material/Today';
-
+import { getCookie } from '@services/AuthenService';
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -24,6 +24,12 @@ const Profile = () => {
         confirmPassword: ''
     });
     const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        const role = getCookie('role');
+        const token = getCookie('token');
+        if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
+      }, []);
 
     useEffect(() => {
         const managerProfile = mockManager[0];

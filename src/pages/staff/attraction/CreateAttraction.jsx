@@ -16,6 +16,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createAttraction, updateAttractionImages } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
+import { getCookie } from '@services/AuthenService';
 
 const AddAttraction = () => {
   const navigate = useNavigate();
@@ -37,8 +38,8 @@ const AddAttraction = () => {
   });
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
   }, []);
 

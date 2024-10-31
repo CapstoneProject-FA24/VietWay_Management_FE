@@ -11,6 +11,7 @@ import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
 import Helmet from 'react-helmet';
 import TourCard from '@components/staff/TourCard';
+import { getCookie } from '@services/AuthenService';
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -28,8 +29,8 @@ const ManageTour = () => {
   const [tourDurations, setTourDurations] = useState([]);
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
   }, []);
 

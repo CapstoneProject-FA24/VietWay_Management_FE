@@ -8,7 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
-
+import { getCookie } from '@services/AuthenService';
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
@@ -24,8 +24,8 @@ const ManageStaff = () => {
   );
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
   }, []);
 

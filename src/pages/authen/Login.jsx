@@ -15,7 +15,7 @@ import "slick-carousel/slick/slick-theme.css";
 import '@styles/Slider.css';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { login } from '@services/AuthenService';
+import { login, getCookie } from '@services/AuthenService';
 import { CircularProgress } from '@mui/material';
 
 export default function Login() {
@@ -54,8 +54,8 @@ export default function Login() {
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (role && token) { navigate(`/${role}/diem-tham-quan`); } //dash-board
   }, [location]);
 

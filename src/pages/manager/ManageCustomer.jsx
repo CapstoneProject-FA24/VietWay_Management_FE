@@ -9,6 +9,7 @@ import StatusPopup from '@components/StatusPopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { getCookie } from '@services/AuthenService';
 
 const ManageCustomer = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,11 +23,11 @@ const ManageCustomer = () => {
     customer.fullname && customer.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
   );
 
-  useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
+  /* useEffect(() => {
+    const role = getCookie('role');
+    const token = getCookie('token');
     if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
-  }, []);
+  }, []); */
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
     const aName = a.fullname || '';

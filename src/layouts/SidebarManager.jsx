@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
@@ -17,6 +17,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArticleIcon from '@mui/icons-material/Article';
 import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -89,6 +90,12 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 }));
 
 const SidebarManager = ({ isOpen, toggleSidebar }) => {
+  useEffect(() => {
+    const role = getCookie('role');
+    const token = getCookie('token');
+    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
+  }, []);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -96,8 +103,8 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
   const open = Boolean(anchorEl);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    removeCookie('token');
+    removeCookie('role');
     
     navigate('/dang-nhap');
   };

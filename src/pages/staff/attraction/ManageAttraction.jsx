@@ -13,6 +13,7 @@ import { fetchAttractions } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { getCookie } from '@services/AuthenService';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -36,8 +37,8 @@ const ManageAttraction = () => {
     const navigate = useNavigate();
     
     useEffect(() => {
-        const role = localStorage.getItem('role');
-        const token = localStorage.getItem('token');
+        const role = getCookie('role');
+        const token = getCookie('token');
         if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
       }, []);
 
