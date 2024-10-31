@@ -39,13 +39,9 @@ const TourCalendar = ({ tours, selectedMonth, handleMonthChange }) => {
                 <div 
                   key={idx} 
                   style={{
-                    backgroundColor: 'rgba(25, 118, 210, 0.1)',
-                    height: 'auto',
-                    padding: '4px',
-                    margin: '1px',
-                    borderRadius: '3px',
-                    display: 'flex',
-                    flexDirection: 'column',
+                    backgroundColor: 'rgba(25, 118, 210, 0.1)', height: 'auto', padding: '4px', 
+                    marginRight: '1px', marginLeft: '1px', marginBottom: '5px', marginTop: '5px',
+                    borderRadius: '3px', display: 'flex', flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center'
                   }}

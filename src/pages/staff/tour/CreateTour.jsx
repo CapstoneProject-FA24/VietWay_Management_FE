@@ -7,13 +7,11 @@ import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 import { fetchToursByTemplateId } from '@services/TourService';
-import { PickersDay } from '@mui/x-date-pickers/PickersDay';
-import Calendar from 'react-calendar';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
-import { getTourStatusInfo } from '@services/StatusService';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import TourCalendar from '@components/staff/TourCalendar';
+import TourCalendar from '@components/staff/tour/createTour/TourCalendar';
+import TourTemplateInfo from '@components/staff/tour/createTour/TourTemplateInfo';
 
 const CreateTour = () => {
   const { id } = useParams();
@@ -24,8 +22,10 @@ const CreateTour = () => {
   const [tours, setTours] = useState([]);
   const [newTourData, setNewTourData] = useState({
     startDate: dayjs(), startTime: null, maxParticipants: 20,
-    minParticipants: 10, adultPrice: '', childPrice: '', infantPrice: ''
+    minParticipants: 10, adultPrice: '', childPrice: '', infantPrice: '',
+    registerOpenDate: null, registerCloseDate: null
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const role = localStorage.getItem('role');
@@ -35,11 +35,14 @@ const CreateTour = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
         setTourTemplate(fetchedTourTemplate);
       } catch (error) {
         console.error('Error fetching tour template:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -123,20 +126,6 @@ const CreateTour = () => {
     }
   };
 
-  const getTourInfo = (date) => {
-    const toursOnThisDay = tours.filter(tour =>
-      dayjs(tour.startDate).isSame(date, 'day') ||
-      (dayjs(tour.startDate).isBefore(date) && dayjs(tour.endDate).isAfter(date)) ||
-      dayjs(tour.endDate).isSame(date, 'day')
-    );
-    console.log(toursOnThisDay);
-
-    return toursOnThisDay.map(tour => ({
-      status: tour.status,
-      participants: `${tour.currentParticipant}/${tour.maxParticipant}`
-    }));
-  };
-
   const calculatePrices = (adultPrice) => {
     const childPrice = Math.round(adultPrice * 0.6);
     const infantPrice = Math.round(adultPrice * 0.3);
@@ -149,12 +138,6 @@ const CreateTour = () => {
     if (!price) return true;
     return numPrice >= minPrice && numPrice <= maxPrice;
   };
-
-  if (!tourTemplate) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', height: '80vh' }}> <img src="/loading.gif" alt="Loading..." /></div>
-    );
-  }
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
@@ -171,33 +154,17 @@ const CreateTour = () => {
             <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 2 }}> Tạo tour mới </Typography>
           </Grid>
           <Grid item xs={12} md={8.5}>
-            <Paper elevation={2} sx={{ p: 2, mb: 2, ml: 1 }}>
-              <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                Thông tin tour mẫu
-              </Typography>
-              <Box>
-                <Typography gutterBottom sx={{ textAlign: 'left', fontWeight: 700, mb: 1, fontSize: '1.2rem' }}>
-                  {tourTemplate.tourName}
-                </Typography>
-                <Typography gutterBottom sx={{ textAlign: 'left', mb: 0.5, fontSize: '0.95rem' }}>
-                  <strong>Mã tour mẫu:</strong> {tourTemplate.code}
-                </Typography>
-                <Typography gutterBottom sx={{ textAlign: 'left', fontSize: '0.95rem' }}>
-                  <strong>Thời lượng:</strong> {tourTemplate.duration.durationName}
-                </Typography>
-              </Box>
-            </Paper>
+            <TourTemplateInfo
+              tourTemplate={tourTemplate}
+              isLoading={isLoading}
+            />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TourCalendar
-                tours={tours}
-                selectedMonth={selectedMonth}
-                handleMonthChange={handleMonthChange}
-              />
+              <TourCalendar tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
             </Box>
           </Grid>
           <Grid item xs={12} md={3.5}>
             <Paper elevation={2} sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 2, color: 'primary.main' }}>
+              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
                 Thông tin tour mới
               </Typography>
               <Box sx={{ mb: 3 }}>
@@ -218,7 +185,7 @@ const CreateTour = () => {
                   <Box sx={{ mb: 1 }}>
                     <TimePicker
                       label="Giờ khởi hành" value={newTourData.startTime} onChange={(value) => handleNewTourChange('startTime', value)}
-                      slotProps={{ textField: { fullWidth: true, inputProps: { style: { height: '15px', textAlign: "center" } } } }}
+                      slotProps={{ textField: { fullWidth: true, inputProps: { style: { height: '15px' } } } }}
                     />
                   </Box>
                   <Box sx={{ mb: 2 }}>
@@ -313,22 +280,66 @@ const CreateTour = () => {
                       handleNewTourChange('infantPrice', e.target.value);
                     }
                   }}
+                  sx={{ mb: 1.5 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
                   error={Number(newTourData.infantPrice) > Number(newTourData.childPrice) || Number(newTourData.infantPrice) < 0}
                   helperText={Number(newTourData.infantPrice) > Number(newTourData.childPrice) ? "Giá em bé phải thấp hơn giá em bé" : ""}
                 />
               </Box>
-              {/* <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>Phụ thu (VND)</Typography>
-                <TextField fullWidth type="number" label="Phụ thu phòng đơn" variant="outlined" inputProps={{ min: 0, style: { height: '15px' } }} />
-              </Box> */}
+
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <Box sx={{ mb: 2, mt: 1.5 }}>
+                    <DatePicker
+                      label="Ngày mở đăng ký"
+                      value={newTourData.registerOpenDate}
+                      onChange={(value) => handleNewTourChange('registerOpenDate', value)}
+                      format="DD/MM/YYYY"
+                      minDate={dayjs()}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          inputProps: { style: { height: '15px' } },
+                          error: newTourData.registerOpenDate && newTourData.registerCloseDate &&
+                            dayjs(newTourData.registerOpenDate).isAfter(newTourData.registerCloseDate),
+                          helperText: newTourData.registerOpenDate && newTourData.registerCloseDate &&
+                            dayjs(newTourData.registerOpenDate).isAfter(newTourData.registerCloseDate) ?
+                            "Ngày mở đăng ký phải trước ngày đóng đăng ký" : ""
+                        }
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ mb: 1 }}>
+                    <DatePicker
+                      label="Ngày đóng đăng ký"
+                      value={newTourData.registerCloseDate}
+                      onChange={(value) => handleNewTourChange('registerCloseDate', value)}
+                      format="DD/MM/YYYY"
+                      minDate={newTourData.registerOpenDate || dayjs()}
+                      maxDate={newTourData.startDate}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          inputProps: { style: { height: '15px' } },
+                          error: newTourData.registerCloseDate &&
+                            dayjs(newTourData.registerCloseDate).isAfter(newTourData.startDate),
+                          helperText: newTourData.registerCloseDate &&
+                            dayjs(newTourData.registerCloseDate).isAfter(newTourData.startDate) ?
+                            "Ngày đóng đăng ký phải trước ngày khởi hành" : ""
+                        }
+                      }}
+                    />
+                  </Box>
+                </LocalizationProvider>
+              </Box>
             </Paper>
           </Grid>
         </Grid>
 
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-          <Button variant="contained" color="primary" sx={{ mr: 2 }}> Xác Nhận </Button>
-          <Button variant="contained" color="error"> Hủy </Button>
+          <Button variant="contained" sx={{ mr: 2, backgroundColor: 'grey' }}> Lưu nháp </Button>
+          <Button variant="contained" color="primary"> Gửi </Button>
         </Box>
       </Box>
     </Box>
