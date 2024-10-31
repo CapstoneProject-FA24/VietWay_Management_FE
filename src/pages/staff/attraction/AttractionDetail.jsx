@@ -8,7 +8,6 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById } from '@services/AttractionService';
-import { getCookie } from '@services/AuthenService';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -16,19 +15,11 @@ const AttractionDetail = () => {
   const [attraction, setAttraction] = useState(null);
   const [error, setError] = useState(null);
   const { id } = useParams();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
 
   useEffect(() => {
     const fetchAttraction = async () => {
       try {
-        const fetchedAttraction = await getAttractionById(id);
-        console.log(fetchedAttraction);
+        const fetchedAttraction = await fetchAttractionById(id);
         setAttraction(fetchedAttraction);
       } catch (error) {
         console.error('Error fetching attraction:', error);

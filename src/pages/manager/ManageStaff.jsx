@@ -8,7 +8,6 @@ import AddIcon from '@mui/icons-material/Add';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
-import { getCookie } from '@services/AuthenService';
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
@@ -22,12 +21,6 @@ const ManageStaff = () => {
   const filteredStaff = mockCompanyStaff.filter(staff =>
     staff.fullname && staff.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
   );
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
-  }, []);
 
   const sortedStaff = [...filteredStaff].sort((a, b) => {
     if (sortOrder === 'name-asc') {

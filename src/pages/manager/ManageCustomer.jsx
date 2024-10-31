@@ -9,7 +9,6 @@ import StatusPopup from '@components/StatusPopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { getCookie } from '@services/AuthenService';
 
 const ManageCustomer = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,17 +16,10 @@ const ManageCustomer = () => {
   const [openPopup, setOpenPopup] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const navigate = useNavigate();
   const searchTermWithoutAccents = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const filteredCustomers = mockCustomer.filter(customer =>
     customer.fullname && customer.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
   );
-
-  /* useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
-  }, []); */
 
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
     const aName = a.fullname || '';

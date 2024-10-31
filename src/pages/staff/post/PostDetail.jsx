@@ -15,7 +15,6 @@ import 'react-quill/dist/quill.snow.css';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@mui/material/IconButton';
-import { getCookie } from '@services/AuthenService';
 
 const animatedComponents = makeAnimated();
 
@@ -32,12 +31,6 @@ const PostDetail = () => {
     content: { value: '', isEditing: false },
     // ... other fields
   });
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
 
   useEffect(() => {
     const loadPost = async () => {

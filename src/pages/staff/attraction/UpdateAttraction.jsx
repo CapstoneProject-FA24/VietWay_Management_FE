@@ -16,7 +16,6 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById, updateAttraction, updateAttractionImages } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
-import { getCookie } from '@services/AuthenService';
 
 const UpdateAttraction = () => {
   const { id } = useParams();
@@ -40,18 +39,12 @@ const UpdateAttraction = () => {
   });
 
   useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const [fetchedProvinces, fetchedAttractionType, attractionData] = await Promise.all([
           fetchProvinces(),
           fetchAttractionType(),
-          getAttractionById(id)
+          fetchAttractionById(id)
         ]);
         setProvinces(fetchedProvinces);
         setAttractionTypes(fetchedAttractionType);

@@ -8,7 +8,6 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById } from '@services/AttractionService';
-import { getCookie } from '@services/AuthenService';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -18,17 +17,12 @@ const ManagerAttractionDetail = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
-    
     const fetchAttraction = async () => {
       try {
         const fetchedAttraction = await fetchAttractionById(id);
         setAttraction(fetchedAttraction);
       } catch (error) {
         console.error('Error fetching attraction:', error);
-        // Handle error (e.g., show error message to user)
       }
     };
 

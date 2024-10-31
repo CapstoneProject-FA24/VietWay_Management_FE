@@ -15,7 +15,6 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { getCookie } from '@services/AuthenService';
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -42,13 +41,7 @@ const ManageTourTemplate = () => {
     const [tempDuration, setTempDuration] = useState([]);
     const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const role = getCookie('role');
-        const token = getCookie('token');
-        if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-      }, []);
-
+    
     useEffect(() => {
         fetchData();
     }, [page, pageSize, searchTerm, selectedCategories, selectedProvinces, selectedDuration, statusTab]);

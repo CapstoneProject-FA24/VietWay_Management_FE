@@ -15,7 +15,6 @@ import { fetchTourTemplateById, updateTourTemplate, updateTemplateImages } from 
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
-import { getCookie } from '@services/AuthenService';
 
 const UpdateTourTemplate = () => {
   const { id } = useParams();
@@ -45,12 +44,6 @@ const UpdateTourTemplate = () => {
   const pageTopRef = useRef(null);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

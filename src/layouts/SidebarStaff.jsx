@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
-import DirectionsBusIcon  from '@mui/icons-material/DirectionsBus';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AttractionsIcon from '@mui/icons-material/Attractions';
@@ -14,6 +14,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
+import { getCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -87,12 +88,18 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 }));
 
 const SidebarStaff = ({ isOpen, toggleSidebar }) => {
+  useEffect(() => {
+    const role = getCookie('role');
+    const token = getCookie('token');
+    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
+  }, []);
+
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -104,13 +111,13 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    
+
     navigate('/dang-nhap');
   };
 
   return (
     <>
-      <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' }}}>
+      <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' } }}>
         {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </ToggleButton>
 
@@ -122,9 +129,9 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
         <Divider />
 
         <List sx={{ width: '100%' }}>
-          <ListItem 
-            component={Link} 
-            to="/admin/dashboard" 
+          <ListItem
+            component={Link}
+            to="/admin/dashboard"
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginTop: 1 }}
           >
             <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
@@ -132,8 +139,8 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <HomeIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Dashboard" 
+                <ListItemText
+                  primary="Dashboard"
                   primaryTypographyProps={{ fontWeight: 'bold', fontSize: '1rem' }}
                 />
               </MenuItemBox>
@@ -149,9 +156,9 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
             { text: 'Bài viết', url: '/nhan-vien/bai-viet', icon: <ArticleIcon /> },
             { text: 'Sự kiện', url: '/nhan-vien/su-kien', icon: <EventIcon /> }
           ].map(({ text, url, icon }) => (
-            <ListItem 
+            <ListItem
               key={text}
-              component={Link} 
+              component={Link}
               to={url}
               sx={{ textDecoration: 'none', color: 'inherit', p: 0 }}
             >
@@ -160,11 +167,11 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
                   <MenuItemPaper2 elevation={1}>
                     {React.cloneElement(icon, { sx: { color: '#2196f3' } })}
                   </MenuItemPaper2>
-                  <ListItemText 
-                    primary={text} 
-                    primaryTypographyProps={{ 
-                      fontWeight: location.pathname === url ? 'bold' : 'normal', 
-                      fontSize: '0.97rem' 
+                  <ListItemText
+                    primary={text}
+                    primaryTypographyProps={{
+                      fontWeight: location.pathname === url ? 'bold' : 'normal',
+                      fontSize: '0.97rem'
                     }}
                   />
                 </MenuItemBox>
@@ -177,7 +184,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
 
         <Divider />
         <List sx={{ width: '100%', mt: 2 }}>
-          <ListItem 
+          <ListItem
             onClick={handleClick}
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}
           >
@@ -186,8 +193,8 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <SettingsIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Tài khoản" 
+                <ListItemText
+                  primary="Tài khoản"
                   primaryTypographyProps={{ fontSize: '0.97rem' }}
                 />
               </MenuItemBox>

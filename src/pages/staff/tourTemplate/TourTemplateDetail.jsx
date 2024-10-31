@@ -20,12 +20,6 @@ const TourTemplateDetails = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);

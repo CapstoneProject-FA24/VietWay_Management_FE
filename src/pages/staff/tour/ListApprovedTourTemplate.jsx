@@ -11,7 +11,6 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { getCookie } from '@services/AuthenService';
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -41,12 +40,6 @@ const ListApprovedTourTemplate = () => {
   useEffect(() => {
     sortTourTemplates();
   }, [tourTemplates, sortOrder]);
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
 
   const fetchData = async () => {
     try {

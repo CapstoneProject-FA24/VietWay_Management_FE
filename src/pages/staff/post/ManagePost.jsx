@@ -11,7 +11,6 @@ import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
-import { getCookie } from '@services/AuthenService';
 
 const ManagePost = () => {
   const location = useLocation();
@@ -46,12 +45,6 @@ const ManagePost = () => {
     fetchPosts().then((data) => {
       setPosts(data);
     });
-
-    useEffect(() => {
-      const role = getCookie('role');
-      const token = getCookie('token');
-      if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-    }, []);
     
     // Fetch provinces
     const fetchProvincesData = async () => {

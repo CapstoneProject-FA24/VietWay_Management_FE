@@ -9,7 +9,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import CreateProvince from '@components/manager/province/CreateProvince';
-import { getCookie } from '@services/AuthenService';
+
 const ManagerManageProvince = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,12 +21,6 @@ const ManagerManageProvince = () => {
     const [sortedProvinces, setSortedProvinces] = useState([]);
     const navigate = useNavigate();
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
-    useEffect(() => {
-        const role = getCookie('role');
-        const token = getCookie('token');
-        if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
-    }, []);
 
     useEffect(() => {
         fetchData();

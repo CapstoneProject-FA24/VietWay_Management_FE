@@ -15,7 +15,6 @@ import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionP
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
-import { getCookie } from '@services/AuthenService';
 
 const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
@@ -44,12 +43,6 @@ const CreateTourTemplate = () => {
   const [currentEditingDay, setCurrentEditingDay] = useState(null);
   const pageTopRef = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const role = getCookie('role');
-    const token = getCookie('token');
-    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
