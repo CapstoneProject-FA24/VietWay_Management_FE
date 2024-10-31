@@ -91,7 +91,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   useEffect(() => {
     const role = getCookie('role');
     const token = getCookie('token');
-    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
+    if (!role || !token || role !== 'nhan-vien') { navigate(`/dang-nhap`); }
   }, []);
 
   const location = useLocation();
