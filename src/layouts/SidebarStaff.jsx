@@ -14,7 +14,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
-import { getCookie } from '@services/AuthenService';
+import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -109,8 +109,8 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    removeCookie('token');
+    removeCookie('role');
 
     navigate('/dang-nhap');
   };

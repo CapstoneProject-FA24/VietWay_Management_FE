@@ -24,6 +24,7 @@ import ManagerProfile from '@pages/manager/ManagerProfile.jsx';
 import StaffProfile from '@pages/staff/StaffProfile.jsx';
 import PostDetail from '@pages/staff/post/PostDetail.jsx';
 import ManagePost from '@pages/staff/post/ManagePost.jsx';
+import ManagerManageTour from '@pages/manager/tour/ManagerManageTour.jsx';
 
 const App = () => {
   return (
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<ManagerAttractionDetail/>} />
         <Route path="/quan-ly/tinh-thanh" element={<ManagerManageProvince/>} />
         <Route path="/quan-ly/thong-tin-tai-khoan" element={<ManagerProfile />} />
+        <Route path="/quan-ly/tour-du-lich" element={<ManagerManageTour />} />
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
