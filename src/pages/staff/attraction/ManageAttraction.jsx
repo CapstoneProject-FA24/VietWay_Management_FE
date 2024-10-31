@@ -154,27 +154,27 @@ const ManageAttraction = () => {
                 <title>Manage Attractions</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+            <Box sx={{ flexGrow: 1,mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
-                    <Grid item xs={12} md={8} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+                    <Grid item xs={12} md={8} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
                         <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý điểm tham quan </Typography>
                     </Grid>
-                    <Grid item md={4} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                    <Grid item md={4} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                         <Button component={Link} to="/nhan-vien/diem-tham-quan/them" variant="contained" color="primary"
                             startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
                             Thêm điểm tham quan
                         </Button>
                     </Grid>
                     <Grid item xs={4.7}>
-                        <Typography>
-                            Tỉnh thành phố
+                        <Typography sx={{ fontWeight: 600 }}>
+                            Tỉnh/Thành phố
                         </Typography>
                         <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
                             isMulti options={provinceOptions} onChange={setAttrProvinces} value={attrProvinces}
                         />
                     </Grid>
                     <Grid item xs={4.7}>
-                        <Typography>
+                        <Typography sx={{ fontWeight: 600 }}>
                             Loại điểm tham quan
                         </Typography>
                         <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
@@ -205,7 +205,7 @@ const ManageAttraction = () => {
                         </Button>
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mt: 3 }}>
-                        <Typography>
+                        <Typography sx={{ fontWeight: 600 }}>
                             Sắp xếp theo
                         </Typography>
                         <Select

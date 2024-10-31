@@ -86,7 +86,7 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
   padding: '12px 16px',
 }));
 
-const SidebarManager = ({ isOpen, toggleSidebar }) => {
+const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -221,4 +221,4 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
   );
 };
 
-export default SidebarManager;
+export default SidebarStaff;

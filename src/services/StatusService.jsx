@@ -63,3 +63,14 @@ export const getRole = (role) => {
       return "Không xác định";
   }
 };
+
+// Post + Event
+export const getStatusColor = (status) => { 
+  switch(status) {
+    case '0': return { color: 'warning', label: 'Bản nháp' };
+    case '1': return { color: 'info', label: 'Chờ duyệt' };
+    case '2': return { color: 'success', label: 'Đã duyệt' };
+    case '3': return { color: 'error', label: 'Từ chối' };
+    default: return { color: 'default', label: 'Không xác định' };
+  }
+};
