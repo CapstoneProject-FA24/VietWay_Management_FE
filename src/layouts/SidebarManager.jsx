@@ -17,6 +17,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArticleIcon from '@mui/icons-material/Article';
 import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
+import CategoryIcon from '@mui/icons-material/Category';
 import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
@@ -159,7 +160,8 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
             { text: 'Bài viết', url: '/quan-ly/bai-viet', icon: <ArticleIcon /> },
             { text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
-            { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> }
+            { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> },
+            { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text} component={Link}  to={url}

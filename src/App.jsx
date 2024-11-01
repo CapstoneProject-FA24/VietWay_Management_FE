@@ -27,6 +27,7 @@ import ManagePost from '@pages/staff/post/ManagePost.jsx';
 import ManagerManageTour from '@pages/manager/tour/ManagerManageTour.jsx';
 import ManagerTourDetail from '@pages/manager/tour/ManagerTourDetail.jsx';
 import TourDetail from '@pages/staff/tour/TourDetail.jsx';
+import ManageCategory from '@pages/manager/category/ManageCategory.jsx';
 
 const App = () => {
   return (
@@ -47,7 +48,8 @@ const App = () => {
         <Route path="/quan-ly/thong-tin-tai-khoan" element={<ManagerProfile />} />
         <Route path="/quan-ly/tour-du-lich" element={<ManagerManageTour />} />
         <Route path="/quan-ly/tour-du-lich/chi-tiet/:id" element={<ManagerTourDetail />} />
-        
+        <Route path="/quan-ly/danh-muc" element={<ManageCategory />} />
+
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
