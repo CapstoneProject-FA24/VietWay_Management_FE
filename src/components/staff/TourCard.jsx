@@ -1,21 +1,6 @@
 import React from 'react';
-import { 
-  Card,
-  CardMedia, 
-  CardContent,
-  CardActions,
-  Typography,
-  Chip,
-  Button,
-  Stack,
-  Box
-} from '@mui/material';
-import { 
-  CalendarToday,
-  AccessTime,
-  Person,
-  LocationOn
-} from '@mui/icons-material';
+import { Card, CardMedia, CardContent, CardActions, Typography, Chip, Button, Stack, Box } from '@mui/material';
+import { CalendarToday, AccessTime, Person, LocationOn } from '@mui/icons-material';
 
 const STATUS_CONFIG = {
   "Đang nhận khách": { color: "success", icon: "🟢" },
@@ -26,15 +11,7 @@ const STATUS_CONFIG = {
 };
 
 const InfoItem = ({ icon, text }) => (
-  <Stack 
-    direction="row" 
-    spacing={1} 
-    alignItems="center"
-    sx={{ 
-      color: 'text.secondary',
-      '& svg': { fontSize: '1.2rem' }
-    }}
-  >
+  <Stack direction="row" spacing={1} alignItems="center" sx={{ color: 'text.secondary', '& svg': { fontSize: '1.2rem' } }}>
     {icon}
     <Typography variant="body2">{text}</Typography>
   </Stack>
@@ -52,6 +29,7 @@ const TourCard = ({ tour, onViewDetails }) => {
         flexDirection: 'column',
         borderRadius: 2,
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        mt: 4,
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: 6

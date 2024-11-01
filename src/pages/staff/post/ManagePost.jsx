@@ -99,7 +99,7 @@ const ManagePost = () => {
             </Typography>
             <Button 
               component={Link} 
-              to={`${currentPage}/tao-bai-viet`}
+              to={`${currentPage}/them`}
               variant="contained" 
               color="primary" 
               startIcon={<AddIcon />} 
@@ -109,87 +109,91 @@ const ManagePost = () => {
             </Button>
           </Grid>
 
-          <Grid item xs={12} md={4.5}>
-            <Typography sx={{ fontWeight: 600 }}>
-              Danh mục
-            </Typography>
-            <ReactSelect
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              isMulti
-              options={categoryOptions}
-              onChange={setTempCategories}
-              value={tempCategories}
-              placeholder="Chọn danh mục"
-            />
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={12} md={4.5}>
+              <Typography sx={{ fontWeight: 600 }}>
+                Danh mục
+              </Typography>
+              <ReactSelect
+                closeMenuOnSelect={false}
+                components={animatedComponents}
+                isMulti
+                options={categoryOptions}
+                onChange={setTempCategories}
+                value={tempCategories}
+                placeholder="Chọn danh mục"
+              />
+            </Grid>
+
+            <Grid item xs={12} md={4.5}>
+              <Typography sx={{ fontWeight: 600 }}>
+                Tỉnh thành
+              </Typography>
+              <ReactSelect
+                closeMenuOnSelect={false}
+                components={animatedComponents}
+                isMulti
+                options={provinces.map(province => ({
+                  value: province.provinceId,
+                  label: province.provinceName
+                }))}
+                onChange={setTempProvinces}
+                value={tempProvinces}
+                placeholder="Chọn tỉnh thành"
+              />
+            </Grid>
+
+            <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'flex-end' }}>
+              <Button
+                variant="contained" 
+                startIcon={<FilterListIcon />} 
+                onClick={handleApplyFilter}
+                sx={{
+                  backgroundColor: 'lightGray', 
+                  color: 'black', 
+                  width: '80%',
+                  float: 'right',
+                  display: 'flex',
+                  marginLeft: 'auto'
+                }}
+              >
+                Áp dụng bộ lọc
+              </Button>
+            </Grid>
           </Grid>
 
-          <Grid item xs={12} md={4.5}>
-            <Typography sx={{ fontWeight: 600 }}>
-              Tỉnh thành
-            </Typography>
-            <ReactSelect
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              isMulti
-              options={provinces.map(province => ({
-                value: province.provinceId,
-                label: province.provinceName
-              }))}
-              onChange={setTempProvinces}
-              value={tempProvinces}
-              placeholder="Chọn tỉnh thành"
-            />
-          </Grid>
-
-          <Grid item xs={12} md={3}>
-            <Button
-              variant="contained" 
-              startIcon={<FilterListIcon />} 
-              onClick={handleApplyFilter}
-              sx={{
-                backgroundColor: 'lightGray', 
-                color: 'black', 
-                width: '80%',
-                float: 'right',
-                display: 'flex',
-                marginLeft: 'auto'
-              }}
-            >
-              Áp dụng bộ lọc
-            </Button>
-          </Grid>
-
-          <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <TextField variant="outlined" placeholder="Tìm kiếm tour mẫu..."
-              size="small" sx={{ width: '100%', mr: 1 }}
-              value={tempSearchTerm} onChange={(e) => setTempSearchTerm(e.target.value)}
+          <Grid container spacing={2} sx={{ my: 0.05 }}>
+            <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <TextField variant="outlined" placeholder="Tìm kiếm bài viết..."
+                size="small" sx={{ width: '100%', mr: 1 }}
+                value={tempSearchTerm} onChange={(e) => setTempSearchTerm(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
                       <SearchIcon />
-                        </InputAdornment>
-                                ),
-                            }}
-                        />
-                        <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
-                            Tìm kiếm
-                        </Button>
-                    </Grid>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
+                Tìm kiếm
+              </Button>
+            </Grid>
 
-          <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography sx={{ fontWeight: 600 }}>
-              Sắp xếp theo
-            </Typography>
-            <Select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              variant="outlined"
-              sx={{ width: '200px', ml: 2, height: '40px' }}
-            >
-              <MenuItem value="newest">Mới nhất</MenuItem>
-              <MenuItem value="oldest">Cũ nhất</MenuItem>
-            </Select>
+            <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <Typography sx={{ fontWeight: 600 }}>
+                Sắp xếp theo
+              </Typography>
+              <Select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                variant="outlined"
+                sx={{ width: '227px', ml: 2, height: '40px' }}
+              >
+                <MenuItem value="newest">Mới nhất</MenuItem>
+                <MenuItem value="oldest">Cũ nhất</MenuItem>
+              </Select>
+            </Grid>
           </Grid>
 
           <Grid item xs={12} sx={{ mb: 2 }}>
