@@ -11,13 +11,12 @@
   }
   
   .react-calendar__tile {
-    height: 100px;
+    height: 110px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
     width: 100% !important;
-    padding: 3.5px !important;
   }
   
   .react-calendar__month-view__days__day {

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import baseURL from '@api/baseURL'
-const token = localStorage.getItem('token');
+import { getCookie } from '@services/AuthenService';
+const token = getCookie('token');
 
 export const fetchAttractionType = async () => {
     try {

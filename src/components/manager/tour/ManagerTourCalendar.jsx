@@ -5,13 +5,14 @@ import dayjs from 'dayjs';
 import { getTourStatusInfo } from '@services/StatusService';
 import 'react-calendar/dist/Calendar.css';
 
-const TourCalendar = ({ tours, selectedMonth, handleMonthChange }) => {
+const ManagerTourCalendar = ({ tourId, tours, selectedMonth, handleMonthChange }) => {
   const getTourInfo = (date) => {
     const toursOnThisDay = tours.filter(tour =>
       dayjs(tour.startDate).isSame(date, 'day')
     );
 
     return toursOnThisDay.map(tour => ({
+      id: tour.id,
       status: tour.status,
       participants: `${tour.currentParticipant}/${tour.maxParticipant}`
     }));
@@ -37,11 +38,17 @@ const TourCalendar = ({ tours, selectedMonth, handleMonthChange }) => {
                 <div 
                   key={idx} 
                   style={{
-                    backgroundColor: 'rgba(25, 118, 210, 0.1)', height: 'auto', padding: '4px', 
-                    marginBottom: '5px', marginTop: '5px',
-                    borderRadius: '3px', display: 'flex', flexDirection: 'column',
+                    backgroundColor: info.id === tourId ? 'rgba(25, 118, 210, 0.3)' : 'rgba(25, 118, 210, 0.1)', 
+                    height: 'auto',
+                    padding: '4px',
+                    marginBottom: '4px', 
+                    marginTop: '4px',
+                    borderRadius: '3px',
+                    display: 'flex', 
+                    flexDirection: 'column',
                     justifyContent: 'center',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    border: info.id === tourId ? '2px solid #1976d2' : 'none'
                   }}
                 >
                   {`${getTourStatusInfo(info.status).text}`} {`(${info.participants})`}
@@ -55,4 +62,4 @@ const TourCalendar = ({ tours, selectedMonth, handleMonthChange }) => {
   );
 };
 
-export default TourCalendar;
+export default ManagerTourCalendar;

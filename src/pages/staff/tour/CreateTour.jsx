@@ -6,7 +6,7 @@ import { LocalizationProvider, StaticDatePicker, DatePicker, TimePicker } from '
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId } from '@services/TourService';
+import { fetchToursByTemplateId, calculateEndDate } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -74,50 +74,6 @@ const CreateTour = () => {
       ...prev,
       [field]: value
     }));
-  };
-
-  const calculateEndDate = (startDate, startTime, duration) => {
-    if (!startDate || !startTime || !duration || !duration.durationName) return null;
-
-    try {
-      const durationStr = duration.durationName;
-      const nights = parseInt(durationStr.match(/\d+(?=\s*đêm)/)[0]);
-      const days = parseInt(durationStr.match(/\d+(?=\s*ngày)/)[0]);
-
-      if (isNaN(nights) || isNaN(days)) {
-        console.error('Could not parse duration:', durationStr);
-        return null;
-      }
-
-      let totalDuration;
-      let recommendationMessage = '';
-
-      if (days > nights) {
-        totalDuration = days;
-        if (startTime.hour() >= 18) {
-          recommendationMessage = 'Khuyến nghị: Tour nên bắt đầu trước 18:00';
-        }
-      } else if (days === nights) {
-        totalDuration = days + 1;
-      } else {
-        totalDuration = days + 1;
-        if (startTime.hour() < 18) {
-          recommendationMessage = 'Khuyến nghị: Tour nên bắt đầu sau 18:00';
-        }
-      }
-
-      const startDateTime = dayjs(startDate)
-        .hour(startTime.hour())
-        .minute(startTime.minute());
-
-      return {
-        endDate: startDateTime.add(totalDuration, 'day'),
-        recommendationMessage
-      };
-    } catch (error) {
-      console.error('Error calculating end date:', error);
-      return null;
-    }
   };
 
   const calculatePrices = (adultPrice) => {
