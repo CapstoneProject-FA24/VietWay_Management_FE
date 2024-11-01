@@ -106,3 +106,60 @@ export const calculateEndDate = (startDate, startTime, duration) => {
         return null;
     }
 };
+
+export const createTour = async (tourData) => {
+    try {
+        const startDateTime = dayjs(tourData.startDate)
+            .hour(tourData.startTime.hour())
+            .minute(tourData.startTime.minute());
+
+        const formattedData = {
+            tourTemplateId: tourData.tourTemplateId,
+            startLocation: tourData.startAddress,
+            startDate: startDateTime.toISOString(),
+            defaultTouristPrice: parseFloat(tourData.adultPrice),
+            registerOpenDate: tourData.registerOpenDate.toISOString(),
+            registerCloseDate: tourData.registerCloseDate.toISOString(),
+            maxParticipant: parseInt(tourData.maxParticipants),
+            minParticipant: parseInt(tourData.minParticipants),
+            currentParticipant: 0,
+            createdAt: new Date().toISOString(),
+            tourPrices: [
+                {
+                    name: "Người lớn",
+                    price: parseFloat(tourData.adultPrice),
+                    ageFrom: 12,
+                    ageTo: 200
+                },
+                {
+                    name: "Trẻ em",
+                    price: parseFloat(tourData.childPrice),
+                    ageFrom: 5,
+                    ageTo: 11
+                },
+                {
+                    name: "Em bé",
+                    price: parseFloat(tourData.infantPrice),
+                    ageFrom: 0,
+                    ageTo: 4
+                }
+            ],
+            refundPolicies: [
+                {
+                    cancelBefore: startDateTime.subtract(1, 'day').toISOString(),
+                    refundPercent: 100
+                },
+                {
+                    cancelBefore: startDateTime.subtract(3, 'day').toISOString(),
+                    refundPercent: 50
+                }
+            ]
+        };
+
+        const response = await axios.post(`${baseURL}/api/tours`, formattedData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating tour:', error);
+        throw error;
+    }
+};
