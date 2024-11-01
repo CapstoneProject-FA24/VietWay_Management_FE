@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, Button, TextField, Select, MenuItem } from '@mui/material';
 import { ArrowBack, Create } from '@mui/icons-material';
-import { toast } from 'react-toastify';
+//import { toast } from 'react-toastify';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchProvinces } from '@services/ProvinceService';
 import ReactQuill from 'react-quill';
@@ -78,7 +78,7 @@ const CreatePost = () => {
         setProvinceOptions(formattedProvinces);
       } catch (error) {
         console.error('Error loading provinces:', error);
-        toast.error('Lỗi khi tải danh sách tỉnh thành');
+        //toast.error('Lỗi khi tải danh sách tỉnh thành');
       } finally {
         setIsLoadingProvinces(false);
       }
@@ -122,7 +122,7 @@ const CreatePost = () => {
     try {
       // Validate required fields
       if (!newPost.title || !newPost.content || !newPost.category || !newPost.provinceId) {
-        toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+        //toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
         return;
       }
 
@@ -130,11 +130,11 @@ const CreatePost = () => {
       // const response = await createPost(newPost);
       console.log('Creating new post:', newPost);
       
-      toast.success('Tạo bài viết mới thành công');
+      //toast.success('Tạo bài viết mới thành công');
       navigate('/nhan-vien/bai-viet');
     } catch (error) {
       console.error('Error creating post:', error);
-      toast.error('Lỗi khi tạo bài viết mới');
+      //toast.error('Lỗi khi tạo bài viết mới');
     }
   };
 

@@ -18,11 +18,14 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { TourStatus } from "@hooks/Statuses";
+import { getTourStatusInfo } from "@services/StatusService";
+import { Tabs, Tab } from "@mui/material";
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [tours, setTours] = useState(mockTours);
-  const [filters, setFilters] = useState({ tourType: [], duration: [], location: [], status: "" });
+  const [filters, setFilters] = useState({ tourType: [], duration: [], location: [] });
   const [filteredTours, setFilteredTours] = useState(tours);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
@@ -42,6 +45,14 @@ const ManageTour = () => {
   });
   const [searchCode, setSearchCode] = useState("");
   const [statusTab, setStatusTab] = useState("all");
+
+  const tourStatusTabs = useMemo(() => {
+    const statuses = Object.entries(TourStatus).map(([key, value]) => ({
+      value: value.toString(),
+      label: getTourStatusInfo(value).text
+    }));
+    return [{ value: "all", label: "Tất cả" }, ...statuses];
+  }, []);
 
   useEffect(() => {
     const fetchApprovedTourTemplates = async () => {
@@ -72,7 +83,10 @@ const ManageTour = () => {
   useEffect(() => {
     const fetchToursData = async (params) => {
       try {
-        const fetchedTours = await fetchTours();
+        const fetchedTours = await fetchTours({
+          ...params,
+          status: statusTab === 'all' ? null : parseInt(statusTab)
+        });
         setTours(fetchedTours);
       } catch (error) {
         console.error('Error fetching tours:', error);
@@ -85,7 +99,6 @@ const ManageTour = () => {
       tourType: filters.tourType,
       duration: filters.duration,
       location: filters.location,
-      status: statusTab === 'all' ? null : parseInt(statusTab),
       startDateFrom: dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : null,
       startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null
     };
@@ -103,10 +116,6 @@ const ManageTour = () => {
       ...prevFilters,
       [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
     }));
-  };
-
-  const handleStatusChange = (event) => {
-    setFilters((prevFilters) => ({ ...prevFilters, status: event.target.value }));
   };
 
   const applyFilters = () => {
@@ -132,10 +141,6 @@ const ManageTour = () => {
 
     if (filters.location.length > 0) {
       result = result.filter((tour) => filters.location.includes(tour.provinceName));
-    }
-
-    if (filters.status) {
-      result = result.filter((tour) => tour.status === filters.status);
     }
 
     setFilteredTours(result);
@@ -181,6 +186,10 @@ const ManageTour = () => {
     });
   };
 
+  const handleStatusTabChange = (event, newValue) => {
+    setStatusTab(newValue);
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
@@ -199,7 +208,7 @@ const ManageTour = () => {
         </Box>
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography>Loại tour</Typography>
               <ReactSelect
@@ -213,7 +222,7 @@ const ManageTour = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography>Thời lượng</Typography>
               <ReactSelect
@@ -227,7 +236,7 @@ const ManageTour = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography>Địa điểm</Typography>
               <ReactSelect
@@ -241,21 +250,7 @@ const ManageTour = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
-            <Typography>Trạng thái</Typography>
-            <FormControl fullWidth>
-              <Select value={filters.status} onChange={handleStatusChange}  sx={{ height: '38px' }}>
-                <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value="Đang nhận khách">Đang nhận khách</MenuItem>
-                <MenuItem value="Đã đầy chỗ">Đã đầy chỗ</MenuItem>
-                <MenuItem value="Hoàn thành">Hoàn thành</MenuItem>
-                <MenuItem value="Bị Hủy">Bị Hủy</MenuItem>
-                <MenuItem value="Đang diễn ra">Đang diễn ra</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{
@@ -293,7 +288,7 @@ const ManageTour = () => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button 
               variant="contained" 
               startIcon={<FilterListIcon />} 
@@ -306,44 +301,40 @@ const ManageTour = () => {
 
           <Grid item xs={12} sm={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3.5 }}>
-              <Box>
+              <Box sx={{ display: 'flex', width: '50%' }}>
                 <TextField
                   variant="outlined"
-                  placeholder="Tìm kiếm tour..."
+                  placeholder="Tìm kiếm tour theo tên..."
                   size="small"
-                  sx={{ mr: 1 }}
+                  sx={{ mr: 1, width: '70%' }}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
+                      <InputAdornment position="start"> <SearchIcon /> </InputAdornment>
                     ),
                   }}
                 />
-                <Button variant="contained" sx={{ backgroundColor: 'lightGray', color: 'black' }}>
+                <Button variant="contained" sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}>
                   Tìm kiếm
                 </Button>
               </Box>
 
-              <Box>
+              <Box sx={{ display: 'flex', width: '50%' }}>
                 <TextField
                   variant="outlined"
-                  placeholder="Tìm kiếm mã tour..."
+                  placeholder="Tìm kiếm tour theo mã tour..."
                   size="small"
-                  sx={{ mr: 1 }}
+                  sx={{ mr: 1, width: '70%' }}
                   value={searchCode}
                   onChange={(e) => setSearchCode(e.target.value)}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
+                      <InputAdornment position="start"><SearchIcon /></InputAdornment>
                     ),
                   }}
                 />
-                <Button variant="contained" sx={{ backgroundColor: 'lightGray', color: 'black' }}>
+                <Button variant="contained" sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}>
                   Tìm kiếm
                 </Button>
               </Box>
@@ -351,12 +342,25 @@ const ManageTour = () => {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-          Trả về {filteredTours.length} kết quả
-        </Typography>
+        <Tabs 
+          value={statusTab}
+          onChange={handleStatusTabChange}
+          aria-label="tour status tabs"
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          <Tab label="Tất cả" value="all" />
+          {Object.entries(TourStatus).map(([key, value]) => (
+            <Tab 
+              key={value}
+              label={getTourStatusInfo(value).text}
+              value={value.toString()}
+            />
+          ))}
+        </Tabs>
 
         {filteredTours.length > 0 ? (
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{ mt: 2 }}>
             {filteredTours.map((tour) => (
               <Grid item xs={12} sm={6} md={4} key={tour.tourId}>
                 <TourCard 
