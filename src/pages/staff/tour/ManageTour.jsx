@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Box, Typography, TextField, Button, Select, MenuItem, Chip, FormControl, Grid, Card, CardContent, CardMedia, CardActions, Pagination } from "@mui/material";
+import { Box, Typography, TextField, Button, Select, MenuItem, Chip, FormControl, Grid, Card, CardContent, CardMedia, CardActions, Pagination, InputAdornment } from "@mui/material";
 import { mockTours } from "@hooks/MockTour";
 import SidebarStaff from "@layouts/SidebarStaff";
 import AddIcon from "@mui/icons-material/Add";
@@ -11,6 +11,7 @@ import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
 import Helmet from 'react-helmet';
 import TourCard from '@components/staff/TourCard';
+import SearchIcon from '@mui/icons-material/Search';
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -26,6 +27,8 @@ const ManageTour = () => {
   const [provinces, setProvinces] = useState([]);
   const [tourCategories, setTourCategories] = useState([]);
   const [tourDurations, setTourDurations] = useState([]);
+
+  const [sortOrder, setSortOrder] = useState('newest');
 
   useEffect(() => {
     const fetchApprovedTourTemplates = async () => {
@@ -148,28 +151,28 @@ const ManageTour = () => {
         toggleSidebar={() => setIsOpen(!isOpen)}
       />
       <Box sx={{ flexGrow: 1, mt: 1.5, p: isOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
-        <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
-        </Grid>
+        <Grid container spacing={2}>
+          {/* Title and Create Button Row */}
+          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> 
+              Quản lý tour du lịch 
+            </Typography>
+            <Button 
+              component={Link} 
+              to={currentPage + "/tour-mau-duoc-duyet"} 
+              variant="contained" 
+              color="primary" 
+              startIcon={<AddIcon />} 
+              sx={{ height: '55px', borderRadius: 2 }}
+            >
+              Tạo Tour Mới
+            </Button>
+          </Grid>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <TextField
-            placeholder="Tìm theo tên tour du lịch..."
-            variant="outlined"
-            sx={{ width: "80%", height: '45px' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-
-          <Button component={Link} to={currentPage + "/tour-mau-duoc-duyet"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: "55px", borderRadius: 2 }}>
-            Tạo Tour Mới
-          </Button>
-        </Box>
-
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={12} sm={6}>
+          {/* Filter Sections */}
+          <Grid item xs={12} md={4.5}>
             <FormControl fullWidth>
-              <Typography>Loại tour</Typography>
+              <Typography sx={{ fontWeight: 600 }}>Loại tour</Typography>
               <ReactSelect
                 closeMenuOnSelect={false}
                 components={animatedComponents}
@@ -181,9 +184,9 @@ const ManageTour = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} md={4.5}>
             <FormControl fullWidth>
-              <Typography>Thời lượng</Typography>
+              <Typography sx={{ fontWeight: 600 }}>Thời lượng</Typography>
               <ReactSelect
                 closeMenuOnSelect={false}
                 components={animatedComponents}
@@ -195,9 +198,9 @@ const ManageTour = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} md={3}>
             <FormControl fullWidth>
-              <Typography>Địa điểm</Typography>
+              <Typography sx={{ fontWeight: 600 }}>Địa điểm</Typography>
               <ReactSelect
                 closeMenuOnSelect={false}
                 components={animatedComponents}
@@ -209,10 +212,56 @@ const ManageTour = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          {/* Search and Sort Row */}
+          <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <TextField 
+              variant="outlined" 
+              placeholder="Tìm kiếm tour..."
+              size="small" 
+              sx={{ width: '100%', mr: 1 }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button 
+              variant="contained" 
+              onClick={applyFilters} 
+              sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }}
+            >
+              Tìm kiếm
+            </Button>
+          </Grid>
+
+          <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+            <Typography sx={{ fontWeight: 600 }}>
+              Sắp xếp theo
+            </Typography>
+            <Select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              variant="outlined"
+              sx={{ width: '200px', ml: 2, height: '40px' }}
+            >
+              <MenuItem value="newest">Mới nhất</MenuItem>
+              <MenuItem value="oldest">Cũ nhất</MenuItem>
+            </Select>
+          </Grid>
+
+          {/* Status Filter */}
+          <Grid item xs={12}>
             <Typography>Trạng thái</Typography>
             <FormControl fullWidth>
-              <Select value={filters.status} onChange={handleStatusChange}  sx={{ height: '38px' }}>
+              <Select 
+                value={filters.status} 
+                onChange={handleStatusChange} 
+                sx={{ height: '38px' }}
+              >
                 <MenuItem value="">Tất cả</MenuItem>
                 <MenuItem value="Đang nhận khách">Đang nhận khách</MenuItem>
                 <MenuItem value="Đã đầy chỗ">Đã đầy chỗ</MenuItem>
@@ -222,41 +271,38 @@ const ManageTour = () => {
               </Select>
             </FormControl>
           </Grid>
+
+          {/* Tour Cards and Pagination */}
+          {currentTours.length > 0 ? (
+            <>
+              <Grid container spacing={2}>
+                {currentTours.map((tour) => (
+                  <Grid item xs={12} sm={6} md={4} key={tour.tourId}>
+                    <TourCard 
+                      tour={tour}
+                      onViewDetails={() => {
+                        // Handle view details click
+                        console.log('View details for tour:', tour.tourId);
+                      }}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Pagination
+                  count={Math.ceil(filteredTours.length / toursPerPage)}
+                  page={page}
+                  onChange={handleChangePage}
+                  color="primary"
+                />
+              </Box>
+            </>
+          ) : (
+            <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
+              Không có kết quả nào
+            </Typography>
+          )}
         </Grid>
-
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-          Trả về {filteredTours.length} kết quả
-        </Typography>
-
-        {currentTours.length > 0 ? (
-          <>
-            <Grid container spacing={2}>
-              {currentTours.map((tour) => (
-                <Grid item xs={12} sm={6} md={4} key={tour.tourId}>
-                  <TourCard 
-                    tour={tour}
-                    onViewDetails={() => {
-                      // Handle view details click
-                      console.log('View details for tour:', tour.tourId);
-                    }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-              <Pagination
-                count={Math.ceil(filteredTours.length / toursPerPage)}
-                page={page}
-                onChange={handleChangePage}
-                color="primary"
-              />
-            </Box>
-          </>
-        ) : (
-          <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
-            Không có kết quả nào
-          </Typography>
-        )}
       </Box>
     </Box>
   );

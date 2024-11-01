@@ -29,13 +29,13 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
 
     return (
         <Paper elevation={2} sx={{ p: 2, mb: 2, ml: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', textAlign: 'center' }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', textAlign: 'center', mb: 2 }}>
                 Thông tin tour mẫu
             </Typography>
 
             <Box sx={{ mb: 1 }}>
-                <Typography gutterBottom sx={{ fontWeight: 700, fontSize: '1.2rem' }}>
-                    {tourTemplate.tourName}
+                <Typography gutterBottom>
+                    <strong>Tên Tour: </strong>{tourTemplate.tourName}
                 </Typography>
                 <Typography gutterBottom>
                     <strong>Mã tour mẫu:</strong> {tourTemplate.code}

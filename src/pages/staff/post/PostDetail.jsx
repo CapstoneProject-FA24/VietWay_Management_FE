@@ -8,15 +8,49 @@ import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchPostById } from '@hooks/MockPost';
 import { fetchProvinces } from '@services/ProvinceService';
 import { getStatusColor } from '@services/StatusService';
-import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@mui/material/IconButton';
-
 const animatedComponents = makeAnimated();
+
+const commonStyles = {
+  boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
+
+  flexContainer: { display: 'flex', alignItems: 'center', flex: 1, width: '80%' },
+
+  labelTypography: {
+    color: '#05073C',
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+    marginRight: '1rem'
+  },
+
+  inputField: {
+    '& .MuiOutlinedInput-root': {
+      height: '40px',
+    },
+    '& .MuiOutlinedInput-input': {
+      padding: '8px 14px'
+    }
+  },
+
+  imageContainer: { mb: 2, flexGrow: 1, position: 'relative', '&:hover .overlay': { opacity: 1 }, '&:hover .change-image-btn': { opacity: 1 } },
+
+  editorContainer: {
+    '& .ql-container': {
+      minHeight: '200px',
+      fontSize: '1.1rem'
+    },
+    '& .ql-editor': {
+      minHeight: '200px',
+      fontSize: '1.1rem'
+    },
+  contentDisplay: { display: 'flex', flexDirection: 'column', maxWidth: '80vw', overflow: 'auto' }
+  }
+};
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -28,8 +62,15 @@ const PostDetail = () => {
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   const [editableFields, setEditableFields] = useState({
+    title: { value: '', isEditing: false },
     content: { value: '', isEditing: false },
-    // ... other fields
+    description: { value: '', isEditing: false },
+    category: { value: '', isEditing: false },
+    provinceId: { value: '', isEditing: false },
+    provinceName: { value: '', isEditing: false },
+    createDate: { value: '', isEditing: false },
+    image: { value: '', isEditing: false },
+    status: { value: '', isEditing: false }
   });
 
   useEffect(() => {
@@ -64,6 +105,22 @@ const PostDetail = () => {
     loadProvinces();
   }, []);
 
+  useEffect(() => {
+    if (post) {
+      setEditableFields({
+        title: { value: post.title || '', isEditing: false },
+        content: { value: post.content || '', isEditing: false },
+        description: { value: post.description || '', isEditing: false },
+        category: { value: post.category || '', isEditing: false },
+        provinceId: { value: post.provinceId || '', isEditing: false },
+        provinceName: { value: post.provinceName || '', isEditing: false },
+        createDate: { value: post.createDate || '', isEditing: false },
+        image: { value: post.image || '', isEditing: false },
+        status: { value: post.status || '0', isEditing: false }
+      });
+    }
+  }, [post]);
+
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -72,27 +129,33 @@ const PostDetail = () => {
     setIsEditMode(true);
   };
 
-  const handleSave = async () => {
+  const handleSaveChanges = async () => {
     try {
-      // Update the post with status 0 (draft)
       const updatedPost = {
-        ...editablePost,
-        status: '0'
+        ...post,
+        title: editableFields.title.value,
+        content: editableFields.content.value,
+        description: editableFields.description.value,
+        category: editableFields.category.value,
+        provinceId: editableFields.provinceId.value,
+        provinceName: editableFields.provinceName.value,
+        createDate: editableFields.createDate.value,
+        image: editableFields.image.value,
+        status: editableFields.status.value
       };
-      await updatePost(updatedPost);
+      
+      console.log('Saving changes:', updatedPost);
       setPost(updatedPost);
-      setEditablePost(updatedPost);
       setIsEditMode(false);
-      toast.success('Đã lưu bài viết dưới dạng nháp');
+      toast.success('Lưu thay đổi thành công');
     } catch (error) {
-      console.error('Error saving draft:', error);
-      toast.error('Lỗi khi lưu bài viết');
+      console.error('Error saving post:', error);
+      toast.error('Lỗi khi lưu thay đổi');
     }
   };
 
   const handleSendForApproval = async () => {
     try {
-      // Update the post with status 1 (pending approval)
       const updatedPost = {
         ...editablePost,
         status: '1'
@@ -113,6 +176,13 @@ const PostDetail = () => {
       ...prev,
       [field]: value
     }));
+
+    if (editableFields[field]?.isEditing) {
+      setEditableFields(prev => ({
+        ...prev,
+        [field]: { ...prev[field], value }
+      }));
+    }
   };
 
   const handleProvinceChange = (selected) => {
@@ -125,28 +195,13 @@ const PostDetail = () => {
       case '0':
         return (
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Edit />}
-              onClick={handleEditPost}
-            >
+            <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}>
               Chỉnh sửa
             </Button>
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={<Delete />}
-              onClick={handleDeletePost}
-            >
+            <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
               Xóa
             </Button>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<Send />}
-              onClick={handleSendForApproval}
-            >
+            <Button variant="contained" color="success" startIcon={<Send />} onClick={handleSendForApproval}>
               Gửi duyệt
             </Button>
           </Box>
@@ -154,11 +209,33 @@ const PostDetail = () => {
       case '1':
         return (
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={<Delete />}
+            <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
+              Xóa
+            </Button>
+          </Box>
+        );
+      case '3':
+        return (
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              startIcon={<Save />} 
               onClick={handleSaveAsDraft}
+              sx={{
+                bgcolor: '#1976d2',
+                '&:hover': {
+                  bgcolor: '#115293'
+                }
+              }}
+            >
+              Tạo bản nháp
+            </Button>
+            <Button 
+              variant="contained" 
+              color="error" 
+              startIcon={<Delete />} 
+              onClick={handleDeletePost}
             >
               Xóa
             </Button>
@@ -176,14 +253,6 @@ const PostDetail = () => {
       } catch (error) {
         console.error('Error deleting post:', error);
       }
-    }
-  };
-
-  const handleSaveAsDraft = async () => {
-    try {
-      navigate('/nhan-vien/bai-viet');
-    } catch (error) {
-      console.error('Error saving post as draft:', error);
     }
   };
 
@@ -206,6 +275,24 @@ const PostDetail = () => {
     }));
   };
 
+  const handleSaveAsDraft = async () => {
+    try {
+      const updatedPost = {
+        ...post,
+        status: '0' // Chuyển status về trạng thái nháp
+      };
+      
+      await updatePost(updatedPost);
+      setPost(updatedPost);
+      setEditablePost(updatedPost);
+      toast.success('Đã lưu bài viết dưới dạng nháp');
+      navigate('/nhan-vien/bai-viet'); // Chuyển về trang danh sách bài viết
+    } catch (error) {
+      console.error('Error saving as draft:', error);
+      toast.error('Lỗi khi lưu bài viết dưới dạng nháp');
+    }
+  };
+
   if (!post) return null;
 
   const statusInfo = getStatusColor(post.status);
@@ -215,12 +302,7 @@ const PostDetail = () => {
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
         
-        <Box sx={{ 
-          flexGrow: 1, 
-          p: 3, 
-          transition: 'margin-left 0.3s',
-          marginLeft: isSidebarOpen ? '260px' : '20px'
-        }}>
+        <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px' }}>
           <Box maxWidth="100vw">
             <Paper elevation={2} sx={{ p: 3, mb: 3, height: '100%', width: 'calc(95vw - 250px)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
@@ -236,198 +318,14 @@ const PostDetail = () => {
 
               {isEditMode ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <TextField
-                    label="Tiêu đề"
-                    value={editablePost.title}
-                    onChange={(e) => handleFieldChange('title', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
-                  />
-                  <Box 
-                    sx={{ 
-                      mb: 2, 
-                      flexGrow: 1,
-                      position: 'relative',
-                      '&:hover .overlay': {
-                        opacity: 1
-                      },
-                      '&:hover .change-image-btn': {
-                        opacity: 1
-                      }
-                    }}
-                  >
-                    <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
-                    <Box
-                      sx={{
-                        position: 'relative',
-                        width: '100%',
-                        borderRadius: '8px',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      <img
-                        src={editablePost.image}
-                        alt={editablePost.title}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                          borderRadius: '8px',
-                        }}
-                      />
-                      <Box
-                        className="overlay"
-                        sx={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <Button
-                          variant="outlined"
-                          component="label"
-                          className="change-image-btn"
-                          sx={{
-                            color: 'white',
-                            borderColor: 'white',
-                            '&:hover': {
-                              borderColor: 'white',
-                              backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            opacity: 0,
-                            transition: 'opacity 0.3s ease'
-                          }}
-                        >
-                          Đổi ảnh khác
-                          <input
-                            type="file"
-                            hidden
-                            onChange={(e) =>
-                              handleFieldChange('image', e.target.files[0])
-                            }
-                          />
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Box>
-                  {editableFields.content.isEditing ? (
-                    <Box>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        mb: 2 
-                      }}>
-                        <Typography sx={{ color: '#05073C', fontWeight: 600 }}>
-                          Nội dung
-                        </Typography>
-                      </Box>
+                  <TextField label="Tiêu đề" value={editablePost.title} onChange={(e) => handleFieldChange('title', e.target.value)} variant="outlined" fullWidth sx={{ mb: 2 }} />
 
-                      <Box sx={{ 
-                        '& .ql-container': {
-                          minHeight: '200px',
-                          fontSize: '1.1rem'
-                        },
-                        '& .ql-editor': {
-                          minHeight: '200px',
-                          fontSize: '1.1rem'
-                        }
-                      }}>
-                        <ReactQuill
-                          value={editableFields.content.value}
-                          onChange={(value) => setEditableFields(prev => ({
-                            ...prev,
-                            content: { ...prev.content, value }
-                          }))}
-                          modules={{
-                            toolbar: [
-                              [{ 'header': [1, 2, 3, false] }],
-                              ['bold', 'italic', 'underline', 'strike'],
-                              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                              ['link', 'image'],
-                              ['clean']
-                            ],
-                          }}
-                          theme="snow"
-                        />
-                        
-                        <Box sx={{ 
-                          display: 'flex', 
-                          justifyContent: 'flex-end', 
-                          width: '100%', 
-                          mt: 2 
-                        }}>
-                          <Button
-                            variant="contained"
-                            onClick={() => handleFieldSubmit('content')}
-                            disabled={!editableFields.content.value.trim()}
-                            sx={{ minWidth: '40px', padding: '8px' }}
-                          >
-                            <CheckIcon />
-                          </Button>
-                        </Box>
-                      </Box>
-                    </Box>
-                  ) : (
-                    <Box>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        mb: 2 
-                      }}>
-                        <Typography sx={{ color: '#05073C', fontWeight: 600 }}>
-                          Nội dung
-                        </Typography>
-                        <IconButton onClick={() => handleFieldEdit('content')}>
-                          <EditIcon />
-                        </IconButton>
-                      </Box>
-
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        maxWidth: '80vw', 
-                        overflow: 'auto' 
-                      }}>
-                        <div dangerouslySetInnerHTML={{ __html: editablePost.content }} />
-                      </Box>
-                    </Box>
-                  )}
-                  <TextField
-                    label="Mô tả"
-                    value={editablePost.description}
-                    onChange={(e) =>
-                      handleFieldChange('description', e.target.value)
-                    }
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    rows={4}
-                    sx={{ mb: 2, flexGrow: 1 }}
-                  />
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                      <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>
+                  <Box sx={commonStyles.boxContainer}>
+                    <Box sx={commonStyles.flexContainer}>
+                      <Typography sx={commonStyles.labelTypography}>
                         Danh mục:
                       </Typography>
-                      <Select
-                        value={editablePost.category}
-                        onChange={(e) =>
-                          handleFieldChange('category', e.target.value)
-                        }
-                        variant="outlined"
-                        fullWidth
-                      >
+                      <Select value={editablePost.category} onChange={(e) => handleFieldChange('category', e.target.value)} variant="outlined" fullWidth sx={commonStyles.inputField}>
                         <MenuItem value="Văn hóa">Văn hóa</MenuItem>
                         <MenuItem value="Ẩm thực">Ẩm thực</MenuItem>
                         <MenuItem value="Kinh nghiệm du lịch">Kinh nghiệm du lịch</MenuItem>
@@ -437,48 +335,101 @@ const PostDetail = () => {
                       </Select>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                      <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem', marginLeft: '1rem' }}>
-                        Tỉnh/Thành phố: 
+                    <Box sx={commonStyles.flexContainer}>
+                      <Typography sx={commonStyles.labelTypography}>
+                        Tỉnh/Thành phố:
                       </Typography>
-                      <ReactSelect
-                        closeMenuOnSelect={true}
-                        components={animatedComponents}
-                        options={provinceOptions}
-                        onChange={handleProvinceChange}
-                        value={provinceOptions.find(option => option.value === editablePost.provinceId)}
-                        isLoading={isLoadingProvinces}
-                        styles={{
-                          control: (base) => ({
-                            ...base,
-                            minHeight: 40
-                          })
-                        }}
-                      />
+                      <Select value={editablePost.provinceId} onChange={handleProvinceChange} variant="outlined" fullWidth sx={commonStyles.inputField} disabled={isLoadingProvinces}>
+                        {provinceOptions.map(option => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     </Box>
 
-                    <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                      <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>
+                    <Box sx={commonStyles.flexContainer}>
+                      <Typography sx={commonStyles.labelTypography}>
                         Ngày tạo:
                       </Typography>
-                      <TextField
-                        type="date"
-                        value={editablePost.createDate}
-                        onChange={(e) =>
-                          handleFieldChange('createDate', e.target.value)
-                        }
-                        variant="outlined"
-                        fullWidth
-                      />
+                      <TextField type="date" value={editablePost.createDate} onChange={(e) => handleFieldChange('createDate', e.target.value)} variant="outlined" fullWidth sx={commonStyles.inputField} />
                     </Box>
                   </Box>
+
+                  <TextField sx={{ mb: 2, fontWeight: 600 }} label="Mô tả" value={editablePost.description} 
+                  onChange={(e) => handleFieldChange('description', e.target.value)} />
+                  
+                  <Box sx={commonStyles.imageContainer}>
+                    <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
+                    <Box sx={{ position: 'relative', width: '100%', borderRadius: '8px', overflow: 'hidden',
+                      '&:hover .overlay': { opacity: 1 },
+                      '&:hover .change-image-btn': { opacity: 1 } }}>
+                      <img src={editablePost.image} alt={editablePost.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }}
+                      />
+                      <Box className="overlay" 
+                        sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', opacity: 0, transition: 'opacity 0.3s ease' }}
+                      />
+                      <Button variant="outlined" component="label" className="change-image-btn"
+                        sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', 
+                          color: 'white', borderColor: 'white', opacity: 0, transition: 'opacity 0.3s ease',
+                          '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255, 255, 255, 0.1)' } }}>
+                        Đổi ảnh khác
+                        <input type="file" hidden onChange={(e) => handleFieldChange('image', e.target.files[0])} />
+                      </Button>
+                    </Box>
+                  </Box>
+                  {editableFields.content.isEditing ? (
+                    <Box sx={commonStyles.editorContainer}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography sx={commonStyles.labelTypography}>
+                          Nội dung
+                        </Typography>
+                      </Box>
+
+                      <ReactQuill
+                        value={editableFields.content.value}
+                        onChange={(value) => setEditableFields(prev => ({
+                          ...prev,
+                          content: { ...prev.content, value }
+                        }))}
+                        modules={{
+                          toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link', 'image'],
+                            ['clean']
+                          ],
+                        }}
+                        theme="snow"
+                      />
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
+                        <Button variant="contained" onClick={() => handleFieldSubmit('content')} 
+                          disabled={!editableFields.content.value.trim()} 
+                          sx={{ minWidth: '40px', padding: '8px' }}>
+                          <CheckIcon />
+                        </Button>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box sx={commonStyles.contentDisplay}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                        <Typography sx={commonStyles.labelTypography}>
+                          Nội dung
+                        </Typography>
+                        <IconButton onClick={() => handleFieldEdit('content')}>
+                          <EditIcon />
+                        </IconButton>
+                      </Box>
+
+                      <div dangerouslySetInnerHTML={{ __html: editablePost.content }} />
+                    </Box>
+                  )}
+                  
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 'auto' }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<Save />}
-                      onClick={handleSave}
-                    >
+                    <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveChanges}>
                       Lưu thay đổi
                     </Button>
                   </Box>
@@ -486,82 +437,31 @@ const PostDetail = () => {
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip 
-                      label={statusInfo.label}
-                      color={statusInfo.color}
-                      size="small"
-                      sx={{ my: 3 }}
-                    />
+                    <Chip label={statusInfo.label} color={statusInfo.color} size="small" sx={{ my: 3 }} />
                   </Box>
 
-                  <Box sx={{ 
-                    position: 'relative',
-                    width: 'fit-content',
-                    height: { xs: '400px', md: '70vh' },
-                    overflow: 'hidden',
-                    mb: 3,
-                    '&::after': {
-                      content: '""',
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '30%',
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)',
-                    }
-                  }}>
-                    <CardMedia
-                      component="img"
-                      image={post.image}
-                      alt={post.title}
-                      sx={{
-                        width: '76vw',
-                        height: 'fit-content',
-                        objectFit: 'fill',
-                        transform: 'scale(1.1)',
-                        transition: 'transform 0.3s ease-in-out',
-                        '&:hover': {
-                          transform: 'scale(1.15)'
-                        }
-                      }}
-                    />
+                  <Box sx={{ position: 'relative', width: 'fit-content', 
+                    height: { xs: '400px', md: '70vh' }, overflow: 'hidden', mb: 3, 
+                    '&::after': { content: '""', position: 'absolute', bottom: 0, left: 0, right: 0, height: '30%', 
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)' } }}>
+                    <CardMedia component="img" image={post.image} alt={post.title} 
+                    sx={{ width: '76vw', height: 'fit-content', objectFit: 'fill', 
+                    transform: 'scale(1.1)', 
+                    transition: 'transform 0.3s ease-in-out', 
+                    '&:hover': { transform: 'scale(1.15)' } }} />
                   </Box>
-                  <Typography 
-                    variant="h1" 
-                    sx={{ 
-                      fontSize: { xs: '2.5rem', md: '3.5rem' },
-                      fontWeight: 700,
-                      color: '#1A1A1A', 
-                      mb: 3,
-                      lineHeight: 1.2,
-                      letterSpacing: '-0.02em',
-                      fontFamily: '"Tinos", serif'
-                    }}
-                  >
+                  <Typography variant="h1" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, fontWeight: 700, color: '#1A1A1A', mb: 3, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: '"Tinos", serif' }}>
                     {post.title}
                   </Typography>
 
-                  <Box sx={{ 
-                    display: 'flex',
-                    alignItems: 'center', 
-                    gap: 3,
-                    mb: 4,
-                    flexWrap: 'wrap'
-                  }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <FontAwesomeIcon icon={faTag} style={{ color: '#666' }} />
-                      <Chip 
-                        label={post.category}
-                        sx={{
-                          bgcolor: '#f5f5f5',
-                          color: '#666',
-                          fontWeight: 500,
-                          '&:hover': {
-                            bgcolor: '#eeeeee'
-                          }
-                        }}
-                      />
+                      <Chip label={post.category} 
+                      sx={{ bgcolor: '#f5f5f5', color: '#666', fontWeight: 500, 
+                      '&:hover': { bgcolor: '#eeeeee' } }} />
                     </Box>
+                    
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <FontAwesomeIcon icon={faCalendarAlt} style={{ color: '#666' }} />
                       <Typography variant="body2" color="text.secondary">
@@ -578,19 +478,8 @@ const PostDetail = () => {
 
                   <Box 
                     dangerouslySetInnerHTML={{ __html: post.content }} 
-                    sx={{
-                      '& img': {
-                        maxWidth: '100%',
-                        height: 'auto',
-                        borderRadius: '4px',
-                        my: 2
-                      },
-                      '& p': {
-                        lineHeight: 1.7,
-                        mb: 2
-                      },
-                      flexGrow: 1
-                    }}
+                    sx={{ '& img': { maxWidth: '100%', height: 'auto', borderRadius: '4px', my: 2 }, 
+                          '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1 }}
                   />
                 </Box>
               )}

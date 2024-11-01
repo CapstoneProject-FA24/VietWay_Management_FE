@@ -257,7 +257,7 @@ const mockPosts = [
         provinceId: '2',
         provinceName: 'Hà Nội',
         isEvent: false,
-        image: 'https://www.vietnamvisa.org.vn/wp-content/uploads/2024/08/Hanoi-street-food-guide.jpg',
+        image: 'https://www.gotadi.com/tour/wp-content/uploads/2022/01/Ho%CC%A3%CC%82i-Du-Li%CC%A3ch-Vie%CC%A3%CC%82t-Nam-Anh-Thu%CC%9B-289.jpeg',
     },
 ];
 

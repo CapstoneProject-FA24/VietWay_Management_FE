@@ -182,14 +182,14 @@ const ManageTourTemplate = () => {
                     <Grid item xs={12} md={12}>
                         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, mr: 1.5 }}>
-                                <Typography>
+                                <Typography sx={{ fontWeight: 600 }}>
                                     Tỉnh/Thành phố
                                 </Typography>
                                 <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
                                     isMulti options={provinceOptions} onChange={setTempProvinces} value={tempProvinces} />
                             </Box>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
-                                <Typography>
+                                <Typography sx={{ fontWeight: 600 }}>
                                     Thời lượng
                                 </Typography>
                                 <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
@@ -198,7 +198,7 @@ const ManageTourTemplate = () => {
                         </Box>
                     </Grid>
                     <Grid item xs={12} md={9.3} sx={{ mb: 1, mt: -2 }}>
-                        <Typography>
+                        <Typography sx={{ fontWeight: 600 }}>
                             Loại Tour
                         </Typography>
                         <ReactSelect closeMenuOnSelect={false} components={animatedComponents}

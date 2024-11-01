@@ -20,6 +20,7 @@ import ManagerManageAttraction from '@pages/manager/attraction/ManagerManageAttr
 import ManagerAttractionDetail from '@pages/manager/attraction/ManagerAttractionDetail.jsx';
 import ManagerManageProvince from '@pages/manager/province/ManagerManageProvince.jsx';
 import ListApprovedTourTemplate from "@pages/staff/tour/ListApprovedTourTemplate.jsx";
+import CreatePost from '@pages/staff/post/CreatePost.jsx';
 import Profile from '@pages/Profile';
 import PostDetail from '@pages/staff/post/PostDetail.jsx';
 import ManagePost from '@pages/staff/post/ManagePost.jsx';
@@ -54,6 +55,7 @@ const App = () => {
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id" element={<CreateTour />} />
         <Route path="/nhan-vien/bai-viet" element={<ManagePost />} />
         <Route path="/nhan-vien/bai-viet/:id" element={<PostDetail />} />
+        <Route path="/nhan-vien/bai-viet/tao-bai-viet" element={<CreatePost />} />
 
         <Route path="/thong-tin-tai-khoan" element={<Profile />} />
       </Routes>

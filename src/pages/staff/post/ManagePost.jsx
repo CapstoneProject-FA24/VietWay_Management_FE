@@ -17,7 +17,7 @@ const ManagePost = () => {
   const currentPage = location.pathname;
 
   const [posts, setPosts] = useState([]);
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [statusTab, setStatusTab] = useState('all');
   const [provinces, setProvinces] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,7 +59,7 @@ const ManagePost = () => {
   }, []);
 
   const handleSidebarToggle = () => {
-    setSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleViewDetails = (postId) => {
@@ -80,10 +80,18 @@ const ManagePost = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
-
-      <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+    <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
+      <Helmet>
+        <title>Manage Posts</title>
+      </Helmet>
+      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <Box sx={{ 
+        flexGrow: 1, 
+        mt: 1.5,
+        p: isSidebarOpen ? 3 : 3, 
+        transition: 'margin-left 0.3s', 
+        marginLeft: isSidebarOpen ? '280px' : '20px'
+      }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> 
@@ -91,7 +99,7 @@ const ManagePost = () => {
             </Typography>
             <Button 
               component={Link} 
-              to={`${currentPage}/them`}
+              to={`${currentPage}/tao-bai-viet`}
               variant="contained" 
               color="primary" 
               startIcon={<AddIcon />} 
@@ -102,6 +110,9 @@ const ManagePost = () => {
           </Grid>
 
           <Grid item xs={12} md={4.5}>
+            <Typography sx={{ fontWeight: 600 }}>
+              Danh mục
+            </Typography>
             <ReactSelect
               closeMenuOnSelect={false}
               components={animatedComponents}
@@ -114,6 +125,9 @@ const ManagePost = () => {
           </Grid>
 
           <Grid item xs={12} md={4.5}>
+            <Typography sx={{ fontWeight: 600 }}>
+              Tỉnh thành
+            </Typography>
             <ReactSelect
               closeMenuOnSelect={false}
               components={animatedComponents}
@@ -146,26 +160,25 @@ const ManagePost = () => {
             </Button>
           </Grid>
 
-          <Grid item xs={7}>
-            <TextField
-              variant="outlined"
-              placeholder="Tìm kiếm bài viết..."
-              size="small"
-              sx={{ width: '100%', mr: 1 }}
-              value={tempSearchTerm}
-              onChange={(e) => setTempSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
+          <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <TextField variant="outlined" placeholder="Tìm kiếm tour mẫu..."
+              size="small" sx={{ width: '100%', mr: 1 }}
+              value={tempSearchTerm} onChange={(e) => setTempSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                        </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
+                            Tìm kiếm
+                        </Button>
+                    </Grid>
 
           <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Typography>
+            <Typography sx={{ fontWeight: 600 }}>
               Sắp xếp theo
             </Typography>
             <Select
@@ -192,7 +205,7 @@ const ManagePost = () => {
           {posts.length > 0 ? (
             <Grid container spacing={2}>
               {posts.map((post) => (
-                <Grid item xs={12} sm={6} md={4} key={post.id}>
+                <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
                   <PostsCard
                     post={post}
                     onViewDetails={() => handleViewDetails(post.id)}

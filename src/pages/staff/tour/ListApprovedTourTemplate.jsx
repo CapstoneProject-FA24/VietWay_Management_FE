@@ -11,6 +11,8 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -32,6 +34,7 @@ const ListApprovedTourTemplate = () => {
   const [tempProvinces, setTempProvinces] = useState([]);
   const [tempDuration, setTempDuration] = useState([]);
   const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -132,6 +135,10 @@ const ListApprovedTourTemplate = () => {
     setSortedTourTemplates(sorted);
   };
 
+  const handleBack = () => {
+    navigate('/staff/tour');
+  };
+
   return (
     <Box sx={{ display: 'flex', width: "98vw", minHeight: "100vh" }}>
       <Helmet>
@@ -143,13 +150,30 @@ const ListApprovedTourTemplate = () => {
       />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
         <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+          <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', mb: -3, mt: -5 }}>
+            <Button
+              variant="text"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBack}
+              sx={{
+                color: 'primary.main',
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              Quay lại
+            </Button>
+          </Grid>
           <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '2.8rem', fontWeight: 600, color: 'primary.main' }}> Danh sách Tour mẫu đã duyệt </Typography>
           </Grid>
           <Grid item xs={12} md={12}>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
               <Box sx={{ width: { xs: '100%', md: '50%' }, mr: 1.5 }}>
-                <Typography>
+                <Typography sx={{ fontWeight: 600 }}>
                   Tỉnh/Thành phố
                 </Typography>
                 <ReactSelect
@@ -162,7 +186,7 @@ const ListApprovedTourTemplate = () => {
                 />
               </Box>
               <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
-                <Typography>
+                <Typography sx={{ fontWeight: 600 }}>
                   Thời lượng
                 </Typography>
                 <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
@@ -171,7 +195,7 @@ const ListApprovedTourTemplate = () => {
             </Box>
           </Grid>
           <Grid item xs={12} md={9.3} sx={{ mb: 1, mt: -2 }}>
-            <Typography>
+            <Typography sx={{ fontWeight: 600 }}>
               Loại Tour
             </Typography>
             <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
@@ -205,7 +229,7 @@ const ListApprovedTourTemplate = () => {
             </Box>
           </Grid>
           <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-            <Typography>
+            <Typography sx={{ fontWeight: 600 }}>
               Sắp xếp theo
             </Typography>
             <Select
