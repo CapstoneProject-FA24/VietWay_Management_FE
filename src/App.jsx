@@ -22,6 +22,7 @@ import ManagerManageProvince from '@pages/manager/province/ManagerManageProvince
 import ListApprovedTourTemplate from "@pages/staff/tour/ListApprovedTourTemplate.jsx";
 import ManagerProfile from '@pages/manager/ManagerProfile.jsx';
 import StaffProfile from '@pages/staff/StaffProfile.jsx';
+import CreatePost from '@pages/staff/post/CreatePost.jsx';
 import PostDetail from '@pages/staff/post/PostDetail.jsx';
 import ManagePost from '@pages/staff/post/ManagePost.jsx';
 import ManagerManageTour from '@pages/manager/tour/ManagerManageTour.jsx';
@@ -65,7 +66,7 @@ const App = () => {
         <Route path="/nhan-vien/bai-viet" element={<ManagePost />} />
         <Route path="/nhan-vien/bai-viet/:id" element={<PostDetail />} />
         <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
-        
+        <Route path="/nhan-vien/bai-viet/them" element={<CreatePost />} />
       </Routes>
     </Router>
   );
