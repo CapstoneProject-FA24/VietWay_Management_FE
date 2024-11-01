@@ -10,8 +10,8 @@ import { fetchToursByTemplateId, calculateEndDate } from '@services/TourService'
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import TourCalendar from '@components/staff/tour/createTour/TourCalendar';
-import TourTemplateInfo from '@components/staff/tour/createTour/TourTemplateInfo';
+import TourCalendar from '@components/staff/tour/TourCalendar';
+import TourTemplateInfo from '@components/staff/tour/TourTemplateInfo';
 
 const CreateTour = () => {
   const { id } = useParams();
@@ -109,7 +109,7 @@ const CreateTour = () => {
               isLoading={isLoading}
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TourCalendar tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
+              <TourCalendar tourId={null} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
             </Box>
           </Grid>
           <Grid item xs={12} md={3.5}>

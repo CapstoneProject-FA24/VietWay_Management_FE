@@ -13,7 +13,7 @@ import ManagerTourTemplateInfo from '@components/manager/tour/ManagerTourTemplat
 import { getTourStatusInfo } from '@services/StatusService';
 import { TourStatus } from '@hooks/Statuses';
 
-const TourDetail = () => {
+const ManagerTourDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -187,4 +187,4 @@ const TourDetail = () => {
   );
 };
 
-export default TourDetail;
+export default ManagerTourDetail;
