@@ -1,27 +1,33 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Box, Typography, TextField, Button, Select, MenuItem, InputAdornment, FormControl, Grid, Card, CardContent, CardMedia, CardActions, Pagination } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, TextField, Button, Select, MenuItem, InputAdornment, FormControl, Grid } from "@mui/material";
 import SidebarManager from "@layouts/SidebarManager";
+import AddIcon from "@mui/icons-material/Add";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchProvinces } from '@services/ProvinceService';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
-import { fetchTours } from '@services/TourService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
 import Helmet from 'react-helmet';
 import TourCard from '@components/manager/tour/TourCard';
+import { fetchTours } from '@services/TourService';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { TourStatus } from "@hooks/Statuses";
+import { getTourStatusInfo } from "@services/StatusService";
+import { Tabs, Tab } from "@mui/material";
+import Pagination from '@mui/material/Pagination';
 
 const ManagerManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [tours, setTours] = useState();
-  const [filters, setFilters] = useState({ tourType: [], duration: [], location: [], status: "" });
+  const [tours, setTours] = useState([]);
+  const [filters, setFilters] = useState({ tourType: [], duration: [], location: [] });
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
   const currentPage = location.pathname;
 
   const [provinces, setProvinces] = useState([]);
@@ -30,122 +36,118 @@ const ManagerManageTour = () => {
 
   const [dateRange, setDateRange] = useState({ from: null, to: null });
   const [tempDateRange, setTempDateRange] = useState({ from: null, to: null });
-
   const [tempFilters, setTempFilters] = useState({
     tourType: [],
     duration: [],
     location: [],
     status: ''
   });
-
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [searchCode, setSearchCode] = useState("");
   const [statusTab, setStatusTab] = useState("all");
-  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const fetchToursData = async (params) => {
-      try {
-        const fetchedTours = await fetchTours();
-        setTours(fetchedTours);
-        setTotalPages(Math.ceil(fetchedTours.total / pageSize));
-      } catch (error) {
-        console.error('Error fetching tours:', error);
-        // You might want to add error handling here (e.g., showing a snackbar)
+  const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 9,
+    total: 0
+  });
+
+  const [tempSearchTerm, setTempSearchTerm] = useState("");
+  const [tempSearchCode, setTempSearchCode] = useState("");
+
+  const handleSearchByName = () => {
+    setPagination(prev => ({
+      ...prev,
+      pageIndex: 1
+    }));
+    setSearchTerm(tempSearchTerm);
+  };
+
+  const handleSearchByCode = () => {
+    setPagination(prev => ({
+      ...prev,
+      pageIndex: 1
+    }));
+    setSearchCode(tempSearchCode);
+  };
+
+  const handleKeyPress = (event, searchType) => {
+    if (event.key === 'Enter') {
+      if (searchType === 'name') {
+        handleSearchByName();
+      } else if (searchType === 'code') {
+        handleSearchByCode();
       }
-    };
-
-    const params = {
-      pageSize: pageSize,
-      pageIndex: page,
-      searchTerm: searchTerm,
-      searchCode: searchCode,
-      tourType: filters.tourType,
-      duration: filters.duration,
-      location: filters.location,
-      status: statusTab === 'all' ? null : parseInt(statusTab),
-      startDateFrom: dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : null,
-      startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null
-    };
-    fetchToursData(params);
-  }, [page, pageSize, searchTerm, searchCode, filters, statusTab, dateRange]);
+    }
+  };
 
   useEffect(() => {
-    const fetchFilterData = async () => {
+    const fetchApprovedTourTemplates = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();
+        setProvinces(fetchedProvinces);
+      } catch (error) {
+        console.error('Error fetching tour templates:', error);
+      }
+    };
+    fetchApprovedTourTemplates();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
         const categories = await fetchTourCategory();
         const duration = await fetchTourDuration();
-        setProvinces(fetchedProvinces);
         setTourCategories(categories);
         setTourDurations(duration);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
-    fetchFilterData();
+    fetchCategories();
   }, []);
 
-  const handleFilterChange = (selectedOptions, filterType) => {
-    setFilters(prevFilters => ({
-      ...prevFilters,
-      [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
-    }));
-  };
+  useEffect(() => {
+    const fetchToursData = async () => {
+      try {
+        const params = {
+          pageSize: pagination.pageSize,
+          pageIndex: pagination.pageIndex,
+          searchTerm: searchTerm,
+          searchCodeTerm: searchCode,
+          templateCategoryIds: filters.tourType,
+          durationIds: filters.duration,
+          provinceIds: filters.location,
+          status: statusTab === 'all' ? null : parseInt(statusTab),
+          startDateFrom: dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : null,
+          startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null
+        };
 
-  const handleStatusChange = (event) => {
-    setFilters((prevFilters) => ({ ...prevFilters, status: event.target.value }));
-  };
+        const response = await fetchTours({ params });
+        setTours(response.data);
+        setPagination(prev => ({
+          ...prev,
+          total: response.total
+        }));
+      } catch (error) {
+        console.error('Error fetching tours:', error);
+      }
+    };
 
-  const applyFilters = () => {
-    let result = tours;
-
-    if (searchTerm) {
-      result = result.filter((tour) =>
-        tour.tourName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (filters.tourType.length > 0) {
-      result = result.filter((tour) =>
-        tour.tourCategories.some((category) => filters.tourType.includes(category.tourCategoryId))
-      );
-    }
-
-    if (filters.duration.length > 0) {
-      result = result.filter(tour =>
-        filters.duration.includes(tour.tourDuration.tourDurationId)
-      );
-    }
-
-    if (filters.location.length > 0) {
-      result = result.filter((tour) => filters.location.includes(tour.provinceName));
-    }
-
-    if (filters.status) {
-      result = result.filter((tour) => tour.status === filters.status);
-    }
-
-    if (dateRange.from && dateRange.to) {
-      result = result.filter((tour) => {
-        const tourDate = dayjs(tour.startDate);
-        return tourDate.isAfter(dateRange.from) && tourDate.isBefore(dateRange.to);
-      });
-    }
-  };
+    fetchToursData();
+  }, [
+    searchTerm, 
+    searchCode, 
+    filters, 
+    statusTab, 
+    dateRange, 
+    pagination.pageIndex, 
+    pagination.pageSize
+  ]);
 
   const animatedComponents = makeAnimated();
 
-  const handleLocationChange = (selectedOptions) => {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      location: selectedOptions.map(option => option.value)
-    }));
-  };
-
   const provinceOptions = provinces.map(province => ({
-    value: province.provinceName,
+    value: province.provinceId,
     label: province.provinceName
   }));
 
@@ -154,42 +156,38 @@ const ManagerManageTour = () => {
     label: duration.durationName
   }));
 
-  const tourTypeOptions = useMemo(() =>
-    tourCategories.map(category => ({
-      value: category.tourCategoryId,
+  const tourTypeOptions = tourCategories.map(category => ({
+    value: category.tourCategoryId,
       label: category.tourCategoryName
-    })),
-    [tourCategories]
-  );
+  }));
+
+  const handleTempFilterChange = (selectedOptions, filterType) => {
+    setTempFilters(prevFilters => ({
+      ...prevFilters,
+      [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
+    }));
+  };
 
   const handleApplyFilter = () => {
-    // Apply all temporary filters to the actual filter states
+    setPagination(prev => ({
+      ...prev,
+      pageIndex: 1
+    }));
+    
     setFilters({
       tourType: tempFilters.tourType,
       duration: tempFilters.duration,
       location: tempFilters.location,
       status: tempFilters.status
     });
-
-    // Apply date range
     setDateRange({
       from: tempDateRange.from,
       to: tempDateRange.to
     });
+  };
 
-    setPage(1);
-    fetchToursData(/* {
-      pageSize: pageSize,
-      pageIndex: 1,
-      searchTerm: searchTerm,
-      searchCode: searchCode,
-      tourType: tempFilters.tourType,
-      duration: tempFilters.duration,
-      location: tempFilters.location,
-      status: statusTab === 'all' ? null : parseInt(statusTab),
-      startDateFrom: tempDateRange.from ? dayjs(tempDateRange.from).format('YYYY-MM-DD') : null,
-      startDateTo: tempDateRange.to ? dayjs(tempDateRange.to).format('YYYY-MM-DD') : null
-    } */);
+  const handleStatusTabChange = (event, newValue) => {
+    setStatusTab(newValue);
   };
 
   return (
@@ -197,14 +195,20 @@ const ManagerManageTour = () => {
       <Helmet>
         <title>Quản lý Tour</title>
       </Helmet>
-      <SidebarManager isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+      <SidebarManager
+        isOpen={isOpen} 
+        toggleSidebar={() => setIsOpen(!isOpen)}
+      />
       <Box sx={{ flexGrow: 1, mt: 1.5, p: isOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
-        <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
-        </Grid>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
+          <Button component={Link} to={currentPage + "/tour-mau-duoc-duyet"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: "55px", borderRadius: 2 }}>
+            Tạo Tour Mới
+          </Button>
+        </Box>
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography>Loại tour</Typography>
               <ReactSelect
@@ -212,13 +216,13 @@ const ManagerManageTour = () => {
                 components={animatedComponents}
                 isMulti
                 options={tourTypeOptions}
-                onChange={(selectedOptions) => handleFilterChange(selectedOptions, "tourType")}
-                value={tourTypeOptions.filter(option => filters.tourType.includes(option.value))}
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "tourType")}
+                value={tourTypeOptions.filter(option => tempFilters.tourType.includes(option.value))}
               />
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography>Thời lượng</Typography>
               <ReactSelect
@@ -226,13 +230,13 @@ const ManagerManageTour = () => {
                 components={animatedComponents}
                 isMulti
                 options={durationOptions}
-                onChange={(selectedOptions) => handleFilterChange(selectedOptions, "duration")}
-                value={durationOptions.filter(option => filters.duration.includes(option.value))}
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")}
+                value={durationOptions.filter(option => tempFilters.duration.includes(option.value))}
               />
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography>Địa điểm</Typography>
               <ReactSelect
@@ -240,47 +244,41 @@ const ManagerManageTour = () => {
                 components={animatedComponents}
                 isMulti
                 options={provinceOptions}
-                onChange={handleLocationChange}
-                value={filters.location.map(location => ({ value: location, label: location }))}
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "location")}
+                value={provinceOptions.filter(option => tempFilters.location.includes(option.value))}
               />
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={6}>
-            <Typography>Trạng thái</Typography>
-            <FormControl fullWidth>
-              <Select value={filters.status} onChange={handleStatusChange} sx={{ height: '38px' }}>
-                <MenuItem value="">Tất cả</MenuItem>
-                <MenuItem value="Đang nhận khách">Đang nhận khách</MenuItem>
-                <MenuItem value="Đã đầy chỗ">Đã đầy chỗ</MenuItem>
-                <MenuItem value="Hoàn thành">Hoàn thành</MenuItem>
-                <MenuItem value="Bị Hủy">Bị Hủy</MenuItem>
-                <MenuItem value="Đang diễn ra">Đang diễn ra</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{
-                  width: { xs: '100%', md: '100%' }, display: 'flex',
-                  flexDirection: 'column', gap: 1
+                  width: { xs: '100%', md: '100%' }, 
+                  display: 'flex',
+                  flexDirection: 'column', 
+                  gap: 1
                 }}>
                   <Typography>Ngày khởi hành</Typography>
                   <Box sx={{ display: 'flex', gap: 2, mt: -0.5 }}>
                     <DatePicker
-                      label="Từ ngày" value={tempDateRange.from}
+                      label="Từ ngày" 
+                      value={tempDateRange.from}
                       onChange={(newValue) => {
                         setTempDateRange(prev => ({ ...prev, from: newValue }));
                       }}
-                      sx={{ width: '100%' }} format="DD/MM/YYYY"
+                      sx={{ width: '100%' }} 
+                      format="DD/MM/YYYY"
                       slotProps={{ textField: { size: "small", error: false } }}
                     />
                     <DatePicker
-                      label="Đến ngày" value={tempDateRange.to}
-                      onChange={(newValue) => { setTempDateRange(prev => ({ ...prev, to: newValue })); }}
-                      sx={{ width: '100%' }} format="DD/MM/YYYY"
+                      label="Đến ngày" 
+                      value={tempDateRange.to}
+                      onChange={(newValue) => { 
+                        setTempDateRange(prev => ({ ...prev, to: newValue })); 
+                      }}
+                      sx={{ width: '100%' }} 
+                      format="DD/MM/YYYY"
                       slotProps={{ textField: { size: "small", error: false } }}
                       minDate={tempDateRange.from ? dayjs(tempDateRange.from) : undefined}
                     />
@@ -289,22 +287,29 @@ const ManagerManageTour = () => {
               </LocalizationProvider>
             </Box>
           </Grid>
-          <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 3.5, backgroundColor: 'lightGray', color: 'black', width: '12rem' }}>
+
+          <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button 
+              variant="contained" 
+              startIcon={<FilterListIcon />} 
+              onClick={handleApplyFilter}
+              sx={{ mt: 3.5, backgroundColor: 'lightGray', color: 'black', width: '12rem' }}
+            >
               Áp dụng bộ lọc
             </Button>
           </Grid>
 
           <Grid item xs={12} sm={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3.5 }}>
-              <Box>
+              <Box sx={{ display: 'flex', width: '50%' }}>
                 <TextField
                   variant="outlined"
-                  placeholder="Tìm kiếm tour mẫu..."
+                  placeholder="Tìm kiếm tour theo tên..."
                   size="small"
-                  sx={{ mr: 1 }}
-                  value={searchTerm}
+                  sx={{ mr: 1, width: '70%' }}
+                  value={tempSearchTerm}
                   onChange={(e) => setTempSearchTerm(e.target.value)}
+                  onKeyPress={(e) => handleKeyPress(e, 'name')}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -313,19 +318,24 @@ const ManagerManageTour = () => {
                     ),
                   }}
                 />
-                <Button variant="contained" sx={{ backgroundColor: 'lightGray', color: 'black' }} >
+                <Button 
+                  variant="contained" 
+                  onClick={handleSearchByName}
+                  sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}
+                >
                   Tìm kiếm
                 </Button>
               </Box>
 
-              <Box>
+              <Box sx={{ display: 'flex', width: '50%' }}>
                 <TextField
                   variant="outlined"
-                  placeholder="Tìm kiếm tour mẫu..."
+                  placeholder="Tìm kiếm tour theo mã tour..."
                   size="small"
-                  sx={{ mr: 1 }}
-                  value={searchTerm}
-                  onChange={(e) => setTempSearchTerm(e.target.value)}
+                  sx={{ mr: 1, width: '70%' }}
+                  value={tempSearchCode}
+                  onChange={(e) => setTempSearchCode(e.target.value)}
+                  onKeyPress={(e) => handleKeyPress(e, 'code')}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -334,7 +344,11 @@ const ManagerManageTour = () => {
                     ),
                   }}
                 />
-                <Button variant="contained" sx={{ backgroundColor: 'lightGray', color: 'black' }} >
+                <Button 
+                  variant="contained"
+                  onClick={handleSearchByCode}
+                  sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}
+                >
                   Tìm kiếm
                 </Button>
               </Box>
@@ -342,13 +356,29 @@ const ManagerManageTour = () => {
           </Grid>
         </Grid>
 
+        <Tabs 
+          value={statusTab}
+          onChange={handleStatusTabChange}
+          aria-label="tour status tabs"
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          <Tab label="Tất cả" value="all" />
+          {Object.entries(TourStatus).map(([key, value]) => (
+            <Tab 
+              key={value}
+              label={getTourStatusInfo(value).text}
+              value={value.toString()}
+            />
+          ))}
+        </Tabs>
 
-        {tours ? (
+        {tours.length > 0 ? (
           <>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
               {tours.map((tour) => (
                 <Grid item xs={12} sm={6} md={4} key={tour.tourId}>
-                  <TourCard
+                  <TourCard 
                     tour={tour}
                     onViewDetails={() => {
                       console.log('View details for tour:', tour.tourId);
@@ -357,6 +387,35 @@ const ManagerManageTour = () => {
                 </Grid>
               ))}
             </Grid>
+            
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, width: '100%' }}>
+              <Box sx={{ width: '10%' }}/>
+              <Pagination
+                count={Math.ceil(pagination.total / pagination.pageSize)}
+                page={pagination.pageIndex}
+                onChange={(e, newPage) => setPagination(prev => ({ ...prev, pageIndex: newPage }))}
+                color="primary"
+              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Select
+                  value={pagination.pageSize}
+                  size="small"
+                  sx={{ minWidth: 80 }}
+                  onChange={(e) => {
+                    setPagination(prev => ({
+                      ...prev,
+                      pageSize: parseInt(e.target.value, 10),
+                      pageIndex: 1
+                    }));
+                  }}
+                >
+                  <MenuItem value={9}>9</MenuItem>
+                  <MenuItem value={18}>18</MenuItem>
+                  <MenuItem value={27}>27</MenuItem>
+                </Select>
+                <Typography>/trang</Typography>
+              </Box>
+            </Box>
           </>
         ) : (
           <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
