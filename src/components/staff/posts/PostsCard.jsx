@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 const getStatusColor = (status) => {
   switch(status) {
-    case '0': return { color: 'warning', label: 'Bản nháp' };
-    case '1': return { color: 'info', label: 'Chờ duyệt' };
-    case '2': return { color: 'success', label: 'Đã duyệt' };
-    case '3': return { color: 'error', label: 'Từ chối' };
+    case 0: return { color: 'warning', label: 'Bản nháp' };
+    case 1: return { color: 'info', label: 'Chờ duyệt' };
+    case 2: return { color: 'success', label: 'Đã duyệt' };
+    case 3: return { color: 'error', label: 'Từ chối' };
     default: return { color: 'default', label: 'Không xác định' };
   }
 };
@@ -32,7 +32,7 @@ const PostsCard = ({ post }) => {
         '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] } }}
     >
       <Chip label={statusInfo.label} color={statusInfo.color} size="small" 
-        sx={{ position: 'absolute' }} 
+        sx={{ position: 'absolute', top: 10, left: 10 }} 
       />
 
       <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image || 'default-image.jpg'}
@@ -42,7 +42,7 @@ const PostsCard = ({ post }) => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
             <CalendarToday sx={{ fontSize: '0.9rem' }} />
-            {new Date(post.createDate).toLocaleDateString('vi-VN')}
+            {new Date(post.createdAt).toLocaleDateString('vi-VN')}
           </Box>
           <Chip icon={<Category sx={{ fontSize: '0.9rem' }} />} label={post.category} size="small" color="primary" variant="outlined" 
             sx={{ height: '24px', '& .MuiChip-label': { fontSize: '0.75rem' } }} 
