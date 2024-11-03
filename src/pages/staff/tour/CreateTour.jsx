@@ -6,7 +6,7 @@ import { LocalizationProvider, StaticDatePicker, DatePicker, TimePicker } from '
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, calculateEndDate } from '@services/TourService';
+import { fetchToursByTemplateId, calculateEndDate, createTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -88,6 +88,19 @@ const CreateTour = () => {
     if (!price) return true;
     return numPrice >= minPrice && numPrice <= maxPrice;
   };
+
+  const handleSubmit = async () => {
+    try {
+        const result = await createTour({
+            tourTemplateId: id, // from useParams
+            ...newTourData
+        });
+       console.log(result);
+        navigate('/nhan-vien/tour-du-lich');
+    } catch (error) {
+        console.error('Error creating tour:', error);
+    }
+};
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
@@ -208,7 +221,7 @@ const CreateTour = () => {
                       }
                     }
                   }}
-                  error={newTourData.adultPrice && (!validatePrice(newTourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice) || Number(newTourData.adultPrice) < 0)}
+                  //error={newTourData.adultPrice && (!validatePrice(newTourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice) || Number(newTourData.adultPrice) < 0)}
                   helperText={`Giá phải từ ${tourTemplate?.minPrice?.toLocaleString() || 0} đến ${tourTemplate?.maxPrice?.toLocaleString() || 0} VND`}
                   sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
@@ -291,6 +304,9 @@ const CreateTour = () => {
             </Paper>
           </Grid>
         </Grid>
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <Button variant="contained" color="primary" onClick={handleSubmit}> Gửi </Button>
+        </Box>
       </Box>
     </Box>
   );

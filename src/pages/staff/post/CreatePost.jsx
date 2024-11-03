@@ -5,21 +5,22 @@ import { ArrowBack, Create } from '@mui/icons-material';
 //import { toast } from 'react-toastify';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchPostCategory } from '@services/PostCategoryService';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
-  
+
   flexContainer: { display: 'flex', alignItems: 'center', flex: 1, width: '80%' },
-  
+
   labelTypography: {
     color: '#05073C',
     fontWeight: 600,
     whiteSpace: 'nowrap',
     marginRight: '1rem'
   },
-  
+
   inputField: {
     '& .MuiOutlinedInput-root': {
       height: '40px',
@@ -28,15 +29,15 @@ const commonStyles = {
       padding: '8px 14px'
     }
   },
-  
-  imageContainer: { 
-    mb: 2, 
-    flexGrow: 1, 
-    position: 'relative', 
-    '&:hover .overlay': { opacity: 1 }, 
-    '&:hover .change-image-btn': { opacity: 1 } 
+
+  imageContainer: {
+    mb: 2,
+    flexGrow: 1,
+    position: 'relative',
+    '&:hover .overlay': { opacity: 1 },
+    '&:hover .change-image-btn': { opacity: 1 }
   },
-  
+
   editorContainer: {
     '& .ql-container': {
       minHeight: '200px',
@@ -53,6 +54,7 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [provinceOptions, setProvinceOptions] = useState([]);
+  const [postCategoryOptions, setPostCategoryOptions] = useState([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
   const [newPost, setNewPost] = useState({
     title: '',
@@ -75,7 +77,13 @@ const CreatePost = () => {
           value: province.provinceId,
           label: province.provinceName
         }));
+        const fetchedPostCategories = await fetchPostCategory();
+        const formattedPostCategories = fetchedPostCategories.map(postCategory => ({
+          value: postCategory.postCategoryId,
+          label: postCategory.name
+        }));
         setProvinceOptions(formattedProvinces);
+        setPostCategoryOptions(formattedPostCategories);
       } catch (error) {
         console.error('Error loading provinces:', error);
         //toast.error('Lỗi khi tải danh sách tỉnh thành');
@@ -118,7 +126,7 @@ const CreatePost = () => {
     }
   };
 
-  const handleCreatePost = async () => {
+  const handleCreatePost = async (isDraft = false) => {
     try {
       // Validate required fields
       if (!newPost.title || !newPost.content || !newPost.category || !newPost.provinceId) {
@@ -126,10 +134,19 @@ const CreatePost = () => {
         return;
       }
 
-      // Call API to create new post
-      // const response = await createPost(newPost);
-      console.log('Creating new post:', newPost);
-      
+      const postData = {
+        title: newPost.title,
+        content: newPost.content,
+        description: newPost.description,
+        postCategoryId: newPost.category,
+        provinceId: newPost.provinceId,
+        imageUrl: newPost.image,
+        createdAt: newPost.createDate,
+        status: isDraft ? 0 : 1,
+        isDraft: isDraft
+      };
+
+      await createPost(postData);
       //toast.success('Tạo bài viết mới thành công');
       navigate('/nhan-vien/bai-viet');
     } catch (error) {
@@ -142,20 +159,20 @@ const CreatePost = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
-        
-        <Box sx={{ 
-          flexGrow: 1, 
-          p: 3, 
-          transition: 'margin-left 0.3s', 
+
+        <Box sx={{
+          flexGrow: 1,
+          p: 3,
+          transition: 'margin-left 0.3s',
           marginLeft: isSidebarOpen ? '260px' : '20px',
           width: `calc(100% - ${isSidebarOpen ? '260px' : '20px'})`,
           maxWidth: '100vw'
         }}>
           <Box maxWidth="100vw">
-            <Paper elevation={2} sx={{ 
-              p: 3, 
-              mb: 3, 
-              height: '100%', 
+            <Paper elevation={2} sx={{
+              p: 3,
+              mb: 3,
+              height: '100%',
               width: isSidebarOpen ? 'calc(95vw - 250px)' : '95vw'
             }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
@@ -166,12 +183,12 @@ const CreatePost = () => {
                 >
                   Quay lại
                 </Button>
-                
-                <Typography 
-                  variant="h4" 
-                  sx={{ 
-                    fontSize: '2.7rem', 
-                    fontWeight: 600, 
+
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontSize: '2.7rem',
+                    fontWeight: 600,
                     color: 'primary.main',
                     alignSelf: 'center',
                     marginBottom: '1rem'
@@ -182,14 +199,14 @@ const CreatePost = () => {
               </Box>
 
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <TextField 
-                  label="Tiêu đề" 
-                  value={newPost.title} 
-                  onChange={(e) => handleFieldChange('title', e.target.value)} 
-                  variant="outlined" 
-                  fullWidth 
+                <TextField
+                  label="Tiêu đề"
+                  value={newPost.title}
+                  onChange={(e) => handleFieldChange('title', e.target.value)}
+                  variant="outlined"
+                  fullWidth
                   required
-                  sx={{ mb: 2 }} 
+                  sx={{ mb: 2 }}
                 />
 
                 <Box sx={commonStyles.boxContainer}>
@@ -197,20 +214,19 @@ const CreatePost = () => {
                     <Typography sx={commonStyles.labelTypography}>
                       Danh mục:
                     </Typography>
-                    <Select 
-                      value={newPost.category} 
-                      onChange={(e) => handleFieldChange('category', e.target.value)} 
-                      variant="outlined" 
-                      fullWidth 
+                    <Select
+                      value={newPost.category}
+                      onChange={(e) => handleFieldChange('category', e.target.value)}
+                      variant="outlined"
+                      fullWidth
                       required
                       sx={commonStyles.inputField}
                     >
-                      <MenuItem value="Văn hóa">Văn hóa</MenuItem>
-                      <MenuItem value="Ẩm thực">Ẩm thực</MenuItem>
-                      <MenuItem value="Kinh nghiệm du lịch">Kinh nghiệm du lịch</MenuItem>
-                      <MenuItem value="Nơi lưu trú">Nơi lưu trú</MenuItem>
-                      <MenuItem value="Mua sắm và giải trí">Mua sắm và giải trí</MenuItem>
-                      <MenuItem value="Tin tức du lịch">Tin tức du lịch</MenuItem>
+                      {postCategoryOptions.map(option => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </Box>
 
@@ -218,13 +234,13 @@ const CreatePost = () => {
                     <Typography sx={commonStyles.labelTypography}>
                       Tỉnh/Thành phố:
                     </Typography>
-                    <Select 
-                      value={newPost.provinceId} 
-                      onChange={handleProvinceChange} 
-                      variant="outlined" 
-                      fullWidth 
+                    <Select
+                      value={newPost.provinceId}
+                      onChange={handleProvinceChange}
+                      variant="outlined"
+                      fullWidth
                       required
-                      sx={commonStyles.inputField} 
+                      sx={commonStyles.inputField}
                       disabled={isLoadingProvinces}
                     >
                       {provinceOptions.map(option => (
@@ -239,36 +255,36 @@ const CreatePost = () => {
                     <Typography sx={commonStyles.labelTypography}>
                       Ngày tạo:
                     </Typography>
-                    <TextField 
-                      type="date" 
-                      value={newPost.createDate} 
-                      onChange={(e) => handleFieldChange('createDate', e.target.value)} 
-                      variant="outlined" 
-                      fullWidth 
-                      sx={commonStyles.inputField} 
+                    <TextField
+                      type="date"
+                      value={newPost.createDate}
+                      onChange={(e) => handleFieldChange('createDate', e.target.value)}
+                      variant="outlined"
+                      fullWidth
+                      sx={commonStyles.inputField}
                     />
                   </Box>
                 </Box>
 
-                <TextField 
-                  label="Mô tả" 
-                  value={newPost.description} 
-                  onChange={(e) => handleFieldChange('description', e.target.value)} 
-                  variant="outlined" 
-                  fullWidth 
+                <TextField
+                  label="Mô tả"
+                  value={newPost.description}
+                  onChange={(e) => handleFieldChange('description', e.target.value)}
+                  variant="outlined"
+                  fullWidth
                   multiline
                   rows={3}
-                  sx={{ mb: 2 }} 
+                  sx={{ mb: 2 }}
                 />
 
                 <Box sx={commonStyles.imageContainer}>
                   <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>
                     Ảnh
                   </Typography>
-                  <Box sx={{ 
-                    position: 'relative', 
-                    width: '100%', 
-                    height: '300px', 
+                  <Box sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '300px',
                     border: '2px dashed #ccc',
                     borderRadius: '8px',
                     display: 'flex',
@@ -277,17 +293,17 @@ const CreatePost = () => {
                     overflow: 'hidden'
                   }}>
                     {newPost.image ? (
-                      <img 
-                        src={newPost.image} 
-                        alt="Preview" 
-                        style={{ 
-                          width: '100%', 
-                          height: '100%', 
-                          objectFit: 'contain' 
-                        }} 
+                      <img
+                        src={newPost.image}
+                        alt="Preview"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain'
+                        }}
                       />
                     ) : (
-                      <img 
+                      <img
                         src="/add-image.png"
                         alt="Add image"
                         style={{
@@ -307,14 +323,9 @@ const CreatePost = () => {
                         transform: 'translate(-50%, -50%)',
                         opacity: 0,
                         transition: 'opacity 0.3s ease',
-                        '&:hover': { opacity: 1 },
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         color: '#000',
                         border: '1px solid #ccc',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                          border: '1px solid #999'
-                        }
                       }}
                     >
                       Chọn ảnh cho bài viết
@@ -339,7 +350,7 @@ const CreatePost = () => {
                       toolbar: [
                         [{ 'header': [1, 2, 3, false] }],
                         ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                         ['link', 'image'],
                         ['clean']
                       ],
@@ -349,13 +360,19 @@ const CreatePost = () => {
                 </Box>
 
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-                  <Button 
+                  <Button
                     variant="contained" 
-                    color="primary" 
-                    startIcon={<Create />} 
-                    onClick={handleCreatePost}
+                    onClick={() => handleCreatePost(true)}
+                    sx={{ mr: 1, backgroundColor: 'grey' }}
                   >
-                    Tạo bài viết
+                    Lưu nháp
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleCreatePost(false)}
+                  >
+                    Gửi duyệt
                   </Button>
                 </Box>
               </Box>

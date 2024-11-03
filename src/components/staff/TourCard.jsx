@@ -30,7 +30,7 @@ const TourCard = ({ tour, onViewDetails }) => {
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img" height="200" alt={tour.tourName}
-          image={'https://r2.nucuoimekong.com/wp-content/uploads/ban-cat-sapa-a.jpg'/* tour.images[0].url */}
+          image={tour.imageUrl}
           sx={{ transition: 'transform 0.3s ease', '&:hover': { transform: 'scale(1.05)' } }}
         />
         <Chip
@@ -63,7 +63,7 @@ const TourCard = ({ tour, onViewDetails }) => {
         </Typography>
 
         <Stack spacing={1}>
-          <InfoItem icon={<Subtitles />} text={`Mã tour: ${tour.tourId}`} />
+          <InfoItem icon={<Subtitles />} text={`Mã tour: ${tour.code}`} />
           <InfoItem icon={<AccessTime />} text={`Thời lượng: ${tour.duration}`} />
           <InfoItem
             icon={<CalendarToday />}
