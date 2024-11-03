@@ -100,7 +100,7 @@ const mockPosts = [
         provinceId: '2',
         provinceName: 'Hà Nội',
         isEvent: false,
-        image: 'https://www.vietnamvisa.org.vn/wp-content/uploads/2024/08/Hanoi-street-food-guide.jpg',
+        image: 'https://i.ex-cdn.com/vntravellive.com/files/news/2024/05/13/am-thuc-viet-nam-ghi-danh-top-100-mon-ngon-duong-pho-chau-a-155251.jpg',
     },
     {
         id: '9',
