@@ -7,7 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 
 const ManagerTourTemplateDetails = () => {
@@ -16,7 +16,7 @@ const ManagerTourTemplateDetails = () => {
   const { id } = useParams();
   const pageTopRef = useRef(null);
   const [expandedDay, setExpandedDay] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,26 +72,24 @@ const ManagerTourTemplateDetails = () => {
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Container maxWidth="lg">
-              <Box sx={{ display: 'flex', width: '100%', height: '450px', mb: 3, ml: -2.5 }}>
-                <Box sx={{ flex: '0 0 60%', mr: 2 }}>
-                  <img src={tourTemplate.imageUrls[0]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+          <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
+              <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
+                <img src={tourTemplate.imageUrls[0]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+              </Box>
+              <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
+                  <img src={tourTemplate.imageUrls[1]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                 </Box>
-                <Box sx={{ flex: '0 0 43%', display: 'flex', flexDirection: 'column' }}>
-                  <Box sx={{ flex: '0 0 50%', mb: 1.2 }}>
-                    <img src={tourTemplate.imageUrls[1]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
+                  <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
+                    <img src={tourTemplate.imageUrls[2]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
-                  <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
-                    <Box sx={{ flex: '0 0 48.2%', mr: 2 }}>
-                      <img src={tourTemplate.imageUrls[2]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
-                    </Box>
-                    <Box sx={{ flex: '0 0 48.2%' }}>
-                      <img src={tourTemplate.imageUrls[3]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
-                    </Box>
+                  <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
+                    <img src={tourTemplate.imageUrls[3]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                 </Box>
               </Box>
-            </Container>
+            </Box>
           </Grid>
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>

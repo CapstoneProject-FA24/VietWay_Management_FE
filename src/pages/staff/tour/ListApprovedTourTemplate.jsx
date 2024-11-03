@@ -7,34 +7,25 @@ import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
 import { fetchTourTemplates } from '@services/TourTemplateService';
-import { fetchProvinces } from '@services/ProvinceService'; import FilterListIcon from '@mui/icons-material/FilterList';
-
-const tourCategories = [
-  { TourCategoryId: 1, Name: 'Du lịch biển' },
-  { TourCategoryId: 2, Name: 'Du lịch núi' },
-  { TourCategoryId: 3, Name: 'Du lịch văn hóa' },
-  { TourCategoryId: 4, Name: 'Du lịch sinh thái' },
-  { TourCategoryId: 5, Name: 'Du lịch nghỉ dưỡng' },
-];
-
-const durations = [
-  { DurationId: 1, DurationName: 'Trong ngày' },
-  { DurationId: 2, DurationName: '2 ngày 1 đêm' },
-  { DurationId: 3, DurationName: '3 ngày 2 đêm' },
-  { DurationId: 4, DurationName: '4 ngày 3 đêm' },
-  { DurationId: 5, DurationName: '5 ngày 4 đêm' },
-];
+import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourCategory } from '@services/TourCategoryService';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { useNavigate } from 'react-router-dom';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [provinces, setProvinces] = useState([]);
+  const [tourCategories, setTourCategories] = useState([]);
+  const [tourDurations, setTourDurations] = useState([]);
   const [tourTemplates, setTourTemplates] = useState([]);
   const [sortOrder, setSortOrder] = useState("tourNameA-Z");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  //const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -43,6 +34,7 @@ const ListApprovedTourTemplate = () => {
   const [tempProvinces, setTempProvinces] = useState([]);
   const [tempDuration, setTempDuration] = useState([]);
   const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -75,7 +67,11 @@ const ListApprovedTourTemplate = () => {
     const fetchProvincesData = async () => {
       try {
         const fetchedProvinces = await fetchProvinces();
+        const duration = await fetchTourDuration();
+        const categories = await fetchTourCategory();
         setProvinces(fetchedProvinces);
+        setTourCategories(categories);
+        setTourDurations(duration);
       } catch (error) {
         console.error('Error fetching provinces:', error);
       }
@@ -84,13 +80,13 @@ const ListApprovedTourTemplate = () => {
   }, []);
 
   const categoryOptions = tourCategories.map(category => ({
-    value: category.TourCategoryId,
-    label: category.Name
+    value: category.tourCategoryId,
+    label: category.tourCategoryName
   }));
 
-  const durationOptions = durations.map(duration => ({
-    value: duration.DurationId,
-    label: duration.DurationName
+  const durationOptions = tourDurations.map(duration => ({
+    value: duration.durationId,
+    label: duration.durationName
   }));
 
   const provinceOptions = provinces.map(province => ({
@@ -139,6 +135,10 @@ const ListApprovedTourTemplate = () => {
     setSortedTourTemplates(sorted);
   };
 
+  const handleBack = () => {
+    navigate('/staff/tour');
+  };
+
   return (
     <Box sx={{ display: 'flex', width: "98vw", minHeight: "100vh" }}>
       <Helmet>
@@ -150,13 +150,30 @@ const ListApprovedTourTemplate = () => {
       />
       <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
         <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+          <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', mb: -3, mt: -5 }}>
+            <Button
+              variant="text"
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBack}
+              sx={{
+                color: 'primary.main',
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                  textDecoration: 'underline'
+                }
+              }}
+            >
+              Quay lại
+            </Button>
+          </Grid>
           <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '2.8rem', fontWeight: 600, color: 'primary.main' }}> Danh sách Tour mẫu đã duyệt </Typography>
           </Grid>
           <Grid item xs={12} md={12}>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
               <Box sx={{ width: { xs: '100%', md: '50%' }, mr: 1.5 }}>
-                <Typography>
+                <Typography sx={{ fontWeight: 600 }}>
                   Tỉnh/Thành phố
                 </Typography>
                 <ReactSelect
@@ -169,32 +186,20 @@ const ListApprovedTourTemplate = () => {
                 />
               </Box>
               <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
-                <Typography>
+                <Typography sx={{ fontWeight: 600 }}>
                   Thời lượng
                 </Typography>
-                <ReactSelect
-                  closeMenuOnSelect={false}
-                  components={animatedComponents}
-                  isMulti
-                  options={durationOptions}
-                  onChange={setTempDuration}
-                  value={tempDuration}
-                />
+                <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                  isMulti options={durationOptions} onChange={setTempDuration} value={tempDuration} />
               </Box>
             </Box>
           </Grid>
           <Grid item xs={12} md={9.3} sx={{ mb: 1, mt: -2 }}>
-            <Typography>
+            <Typography sx={{ fontWeight: 600 }}>
               Loại Tour
             </Typography>
-            <ReactSelect
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              isMulti
-              options={categoryOptions}
-              onChange={setTempCategories}
-              value={tempCategories}
-            />
+            <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+              isMulti options={categoryOptions} onChange={setTempCategories} value={tempCategories} />
           </Grid>
           <Grid item xs={12} md={2.7} sx={{ mb: 5 }}>
             <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 1, backgroundColor: 'lightGray', color: 'black', width: '100%' }}>
@@ -224,7 +229,7 @@ const ListApprovedTourTemplate = () => {
             </Box>
           </Grid>
           <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-            <Typography>
+            <Typography sx={{ fontWeight: 600 }}>
               Sắp xếp theo
             </Typography>
             <Select

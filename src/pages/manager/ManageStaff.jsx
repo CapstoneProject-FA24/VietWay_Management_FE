@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { mockCompanyStaff } from '@hooks/MockAccount';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -8,8 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
-
-const ManageCompanyStaff = () => {
+const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
   const [openUpdatePopup, setOpenUpdatePopup] = useState(false);
@@ -88,16 +87,15 @@ const ManageCompanyStaff = () => {
             </Select>
           </Box>
         </Box>
-        <TableContainer>
+        <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ width: '1rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>ID</TableCell>
+                <TableCell sx={{ width: '1rem', fontWeight: 700, textAlign: 'left', padding: '10px' }}>ID</TableCell>
                 <TableCell sx={{ width: '10rem', fontWeight: 700, padding: '10px' }}>Họ tên</TableCell>
-                <TableCell sx={{ width: '8rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
+                <TableCell sx={{ width: '10rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
                 <TableCell sx={{ width: '13rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Email</TableCell>
-                {/*<TableCell sx={{ width: '8.5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Mật khẩu</TableCell>*/}
-                <TableCell sx={{ width: '9rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Trạng thái</TableCell>
+                <TableCell sx={{ width: '9rem', fontWeight: 700, textAlign: !isSidebarOpen ? 'left' : 'center', padding: '7px', pl: !isSidebarOpen ? '2%' : 0 }}>Trạng thái</TableCell>
                 <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Ngày tạo</TableCell>
                 <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}></TableCell>
               </TableRow>
@@ -105,20 +103,15 @@ const ManageCompanyStaff = () => {
             <TableBody>
               {sortedStaff.map((staff) => (
                 <TableRow key={staff.id}>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{staff.id}</TableCell>
+                  <TableCell sx={{ padding: '10px', textAlign: 'left' }}>{staff.id}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullname}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{staff.phone}</TableCell>
                   <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{staff.email}</TableCell>
-                  {/*
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                    {showPassword ? staff.pass : '••••••••'}
-                    <IconButton onClick={togglePasswordVisibility}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </TableCell>
-                  */}
-                  <TableCell sx={{ color: staff.status === 1 ? 'green' : 'red', padding: '10px', textAlign: 'center' }}>
-                    {staff.status === 1 ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+                      <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: staff.status === 1 ? '#4caf50' : '#ea4747' }} />
+                      <Typography sx={{ fontSize: '0.9rem' }}> {staff.status === 1 ? 'Hoạt động' : 'Đã xóa'}</Typography>
+                    </Box>
                   </TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(staff.createDate).toLocaleDateString()}</TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
@@ -152,4 +145,4 @@ const ManageCompanyStaff = () => {
   );
 };
 
-export default ManageCompanyStaff;
+export default ManageStaff;

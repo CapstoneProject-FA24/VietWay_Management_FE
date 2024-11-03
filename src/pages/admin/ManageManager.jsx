@@ -16,6 +16,12 @@ const ManageManager = () => {
   const [selectedManager, setSelectedManager] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    const token = localStorage.getItem('token');
+    if (!role || !token || role !== 'admin') { navigate(`/dang-nhap`); }
+  }, []);
+
   const searchTermWithoutAccents = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const filteredManagers = mockManager.filter(manager =>
     manager.fullname && manager.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())

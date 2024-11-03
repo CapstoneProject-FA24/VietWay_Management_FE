@@ -23,7 +23,6 @@ export const fetchTourTemplates = async (params) => {
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
 
         const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`);
-
         const items = response.data?.data?.items;
         
         if (!items || !Array.isArray(items)) {
@@ -66,6 +65,8 @@ export const fetchTourTemplateById = async (id) => {
             tourName: response.data.data.tourName,
             description: response.data.data.description,
             duration: response.data.data.duration,
+            maxPrice: response.data.data.maxPrice,
+            minPrice: response.data.data.minPrice,
             tourCategoryId: response.data.data.tourCategory.tourCategoryId,
             tourCategoryName: response.data.data.tourCategory.tourCategoryName,
             policy: response.data.data.policy,
@@ -86,41 +87,82 @@ export const fetchTourTemplateById = async (id) => {
 
 export const createTourTemplate = async (tourTemplateData) => {
     try {
+        const requestData = {
+            code: tourTemplateData.code,
+            tourName: tourTemplateData.tourName,
+            description: tourTemplateData.description,
+            durationId: tourTemplateData.durationId,
+            tourCategoryId: tourTemplateData.tourCategoryId,
+            policy: tourTemplateData.policy,
+            note: tourTemplateData.note,
+            provinceIds: tourTemplateData.provinceIds,
+            schedules: tourTemplateData.schedules.map(s => ({
+                dayNumber: s.dayNumber,
+                title: s.title,
+                description: s.description,
+                attractionIds: s.attractionIds
+            })),
+            isDraft: tourTemplateData.isDraft
+        };
+        console.log(requestData);
+        const response = await axios.post(`${baseURL}/api/TourTemplate`, requestData);
+        return response.data;
+    } catch (error) {
+        console.error('Error saving tour template:', error);
+        throw error;
+    }
+};
+
+export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
+    try {
+        const requestData = {
+            code: tourTemplateData.code,
+            tourName: tourTemplateData.tourName,
+            description: tourTemplateData.description,
+            durationId: tourTemplateData.durationId,
+            tourCategoryId: tourTemplateData.tourCategoryId,
+            policy: tourTemplateData.policy,
+            note: tourTemplateData.note,
+            provinceIds: tourTemplateData.provinceIds,
+            schedules: tourTemplateData.schedules.map(s => ({
+                dayNumber: s.dayNumber,
+                title: s.title,
+                description: s.description,
+                attractionIds: s.attractionIds
+            })),
+            isDraft: tourTemplateData.isDraft
+        };
+        console.log(requestData);
+        const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating tour template:', error);
+        throw error;
+    }
+};
+
+export const updateTemplateImages = async (tourTemplateId, newImages, deletedImageIds) => {
+    try {
         const formData = new FormData();
-        
-        formData.append("Code", tourTemplateData.code);
-        formData.append("TourName", tourTemplateData.tourName);
-        formData.append("Description", tourTemplateData.description);
-        formData.append("Duration", tourTemplateData.duration);
-        formData.append("TourCategoryId", tourTemplateData.tourCategoryId);
-        formData.append("Policy", tourTemplateData.policy);
-        formData.append("Note", tourTemplateData.note);
-
-        tourTemplateData.provinces.forEach((province) => {
-            formData.append("ProvinceId", province); // Correct naming
-        });
-
-        tourTemplateData.schedule.forEach((s, index) => {
-            formData.append(`Schedules[${index}].dayNumber`, s.dayNumber);
-            formData.append(`Schedules[${index}].title`, s.title);
-            formData.append(`Schedules[${index}].description`, s.description);
-            s.attractions.forEach((attraction, attIndex) => {
-                formData.append(`Schedules[${index}].attractionId[${attIndex}]`, attraction);
+        if (newImages) {
+            newImages.forEach((image) => {
+                formData.append("NewImages", image);
             });
-        });
+        }
+        if (deletedImageIds) {
+            deletedImageIds.forEach((imageId) => {
+                formData.append("DeletedImageIds", imageId);
+            });
+        }
 
-        tourTemplateData.imageUrls.forEach((image) => {
-            formData.append("Images", image);
-        });
-
-        const response = await axios.post(`${baseURL}/api/TourTemplate`, formData, {
+        const response = await axios.patch(`${baseURL}/api/TourTemplate/${tourTemplateId}/images`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
         return response.data;
     } catch (error) {
-        console.error('Error saving tour template:', error);
+        console.error('Error updating tour template images:', error.response);
         throw error;
     }
 };

@@ -7,33 +7,21 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourCategory } from '@services/TourCategoryService';
+import { fetchTourDuration } from '@services/DurationService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
-const tourCategories = [
-    { TourCategoryId: 1, Name: 'Du lịch biển' },
-    { TourCategoryId: 2, Name: 'Du lịch núi' },
-    { TourCategoryId: 3, Name: 'Du lịch văn hóa' },
-    { TourCategoryId: 4, Name: 'Du lịch sinh thái' },
-    { TourCategoryId: 5, Name: 'Du lịch nghỉ dưỡng' },
-];
-
-const durations = [
-    { DurationId: 1, DurationName: 'Trong ngày' },
-    { DurationId: 2, DurationName: '2 ngày 1 đêm' },
-    { DurationId: 3, DurationName: '3 ngày 2 đêm' },
-    { DurationId: 4, DurationName: '4 ngày 3 đêm' },
-    { DurationId: 5, DurationName: '5 ngày 4 đêm' },
-];
 
 const ManagerManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
     const [provinces, setProvinces] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [durations, setDurations] = useState([]);
     const [sortOrder, setSortOrder] = useState('name');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
@@ -83,7 +71,11 @@ const ManagerManageTourTemplate = () => {
         const fetchProvincesData = async () => {
             try {
                 const fetchedProvinces = await fetchProvinces();
+                const fetchedCategories = await fetchTourCategory();
+                const fetchedDurations = await fetchTourDuration();
                 setProvinces(fetchedProvinces);
+                setCategories(fetchedCategories);
+                setDurations(fetchedDurations);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
             }
@@ -91,14 +83,14 @@ const ManagerManageTourTemplate = () => {
         fetchProvincesData();
     }, []);
 
-    const categoryOptions = tourCategories.map(category => ({
-        value: category.TourCategoryId,
-        label: category.Name
+    const categoryOptions = categories.map(category => ({
+        value: category.tourCategoryId,
+        label: category.tourCategoryName
     }));
 
     const durationOptions = durations.map(duration => ({
-        value: duration.DurationId,
-        label: duration.DurationName
+        value: duration.durationId,
+        label: duration.durationName
     }));
 
     const provinceOptions = provinces.map(province => ({
@@ -170,7 +162,7 @@ const ManagerManageTourTemplate = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', width: '98vw' }}>
+        <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
                 <title>Duyệt Tour mẫu</title>
             </Helmet>
@@ -286,6 +278,13 @@ const ManagerManageTourTemplate = () => {
                             />
                         </Grid>
                     ))}
+                    {sortedTourTemplates.length === 0 && (
+                        <Grid item xs={12}>
+                            <Typography variant="body1" align="center" color="error">
+                                Không tìm thấy tour phù hợp.
+                            </Typography>
+                        </Grid>
+                    )}
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                     <Pagination

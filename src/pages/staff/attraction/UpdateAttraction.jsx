@@ -12,50 +12,58 @@ import CheckIcon from '@mui/icons-material/Check';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
-import { Link, useParams } from 'react-router-dom';
-import { getAttractionById, mockAttractionTypes } from '@hooks/MockAttractions';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { fetchAttractionById, updateAttraction, updateAttractionImages } from '@services/AttractionService';
+import { fetchProvinces } from '@services/ProvinceService';
+import { fetchAttractionType } from '@services/AttractionTypeService';
 
 const UpdateAttraction = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [sliderRef, setSliderRef] = useState(null);
   const [images, setImages] = useState([]);
+  const [removedImageIds, setRemovedImageIds] = useState([]);
   const fileInputRef = useRef(null);
-  const [attraction, setAttraction] = useState(null);
+  const [provinces, setProvinces] = useState([]);
+  const [attractionTypes, setAttractionTypes] = useState([]);
 
-  useEffect(() => {
-    const fetchedAttraction = getAttractionById(id);
-    if (fetchedAttraction) {
-      console.log(fetchedAttraction);
-      setAttraction(fetchedAttraction);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    if (attraction) {
-      console.log(attraction);
-      setEditableFields({
-        name: { value: attraction.name, isEditing: false },
-        contactInfo: { value: attraction.contactInfo, isEditing: false },
-        description: { value: attraction.description, isEditing: false },
-        detail: { value: attraction.detail, isEditing: false },
-        address: { value: attraction.address, isEditing: false },
-        website: { value: attraction.website, isEditing: false },
-        attractionType: { value: attraction.attractionType, isEditing: false }
-      });
-      setImages(attraction.attractionImages);
-    }
-  }, [attraction]);
-
+  const [selectedProvince, setSelectedProvince] = useState('');
   const [editableFields, setEditableFields] = useState({
     name: { value: '', isEditing: false },
     contactInfo: { value: '', isEditing: false },
     description: { value: '', isEditing: false },
-    detail: { value: '', isEditing: false },
     address: { value: '', isEditing: false },
     website: { value: '', isEditing: false },
-    attractionType: { value: '', isEditing: false }
+    type: { value: '', isEditing: false }
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [fetchedProvinces, fetchedAttractionType, attractionData] = await Promise.all([
+          fetchProvinces(),
+          fetchAttractionType(),
+          fetchAttractionById(id)
+        ]);
+        setProvinces(fetchedProvinces);
+        setAttractionTypes(fetchedAttractionType);
+        setSelectedProvince(attractionData.provinceId);
+        setImages(attractionData.images || []);
+        setEditableFields({
+          name: { value: attractionData.name, isEditing: false },
+          contactInfo: { value: attractionData.contactInfo, isEditing: false },
+          description: { value: attractionData.description, isEditing: false },
+          address: { value: attractionData.address, isEditing: false },
+          website: { value: attractionData.website, isEditing: false },
+          type: { value: attractionData.attractionTypeId, isEditing: false }
+        });
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
+  }, [id]);
 
   const handleFieldChange = (field, value) => {
     setEditableFields(prev => ({
@@ -108,27 +116,20 @@ const UpdateAttraction = () => {
   };
 
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const newImage = {
-          url: e.target.result,
-          alt: file.name
-        };
-        setImages([...images, newImage]);
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(event.target.files);
+    setImages(prevImages => [...prevImages, ...files]);
   };
 
   const handleRemoveImage = (index) => {
-    const newImages = [...images];
-    newImages.splice(index, 1);
-    setImages(newImages);
-    if (currentSlide >= newImages.length) {
-      setCurrentSlide(newImages.length - 1);
-    }
+    setImages(prevImages => {
+      const newImages = [...prevImages];
+      const removedImage = newImages[index];
+      if (removedImage.imageId) {
+        setRemovedImageIds(prev => [...prev, removedImage.imageId]);
+      }
+      newImages.splice(index, 1);
+      return newImages;
+    });
   };
 
   const modules = {
@@ -146,8 +147,73 @@ const UpdateAttraction = () => {
     }
   };
 
+  const handleProvinceChange = (event) => {
+    setSelectedProvince(event.target.value);
+  };
+
+  const handleSave = async (isDraft) => {
+    try {
+      const attractionData = {
+        id: id,
+        name: editableFields.name.value,
+        address: editableFields.address.value,
+        description: editableFields.description.value,
+        contactInfo: editableFields.contactInfo.value,
+        website: editableFields.website.value,
+        provinceId: selectedProvince,
+        attractionTypeId: editableFields.type.value,
+        isDraft: isDraft,
+      };
+
+      if (!isDraft) {
+        const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
+        const missingFields = requiredFields.filter(field => !attractionData[field]);
+        if (missingFields.length > 0) {
+          alert(`Vui lòng điền đầy đủ thông tin trước khi cập nhật.`);
+          return;
+        }
+        if (images.length === 0) {
+          alert('Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.');
+          return;
+        }
+      } else {
+        const requiredFields = ['provinceId', 'attractionTypeId'];
+        const missingFields = requiredFields.filter(field => !attractionData[field]);
+        if (missingFields.length > 0) {
+          alert(`Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.`);
+          return;
+        }
+      }
+
+      // Update attraction details
+      const response = await updateAttraction(attractionData);
+      
+      if (response.statusCode === 200) {
+        // Update images
+        const newImages = images.filter(img => img instanceof File);
+        if (newImages.length > 0 || removedImageIds.length > 0) {
+          const imagesResponse = await updateAttractionImages(
+            id,
+            newImages.length > 0 ? newImages : null,
+            removedImageIds.length > 0 ? removedImageIds : null
+          );
+          if (imagesResponse.statusCode !== 200) {
+            alert('Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.');
+            return;
+          }
+        }
+        navigate('/nhan-vien/diem-tham-quan');
+      } else {
+        alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Error updating attraction:', error);
+      alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+    }
+  };
+
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98vw' }}>
       <Helmet>
         <title>Sửa điểm tham quan</title>
       </Helmet>
@@ -165,27 +231,27 @@ const UpdateAttraction = () => {
         </Typography>
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        {editableFields.attractionType.isEditing ? (
+        {editableFields.type.isEditing ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
             <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
               Loại điểm tham quan
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Select
-                value={editableFields.attractionType.value}
-                onChange={(e) => handleFieldChange('attractionType', e.target.value)}
+                value={editableFields.type.value}
+                onChange={(e) => handleFieldChange('type', e.target.value)}
                 variant="outlined"
                 fullWidth
                 sx={{ mr: 2 }}
               >
-                {mockAttractionTypes.map((type) => (
-                  <MenuItem key={type.TypeId} value={type.typeName}>{type.typeName}</MenuItem>
+                {attractionTypes.map((type) => (
+                  <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
                 ))}
               </Select>
               <Button
                 variant="contained"
-                onClick={() => handleFieldSubmit('attractionType')}
-                disabled={!editableFields.attractionType.value}
+                onClick={() => handleFieldSubmit('type')}
+                disabled={!editableFields.type.value}
                 sx={{ minWidth: '40px', padding: '8px' }}
               >
                 <CheckIcon />
@@ -195,9 +261,9 @@ const UpdateAttraction = () => {
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-              {editableFields.attractionType.value}
+              {attractionTypes.find(type => type.attractionTypeId === editableFields.type.value)?.attractionTypeName}
             </Typography>
-            <IconButton onClick={() => handleFieldEdit('attractionType')} sx={{ ml: 2 }}>
+            <IconButton onClick={() => handleFieldEdit('type')} sx={{ ml: 2 }}>
               <EditIcon />
             </IconButton>
           </Box>
@@ -240,8 +306,8 @@ const UpdateAttraction = () => {
                     images.map((image, index) => (
                       <div key={index} style={{ position: 'relative' }}>
                         <img
-                          src={image.url}
-                          alt={image.alt}
+                          src={image instanceof File ? URL.createObjectURL(image) : image.url}
+                          alt={`Attraction image ${index + 1}`}
                           style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                         />
                         <IconButton
@@ -278,8 +344,8 @@ const UpdateAttraction = () => {
                   onClick={() => handleThumbnailClick(index)}
                 >
                   <img
-                    src={image.url}
-                    alt={image.alt}
+                    src={image instanceof File ? URL.createObjectURL(image) : image.url}
+                    alt={`Thumbnail ${index + 1}`}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
                   <IconButton
@@ -315,24 +381,18 @@ const UpdateAttraction = () => {
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
                 accept="image/*"
+                multiple
               />
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu</Typography>
               {editableFields.description.isEditing ? (
                 <Box >
-                  <TextField
-                    variant="outlined"
-                    multiline
-                    rows={5}
+                  <ReactQuill
                     value={editableFields.description.value}
-                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                    fullWidth
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                      }
-                    }}
+                    onChange={(value) => handleFieldChange('description', value)}
+                    theme="snow"
+                    modules={modules}
                   />
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
                     <Button
@@ -354,39 +414,21 @@ const UpdateAttraction = () => {
                 </Box>
               )}
             </Box>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-              {editableFields.detail.isEditing ? (
-                <Box sx={{ mt: 2 }}>
-                  <ReactQuill
-                    value={editableFields.detail.value}
-                    onChange={(value) => handleFieldChange('detail', value)}
-                    theme="snow"
-                    modules={modules}
-                  />
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                    <Button
-                      variant="contained"
-                      onClick={() => handleFieldSubmit('detail')}
-                      disabled={!editableFields.detail.value.trim() || editableFields.detail.value.trim() === '<p><br></p>'}
-                      sx={{ minWidth: '40px', padding: '8px' }}
-                    >
-                      <CheckIcon />
-                    </Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', mt: -7 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2.5 }}>
-                    <IconButton onClick={() => handleFieldEdit('detail')}><EditIcon /></IconButton>
-                  </Box>
-                  <div dangerouslySetInnerHTML={{ __html: editableFields.detail.value }} />
-                </Box>
-              )}
-            </Box>
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
+              <Select
+                value={selectedProvince}
+                onChange={handleProvinceChange}
+                variant="outlined"
+                fullWidth
+                sx={{ mr: 2, mb: 2 }}
+              >
+                {provinces.map((province) => (
+                  <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
+                ))}
+              </Select>
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
               {editableFields.address.isEditing ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -476,11 +518,11 @@ const UpdateAttraction = () => {
           </Grid>
         </Grid>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-          <Button variant="contained" sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-          <Button variant="contained" sx={{ p: 1.5 }}> Cập nhật </Button>
+          <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+          <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Cập nhật </Button>
         </Box>
       </Box>
-    </Box >
+    </Box>
   );
 };
 

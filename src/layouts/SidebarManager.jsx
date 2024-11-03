@@ -1,16 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MapIcon from '@mui/icons-material/Map';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import PersonIcon from '@mui/icons-material/Person';
 import { styled } from '@mui/material/styles';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AttractionsIcon from '@mui/icons-material/Attractions';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import ArticleIcon from '@mui/icons-material/Article';
+import EventIcon from '@mui/icons-material/Event';
+import SettingsIcon from '@mui/icons-material/Settings';
+import CategoryIcon from '@mui/icons-material/Category';
+import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -50,7 +58,7 @@ const ToggleButton = styled(Paper)(({ theme, isopen }) => ({
 }));
 
 const LogoLink = styled(Link)(({ theme }) => ({
-  marginBottom: '30px',
+  marginBottom: '10px',
   textDecoration: 'none',
   display: 'flex',
   justifyContent: 'center',
@@ -66,29 +74,53 @@ const MenuItemPaper = styled(Paper)(({ theme, isSelected }) => ({
 }));
 
 const MenuItemPaper2 = styled(Paper)(({ theme }) => ({
-  width: '40px',
-  height: '40px',
-  borderRadius: '12px',
+  width: '37px',
+  height: '37px',
+  borderRadius: '8px',
   overflow: 'hidden',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
   marginRight: '12px',
-  '&:hover': { backgroundColor: '#f5f5f5' },
 }));
 
 const MenuItemBox = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
-  padding: '12px 16px',
+  padding: '10px 10px',
 }));
 
 const SidebarManager = ({ isOpen, toggleSidebar }) => {
+  useEffect(() => {
+    const role = getCookie('role');
+    const token = getCookie('token');
+    if (!role || !token || role !== 'quan-ly') { navigate(`/dang-nhap`); }
+  }, []);
+
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleLogout = () => {
+    removeCookie('token');
+    removeCookie('role');
+    
+    navigate('/dang-nhap');
+  };
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <>
-      <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
+      <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' }}}>
         {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
       </ToggleButton>
 
@@ -119,19 +151,21 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
           </ListItem>
         </List>
 
-        <List sx={{ width: '100%' }}>
+        <List sx={{ width: '110%', maxHeight: '60vh', overflow: 'auto', ml: -1 }}>
           {[
-            { text: 'Điểm tham quan', url: '/quan-ly/diem-tham-quan', icon: <LocationOnIcon /> },
-            { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <MapIcon /> },
+            { text: 'Tỉnh thành', url: '/quan-ly/tinh-thanh', icon: <MapIcon /> },
+            { text: 'Điểm tham quan', url: '/quan-ly/diem-tham-quan', icon: <AttractionsIcon /> },
+            { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Bài viết', url: '/quan-ly/bai-viet', icon: <ArticleIcon /> },
+            { text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
-            { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> }
+            { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> },
+            { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem 
-              key={text}
-              component={Link} 
-              to={url}
-              sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
+              key={text} component={Link}  to={url}
+              sx={{ textDecoration: 'none', color: 'inherit', p: 0 }}
             >
               <MenuItemPaper elevation={0} isSelected={location.pathname === url}>
                 <MenuItemBox>
@@ -140,7 +174,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
                   </MenuItemPaper2>
                   <ListItemText 
                     primary={text} 
-                    primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
+                    primaryTypographyProps={{ fontWeight: location.pathname === url ? 'bold' : 'normal', fontSize: '0.97rem' }}
                   />
                 </MenuItemBox>
               </MenuItemPaper>
@@ -153,22 +187,43 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
         <Divider />
         <List sx={{ width: '100%', mt: 2 }}>
           <ListItem 
-            component={Link} 
-            to="/dang-xuat" 
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
+            onClick={handleClick}
+            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}
           >
-            <MenuItemPaper elevation={1} isSelected={location.pathname === '/dang-xuat'}>
+            <MenuItemPaper elevation={1}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
-                  <ExitToAppIcon sx={{ color: '#2196f3', transform: 'rotate(180deg)' }} />
+                  <SettingsIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Đăng xuất" 
-                  primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
+                  primary="Tài khoản" 
+                  primaryTypographyProps={{ fontSize: '0.97rem' }}
                 />
               </MenuItemBox>
             </MenuItemPaper>
           </ListItem>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+          >
+            <MenuItem onClick={() => {
+              handleClose();
+              navigate('/quan-ly/thong-tin-tai-khoan');
+            }}>Thông tin tài khoản</MenuItem>
+            <MenuItem sx={{ color: 'red' }} onClick={() => {
+              handleClose();
+              handleLogout();
+            }}>Đăng xuất</MenuItem>
+          </Menu>
         </List>
       </SidebarContainer>
     </>

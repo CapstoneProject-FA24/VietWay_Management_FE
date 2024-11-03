@@ -126,7 +126,7 @@ export const getFilteredAttractions = (filters, sortBy) => {
     }
     if (filters.status) {
       filteredAttractions = filteredAttractions.filter(attraction => 
-        attraction.statusName === filters.status
+        attraction.status === filters.status
       );
     }
     if (filters.rating) {

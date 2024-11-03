@@ -3,7 +3,6 @@ import { Modal, Box, Button, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const AttractionDeletePopup = ({ open, onClose, attraction, onDelete }) => {
-    console.log(attraction);
     const handleSubmit = () => {
         if (attraction && attraction.attractionId) {
             onDelete(attraction.attractionId);

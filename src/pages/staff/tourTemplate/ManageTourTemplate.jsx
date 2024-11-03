@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
@@ -7,33 +8,21 @@ import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import { Link, useLocation } from 'react-router-dom';
+
 import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
+import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
-
-const tourCategories = [
-    { TourCategoryId: 1, Name: 'Du lịch biển' },
-    { TourCategoryId: 2, Name: 'Du lịch núi' },
-    { TourCategoryId: 3, Name: 'Du lịch văn hóa' },
-    { TourCategoryId: 4, Name: 'Du lịch sinh thái' },
-    { TourCategoryId: 5, Name: 'Du lịch nghỉ dưỡng' },
-];
-
-const durations = [
-    { DurationId: 1, DurationName: 'Trong ngày' },
-    { DurationId: 2, DurationName: '2 ngày 1 đêm' },
-    { DurationId: 3, DurationName: '3 ngày 2 đêm' },
-    { DurationId: 4, DurationName: '4 ngày 3 đêm' },
-    { DurationId: 5, DurationName: '5 ngày 4 đêm' },
-];
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [tourTemplates, setTourTemplates] = useState([]);
     const [provinces, setProvinces] = useState([]);
+    const [tourCategories, setTourCategories] = useState([]);
+    const [tourDurations, setTourDurations] = useState([]);
     const [sortOrder, setSortOrder] = useState('tourNameA-Z');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
@@ -44,14 +33,15 @@ const ManageTourTemplate = () => {
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [pageSize, setPageSize] = useState(12);
     const [totalPages, setTotalPages] = useState(1);
     const [tempSearchTerm, setTempSearchTerm] = useState('');
     const [tempCategories, setTempCategories] = useState([]);
     const [tempProvinces, setTempProvinces] = useState([]);
     const [tempDuration, setTempDuration] = useState([]);
     const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         fetchData();
     }, [page, pageSize, searchTerm, selectedCategories, selectedProvinces, selectedDuration, statusTab]);
@@ -83,7 +73,11 @@ const ManageTourTemplate = () => {
         const fetchProvincesData = async () => {
             try {
                 const fetchedProvinces = await fetchProvinces();
+                const duration = await fetchTourDuration();
+                const categories = await fetchTourCategory();
                 setProvinces(fetchedProvinces);
+                setTourDurations(duration);
+                setTourCategories(categories);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
             }
@@ -92,13 +86,13 @@ const ManageTourTemplate = () => {
     }, []);
 
     const categoryOptions = tourCategories.map(category => ({
-        value: category.TourCategoryId,
-        label: category.Name
+        value: category.tourCategoryId,
+        label: category.tourCategoryName
     }));
 
-    const durationOptions = durations.map(duration => ({
-        value: duration.DurationId,
-        label: duration.DurationName
+    const durationOptions = tourDurations.map(duration => ({
+        value: duration.durationId,
+        label: duration.durationName
     }));
 
     const provinceOptions = provinces.map(province => ({
@@ -172,13 +166,13 @@ const ManageTourTemplate = () => {
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
-                <title>Quản lý Tour mẫu</title>
+                <title>Manage Tour Template</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
-                <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+            <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+                <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={12} md={9} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-                        <Typography sx={{ fontSize: '3rem', fontWeight: 600, color:'primary.main' }}> Quản lý tour mẫu </Typography>
+                        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour mẫu </Typography>
                     </Grid>
                     <Grid item xs={12} md={3} sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                         <Button component={Link} to={currentPage + "/them"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
@@ -188,72 +182,48 @@ const ManageTourTemplate = () => {
                     <Grid item xs={12} md={12}>
                         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, mr: 1.5 }}>
-                                <Typography>
+                                <Typography sx={{ fontWeight: 600 }}>
                                     Tỉnh/Thành phố
                                 </Typography>
-                                <ReactSelect
-                                    closeMenuOnSelect={false}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={provinceOptions}
-                                    onChange={setTempProvinces}
-                                    value={tempProvinces}
-                                />
+                                <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                                    isMulti options={provinceOptions} onChange={setTempProvinces} value={tempProvinces} />
                             </Box>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
-                                <Typography>
+                                <Typography sx={{ fontWeight: 600 }}>
                                     Thời lượng
                                 </Typography>
-                                <ReactSelect
-                                    closeMenuOnSelect={false}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={durationOptions}
-                                    onChange={setTempDuration}
-                                    value={tempDuration}
-                                />
+                                <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                                    isMulti options={durationOptions} onChange={setTempDuration} value={tempDuration} />
                             </Box>
                         </Box>
                     </Grid>
                     <Grid item xs={12} md={9.3} sx={{ mb: 1, mt: -2 }}>
-                        <Typography>
+                        <Typography sx={{ fontWeight: 600 }}>
                             Loại Tour
                         </Typography>
-                        <ReactSelect
-                            closeMenuOnSelect={false}
-                            components={animatedComponents}
-                            isMulti
-                            options={categoryOptions}
-                            onChange={setTempCategories}
-                            value={tempCategories}
-                        />
+                        <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
+                            isMulti options={categoryOptions} onChange={setTempCategories} value={tempCategories} />
                     </Grid>
                     <Grid item xs={12} md={2.7} sx={{ mb: 5 }}>
                         <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 1, backgroundColor: 'lightGray', color: 'black', width: '100%' }}>
                             Áp dụng bộ lọc
                         </Button>
                     </Grid>
-                    <Grid item xs={12} md={7}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <TextField
-                                variant="outlined"
-                                placeholder="Tìm kiếm tour mẫu..."
-                                size="small"
-                                sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
-                                value={tempSearchTerm}
-                                onChange={(e) => setTempSearchTerm(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                            <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black' }} >
-                                Tìm kiếm
-                            </Button>
-                        </Box>
+                    <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <TextField variant="outlined" placeholder="Tìm kiếm tour mẫu..."
+                            size="small" sx={{ width: '100%', mr: 1 }}
+                            value={tempSearchTerm} onChange={(e) => setTempSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                        />
+                        <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
+                            Tìm kiếm
+                        </Button>
                     </Grid>
                     <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
                         <Typography>
@@ -306,9 +276,9 @@ const ManageTourTemplate = () => {
                         variant="outlined"
                         sx={{ height: '40px' }}
                     >
-                        <MenuItem value={5}>5 / trang</MenuItem>
-                        <MenuItem value={10}>10 / trang</MenuItem>
-                        <MenuItem value={20}>20 / trang</MenuItem>
+                        <MenuItem value={6}>6 / trang</MenuItem>
+                        <MenuItem value={12}>12 / trang</MenuItem>
+                        <MenuItem value={24}>24 / trang</MenuItem>
                     </Select>
                 </Box>
                 <TourTemplateDeletePopup
