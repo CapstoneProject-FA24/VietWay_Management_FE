@@ -5,14 +5,14 @@ import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LockIcon from '@mui/icons-material/Lock';
-import SidebarManager from '../layouts/SidebarManager';
-import { mockManager } from '../hooks/MockAccount';
+import SidebarStaff from '@layouts/SidebarStaff';
+import { mockManager } from '@hooks/MockAccount';
 import TodayIcon from '@mui/icons-material/Today';
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const Profile = () => {
+const StaffProfile = () => {
     const [profile, setProfile] = useState({});
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -101,7 +101,7 @@ const Profile = () => {
 
     return (
         <Box sx={{ display: 'flex' }}>
-            <SidebarManager isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+            <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0 }}>
                 <Box component="header" sx={{ width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw', position: 'relative', height: '400px', borderRadius: '0 0 30px 30px', overflow: 'hidden' }}>
                     <Box className="hero-text" sx={{
@@ -117,7 +117,7 @@ const Profile = () => {
                         </Typography>
                         <Typography variant="h5" sx={{ width: "40%", zIndex: 2, color: 'white' }}>{profile.email}</Typography>
                         <img
-                            src="account-background.jpg" alt="Wave"
+                            src="/account-background.jpg" alt="Wave"
                             style={{ width: "100%", height: "100%", bottom: 0, left: 0, position: "absolute", zIndex: -1 }}
                         />
                     </Box>
@@ -221,4 +221,4 @@ const Profile = () => {
     );
 };
 
-export default Profile;
+export default StaffProfile;

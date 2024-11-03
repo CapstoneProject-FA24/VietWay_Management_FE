@@ -20,10 +20,15 @@ import ManagerManageAttraction from '@pages/manager/attraction/ManagerManageAttr
 import ManagerAttractionDetail from '@pages/manager/attraction/ManagerAttractionDetail.jsx';
 import ManagerManageProvince from '@pages/manager/province/ManagerManageProvince.jsx';
 import ListApprovedTourTemplate from "@pages/staff/tour/ListApprovedTourTemplate.jsx";
+import ManagerProfile from '@pages/manager/ManagerProfile.jsx';
+import StaffProfile from '@pages/staff/StaffProfile.jsx';
 import CreatePost from '@pages/staff/post/CreatePost.jsx';
-import Profile from '@pages/Profile';
 import PostDetail from '@pages/staff/post/PostDetail.jsx';
 import ManagePost from '@pages/staff/post/ManagePost.jsx';
+import ManagerManageTour from '@pages/manager/tour/ManagerManageTour.jsx';
+import ManagerTourDetail from '@pages/manager/tour/ManagerTourDetail.jsx';
+import TourDetail from '@pages/staff/tour/TourDetail.jsx';
+import ManageCategory from '@pages/manager/category/ManageCategory.jsx';
 
 const App = () => {
   return (
@@ -41,6 +46,10 @@ const App = () => {
         <Route path="/quan-ly/diem-tham-quan" element={<ManagerManageAttraction/>} />
         <Route path="/quan-ly/diem-tham-quan/chi-tiet/:id" element={<ManagerAttractionDetail/>} />
         <Route path="/quan-ly/tinh-thanh" element={<ManagerManageProvince/>} />
+        <Route path="/quan-ly/thong-tin-tai-khoan" element={<ManagerProfile />} />
+        <Route path="/quan-ly/tour-du-lich" element={<ManagerManageTour />} />
+        <Route path="/quan-ly/tour-du-lich/chi-tiet/:id" element={<ManagerTourDetail />} />
+        <Route path="/quan-ly/danh-muc" element={<ManageCategory />} />
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
@@ -51,13 +60,13 @@ const App = () => {
         <Route path="/nhan-vien/tour-mau/them" element={<CreateTourTemplate/>} />
         <Route path="/nhan-vien/tour-mau/sua/:id" element={<UpdateTourTemplate/>} />
         <Route path="/nhan-vien/tour-du-lich" element={<ManageTour />} />
+        <Route path="/nhan-vien/tour-du-lich/chi-tiet/:id" element={<TourDetail />} />
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet" element={<ListApprovedTourTemplate />} />
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id" element={<CreateTour />} />
         <Route path="/nhan-vien/bai-viet" element={<ManagePost />} />
         <Route path="/nhan-vien/bai-viet/:id" element={<PostDetail />} />
+        <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
         <Route path="/nhan-vien/bai-viet/them" element={<CreatePost />} />
-
-        <Route path="/thong-tin-tai-khoan" element={<Profile />} />
       </Routes>
     </Router>
   );

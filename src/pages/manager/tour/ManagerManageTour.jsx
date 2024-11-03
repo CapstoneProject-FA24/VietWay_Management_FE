@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Typography, TextField, Button, Select, MenuItem, InputAdornment, FormControl, Grid } from "@mui/material";
-import SidebarStaff from "@layouts/SidebarStaff";
+import SidebarManager from "@layouts/SidebarManager";
 import AddIcon from "@mui/icons-material/Add";
 import { Link, useNavigate } from "react-router-dom";
 import { fetchProvinces } from '@services/ProvinceService';
@@ -9,7 +9,7 @@ import makeAnimated from 'react-select/animated';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
 import Helmet from 'react-helmet';
-import TourCard from '@components/staff/TourCard';
+import TourCard from '@components/manager/tour/TourCard';
 import { fetchTours } from '@services/TourService';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -22,7 +22,7 @@ import { getTourStatusInfo } from "@services/StatusService";
 import { Tabs, Tab } from "@mui/material";
 import Pagination from '@mui/material/Pagination';
 
-const ManageTour = () => {
+const ManagerManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [tours, setTours] = useState([]);
   const [filters, setFilters] = useState({ tourType: [], duration: [], location: [] });
@@ -168,13 +168,6 @@ const ManageTour = () => {
     }));
   };
 
-  const handleTempLocationChange = (selectedOptions) => {
-    setTempFilters(prevFilters => ({
-      ...prevFilters,
-      location: selectedOptions.map(option => option.value)
-    }));
-  };
-
   const handleApplyFilter = () => {
     setPagination(prev => ({
       ...prev,
@@ -197,27 +190,12 @@ const ManageTour = () => {
     setStatusTab(newValue);
   };
 
-  const handlePageChange = (event, newPage) => {
-    setPagination(prev => ({
-      ...prev,
-      pageIndex: newPage + 1
-    }));
-  };
-
-  const handlePageSizeChange = (event) => {
-    setPagination(prev => ({
-      ...prev,
-      pageSize: parseInt(event.target.value, 10),
-      pageIndex: 1 // Reset to first page when changing page size
-    }));
-  };
-
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
         <title>Quản lý Tour</title>
       </Helmet>
-      <SidebarStaff 
+      <SidebarManager
         isOpen={isOpen} 
         toggleSidebar={() => setIsOpen(!isOpen)}
       />
@@ -449,4 +427,4 @@ const ManageTour = () => {
   );
 };
 
-export default ManageTour;
+export default ManagerManageTour;

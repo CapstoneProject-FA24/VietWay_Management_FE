@@ -14,7 +14,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
-import { getCookie } from '@services/AuthenService';
+import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -109,8 +109,8 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    removeCookie('token');
+    removeCookie('role');
 
     navigate('/dang-nhap');
   };
@@ -215,7 +215,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
           >
             <MenuItem onClick={() => {
               handleClose();
-              navigate('/thong-tin-tai-khoan');
+              navigate('/nhan-vien/thong-tin-tai-khoan');
             }}>Thông tin tài khoản</MenuItem>
             <MenuItem sx={{ color: 'red' }} onClick={() => {
               handleClose();

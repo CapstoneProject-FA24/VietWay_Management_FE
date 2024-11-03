@@ -33,19 +33,19 @@ export const getAttractionStatusInfo = (statusCode) => {
 export const getTourStatusInfo = (statusCode) => {
   switch (statusCode) {
     case TourStatus.Pending:
-      return { text: "Đang chờ duyệt", color: "#FFA500" }; // Orange
+      return { text: "Đang chờ duyệt", color: "#4900ff", textColor: "#24007c", backgroundColor: "#bfb0ff" }; // Orange
     case TourStatus.Rejected:
-      return { text: "Đã từ chối", color: "#F44336" }; // Red
+      return { text: "Đã từ chối", color: "#ff9300", textColor: "#9c5a00", backgroundColor: "#ffd9a6" }; // Red
     case TourStatus.Scheduled:
-      return { text: "Đã duyệt", color: "#2196F3" }; // Blue
+      return { text: "Đã duyệt", color: "#00c5e8", textColor: "#006f83", backgroundColor: "#c2f6ff" }; // Blue
     case TourStatus.Closed:
-      return { text: "Đã đóng", color: "#9E9E9E" }; // Grey
+      return { text: "Đã đóng", color: "#5f5f5f", textColor: "#2b2b2b", backgroundColor: "#cbcbcb" }; // Grey
     case TourStatus.OnGoing:
-      return { text: "Đang diễn ra", color: "#4CAF50" }; // Green
+      return { text: "Đang diễn ra", color: "#0059ff", textColor: "#001f5a", backgroundColor: "#b1ccff" }; // Green
     case TourStatus.Completed:
-      return { text: "Đã hoàn thành", color: "#673AB7" }; // Purple
+      return { text: "Đã hoàn thành", color: "#19cd00", textColor: "#0f7c00", backgroundColor: "#d3ffa4" }; // Purple
     case TourStatus.Cancelled:
-      return { text: "Đã hủy", color: "#F44336" }; // Red
+      return { text: "Đã hủy", color: "#ff0000", textColor: "#600000", backgroundColor: "#ffb8b8" }; // Red
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
   }

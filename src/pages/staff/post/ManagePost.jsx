@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, Typography, Tabs, Tab, Button, TextField, Select, MenuItem, InputAdornment } from '@mui/material';
+import { Box, Grid, Typography, Tabs, Tab, Button, TextField, Select, MenuItem, InputAdornment, Pagination } from '@mui/material';
 import PostsCard from '@components/staff/posts/PostsCard';
 import SidebarStaff from '@layouts/SidebarStaff';
-import { fetchPosts } from '@hooks/MockPost';
+import { fetchPosts } from '@services/PostService';
 import { fetchProvinces } from '@services/ProvinceService';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
@@ -27,6 +27,12 @@ const ManagePost = () => {
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [tempCategories, setTempCategories] = useState([]);
   const [tempProvinces, setTempProvinces] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    pageIndex: 1,
+    pageSize: 12,
+    total: 0
+  });
 
   const animatedComponents = makeAnimated();
 
@@ -42,21 +48,44 @@ const ManagePost = () => {
   ];
 
   useEffect(() => {
-    fetchPosts().then((data) => {
-      setPosts(data);
-    });
-    
-    // Fetch provinces
-    const fetchProvincesData = async () => {
+    const loadPosts = async () => {
+      setLoading(true);
       try {
-        const fetchedProvinces = await fetchProvinces();
-        setProvinces(fetchedProvinces);
+        const params = {
+          pageSize: pagination.pageSize,
+          pageIndex: pagination.pageIndex,
+          searchTerm: searchTerm,
+          postCategoryIds: selectedCategories.map(cat => cat.value),
+          provinceIds: selectedProvinces.map(prov => prov.value),
+          status: statusTab !== 'all' ? statusTab : null
+        };
+
+        const response = await fetchPosts(params);
+        setPosts(response.data);
+        setPagination(prev => ({
+          ...prev,
+          total: response.total
+        }));
       } catch (error) {
-        console.error('Error fetching provinces:', error);
+        console.error('Error loading posts:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchProvincesData();
-  }, []);
+
+    loadPosts();
+  }, [pagination.pageIndex, pagination.pageSize, searchTerm, selectedCategories, selectedProvinces, statusTab]);
+
+  // Fetch provinces
+  const fetchProvincesData = async () => {
+    try {
+      const fetchedProvinces = await fetchProvinces();
+      setProvinces(fetchedProvinces);
+    } catch (error) {
+      console.error('Error fetching provinces:', error);
+    }
+  };
+  fetchProvincesData();
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -85,24 +114,24 @@ const ManagePost = () => {
         <title>Manage Posts</title>
       </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{ 
-        flexGrow: 1, 
+      <Box sx={{
+        flexGrow: 1,
         mt: 1.5,
-        p: isSidebarOpen ? 3 : 3, 
-        transition: 'margin-left 0.3s', 
-        marginLeft: isSidebarOpen ? '280px' : '20px'
+        p: isSidebarOpen ? 3 : 3,
+        transition: 'margin-left 0.3s',
+        marginLeft: isSidebarOpen ? '280px' : '40px'
       }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> 
-              Quản lý bài viết 
+            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>
+              Quản lý bài viết
             </Typography>
-            <Button 
-              component={Link} 
+            <Button
+              component={Link}
               to={`${currentPage}/them`}
-              variant="contained" 
-              color="primary" 
-              startIcon={<AddIcon />} 
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
               sx={{ height: '55px', borderRadius: 2 }}
             >
               Tạo bài viết mới
@@ -145,12 +174,12 @@ const ManagePost = () => {
 
             <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'flex-end' }}>
               <Button
-                variant="contained" 
-                startIcon={<FilterListIcon />} 
+                variant="contained"
+                startIcon={<FilterListIcon />}
                 onClick={handleApplyFilter}
                 sx={{
-                  backgroundColor: 'lightGray', 
-                  color: 'black', 
+                  backgroundColor: 'lightGray',
+                  color: 'black',
                   width: '80%',
                   float: 'right',
                   display: 'flex',
@@ -207,16 +236,38 @@ const ManagePost = () => {
           </Grid>
 
           {posts.length > 0 ? (
-            <Grid container spacing={2}>
-              {posts.map((post) => (
-                <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
-                  <PostsCard
-                    post={post}
-                    onViewDetails={() => handleViewDetails(post.id)}
-                  />
-                </Grid>
-              ))}
-            </Grid>
+            <>
+              <Grid container spacing={2}>
+                {posts.map((post) => (
+                  <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
+                    <PostsCard
+                      post={post}
+                      onViewDetails={() => handleViewDetails(post.id)}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, width: '100%' }}>
+                <Box sx={{ width: '10%' }}/>
+                <Pagination
+                  count={Math.ceil(pagination.total / pagination.pageSize)}
+                  page={pagination.pageIndex}
+                  onChange={(e, newPage) => setPagination(prev => ({ ...prev, pageIndex: newPage }))}
+                  color="primary"
+                />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Select
+                    value={pagination.pageSize} size="small" sx={{ minWidth: 80 }}
+                    onChange={(e) => { setPagination(prev => ({ ...prev, pageSize: e.target.value, pageIndex: 1 })); }}
+                  >
+                    <MenuItem value={12}>12</MenuItem>
+                    <MenuItem value={24}>24</MenuItem>
+                    <MenuItem value={48}>48</MenuItem>
+                  </Select>
+                  <Typography>/trang</Typography>
+                </Box>
+              </Box>
+            </>
           ) : (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', width: '100%' }}>
               <Typography variant="h5" sx={{ color: 'text.secondary' }}>
