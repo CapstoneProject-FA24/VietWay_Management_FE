@@ -133,19 +133,20 @@ export const createTour = async (tourData) => {
     try {
         const startDateTime = dayjs(tourData.startDate)
             .hour(tourData.startTime.hour())
-            .minute(tourData.startTime.minute());
+            .minute(tourData.startTime.minute())
+            .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
 
         const formattedData = {
             tourTemplateId: tourData.tourTemplateId,
             startLocation: tourData.startAddress,
-            startDate: startDateTime.toISOString(),
+            startDate: startDateTime,
             defaultTouristPrice: parseFloat(tourData.adultPrice),
-            registerOpenDate: tourData.registerOpenDate.toISOString(),
-            registerCloseDate: tourData.registerCloseDate.toISOString(),
+            registerOpenDate: dayjs(tourData.registerOpenDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+            registerCloseDate: dayjs(tourData.registerCloseDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
             maxParticipant: parseInt(tourData.maxParticipants),
             minParticipant: parseInt(tourData.minParticipants),
             currentParticipant: 0,
-            createdAt: new Date().toISOString(),
+            createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
             tourPrices: [
                 {
                     name: "Người lớn",
@@ -154,7 +155,7 @@ export const createTour = async (tourData) => {
                     ageTo: 200
                 },
                 {
-                    name: "Trẻ em",
+                    name: "Trẻ em", 
                     price: parseFloat(tourData.childPrice),
                     ageFrom: 5,
                     ageTo: 11
@@ -166,16 +167,10 @@ export const createTour = async (tourData) => {
                     ageTo: 4
                 }
             ],
-            refundPolicies: [
-                {
-                    cancelBefore: startDateTime.subtract(1, 'day').toISOString(),
-                    refundPercent: 100
-                },
-                {
-                    cancelBefore: startDateTime.subtract(3, 'day').toISOString(),
-                    refundPercent: 50
-                }
-            ]
+            refundPolicies: tourData.refundPolicies.map(policy => ({
+                cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+                refundPercent: Number(policy.refundRate)
+            }))
         };
 
         const response = await axios.post(`${baseURL}/api/tours`, formattedData);
