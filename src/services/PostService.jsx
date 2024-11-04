@@ -1,5 +1,6 @@
 import axios from 'axios';
 import baseURL from '@api/BaseURL';
+import { getCookie } from '@services/AuthenService';
 
 export const fetchPosts = async (params) => {
     try {
@@ -65,19 +66,21 @@ export const fetchPostById = async (id) => {
 };
 
 export const createPost = async (postData) => {
+    const token = getCookie('token');
     try {
         const post = {
             title: postData.title,
-            imageUrl: postData.imageUrl,
             content: postData.content,
             postCategoryId: postData.postCategoryId,
             provinceId: postData.provinceId,
             description: postData.description,
-            createdAt: postData.createdAt,
-            status: postData.status,
             isDraft: postData.isDraft
         };
-        const response = await axios.post(`${baseURL}/api/posts`, post);
+        const response = await axios.post(`${baseURL}/api/Post`, post, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error creating post:', error);

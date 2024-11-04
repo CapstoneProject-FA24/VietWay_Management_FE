@@ -1,9 +1,9 @@
 import axios from 'axios';
 import baseURL from '@api/baseURL'
 import { getCookie } from '@services/AuthenService';
-const token = getCookie('token');
 
 export const fetchAttractionType = async () => {
+    const token = getCookie('token');
     try {
         const response = await axios.get(`${baseURL}/api/attraction-types`, {
             headers: {
@@ -13,7 +13,8 @@ export const fetchAttractionType = async () => {
         return response.data.data.map(item => ({
             attractionTypeId: item.attractionCategoryId,
             attractionTypeName: item.name,
-            description: item.description
+            description: item.description,
+            createdAt: item.createdAt
         }));
     } catch (error) {
         console.error('Error fetching tour templates:', error);
