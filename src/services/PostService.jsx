@@ -46,21 +46,23 @@ export const fetchPosts = async (params) => {
 
 export const fetchPostById = async (id) => {
     try {
-        const response = await axios.get(`${baseURL}/api/posts/${id}`);
-        const item = response.data.data
+        const response = await axios.get(`${baseURL}/api/Post/${id}`);
+        const item = response.data.data;
         return {
             postId: item.postId,
             title: item.title,
             imageUrl: item.imageUrl,
             content: item.content,
-            postCategory: item.postCategory,
-            province: item.province,
+            postCategoryName: item.postCategoryName,
+            postCategoryId: item.postCategoryId,
+            provinceName: item.provinceName,
+            provinceId: item.provinceId,
             description: item.description,
-            createdAt: item.createdAt,
+            createdAt: item.createAt,
             status: item.status
         };
     } catch (error) {
-        console.error('Error fetching tour template:', error);
+        console.error('Error fetching post:', error);
         throw error;
     }
 };
@@ -88,3 +90,25 @@ export const createPost = async (postData) => {
     }
 };
 
+export const updatePost = async (id, postData) => {
+    const token = getCookie('token');
+    try {
+        const post = {
+            title: postData.title,
+            content: postData.content, 
+            postCategoryId: postData.postCategoryId,
+            provinceId: postData.provinceId,
+            description: postData.description,
+            isDraft: postData.isDraft
+        };
+        const response = await axios.put(`${baseURL}/api/Post/${id}`, post, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating post:', error);
+        throw error;
+    }
+};

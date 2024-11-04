@@ -11,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
+import { fetchPostCategory } from '@services/PostCategoryService';
 
 const ManagePost = () => {
   const location = useLocation();
@@ -27,29 +28,33 @@ const ManagePost = () => {
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [tempCategories, setTempCategories] = useState([]);
   const [tempProvinces, setTempProvinces] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     pageIndex: 1,
     pageSize: 12,
     total: 0
   });
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   const animatedComponents = makeAnimated();
 
-  const categoryOptions = [
-    { value: 'am-thuc', label: 'Ẩm thực' },
-    { value: 'tin-tuc-du-lich', label: 'Tin tức du lịch' },
-    { value: 'noi-luu-tru', label: 'Nơi lưu trú' },
-    { value: 'diem-den-du-lich', label: 'Điểm đến du lịch' },
-    { value: 'kinh-nghiem-du-lich', label: 'Kinh nghiệm du lịch' },
-    { value: 'van-hoa', label: 'Văn hóa' },
-    { value: 'hoat-dong-vui-choi', label: 'Hoạt động vui chơi' },
-    { value: 'mua-sam-giai-tri', label: 'Mua sắm và giải trí' },
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categories = await fetchPostCategory();
+        const formattedCategories = categories.map(cat => ({
+          value: cat.postCategoryId,
+          label: cat.name
+        }));
+        setCategoryOptions(formattedCategories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const loadPosts = async () => {
-      setLoading(true);
       try {
         const params = {
           pageSize: pagination.pageSize,
@@ -68,8 +73,6 @@ const ManagePost = () => {
         }));
       } catch (error) {
         console.error('Error loading posts:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -86,14 +89,6 @@ const ManagePost = () => {
     }
   };
   fetchProvincesData();
-
-  const handleSidebarToggle = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleViewDetails = (postId) => {
-    console.log('View details for post:', postId);
-  };
 
   const handleStatusTabChange = (event, newValue) => {
     setStatusTab(newValue);
@@ -240,10 +235,7 @@ const ManagePost = () => {
               <Grid container spacing={2}>
                 {posts.map((post) => (
                   <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
-                    <PostsCard
-                      post={post}
-                      onViewDetails={() => handleViewDetails(post.id)}
-                    />
+                    <PostsCard post={post} />
                   </Grid>
                 ))}
               </Grid>

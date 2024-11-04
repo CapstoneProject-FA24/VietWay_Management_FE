@@ -352,6 +352,7 @@ const CreatePost = () => {
                         transform: 'translate(-50%, -50%)',
                         opacity: 0,
                         transition: 'opacity 0.3s ease',
+                        '&:hover': { opacity: 1 },
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         color: '#000',
                         border: '1px solid #ccc',
