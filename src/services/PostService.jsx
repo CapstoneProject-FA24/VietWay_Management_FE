@@ -112,3 +112,17 @@ export const updatePost = async (id, postData) => {
         throw error;
     }
 };
+
+export const deletePost = async (id) => {
+    const token = getCookie('token');
+    try {
+        await axios.delete(`${baseURL}/api/Post/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        throw error;
+    }
+};

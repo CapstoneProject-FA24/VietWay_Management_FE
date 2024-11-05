@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect } from 'react';
 import { mockCompanyStaff } from '@hooks/MockAccount';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -47,11 +47,12 @@ const ManageStaff = () => {
   return (
     <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
-        <title>Nhân viên</title>
+        <title>Quản lý nhân viên</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0', padding: 5, overflowY: 'auto' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2  }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant='h3' color='primary' sx={{ fontWeight: 700 }}>Quản lý nhân viên</Typography>
           <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />}>
             Thêm nhân viên
           </Button>
@@ -108,7 +109,7 @@ const ManageStaff = () => {
                   <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{staff.phone}</TableCell>
                   <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{staff.email}</TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
                       <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: staff.status === 1 ? '#4caf50' : '#ea4747' }} />
                       <Typography sx={{ fontSize: '0.9rem' }}> {staff.status === 1 ? 'Hoạt động' : 'Đã xóa'}</Typography>
                     </Box>

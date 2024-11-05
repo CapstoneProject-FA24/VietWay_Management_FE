@@ -8,8 +8,6 @@ const PostsCard = ({ post }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
 
-  const statusInfo = getStatusColor(post.status);
-
   const handleViewDetails = (postId) => {
     navigate(`/nhan-vien/bai-viet/${postId}`);
   };
@@ -25,7 +23,7 @@ const PostsCard = ({ post }) => {
         sx={{ position: 'absolute', top: 10, left: 10 }} 
       />
 
-      <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image || 'default-image.jpg'}
+      <CardMedia component="img" height={isMobile ? "140" : "180"} image={ post.image === null ? '/no-image-available.png' : post.image }
         alt={post.title} sx={{ objectFit: 'cover',}}/>
 
       <CardContent sx={{ flexGrow: 1, p: isMobile ? 1.5 : 2, display: 'flex', flexDirection: 'column', gap: 1 }}>

@@ -44,10 +44,13 @@ const ManageCustomer = () => {
   return (
     <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
-        <title>Khách hàng</title>
+        <title>Quản lý khách hàng</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '245px' : '0', padding: isSidebarOpen ? 3 : 6, overflowY: 'auto' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, mt: 3 }}>
+          <Typography variant='h3' color='primary' sx={{ fontWeight: 700 }}>Quản lý khách hàng</Typography>
+        </Box>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <TextField
             variant="outlined"

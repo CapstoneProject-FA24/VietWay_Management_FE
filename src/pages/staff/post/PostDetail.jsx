@@ -18,6 +18,7 @@ import { getCookie } from '@services/AuthenService';
 import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import baseURL from '@api/BaseURL';
+import PostDeleteConfirm from '@components/staff/posts/PostDeleteConfirm';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -82,6 +83,7 @@ const PostDetail = () => {
     message: '',
     severity: 'success' // 'success' | 'error' | 'warning' | 'info'
   });
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -307,12 +309,25 @@ const PostDetail = () => {
   };
 
   const handleDeletePost = async () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-      try {
-        navigate(`/nhan-vien/bai-viet`);
-      } catch (error) {
-        console.error('Error deleting post:', error);
-      }
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async (postId) => {
+    console.log(postId);
+    try {
+      await deletePost(postId);
+      setSnackbar({
+        open: true,
+        message: 'Bài viết đã được xóa',
+        severity: 'success'
+      });
+      navigate(`/nhan-vien/bai-viet`);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi xóa bài viết: ' + (error.response?.data?.message || error.message),
+        severity: 'error'
+      });
     }
   };
 
@@ -629,6 +644,12 @@ const PostDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <PostDeleteConfirm 
+        open={isDeleteConfirmOpen} 
+        onClose={() => setIsDeleteConfirmOpen(false)} 
+        postId={post.postId} 
+        onDelete={handleConfirmDelete} 
+      />
     </Box>
   );
 };
