@@ -409,8 +409,7 @@ const UpdateAttraction = () => {
                     <IconButton onClick={() => handleFieldEdit('description')}><EditIcon /></IconButton>
                   </Box>
                   <Box
-                    dangerouslySetInnerHTML={{ __html: editableFields.description.value }}
-                    sx={{
+                    dangerouslySetInnerHTML={{ __html: editableFields.description.value }} sx={{
                       '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
                       '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
                     }} />
