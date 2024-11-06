@@ -1,4 +1,4 @@
-import baseURL from '@api/BaseURL'
+const baseURL = import.meta.env.VITE_API_URL;
 import axios from 'axios';
 
 export const fetchProvinces = async () => {

@@ -187,9 +187,7 @@ const UpdateAttraction = () => {
 
       // Update attraction details
       const response = await updateAttraction(attractionData);
-      
-      if (response.statusCode === 200) {
-        // Update images
+      if (response.status === 200) {
         const newImages = images.filter(img => img instanceof File);
         if (newImages.length > 0 || removedImageIds.length > 0) {
           const imagesResponse = await updateAttractionImages(
@@ -410,7 +408,11 @@ const UpdateAttraction = () => {
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: -4 }}>
                     <IconButton onClick={() => handleFieldEdit('description')}><EditIcon /></IconButton>
                   </Box>
-                  <div dangerouslySetInnerHTML={{ __html: editableFields.description.value }} />
+                  <Box
+                    dangerouslySetInnerHTML={{ __html: editableFields.description.value }} sx={{
+                      '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                      '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                    }} />
                 </Box>
               )}
             </Box>

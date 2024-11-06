@@ -1,17 +1,17 @@
 import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
 
-export const fetchPostCategory = async () => {
+export const fetchEventCategory = async () => {
     try {
-        const response = await axios.get(`${baseURL}/api/post-categories`);
+        const response = await axios.get(`${baseURL}/api/event-categories`);
         return response.data.data.map(item => ({
-            postCategoryId: item.postCategoryId,
+            eventCategoryId: item.eventCategoryId,
             name: item.name,
             description: item.description,
             createdAt: item.createdAt
         }));
     } catch (error) {
-        console.error('Error fetching tour templates:', error);
+        console.error('Error fetching event categories:', error);
         throw error;
     }
 };

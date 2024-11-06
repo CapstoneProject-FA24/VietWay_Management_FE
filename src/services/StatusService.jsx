@@ -1,4 +1,4 @@
-import { BookingStatus, AttractionStatus, UserRole, TourStatus } from "@hooks/Statuses";
+import { BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus } from "@hooks/Statuses";
 
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
@@ -67,10 +67,10 @@ export const getRole = (role) => {
 // Post + Event
 export const getStatusColor = (status) => { 
   switch(status) {
-    case '0': return { color: 'warning', label: 'Bản nháp' };
-    case '1': return { color: 'info', label: 'Chờ duyệt' };
-    case '2': return { color: 'success', label: 'Đã duyệt' };
-    case '3': return { color: 'error', label: 'Từ chối' };
+    case PostStatus.Draft: return { color: 'warning', label: 'Bản nháp' };
+    case PostStatus.Pending: return { color: 'info', label: 'Chờ duyệt' };
+    case PostStatus.Approved: return { color: 'success', label: 'Đã duyệt' };
+    case PostStatus.Rejected: return { color: 'error', label: 'Từ chối' };
     default: return { color: 'default', label: 'Không xác định' };
   }
 };

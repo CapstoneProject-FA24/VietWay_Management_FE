@@ -20,12 +20,20 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
         }
     };
 
+    const formatDate = (date) => {
+        const newDate = new Date(date);
+        const day = newDate.getDate();
+        const month = newDate.getMonth() + 1;
+        const year = newDate.getFullYear();
+        return `${day < 10 ? '0' : ''}${day}/${month < 10 ? '0' : ''}${month}/${year}`;
+    };
+
     return (
         <Card sx={{ display: 'flex', height: isOpen ? '15.9rem' : '13.9rem', p: '0.7rem', borderRadius: 1.5 }}>
             <CardMedia
                 component="img"
                 sx={{ minWidth: '40%', width: '40%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
-                image={attraction.imageUrl}
+                image={attraction.imageUrl ? attraction.imageUrl : '/no-image-available.png'}
                 alt={attraction.name}
             />
             <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: '60%', width: '60%' }}>
@@ -35,7 +43,7 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
-                            Tạo ngày: {new Date(attraction.createdDate).toLocaleDateString()}
+                            Tạo ngày: {formatDate(attraction.createdDate)}
                         </Typography>
                         <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
                             Tạo bởi: {attraction.creatorName}

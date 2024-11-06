@@ -1,9 +1,10 @@
 import axios from 'axios';
-import baseURL from '@api/baseURL'
+const baseURL = import.meta.env.VITE_API_URL;
+
 import { getCookie } from '@services/AuthenService';
-const token = getCookie('token');
 
 export const fetchAttractions = async (params) => {
+    const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
         queryParams.append('pageSize', params.pageSize);
@@ -25,8 +26,8 @@ export const fetchAttractions = async (params) => {
 
         const attractions = items.map(item => ({
             attractionId: item.attractionId,
-            name: item.name || "Không có",
-            address: item.address || "Không có",
+            name: item.name,
+            address: item.address,
             status: item.status,
             attractionType: item.attractionType,
             createdDate: item.createdAt,
@@ -49,6 +50,7 @@ export const fetchAttractions = async (params) => {
 };
 
 export const fetchAttractionById = async (id) => {
+    const token = getCookie('token');
     try {
         const response = await axios.get(`${baseURL}/api/attractions/${id}`, {
             headers: {
@@ -56,26 +58,24 @@ export const fetchAttractionById = async (id) => {
             }
         });
         const data = response.data.data;
-        console.log(data);
         const attraction = {
             attractionId: data.attractionId,
-            name: data.name || "Không có",
-            address: data.address || "Không có",
-            contactInfo: data.contactInfo || "Không có",
-            website: data.website || "Không có",
-            description: data.description || "Không có",
-            googlePlaceId: data.googlePlaceId || "Không có",
+            name: data.name,
+            address: data.address,
+            contactInfo: data.contactInfo,
+            website: data.website,
+            description: data.description,
+            googlePlaceId: data.googlePlaceId,
             status: data.status,
             createdDate: data.createdDate,
-            creatorName: data.creatorName || "Không có",
-            provinceId: data.province.provinceId || "Không có",
-            provinceName: data.province.provinceName || "Không có",
-            imageURL: data.province.imageURL,
-            attractionTypeId: data.attractionType.attractionCategoryId || "Không có",
-            attractionTypeName: data.attractionType.name || "Không có",
+            creatorName: data.creatorName,
+            provinceId: data.province.provinceId,
+            provinceName: data.province.provinceName,
+            attractionTypeId: data.attractionType.attractionCategoryId,
+            attractionTypeName: data.attractionType.name,
             images: data.images.map(image => ({
                 imageId: image.imageId,
-                url: image.url
+                url: image.imageUrl
             }))
         };
         return attraction;
@@ -86,15 +86,16 @@ export const fetchAttractionById = async (id) => {
 };
 
 export const createAttraction = async (attractionData) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/Attraction`, {
+        const response = await axios.post(`${baseURL}/api/attractions`, {
             name: attractionData.name,
             address: attractionData.address,
             contactInfo: attractionData.contactInfo,
             website: attractionData.website,
             description: attractionData.description,
             provinceId: attractionData.provinceId,
-            attractionTypeId: attractionData.attractionTypeId,
+            attractionCategoryId: attractionData.attractionTypeId,
             googlePlaceId: attractionData.googlePlaceId,
             isDraft: attractionData.isDraft
         }, {
@@ -111,6 +112,7 @@ export const createAttraction = async (attractionData) => {
 
 
 export const updateAttractionImages = async (attractionId, newImages, deletedImageIds) => {
+    const token = getCookie('token');
     try {
         const formData = new FormData();
         if (newImages) {
@@ -138,6 +140,7 @@ export const updateAttractionImages = async (attractionId, newImages, deletedIma
 };
 
 export const updateAttraction = async (attractionData) => {
+    const token = getCookie('token');
     try {
         const response = await axios.put(`${baseURL}/api/attractions/${attractionData.id}`, {
             name: attractionData.name,
@@ -146,7 +149,7 @@ export const updateAttraction = async (attractionData) => {
             website: attractionData.website,
             description: attractionData.description,
             provinceId: attractionData.provinceId,
-            attractionTypeId: attractionData.attractionTypeId,
+            attractionCategoryId: attractionData.attractionTypeId,
             googlePlaceId: attractionData.googlePlaceId,
             isDraft: attractionData.isDraft
         }, {
@@ -154,7 +157,7 @@ export const updateAttraction = async (attractionData) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        return response.data;
+        return response;
     } catch (error) {
         console.error('Error updating attraction:', error.response);
         throw error;

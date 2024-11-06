@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, TextField, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Paper, Button, TextField, Select, MenuItem, Snackbar, Alert } from '@mui/material';
 import { ArrowBack, Create } from '@mui/icons-material';
-//import { toast } from 'react-toastify';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import dayjs from 'dayjs';
+import { createPost } from '@services/PostService';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -56,6 +57,11 @@ const CreatePost = () => {
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [postCategoryOptions, setPostCategoryOptions] = useState([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
   const [newPost, setNewPost] = useState({
     title: '',
     content: '',
@@ -86,7 +92,11 @@ const CreatePost = () => {
         setPostCategoryOptions(formattedPostCategories);
       } catch (error) {
         console.error('Error loading provinces:', error);
-        //toast.error('Lỗi khi tải danh sách tỉnh thành');
+        setSnackbar({
+          open: true,
+          message: 'Lỗi khi tải danh sách tỉnh thành',
+          severity: 'error'
+        });
       } finally {
         setIsLoadingProvinces(false);
       }
@@ -130,33 +140,66 @@ const CreatePost = () => {
     try {
       // Validate required fields
       if (!newPost.title || !newPost.content || !newPost.category || !newPost.provinceId) {
-        //toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
+        setSnackbar({
+          open: true,
+          message: 'Vui lòng điền đầy đủ thông tin bắt buộc',
+          severity: 'error'
+        });
         return;
       }
 
+      // Validate content length
+      if (newPost.content.length < 50) {
+        setSnackbar({
+          open: true,
+          message: 'Nội dung bài viết phải có ít nhất 50 ký tự',
+          severity: 'error'
+        });
+        return;
+      }
+
+      // Prepare post data without image
       const postData = {
-        title: newPost.title,
+        title: newPost.title.trim(),
         content: newPost.content,
-        description: newPost.description,
+        description: newPost.description.trim(),
         postCategoryId: newPost.category,
         provinceId: newPost.provinceId,
-        imageUrl: newPost.image,
-        createdAt: newPost.createDate,
-        status: isDraft ? 0 : 1,
+        createdAt: dayjs(newPost.createDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
         isDraft: isDraft
       };
 
-      await createPost(postData);
-      //toast.success('Tạo bài viết mới thành công');
-      navigate('/nhan-vien/bai-viet');
+      // Create post first
+      const createdPost = await createPost(postData);
+
+      // Show success message
+      setSnackbar({
+        open: true,
+        message: `Bài viết đã được ${isDraft ? 'lưu nháp' : 'gửi duyệt'} thành công`,
+        severity: 'success'
+      });
+
+      // Navigate back after successful creation
+      setTimeout(() => {
+        navigate('/nhan-vien/bai-viet');
+      }, 1500);
+
     } catch (error) {
       console.error('Error creating post:', error);
-      //toast.error('Lỗi khi tạo bài viết mới');
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo bài viết',
+        severity: 'error'
+      });
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({...prev, open: false}));
+  };
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '89vw' }}>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
@@ -164,8 +207,8 @@ const CreatePost = () => {
           flexGrow: 1,
           p: 3,
           transition: 'margin-left 0.3s',
-          marginLeft: isSidebarOpen ? '260px' : '20px',
-          width: `calc(100% - ${isSidebarOpen ? '260px' : '20px'})`,
+          marginLeft: isSidebarOpen ? '260px' : '25px',
+          width: '100%',
           maxWidth: '100vw'
         }}>
           <Box maxWidth="100vw">
@@ -173,7 +216,7 @@ const CreatePost = () => {
               p: 3,
               mb: 3,
               height: '100%',
-              width: isSidebarOpen ? 'calc(95vw - 250px)' : '95vw'
+              width: isSidebarOpen ? 'calc(95vw - 260px)' : '92vw'
             }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
                 <Button
@@ -250,20 +293,6 @@ const CreatePost = () => {
                       ))}
                     </Select>
                   </Box>
-
-                  <Box sx={commonStyles.flexContainer}>
-                    <Typography sx={commonStyles.labelTypography}>
-                      Ngày tạo:
-                    </Typography>
-                    <TextField
-                      type="date"
-                      value={newPost.createDate}
-                      onChange={(e) => handleFieldChange('createDate', e.target.value)}
-                      variant="outlined"
-                      fullWidth
-                      sx={commonStyles.inputField}
-                    />
-                  </Box>
                 </Box>
 
                 <TextField
@@ -323,6 +352,7 @@ const CreatePost = () => {
                         transform: 'translate(-50%, -50%)',
                         opacity: 0,
                         transition: 'opacity 0.3s ease',
+                        '&:hover': { opacity: 1 },
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         color: '#000',
                         border: '1px solid #ccc',
@@ -380,6 +410,16 @@ const CreatePost = () => {
           </Box>
         </Box>
       </Box>
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

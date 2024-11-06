@@ -121,7 +121,10 @@ const AttractionDetail = () => {
             </Box>
             <Box sx={{ mt: 3 }}>
               <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
+              <Box dangerouslySetInnerHTML={{ __html: attraction.description }} sx={{
+                '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+              }} />
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>

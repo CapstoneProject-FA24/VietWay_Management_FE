@@ -2,23 +2,11 @@ import React from 'react';
 import { Card, CardMedia, CardContent, Typography, Box, Button, Chip, useTheme, useMediaQuery } from '@mui/material';
 import { CalendarToday, Category, Launch } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-
-const getStatusColor = (status) => {
-  switch(status) {
-    case 0: return { color: 'warning', label: 'Bản nháp' };
-    case 1: return { color: 'info', label: 'Chờ duyệt' };
-    case 2: return { color: 'success', label: 'Đã duyệt' };
-    case 3: return { color: 'error', label: 'Từ chối' };
-    default: return { color: 'default', label: 'Không xác định' };
-  }
-};
-
+import { getStatusColor } from '@services/StatusService';
 const PostsCard = ({ post }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
-
-  const statusInfo = getStatusColor(post.status);
 
   const handleViewDetails = (postId) => {
     navigate(`/nhan-vien/bai-viet/${postId}`);
@@ -31,11 +19,11 @@ const PostsCard = ({ post }) => {
         bgcolor: 'background.paper', position: 'relative', 
         '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] } }}
     >
-      <Chip label={statusInfo.label} color={statusInfo.color} size="small" 
+      <Chip label={getStatusColor(post.status).label} color={getStatusColor(post.status).color} size="small" 
         sx={{ position: 'absolute', top: 10, left: 10 }} 
       />
 
-      <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image || 'default-image.jpg'}
+      <CardMedia component="img" height={isMobile ? "140" : "180"} image={ post.image === null ? '/no-image-available.png' : post.image }
         alt={post.title} sx={{ objectFit: 'cover',}}/>
 
       <CardContent sx={{ flexGrow: 1, p: isMobile ? 1.5 : 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -69,7 +57,7 @@ const PostsCard = ({ post }) => {
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 1 }}>
           <Button variant="contained" size={isMobile ? "small" : "medium"} 
-          onClick={() => handleViewDetails(post.id)} endIcon={<Launch />}
+          onClick={() => handleViewDetails(post.postId)} endIcon={<Launch />}
             sx={{ borderRadius: theme.shape.borderRadius, textTransform: 'none', px: isMobile ? 1.5 : 2, fontSize: '0.875rem' }}
           >
             Chi tiết

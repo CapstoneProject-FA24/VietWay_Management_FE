@@ -4,8 +4,6 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography }
 const DeleteCategory = ({ open, onClose, onSuccess, category, categoryType }) => {
   const handleDelete = async () => {
     try {
-      // Implement delete API call based on categoryType
-      // await deleteCategory(categoryType, category.id);
       onSuccess();
     } catch (error) {
       console.error('Error deleting category:', error);
