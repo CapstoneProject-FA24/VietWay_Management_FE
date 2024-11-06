@@ -1,5 +1,6 @@
 import axios from 'axios';
-import baseURL from '@api/baseURL'
+const baseURL = import.meta.env.VITE_API_URL;
+
 import { getCookie } from '@services/AuthenService';
 
 export const fetchAttractions = async (params) => {
