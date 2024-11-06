@@ -13,12 +13,10 @@ import 'react-quill/dist/quill.snow.css';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@mui/material/IconButton';
-import axios from 'axios';
-import { getCookie } from '@services/AuthenService';
 import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
-import baseURL from '@api/BaseURL';
 import PostDeleteConfirm from '@components/staff/posts/PostDeleteConfirm';
+import { updatePost } from '@services/PostService';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -348,30 +346,6 @@ const PostDetail = () => {
       ...prev,
       [field]: { ...prev[field], isEditing: false }
     }));
-  };
-
-  const updatePost = async (postId, postData) => {
-    const token = getCookie('token');
-    try {
-      const response = await axios.put(`${baseURL}/api/Post/${postId}`, {
-        title: postData.title,
-        content: postData.content,
-        postCategoryId: postData.postCategoryId,
-        provinceId: postData.provinceId,
-        description: postData.description,
-        status: postData.status,
-        isDraft: postData.isDraft
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error updating post:', error);
-      throw error;
-    }
   };
 
   const handleSnackbarClose = (event, reason) => {
