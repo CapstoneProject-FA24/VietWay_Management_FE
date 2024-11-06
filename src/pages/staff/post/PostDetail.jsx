@@ -602,7 +602,7 @@ const PostDetail = () => {
                   </Box>
                   <img src={post.imageUrl} alt={post.title}
                     style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />
-                  <Typography variant="h1" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, fontWeight: 700, color: '#1A1A1A', mb: 3, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: '"Tinos", serif' }}>
+                  <Typography variant="h1" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, fontWeight: 700, color: '#1A1A1A', mb: 3, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: '"Tinos", serif', marginTop: 3 }}>
                     {post.title}
                   </Typography>
 
