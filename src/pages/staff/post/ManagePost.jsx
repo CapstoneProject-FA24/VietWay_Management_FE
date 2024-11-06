@@ -111,29 +111,14 @@ const ManagePost = () => {
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
-        <title>Manage Posts</title>
+        <title>Quản lý bài viết</title>
       </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{
-        flexGrow: 1,
-        mt: 1.5,
-        p: isSidebarOpen ? 3 : 3,
-        transition: 'margin-left 0.3s',
-        marginLeft: isSidebarOpen ? '280px' : '40px'
-      }}>
+      <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>
-              Quản lý bài viết
-            </Typography>
-            <Button
-              component={Link}
-              to={`${currentPage}/them`}
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              sx={{ height: '55px', borderRadius: 2 }}
-            >
+            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>Quản lý bài viết</Typography>
+            <Button component={Link} to={`${currentPage}/them`} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
               Tạo bài viết mới
             </Button>
           </Grid>
@@ -143,33 +128,14 @@ const ManagePost = () => {
               <Typography sx={{ fontWeight: 600 }}>
                 Danh mục
               </Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={categoryOptions}
-                onChange={setTempCategories}
-                value={tempCategories}
-                placeholder="Chọn danh mục"
-              />
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={categoryOptions} onChange={(selectedOptions) => setTempCategories(selectedOptions)} value={tempCategories} placeholder="Chọn danh mục" />
             </Grid>
 
             <Grid item xs={12} md={4.5}>
               <Typography sx={{ fontWeight: 600 }}>
                 Tỉnh thành
               </Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={provinces.map(province => ({
-                  value: province.provinceId,
-                  label: province.provinceName
-                }))}
-                onChange={setTempProvinces}
-                value={tempProvinces}
-                placeholder="Chọn tỉnh thành"
-              />
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))} onChange={setTempProvinces} value={tempProvinces} placeholder="Chọn tỉnh thành" />
             </Grid>
 
             <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'flex-end' }}>
