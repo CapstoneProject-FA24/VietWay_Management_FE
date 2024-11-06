@@ -12,6 +12,8 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import { fetchPostCategory } from '@services/PostCategoryService';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import XIcon from '@mui/icons-material/X';
 
 const ManagePost = () => {
   const location = useLocation();
@@ -101,6 +103,17 @@ const ManagePost = () => {
   const handleApplyFilter = () => {
     setSelectedCategories(tempCategories);
     setSelectedProvinces(tempProvinces);
+  };
+
+  const handleShareToSocial = (platform, post) => {
+    const url = encodeURIComponent(window.location.origin + '/posts/' + post.id);
+    const text = encodeURIComponent(post.title);
+    
+    if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    } else if (platform === 'twitter') {
+      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+    }
   };
 
   return (
@@ -202,6 +215,37 @@ const ManagePost = () => {
                 {posts.map((post) => (
                   <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
                     <PostsCard post={post} />
+                    {post.status === 2 && (
+                      <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        <Typography sx={{ mb: 1 }}>
+                          Đăng bài viết này lên MXH
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                          <Button
+                            variant="contained"
+                            startIcon={<FacebookIcon />}
+                            onClick={() => handleShareToSocial('facebook', post)}
+                            sx={{ 
+                              backgroundColor: '#1877F2',
+                              '&:hover': { backgroundColor: '#0d6efd' }
+                            }}
+                          >
+                            Facebook
+                          </Button>
+                          <Button
+                            variant="contained"
+                            startIcon={<XIcon />}
+                            onClick={() => handleShareToSocial('twitter', post)}
+                            sx={{ 
+                              backgroundColor: '#000000',
+                              '&:hover': { backgroundColor: '#2c2c2c' }
+                            }}
+                          >
+                            X
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
                   </Grid>
                 ))}
               </Grid>

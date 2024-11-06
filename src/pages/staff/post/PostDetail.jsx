@@ -17,6 +17,9 @@ import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import PostDeleteConfirm from '@components/staff/posts/PostDeleteConfirm';
 import { updatePost } from '@services/PostService';
+import PublishIcon from '@mui/icons-material/Publish';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import XIcon from '@mui/icons-material/X';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -274,11 +277,6 @@ const PostDetail = () => {
     }
   };
 
-  const handleProvinceChange = (selected) => {
-    handleFieldChange('provinceId', selected?.value);
-    handleFieldChange('provinceName', selected?.label);
-  };
-
   const renderActionButtons = () => {
     switch (post.status) {
       case PostStatus.Draft:
@@ -299,6 +297,38 @@ const PostDetail = () => {
             <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
               Xóa
             </Button>
+          </Box>
+        );
+      case PostStatus.Approved:
+        return (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginTop: 10 }}>
+            <Typography>
+              Đăng bài viết này lên MXH
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                startIcon={<FacebookIcon />}
+                onClick={() => handleShareToSocial('facebook')}
+                sx={{ 
+                  backgroundColor: '#1877F2',
+                  '&:hover': { backgroundColor: '#0d6efd' }
+                }}
+              >
+                Facebook
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<XIcon />}
+                onClick={() => handleShareToSocial('twitter')}
+                sx={{ 
+                  backgroundColor: '#000000',
+                  '&:hover': { backgroundColor: '#2c2c2c' }
+                }}
+              >
+                Twitter
+              </Button>
+            </Box>
           </Box>
         );
       default:
@@ -353,6 +383,17 @@ const PostDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  const handleShareToSocial = (platform) => {
+    const url = encodeURIComponent(window.location.origin + '/posts/' + post.postId);
+    const text = encodeURIComponent(post.title);
+    
+    if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    } else if (platform === 'twitter') {
+      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+    }
+  };
+
   if (!post) return null;
 
   const statusInfo = getStatusColor(post.status);
@@ -364,7 +405,7 @@ const PostDetail = () => {
 
         <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px' }}>
           <Box maxWidth="89vw">
-            <Box elevation={2} sx={{ p: 3, mb: 3, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
+            <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Button
                   startIcon={<ArrowBack />}
