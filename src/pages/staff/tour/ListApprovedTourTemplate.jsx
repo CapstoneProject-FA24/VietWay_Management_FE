@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Pagination } from '@mui/material';
-import ApprovedTourTemplateCard from "@components/staff/ApprovedTourTemplateCard";
+import ApprovedTourTemplateCard from "@components/staff/tourTemplate/ApprovedTourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";

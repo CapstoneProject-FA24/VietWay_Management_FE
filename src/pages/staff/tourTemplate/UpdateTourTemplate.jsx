@@ -10,7 +10,7 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
+import TemplateAddAttractionPopup from '@components/staff/tourTemplate/TemplateAddAttractionPopup';
 import { fetchTourTemplateById, updateTourTemplate, updateTemplateImages } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';

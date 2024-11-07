@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import AttractionCard from '@components/manager/AttractionCard';
+import AttractionCard from '@components/manager/attraction/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';

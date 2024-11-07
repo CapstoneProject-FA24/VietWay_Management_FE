@@ -3,13 +3,13 @@ import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import TourTemplateCard from '@components/staff/TourTemplateCard';
+import TourTemplateCard from '@components/staff/tourTemplate/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 
-import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
+import TourTemplateDeletePopup from '@components/staff/tourTemplate/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';

@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon, ExpandLess as ExpandLessIcon, ExpandMore as ExpandMoreIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { createTourTemplate, updateTemplateImages } from '@services/TourTemplateService';
-import TemplateAddAttractionPopup from '@components/staff/TemplateAddAttractionPopup';
+import TemplateAddAttractionPopup from '@components/staff/tourTemplate/TemplateAddAttractionPopup';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';

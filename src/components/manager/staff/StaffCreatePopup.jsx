@@ -3,7 +3,7 @@ import { Modal, Box, TextField, Button, Typography, MenuItem , FormControl, Inpu
 import Grid from '@mui/material/Grid';
 import CloseIcon from '@mui/icons-material/Close';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { mockCompany } from '../../hooks/MockCompany';
+import { mockCompany } from '@hooks/MockCompany';
 
 const StaffCreatePopup = ({ open, onClose, onCreate }) => {
     const [newStaff, setNewStaff] = useState({});
