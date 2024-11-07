@@ -17,7 +17,7 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
                 '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] }
             }}
         >
-            <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}`, position: 'absolute', top: 10, left: 10 }} />
+            <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
             <CardMedia
                 component="img"
                 sx={{ minWidth: '100%', height: isMobile ? '140px' : '200px', objectFit: 'cover' }}

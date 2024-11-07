@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardMedia, CardContent, Typography, Box, Button, Chip, useTheme, useMediaQuery } from '@mui/material';
 import { CalendarToday, Category, Launch } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
-import { getStatusColor } from '@services/StatusService';
+import { getPostStatusInfo } from '@services/StatusService';
 const PostsCard = ({ post }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -16,9 +16,10 @@ const PostsCard = ({ post }) => {
         '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] }
       }}
     >
-      <Chip label={getStatusColor(post.status).label} color={getStatusColor(post.status).color} size="small"
+      <Chip label={getPostStatusInfo(post.status).text} color={getPostStatusInfo(post.status).color} size="small"
         sx={{ position: 'absolute', top: 10, left: 10 }}
       />
+      <Chip label={getPostStatusInfo(post.status).text} size="small" sx={{ mb: 1, color: `${getPostStatusInfo(post.status).color}`, bgcolor: `${getPostStatusInfo(post.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
 
       <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image === null ? '/no-image-available.png' : post.image}
         alt={post.title} sx={{ objectFit: 'cover', }} />

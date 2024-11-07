@@ -14,7 +14,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
         onOpenDeletePopup(tour);
     };
 
-    const getStatusColor = (status) => {
+    const getPostStatusInfo = (status) => {
         switch (status) {
             case 0: return 'gray';
             case 1: return 'blue';
@@ -69,7 +69,7 @@ const TourTemplateCard = ({ tour, isOpen, onOpenDeletePopup }) => {
                         <Typography sx={{
                             alignItems: 'center',
                             fontSize: isOpen ? '1.05rem' : '1rem',
-                            color: getStatusColor(tour.status),
+                            color: getPostStatusInfo(tour.status),
                             padding: '4px 8px',
                             borderRadius: '4px',
                             fontWeight: 700

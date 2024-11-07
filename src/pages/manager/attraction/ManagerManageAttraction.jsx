@@ -208,7 +208,7 @@ const ManagerManageAttraction = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedAttractions.map(attraction => (
-                        <Grid item xs={isSidebarOpen ? 4 : 4} key={attraction.attractionId}>
+                        <Grid item xs={4} key={attraction.attractionId}>
                             <AttractionCard attraction={attraction} isOpen={isSidebarOpen} />
                         </Grid>
                     ))}

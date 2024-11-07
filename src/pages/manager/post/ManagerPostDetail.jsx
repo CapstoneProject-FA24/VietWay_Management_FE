@@ -7,7 +7,7 @@ import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchPostById, deletePost } from '@services/PostService';
 import { fetchProvinces } from '@services/ProvinceService';
-import { getStatusColor } from '@services/StatusService';
+import { getPostStatusInfo } from '@services/StatusService';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import EditIcon from '@mui/icons-material/Edit';
@@ -279,7 +279,7 @@ const ManagerPostDetail = () => {
 
   if (!post) return null;
 
-  const statusInfo = getStatusColor(post.status);
+  const statusInfo = getPostStatusInfo(post.status);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>

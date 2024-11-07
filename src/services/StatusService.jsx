@@ -26,7 +26,7 @@ export const getAttractionStatusInfo = (statusCode) => {
     case AttractionStatus.Rejected:
       return { text: "Đã từ chối", color: "#9c5a00", backgroundColor: "#ffd9a6" }; 
     default:
-      return { text: "Không xác định", color: "#9E9E9E" };
+      return { text: "Không xác định", color: "#9E9E9E", backgroundColor: "#9E9E9E" };
   }
 };
 
@@ -47,7 +47,7 @@ export const getTourStatusInfo = (statusCode) => {
     case TourStatus.Cancelled:
       return { text: "Đã hủy", color: "#ff0000", textColor: "#600000", backgroundColor: "#ffb8b8" }; // Red
     default:
-      return { text: "Không xác định", color: "#9E9E9E" };
+      return { text: "Không xác định", color: "#9E9E9E" , textColor: "#9E9E9E", backgroundColor: "#9E9E9E"};
   }
 };
 
@@ -64,13 +64,17 @@ export const getRole = (role) => {
   }
 };
 
-// Post + Event
-export const getStatusColor = (status) => { 
-  switch(status) {
-    case PostStatus.Draft: return { color: 'warning', label: 'Bản nháp' };
-    case PostStatus.Pending: return { color: 'info', label: 'Chờ duyệt' };
-    case PostStatus.Approved: return { color: 'success', label: 'Đã duyệt' };
-    case PostStatus.Rejected: return { color: 'error', label: 'Từ chối' };
-    default: return { color: 'default', label: 'Không xác định' };
+export const getPostStatusInfo = (statusCode) => {
+  switch (statusCode) {
+    case PostStatus.Draft:
+      return { text: "Bản nháp", color: "#2b2b2b", backgroundColor: "#cbcbcb" }; 
+    case PostStatus.Pending:
+      return { text: "Đang chờ duyệt", color: "#24007c", backgroundColor: "#bfb0ff"  }; 
+    case PostStatus.Approved:
+      return { text: "Đã duyệt", color: "#006f83", backgroundColor: "#c2f6ff" }; 
+    case PostStatus.Rejected:
+      return { text: "Đã từ chối", color: "#9c5a00", backgroundColor: "#ffd9a6" }; 
+    default:
+      return { text: "Không xác định", color: "#9E9E9E", backgroundColor: "#9E9E9E" };
   }
 };

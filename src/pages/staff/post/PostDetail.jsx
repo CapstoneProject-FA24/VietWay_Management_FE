@@ -7,7 +7,7 @@ import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchPostById } from '@services/PostService';
 import { fetchProvinces } from '@services/ProvinceService';
-import { getStatusColor } from '@services/StatusService';
+import { getPostStatusInfo } from '@services/StatusService';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import EditIcon from '@mui/icons-material/Edit';
@@ -364,7 +364,7 @@ const PostDetail = () => {
 
   if (!post) return null;
 
-  const statusInfo = getStatusColor(post.status);
+  const statusInfo = getPostStatusInfo(post.status);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -566,7 +566,7 @@ const PostDetail = () => {
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label={statusInfo.label} color={statusInfo.color} size="small" sx={{ my: 3 }} />
+                    <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
                   </Box>
                   <img src={post.imageUrl} alt={post.title}
                     style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />
