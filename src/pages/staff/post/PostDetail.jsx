@@ -299,38 +299,6 @@ const PostDetail = () => {
             </Button>
           </Box>
         );
-      case PostStatus.Approved:
-        return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, marginTop: 10 }}>
-            <Typography>
-              Đăng bài viết này lên MXH
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="contained"
-                startIcon={<FacebookIcon />}
-                onClick={() => handleShareToSocial('facebook')}
-                sx={{ 
-                  backgroundColor: '#1877F2',
-                  '&:hover': { backgroundColor: '#0d6efd' }
-                }}
-              >
-                Facebook
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<XIcon />}
-                onClick={() => handleShareToSocial('twitter')}
-                sx={{ 
-                  backgroundColor: '#000000',
-                  '&:hover': { backgroundColor: '#2c2c2c' }
-                }}
-              >
-                Twitter
-              </Button>
-            </Box>
-          </Box>
-        );
       default:
         return null;
     }
@@ -403,10 +371,10 @@ const PostDetail = () => {
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
-        <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px' }}>
+        <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', mt: 5 }}>
           <Box maxWidth="89vw">
             <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Button
                   startIcon={<ArrowBack />}
                   onClick={() => navigate(-1)}

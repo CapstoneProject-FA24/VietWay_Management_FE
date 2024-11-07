@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Tabs, Tab, Button, TextField, Select, MenuItem, InputAdornment, Pagination } from '@mui/material';
-import PostsCard from '@components/staff/posts/PostsCard';
-import SidebarStaff from '@layouts/SidebarStaff';
+import PostsCard from '@components/manager/post/PostsCard';
+import SidebarManager from '@layouts/SidebarManager';
 import { fetchPosts } from '@services/PostService';
 import { fetchProvinces } from '@services/ProvinceService';
 import ReactSelect from 'react-select';
@@ -121,7 +121,7 @@ const ManagerManagePost = () => {
       <Helmet>
         <title>Quản lý bài viết</title>
       </Helmet>
-      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -215,37 +215,6 @@ const ManagerManagePost = () => {
                 {posts.map((post) => (
                   <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
                     <PostsCard post={post} />
-                    {post.status === 2 && (
-                      <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Typography sx={{ mb: 1 }}>
-                          Đăng bài viết này lên MXH
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                          <Button
-                            variant="contained"
-                            startIcon={<FacebookIcon />}
-                            onClick={() => handleShareToSocial('facebook', post)}
-                            sx={{ 
-                              backgroundColor: '#1877F2',
-                              '&:hover': { backgroundColor: '#0d6efd' }
-                            }}
-                          >
-                            Facebook
-                          </Button>
-                          <Button
-                            variant="contained"
-                            startIcon={<XIcon />}
-                            onClick={() => handleShareToSocial('twitter', post)}
-                            sx={{ 
-                              backgroundColor: '#000000',
-                              '&:hover': { backgroundColor: '#2c2c2c' }
-                            }}
-                          >
-                            X
-                          </Button>
-                        </Box>
-                      </Box>
-                    )}
                   </Grid>
                 ))}
               </Grid>

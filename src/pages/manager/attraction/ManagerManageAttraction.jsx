@@ -136,7 +136,7 @@ const ManagerManageAttraction = () => {
                 <title>Duyệt điểm tham quan</title>
             </Helmet>
             <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+            <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                         <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý điểm tham quan </Typography>
@@ -208,7 +208,7 @@ const ManagerManageAttraction = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedAttractions.map(attraction => (
-                        <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.attractionId}>
+                        <Grid item xs={isSidebarOpen ? 4 : 4} key={attraction.attractionId}>
                             <AttractionCard attraction={attraction} isOpen={isSidebarOpen} />
                         </Grid>
                     ))}

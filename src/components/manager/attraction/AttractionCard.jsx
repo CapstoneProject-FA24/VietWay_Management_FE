@@ -1,81 +1,64 @@
-import React, { useContext } from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, Button } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Card, CardContent, CardMedia, Typography, Box, Button, Chip, useTheme, useMediaQuery } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { getAttractionStatusInfo } from '@services/StatusService';
+import { CalendarToday, Category, Launch } from '@mui/icons-material';
 
 const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
-    const location = useLocation();
-    const currentPage = location.pathname;
-
-    const handleDelete = () => {
-        onOpenDeletePopup(attraction);
-    };
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     return (
-        <Card sx={{ display: 'flex', height: isOpen ? '15.9rem' : '13.9rem', p: '0.7rem', borderRadius: 1.5 }}>
+        <Card
+            sx={{
+                display: 'flex', flexDirection: 'column',
+                borderRadius: 2, transition: 'all 0.2s ease',
+                bgcolor: 'background.paper', position: 'relative',
+                '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] }
+            }}
+        >
+            <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}`, position: 'absolute', top: 10, left: 10 }} />
             <CardMedia
                 component="img"
-                sx={{ minWidth: '40%', width: '40%', height: isOpen ? '14.5rem' : '12.5rem', borderRadius: 1.5 }}
-                image={attraction.imageUrl}
+                sx={{ minWidth: '100%', height: isMobile ? '140px' : '200px', objectFit: 'cover' }}
+                image={attraction.imageUrl ? attraction.imageUrl : '/no-image-available.png'}
                 alt={attraction.name}
             />
-            <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: '60%', width: '60%' }}>
-                <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between', pl: '1rem' }}>
-                    <Typography variant="h1" color="primary" component="div" sx={{ fontSize: isOpen ? '1.5rem' : '1.2rem' }}>
-                        Mã: {attraction.attractionId}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
-                            Tạo ngày: {new Date(attraction.createdDate).toLocaleDateString()}
-                        </Typography>
-                        <Typography color="text.secondary" component="div" sx={{ fontSize: isOpen ? '0.95rem' : '0.85rem', textAlign: 'right' }}>
-                            Tạo bởi: {attraction.creatorName}
-                        </Typography>
+            <CardContent sx={{ flexGrow: 1, p: isMobile ? 1.5 : 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.8rem' } }}>
+                        <CalendarToday sx={{ fontSize: '0.9rem' }} />
+                        {new Date(attraction.createdDate).toLocaleDateString('vi-VN')}
                     </Box>
+                    <Chip icon={<Category/>} label={attraction.attractionType} size="small" color="primary" variant="outlined"
+                        sx={{ height: '25px', '& .MuiChip-label': { fontSize: '0.75rem' }, p: 0.5 }}
+                    />
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: '0.5rem', mt: isOpen ? -0.8 : -1.1, ml: '0.5rem' }}>
-                    <Typography noWrap color="text.secondary" component="div" sx={{ fontSize: isOpen ? '1rem' : '0.9rem', width: '100%' }}>
-                        {attraction.attractionType}
-                    </Typography>
-                    <Typography noWrap component="div" variant="h6" sx={{ fontSize: isOpen ? '1.85rem' : '1.5rem', textOverflow: 'ellipsis', mt: -1 }}>
-                        {attraction.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isOpen ? '1.05rem' : '1rem', fontWeight: 700 }}>
-                        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
-                            {attraction.province}
-                        </Box>
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'flex-start', fontSize: isOpen ? '1.05rem' : '1rem', height: isOpen ? '3.6rem' : '3.1rem' }}>
-                        <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mb: 1 }}>
-                            Địa chỉ: {attraction.address}
-                        </Box>
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', pb: 1, justifyContent: 'space-between' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            {/* <Button
-                                variant="outlined"
-                                onClick={handleDelete}
-                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'red', borderColor: 'red', mr: 1 }}
-                            >Xóa
-                            </Button> */}
-                            <Button variant="outlined" component={Link} to={currentPage + "/chi-tiet/" + attraction.attractionId}
-                                sx={{ fontSize: isOpen ? '0.9rem' : '0.75rem', borderRadius: 1.5, color: 'gray', borderColor: 'gray', mr: 1 }}>
-                                Chi tiết
-                            </Button>
-                        </Box>
-                        <Typography sx={{
-                            alignItems: 'center',
-                            fontSize: isOpen ? '1.05rem' : '1rem',
-                            color: getAttractionStatusInfo(attraction.status).color,
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontWeight: 700
-                        }}>
-                            {getAttractionStatusInfo(attraction.status).text}
-                        </Typography>
+                <Typography noWrap component="div" variant="h6" sx={{ fontSize: isMobile ? '1.25rem' : '1.5rem', textOverflow: 'ellipsis', mt: -1 }}>
+                    {attraction.name ? attraction.name : 'Không có tên'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'center', fontSize: isMobile ? '1rem' : '1.05rem', fontWeight: 700 }}>
+                    <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
+                        {attraction.province}
                     </Box>
+                </Typography>
+                <Typography variant="body2" color="text.secondary" component="div" sx={{ display: 'flex', alignItems: 'flex-start', fontSize: isMobile ? '1rem' : '1.05rem', height: isMobile ? '3.1rem' : '3.6rem' }}>
+                    <Box sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mb: 1 }}>
+                        Địa chỉ: {attraction.address ? attraction.address : 'Không có địa chỉ'}
+                    </Box>
+                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button variant="outlined" component={Link} to={`/quan-ly/diem-tham-quan/chi-tiet/${attraction.attractionId}`} endIcon={<Launch />}
+                        sx={{
+                            borderRadius: theme.shape.borderRadius, textTransform: 'none', px: isMobile ? 1.5 : 2,
+                            fontSize: '0.875rem', backgroundColor: 'transparent', color: 'primary.main',
+                            borderColor: 'primary.main', border: '1px solid'
+                        }}
+                    >
+                        Chi tiết
+                    </Button>
                 </Box>
-            </Box>
+            </CardContent>
         </Card>
     );
 };

@@ -18,13 +18,13 @@ export const getBookingStatusInfo = (statusCode) => {
 export const getAttractionStatusInfo = (statusCode) => {
   switch (statusCode) {
     case AttractionStatus.Draft:
-      return { text: "Bản nháp", color: "grey" }; 
+      return { text: "Bản nháp", color: "#2b2b2b", backgroundColor: "#cbcbcb" }; 
     case AttractionStatus.Pending:
-      return { text: "Đang chờ duyệt", color: "blue" }; 
+      return { text: "Đang chờ duyệt", color: "#24007c", backgroundColor: "#bfb0ff"  }; 
     case AttractionStatus.Approved:
-      return { text: "Đã duyệt", color: "green" }; 
+      return { text: "Đã duyệt", color: "#006f83", backgroundColor: "#c2f6ff" }; 
     case AttractionStatus.Rejected:
-      return { text: "Đã từ chối", color: "red" }; 
+      return { text: "Đã từ chối", color: "#9c5a00", backgroundColor: "#ffd9a6" }; 
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
   }

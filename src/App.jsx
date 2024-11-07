@@ -68,7 +68,7 @@ const App = () => {
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet" element={<ListApprovedTourTemplate />} />
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id" element={<CreateTour />} />
         <Route path="/nhan-vien/bai-viet" element={<ManagePost />} />
-        <Route path="/nhan-vien/bai-viet/:id" element={<PostDetail />} />
+        <Route path="/nhan-vien/bai-viet/chi-tiet/:id" element={<PostDetail />} />
         <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
         <Route path="/nhan-vien/bai-viet/them" element={<CreatePost />} />
       </Routes>

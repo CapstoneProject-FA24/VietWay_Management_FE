@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, IconButton, Button } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -8,6 +8,8 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById } from '@services/AttractionService';
+import { AttractionStatus } from '@hooks/Statuses';
+import { getAttractionStatusInfo } from '@services/StatusService';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -15,7 +17,7 @@ const ManagerAttractionDetail = () => {
   const [attraction, setAttraction] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const fetchAttraction = async () => {
       try {
@@ -55,7 +57,7 @@ const ManagerAttractionDetail = () => {
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', maxWidth: '100vw' }}>
+    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98.8vw' }}>
       <Helmet>
         <title>Chi tiết điểm tham quan</title>
       </Helmet>
@@ -73,10 +75,24 @@ const ManagerAttractionDetail = () => {
         </Typography>
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-            {attraction.attractionTypeName}
-          </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
+            <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+              {attraction.attractionTypeName}
+            </Typography>
+          </Box>
+          {attraction?.status === AttractionStatus.Pending && (
+            <Box sx={{ mt: 5, display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
+              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
+            </Box>
+          )}
+          {attraction?.status === AttractionStatus.Approved && (
+            <>
+              <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, mt: 5, backgroundColor: 'red' }}>Xóa</Button>
+            </>
+          )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
@@ -85,7 +101,7 @@ const ManagerAttractionDetail = () => {
         </Box>
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
-            <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
+            <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
               <Box className="slick-slider-container" sx={{ height: '450px' }}>
                 <Slider ref={setSliderRef} {...settings}>
                   {attraction.images.map((image, index) => (
@@ -134,12 +150,6 @@ const ManagerAttractionDetail = () => {
 
               <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
               <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
-              {attraction?.status === 1 && (
-                <>
-                <Button variant="contained" sx={{ width: '100%', p: 1.1, mb: 1, mt: 5, backgroundColor: 'green' }}>Chấp nhận</Button>
-                <Button variant="contained" sx={{ width: '100%', p: 1.1, backgroundColor: 'red' }}>Từ chối</Button>
-                </>)
-              }
             </Paper>
           </Grid>
         </Grid>
