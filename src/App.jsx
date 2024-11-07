@@ -9,7 +9,6 @@ import CreateTour from '@pages/staff/tour/CreateTour.jsx';
 import ManageAttraction from '@pages/staff/attraction/ManageAttraction.jsx';
 import ManageTourTemplate from '@pages/staff/tourTemplate/ManageTourTemplate.jsx';
 import CreateAttraction from '@pages/staff/attraction/CreateAttraction.jsx';
-import UpdateAttraction from '@pages/staff/attraction/UpdateAttraction.jsx';
 import AttractionDetail from '@pages/staff/attraction/AttractionDetail.jsx';
 import TourTemplateDetail from '@pages/staff/tourTemplate/TourTemplateDetail.jsx';
 import CreateTourTemplate from '@pages/staff/tourTemplate/CreateTourTemplate.jsx';
@@ -57,7 +56,6 @@ const App = () => {
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
-        <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail/>} />
         <Route path="/nhan-vien/tour-mau" element={<ManageTourTemplate/>} />
         <Route path="/nhan-vien/tour-mau/chi-tiet/:id" element={<TourTemplateDetail/>} />

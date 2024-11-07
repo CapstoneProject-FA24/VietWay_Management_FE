@@ -1,8 +1,9 @@
 import React from 'react';
-import { Box, Typography, Grid, Paper } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { getAttractionStatusInfo } from '@services/StatusService';
 
 const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const settings = {
@@ -28,6 +29,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
 
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+      <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
           {attraction.attractionTypeName}

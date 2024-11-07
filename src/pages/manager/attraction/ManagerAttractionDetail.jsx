@@ -10,6 +10,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchAttractionById } from '@services/AttractionService';
 import { AttractionStatus } from '@hooks/Statuses';
 import { getAttractionStatusInfo } from '@services/StatusService';
+import SidebarManager from '@layouts/SidebarManager';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -17,6 +18,7 @@ const ManagerAttractionDetail = () => {
   const [attraction, setAttraction] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const fetchAttraction = async () => {
@@ -52,27 +54,50 @@ const ManagerAttractionDetail = () => {
     }
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   if (!attraction) {
     return <Typography>Loading...</Typography>;
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98.8vw' }}>
+    <Box className='main' sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      minHeight: '100vh',
+      width: isSidebarOpen ? 'calc(98.8vw - 230px)' : '98.8vw',
+      ml: isSidebarOpen ? '230px' : 0,
+      transition: 'margin-left 0.3s'
+    }}>
+      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Helmet>
         <title>Chi tiết điểm tham quan</title>
       </Helmet>
-      <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ m: '-60px -60px 0px -60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
           component={Link}
           to="/quan-ly/diem-tham-quan"
           variant="contained"
           startIcon={<ArrowBackIosNewOutlinedIcon />}
-          sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
+          sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
           Quay lại
         </Button>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
           Chi tiết điểm tham quan
         </Typography>
+        {attraction?.status === AttractionStatus.Pending && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
+              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
+            </Box>
+          )}
+          {attraction?.status === AttractionStatus.Approved && (
+            <>
+              <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}>Xóa</Button>
+            </>
+          )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -82,17 +107,6 @@ const ManagerAttractionDetail = () => {
               {attraction.attractionTypeName}
             </Typography>
           </Box>
-          {attraction?.status === AttractionStatus.Pending && (
-            <Box sx={{ mt: 5, display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
-              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
-            </Box>
-          )}
-          {attraction?.status === AttractionStatus.Approved && (
-            <>
-              <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, mt: 5, backgroundColor: 'red' }}>Xóa</Button>
-            </>
-          )}
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
