@@ -12,6 +12,8 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import { fetchPostCategory } from '@services/PostCategoryService';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import XIcon from '@mui/icons-material/X';
 
 const ManagePost = () => {
   const location = useLocation();
@@ -103,32 +105,28 @@ const ManagePost = () => {
     setSelectedProvinces(tempProvinces);
   };
 
+  const handleShareToSocial = (platform, post) => {
+    const url = encodeURIComponent(window.location.origin + '/posts/' + post.id);
+    const text = encodeURIComponent(post.title);
+    
+    if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    } else if (platform === 'twitter') {
+      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
-        <title>Manage Posts</title>
+        <title>Quản lý bài viết</title>
       </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{
-        flexGrow: 1,
-        mt: 1.5,
-        p: isSidebarOpen ? 3 : 3,
-        transition: 'margin-left 0.3s',
-        marginLeft: isSidebarOpen ? '280px' : '40px'
-      }}>
+      <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>
-              Quản lý bài viết
-            </Typography>
-            <Button
-              component={Link}
-              to={`${currentPage}/them`}
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              sx={{ height: '55px', borderRadius: 2 }}
-            >
+            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>Quản lý bài viết</Typography>
+            <Button component={Link} to={`${currentPage}/them`} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
               Tạo bài viết mới
             </Button>
           </Grid>
@@ -138,33 +136,14 @@ const ManagePost = () => {
               <Typography sx={{ fontWeight: 600 }}>
                 Danh mục
               </Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={categoryOptions}
-                onChange={setTempCategories}
-                value={tempCategories}
-                placeholder="Chọn danh mục"
-              />
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={categoryOptions} onChange={(selectedOptions) => setTempCategories(selectedOptions)} value={tempCategories} placeholder="Chọn danh mục" />
             </Grid>
 
             <Grid item xs={12} md={4.5}>
               <Typography sx={{ fontWeight: 600 }}>
                 Tỉnh thành
               </Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={provinces.map(province => ({
-                  value: province.provinceId,
-                  label: province.provinceName
-                }))}
-                onChange={setTempProvinces}
-                value={tempProvinces}
-                placeholder="Chọn tỉnh thành"
-              />
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))} onChange={setTempProvinces} value={tempProvinces} placeholder="Chọn tỉnh thành" />
             </Grid>
 
             <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'flex-end' }}>
@@ -236,6 +215,37 @@ const ManagePost = () => {
                 {posts.map((post) => (
                   <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
                     <PostsCard post={post} />
+                    {post.status === 2 && (
+                      <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        <Typography sx={{ mb: 1 }}>
+                          Đăng bài viết này lên MXH
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                          <Button
+                            variant="contained"
+                            startIcon={<FacebookIcon />}
+                            onClick={() => handleShareToSocial('facebook', post)}
+                            sx={{ 
+                              backgroundColor: '#1877F2',
+                              '&:hover': { backgroundColor: '#0d6efd' }
+                            }}
+                          >
+                            Facebook
+                          </Button>
+                          <Button
+                            variant="contained"
+                            startIcon={<XIcon />}
+                            onClick={() => handleShareToSocial('twitter', post)}
+                            sx={{ 
+                              backgroundColor: '#000000',
+                              '&:hover': { backgroundColor: '#2c2c2c' }
+                            }}
+                          >
+                            X
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
                   </Grid>
                 ))}
               </Grid>

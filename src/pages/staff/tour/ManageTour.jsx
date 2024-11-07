@@ -208,7 +208,7 @@ const ManageTour = () => {
     setPagination(prev => ({
       ...prev,
       pageSize: parseInt(event.target.value, 10),
-      pageIndex: 1 // Reset to first page when changing page size
+      pageIndex: 1
     }));
   };
 
@@ -217,10 +217,7 @@ const ManageTour = () => {
       <Helmet>
         <title>Quản lý Tour</title>
       </Helmet>
-      <SidebarStaff 
-        isOpen={isOpen} 
-        toggleSidebar={() => setIsOpen(!isOpen)}
-      />
+      <SidebarStaff isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
       <Box sx={{ flexGrow: 1, mt: 1.5, p: isOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
@@ -232,78 +229,33 @@ const ManageTour = () => {
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
-              <Typography>Loại tour</Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={tourTypeOptions}
-                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "tourType")}
-                value={tourTypeOptions.filter(option => tempFilters.tourType.includes(option.value))}
-              />
+              <Typography sx={{ fontWeight: 600 }}>Loại tour</Typography>
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={tourTypeOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "tourType")} value={tourTypeOptions.filter(option => tempFilters.tourType.includes(option.value))} />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
-              <Typography>Thời lượng</Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={durationOptions}
-                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")}
-                value={durationOptions.filter(option => tempFilters.duration.includes(option.value))}
-              />
+              <Typography sx={{ fontWeight: 600 }}>Thời lượng</Typography>
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={durationOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")} value={durationOptions.filter(option => tempFilters.duration.includes(option.value))} />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
-              <Typography>Địa điểm</Typography>
-              <ReactSelect
-                closeMenuOnSelect={false}
-                components={animatedComponents}
-                isMulti
-                options={provinceOptions}
-                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "location")}
-                value={provinceOptions.filter(option => tempFilters.location.includes(option.value))}
-              />
+              <Typography sx={{ fontWeight: 600 }}>Địa điểm</Typography>
+              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={provinceOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "location")} value={provinceOptions.filter(option => tempFilters.location.includes(option.value))} />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Box sx={{
-                  width: { xs: '100%', md: '100%' }, 
-                  display: 'flex',
-                  flexDirection: 'column', 
-                  gap: 1
-                }}>
-                  <Typography>Ngày khởi hành</Typography>
+                <Box sx={{ width: { xs: '100%', md: '100%' }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography sx={{ fontWeight: 600 }}>Ngày khởi hành</Typography>
                   <Box sx={{ display: 'flex', gap: 2, mt: -0.5 }}>
-                    <DatePicker
-                      label="Từ ngày" 
-                      value={tempDateRange.from}
-                      onChange={(newValue) => {
-                        setTempDateRange(prev => ({ ...prev, from: newValue }));
-                      }}
-                      sx={{ width: '100%' }} 
-                      format="DD/MM/YYYY"
-                      slotProps={{ textField: { size: "small", error: false } }}
-                    />
-                    <DatePicker
-                      label="Đến ngày" 
-                      value={tempDateRange.to}
-                      onChange={(newValue) => { 
-                        setTempDateRange(prev => ({ ...prev, to: newValue })); 
-                      }}
-                      sx={{ width: '100%' }} 
-                      format="DD/MM/YYYY"
-                      slotProps={{ textField: { size: "small", error: false } }}
-                      minDate={tempDateRange.from ? dayjs(tempDateRange.from) : undefined}
-                    />
+                    <DatePicker label="Từ ngày" value={tempDateRange.from} onChange={(newValue) => { setTempDateRange(prev => ({ ...prev, from: newValue })); }} sx={{ width: '100%' }} format="DD/MM/YYYY" slotProps={{ textField: { size: "small", error: false } }} />
+                    <DatePicker label="Đến ngày" value={tempDateRange.to} onChange={(newValue) => { setTempDateRange(prev => ({ ...prev, to: newValue })); }} sx={{ width: '100%' }} format="DD/MM/YYYY" slotProps={{ textField: { size: "small", error: false } }} />
                   </Box>
                 </Box>
               </LocalizationProvider>
@@ -311,12 +263,7 @@ const ManageTour = () => {
           </Grid>
 
           <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button 
-              variant="contained" 
-              startIcon={<FilterListIcon />} 
-              onClick={handleApplyFilter}
-              sx={{ mt: 3.5, backgroundColor: 'lightGray', color: 'black', width: '12rem' }}
-            >
+            <Button variant="contained" startIcon={<FilterListIcon />} onClick={handleApplyFilter} sx={{ mt: 3.5, backgroundColor: 'lightGray', color: 'black', width: '12rem' }}>
               Áp dụng bộ lọc
             </Button>
           </Grid>
@@ -324,14 +271,8 @@ const ManageTour = () => {
           <Grid item xs={12} sm={12}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 3.5 }}>
               <Box sx={{ display: 'flex', width: '50%' }}>
-                <TextField
-                  variant="outlined"
-                  placeholder="Tìm kiếm tour theo tên..."
-                  size="small"
-                  sx={{ mr: 1, width: '70%' }}
-                  value={tempSearchTerm}
-                  onChange={(e) => setTempSearchTerm(e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, 'name')}
+                <TextField variant="outlined" placeholder="Tìm kiếm tour theo tên..." size="small" sx={{ mr: 1, width: '70%' }}
+                  value={tempSearchTerm} onChange={(e) => setTempSearchTerm(e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'name')}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -340,37 +281,21 @@ const ManageTour = () => {
                     ),
                   }}
                 />
-                <Button 
-                  variant="contained" 
-                  onClick={handleSearchByName}
-                  sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}
-                >
+
+                <Button variant="contained" onClick={handleSearchByName} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}>
                   Tìm kiếm
                 </Button>
               </Box>
 
               <Box sx={{ display: 'flex', width: '50%' }}>
-                <TextField
-                  variant="outlined"
-                  placeholder="Tìm kiếm tour theo mã tour..."
-                  size="small"
-                  sx={{ mr: 1, width: '70%' }}
-                  value={tempSearchCode}
-                  onChange={(e) => setTempSearchCode(e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, 'code')}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon />
-                      </InputAdornment>
-                    ),
-                  }}
+                <TextField variant="outlined" placeholder="Tìm kiếm tour theo mã tour..." size="small" sx={{ mr: 1, width: '70%' }} value={tempSearchCode} onChange={(e) => setTempSearchCode(e.target.value)} onKeyPress={(e) => handleKeyPress(e, 'code')} InputProps={{ startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
                 />
-                <Button 
-                  variant="contained"
-                  onClick={handleSearchByCode}
-                  sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}
-                >
+                <Button variant="contained" onClick={handleSearchByCode} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}>
                   Tìm kiếm
                 </Button>
               </Box>

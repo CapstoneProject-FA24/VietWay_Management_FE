@@ -525,7 +525,7 @@ const AddAttraction = () => {
           </Grid>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
             <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Tạo mới </Button>
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>
           </Box>
         </Box>
       </Box>
