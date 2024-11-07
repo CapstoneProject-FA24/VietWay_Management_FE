@@ -215,37 +215,6 @@ const ManagePost = () => {
                 {posts.map((post) => (
                   <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
                     <PostsCard post={post} />
-                    {post.status === 2 && (
-                      <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Typography sx={{ mb: 1 }}>
-                          Đăng bài viết này lên MXH
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                          <Button
-                            variant="contained"
-                            startIcon={<FacebookIcon />}
-                            onClick={() => handleShareToSocial('facebook', post)}
-                            sx={{ 
-                              backgroundColor: '#1877F2',
-                              '&:hover': { backgroundColor: '#0d6efd' }
-                            }}
-                          >
-                            Facebook
-                          </Button>
-                          <Button
-                            variant="contained"
-                            startIcon={<XIcon />}
-                            onClick={() => handleShareToSocial('twitter', post)}
-                            sx={{ 
-                              backgroundColor: '#000000',
-                              '&:hover': { backgroundColor: '#2c2c2c' }
-                            }}
-                          >
-                            X
-                          </Button>
-                        </Box>
-                      </Box>
-                    )}
                   </Grid>
                 ))}
               </Grid>

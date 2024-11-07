@@ -17,9 +17,6 @@ import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import PostDeleteConfirm from '@components/staff/posts/PostDeleteConfirm';
 import { updatePost } from '@services/PostService';
-import PublishIcon from '@mui/icons-material/Publish';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import XIcon from '@mui/icons-material/X';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },

@@ -11,6 +11,7 @@ import AttractionUpdateForm from '@components/staff/attraction/AttractionUpdateF
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import SidebarStaff from '@layouts/SidebarStaff';
+import { AttractionStatus } from '@hooks/Statuses';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -22,6 +23,7 @@ const AttractionDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [provinces, setProvinces] = useState([]);
   const [attractionTypes, setAttractionTypes] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,6 +92,10 @@ const AttractionDetail = () => {
     } */
   };
 
+  const handleSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   if (error) {
     return <Typography color="error">Error: {error}</Typography>;
   }
@@ -99,71 +105,89 @@ const AttractionDetail = () => {
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98vw' }}>
-      <Helmet>
-        <title>Chi tiết điểm tham quan</title>
-      </Helmet>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Box sx={{ display: 'flex' }}>
+        <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
-      <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Button
-          component={Link}
-          to="/nhan-vien/diem-tham-quan"
-          variant="contained"
-          startIcon={<ArrowBackIosNewOutlinedIcon />}
-          sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
-          Quay lại
-        </Button>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
-          Chi tiết điểm tham quan
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            startIcon={<EditIcon />}
-            onClick={handleEdit}
-            sx={{ 
-              backgroundColor: '#3572EF',
-              '&:hover': { backgroundColor: '#1C4ED8' },
-              height: '45px'
-            }}
-          >
-            Sửa
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<DeleteIcon />}
-            onClick={handleDelete}
-            sx={{ 
-              backgroundColor: '#DC2626',
-              '&:hover': { backgroundColor: '#B91C1C' },
-              height: '45px'
-            }}
-          >
-            Xóa
-          </Button>
+        <Box sx={{
+          flexGrow: 1,
+          p: 3,
+          transition: 'margin-left 0.3s',
+          marginLeft: isSidebarOpen ? '260px' : '20px',
+          mt: 5
+        }}>
+          <Box maxWidth="89vw">
+            <Box elevation={2} sx={{
+              p: 1,
+              mb: 3,
+              marginTop: -1.5,
+              height: '100%',
+              width: isSidebarOpen ? 'calc(93vw - 260px)' : 'calc(93vw - 20px)'
+            }}>
+              <Box sx={{ m: '-60px -60px 0px -60px', boxShadow: 2, pt: 3, pl: 4, pr: 4, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Button
+                  component={Link}
+                  to="/nhan-vien/diem-tham-quan"
+                  variant="contained"
+                  startIcon={<ArrowBackIosNewOutlinedIcon />}
+                  sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
+                  Quay lại
+                </Button>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
+                  Quản lý điểm tham quan
+                </Typography>
+                {(attraction.status === AttractionStatus.Draft || attraction.status === AttractionStatus.Rejected) && (
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button
+                    variant="contained" startIcon={<EditIcon />} onClick={handleEdit}
+                    sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                  >
+                    Sửa
+                  </Button>
+                  <Button
+                    variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
+                    sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                  >
+                    Xóa
+                  </Button>
+                </Box>
+                )}
+                {attraction.status === AttractionStatus.Pending && (
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Button
+                    variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
+                    sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                  >
+                    Xóa
+                  </Button>
+                </Box>
+                )}
+              </Box>
+
+              {isEditing ? (
+                <AttractionUpdateForm
+                  attraction={attraction}
+                  provinces={provinces}
+                  attractionTypes={attractionTypes}
+                  onSave={handleSave}
+                  currentSlide={currentSlide}
+                  setCurrentSlide={setCurrentSlide}
+                  sliderRef={sliderRef}
+                  setSliderRef={setSliderRef}
+                />
+              ) : (
+                <AttractionInfo
+                  attraction={attraction}
+                  currentSlide={currentSlide}
+                  setCurrentSlide={setCurrentSlide}
+                  sliderRef={sliderRef}
+                  setSliderRef={setSliderRef}
+                />
+              )}
+            </Box>
+          </Box>
         </Box>
       </Box>
-      
-      {isEditing ? (
-        <AttractionUpdateForm 
-          attraction={attraction}
-          provinces={provinces}
-          attractionTypes={attractionTypes}
-          onSave={handleSave}
-          currentSlide={currentSlide}
-          setCurrentSlide={setCurrentSlide}
-          sliderRef={sliderRef}
-          setSliderRef={setSliderRef}
-        />
-      ) : (
-        <AttractionInfo 
-          attraction={attraction}
-          currentSlide={currentSlide}
-          setCurrentSlide={setCurrentSlide}
-          sliderRef={sliderRef}
-          setSliderRef={setSliderRef}
-        />
-      )}
     </Box>
   );
 };

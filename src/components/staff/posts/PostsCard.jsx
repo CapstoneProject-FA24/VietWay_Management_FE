@@ -53,7 +53,7 @@ const PostsCard = ({ post }) => {
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="outlined" component={Link} to={`/quan-ly/bai-viet/chi-tiet/${post.postId}`} endIcon={<Launch />}
+          <Button variant="outlined" component={Link} to={`/nhan-vien/bai-viet/chi-tiet/${post.postId}`} endIcon={<Launch />}
             sx={{
               borderRadius: theme.shape.borderRadius, textTransform: 'none', px: isMobile ? 1.5 : 2,
               fontSize: '0.875rem', backgroundColor: 'transparent', color: 'primary.main',
