@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Grid, Typography, Tabs, Tab, Button, TextField, Select, MenuItem, InputAdornment, Pagination } from '@mui/material';
-import PostsCard from '@components/staff/posts/PostsCard';
+import PostsCard from '@components/post/PostsCard';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchPosts } from '@services/PostService';
 import { fetchProvinces } from '@services/ProvinceService';
@@ -12,8 +12,6 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import { fetchPostCategory } from '@services/PostCategoryService';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import XIcon from '@mui/icons-material/X';
 
 const ManagePost = () => {
   const location = useLocation();

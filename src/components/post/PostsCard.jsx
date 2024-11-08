@@ -3,6 +3,8 @@ import { Card, CardMedia, CardContent, Typography, Box, Button, Chip, useTheme, 
 import { CalendarToday, Category, Launch } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import { getPostStatusInfo } from '@services/StatusService';
+import { getCookie } from '@services/AuthenService';
+
 const PostsCard = ({ post }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -16,6 +18,9 @@ const PostsCard = ({ post }) => {
         '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] }
       }}
     >
+      <Chip label={getPostStatusInfo(post.status).text} color={getPostStatusInfo(post.status).color} size="small"
+        sx={{ position: 'absolute', top: 10, left: 10 }}
+      />
       <Chip label={getPostStatusInfo(post.status).text} size="small" sx={{ mb: 1, color: `${getPostStatusInfo(post.status).color}`, bgcolor: `${getPostStatusInfo(post.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
 
       <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image === null ? '/no-image-available.png' : post.image}
@@ -53,7 +58,7 @@ const PostsCard = ({ post }) => {
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="outlined" component={Link} to={`/nhan-vien/bai-viet/chi-tiet/${post.postId}`} endIcon={<Launch />}
+          <Button variant="outlined" component={Link} to={`/${getCookie("role")}/bai-viet/chi-tiet/${post.postId}`} endIcon={<Launch />}
             sx={{
               borderRadius: theme.shape.borderRadius, textTransform: 'none', px: isMobile ? 1.5 : 2,
               fontSize: '0.875rem', backgroundColor: 'transparent', color: 'primary.main',

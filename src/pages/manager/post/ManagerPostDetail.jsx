@@ -6,56 +6,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchPostById, deletePost } from '@services/PostService';
-import { fetchProvinces } from '@services/ProvinceService';
 import { getPostStatusInfo } from '@services/StatusService';
-import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
-import IconButton from '@mui/material/IconButton';
 import { PostStatus } from '@hooks/Statuses';
-import { fetchPostCategory } from '@services/PostCategoryService';
-import PostDeleteConfirm from '@components/staff/posts/PostDeleteConfirm';
+import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
 import { updatePost } from '@services/PostService';
-import PublishIcon from '@mui/icons-material/Publish';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
-
-const commonStyles = {
-  boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
-
-  flexContainer: { display: 'flex', alignItems: 'center', flex: 1, width: '80%' },
-
-  labelTypography: {
-    color: '#05073C',
-    fontWeight: 600,
-    whiteSpace: 'nowrap',
-    marginRight: '1rem'
-  },
-
-  inputField: {
-    '& .MuiOutlinedInput-root': {
-      height: '40px',
-    },
-    '& .MuiOutlinedInput-input': {
-      padding: '8px 14px'
-    }
-  },
-
-  imageContainer: { mb: 2, flexGrow: 1, position: 'relative', '&:hover .overlay': { opacity: 1 }, '&:hover .change-image-btn': { opacity: 1 } },
-
-  editorContainer: {
-    '& .ql-container': {
-      minHeight: '200px',
-      fontSize: '1.1rem'
-    },
-    '& .ql-editor': {
-      minHeight: '200px',
-      fontSize: '1.1rem'
-    },
-    contentDisplay: { display: 'flex', flexDirection: 'column', maxWidth: '80vw', overflow: 'auto' }
-  }
-};
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -68,27 +25,12 @@ const ManagerPostDetail = () => {
     severity: 'success'
   });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [isLoadingProvinces, setIsLoadingProvinces] = useState(false);
-  const [categoryOptions, setCategoryOptions] = useState([]);
-  const [provinceOptions, setProvinceOptions] = useState([]);
-  const [editablePost, setEditablePost] = useState(null);
-  const [editableFields, setEditableFields] = useState({});
 
   useEffect(() => {
     const loadPost = async () => {
       try {
         const data = await fetchPostById(id);
         setPost(data);
-        setEditablePost({
-          ...data,
-          category: data.postCategoryName,
-          postCategoryId: data.postCategoryId,
-          provinceId: data.provinceId,
-          provinceName: data.provinceName,
-          image: data.imageUrl,
-          content: data.content
-        });
       } catch (error) {
         console.error('Error loading post:', error);
         setSnackbar({
@@ -100,68 +42,6 @@ const ManagerPostDetail = () => {
     };
     loadPost();
   }, [id]);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      setIsLoadingCategories(true);
-      try {
-        const categories = await fetchPostCategory();
-        setCategoryOptions(categories.map(cat => ({
-          postCategoryId: cat.postCategoryId,
-          name: cat.name
-        })));
-      } catch (error) {
-        console.error('Error loading categories:', error);
-        setSnackbar({
-          open: true,
-          message: 'Không thể tải danh mục',
-          severity: 'error'
-        });
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    const loadProvinces = async () => {
-      setIsLoadingProvinces(true);
-      try {
-        const provinces = await fetchProvinces();
-        setProvinceOptions(provinces.map(province => ({
-          value: province.provinceId,
-          label: province.provinceName
-        })));
-      } catch (error) {
-        console.error('Error loading provinces:', error);
-        setSnackbar({
-          open: true,
-          message: 'Không thể tải danh sách tỉnh thành',
-          severity: 'error'
-        });
-      } finally {
-        setIsLoadingProvinces(false);
-      }
-    };
-    loadProvinces();
-  }, []);
-
-  useEffect(() => {
-    if (post) {
-      setEditableFields({
-        title: { value: post.title || '', isEditing: false },
-        content: { value: post.content || '', isEditing: false },
-        description: { value: post.description || '', isEditing: false },
-        category: { value: post.category || '', isEditing: false },
-        provinceId: { value: post.provinceId || '', isEditing: false },
-        provinceName: { value: post.provinceName || '', isEditing: false },
-        createDate: { value: post.createDate || '', isEditing: false },
-        image: { value: post.image || '', isEditing: false },
-        status: { value: post.status || '0', isEditing: false }
-      });
-    }
-  }, [post]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -251,7 +131,7 @@ const ManagerPostDetail = () => {
         message: 'Bài viết đã được xóa',
         severity: 'success'
       });
-      navigate(`/nhan-vien/bai-viet`);
+      navigate(`/quan-ly/bai-viet`);
     } catch (error) {
       setSnackbar({
         open: true,
@@ -301,7 +181,7 @@ const ManagerPostDetail = () => {
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Chip label={statusInfo.label} color={statusInfo.color} size="small" sx={{ mb: 1.5 }} />
+                  <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />
                 </Box>
                 <img src={post.imageUrl} alt={post.title}
                   style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />

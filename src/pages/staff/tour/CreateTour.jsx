@@ -11,8 +11,8 @@ import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
-import TourCalendar from '@components/staff/tour/TourCalendar';
-import TourTemplateInfo from '@components/staff/tour/TourTemplateInfo';
+import TourCalendar from '@components/tour/TourCalendar';
+import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 
 const DATE_FORMAT = "DD/MM/YYYY";
 

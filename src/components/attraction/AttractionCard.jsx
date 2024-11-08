@@ -11,7 +11,7 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
     return (
         <Card
             sx={{
-                display: 'flex', flexDirection: 'column',
+                display: 'flex', flexDirection: 'column', height: '100%',
                 borderRadius: 2, transition: 'all 0.2s ease',
                 bgcolor: 'background.paper', position: 'relative',
                 '&:hover': { transform: 'translateY(-4px)', boxShadow: theme.shadows[3] }
@@ -34,20 +34,19 @@ const AttractionCard = ({ attraction, isOpen, onOpenDeletePopup }) => {
                         sx={{ height: '25px', '& .MuiChip-label': { fontSize: '0.75rem' }, p: 0.5 }}
                     />
                 </Box>
-                <Typography sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
+                <Typography color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
                     {attraction.province}
                 </Typography>
                 <Typography component="div" variant="h6" sx={{ fontSize: '1.4rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: -1 }}>
                     {attraction.name ? attraction.name : 'Không có tên'}
                 </Typography>
-                <Typography variant="body1" color="text.secondary" component="div" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                <Typography variant="body1" color="text.secondary" component="div" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mb: 3 }}>
                     Địa chỉ: {attraction.address ? attraction.address : 'Không có địa chỉ'}
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', position: 'absolute', bottom: 10, right: 10 }}>
                     <Button variant="outlined" component={Link} to={ `/${getCookie("role")}/diem-tham-quan/chi-tiet/${attraction.attractionId}`} endIcon={<Launch />}
                         sx={{
-                            borderRadius: theme.shape.borderRadius, textTransform: 'none', px: 2,
-                            fontSize: '0.875rem', backgroundColor: 'transparent', color: 'primary.main',
+                            borderRadius: theme.shape.borderRadius, fontSize: '0.875rem', backgroundColor: 'transparent', color: 'primary.main',
                             borderColor: 'primary.main', border: '1px solid'
                         }}
                     >

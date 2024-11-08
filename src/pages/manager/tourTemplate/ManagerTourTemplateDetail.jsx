@@ -9,6 +9,7 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
+import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);

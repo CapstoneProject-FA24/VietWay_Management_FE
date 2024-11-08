@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import TourTemplateCard from '@components/manager/tourTemplate/TourTemplateCard';
+import TourTemplateCard from '@components/tourTemplate/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import TourTemplateDeletePopup from '@components/staff/tourTemplate/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourCategory } from '@services/TourCategoryService';
@@ -28,8 +27,6 @@ const ManagerManageTourTemplate = () => {
     const [selectedDuration, setSelectedDuration] = useState([]);
     const [statusTab, setStatusTab] = useState('all');
     const location = useLocation();
-    const currentPage = location.pathname;
-    const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -103,24 +100,6 @@ const ManagerManageTourTemplate = () => {
     };
 
     const animatedComponents = makeAnimated();
-
-    const handleOpenDeletePopup = (template) => {
-        setSelectedTemplate(template);
-        setOpenDeletePopup(true);
-    };
-
-    const handleCloseDeletePopup = () => {
-        setOpenDeletePopup(false);
-        setSelectedTemplate(null);
-    };
-
-    const handleDeleteTemplate = (templateId) => {
-        /*  // Implement the delete logic here
-         console.log(`Deleting template with ID: ${templateId}`);
-         // After deletion, update the tourTemplates state and close the popup
-         setTourTemplates(prevTemplates => prevTemplates.filter(t => t.TourTemplateId !== templateId));
-         handleCloseDeletePopup(); */
-    };
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -270,11 +249,10 @@ const ManagerManageTourTemplate = () => {
                 </Grid>
                 <Grid container spacing={2}>
                     {sortedTourTemplates.map(tourTemplate => (
-                        <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
+                        <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
                             <TourTemplateCard
                                 tour={tourTemplate}
                                 isOpen={isSidebarOpen}
-                                onOpenDeletePopup={handleOpenDeletePopup}
                             />
                         </Grid>
                     ))}
@@ -305,12 +283,6 @@ const ManagerManageTourTemplate = () => {
                         <MenuItem value={20}>20 / trang</MenuItem>
                     </Select>
                 </Box>
-                <TourTemplateDeletePopup
-                    open={openDeletePopup}
-                    onClose={handleCloseDeletePopup}
-                    template={selectedTemplate}
-                    onDelete={handleDeleteTemplate}
-                />
             </Box>
         </Box>
     );

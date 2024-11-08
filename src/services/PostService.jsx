@@ -114,6 +114,7 @@ export const updatePost = async (id, postData) => {
 };
 
 export const deletePost = async (id) => {
+    console.log(id);
     const token = getCookie('token');
     try {
         await axios.delete(`${baseURL}/api/Post/${id}`, {

@@ -5,7 +5,6 @@ import { ArrowBack, Edit, Delete, Save, Send } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarStaff from '@layouts/SidebarStaff';
-import { fetchPostById } from '@services/PostService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { getPostStatusInfo } from '@services/StatusService';
 import ReactQuill from 'react-quill';
@@ -15,8 +14,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import IconButton from '@mui/material/IconButton';
 import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
-import PostDeleteConfirm from '@components/staff/posts/PostDeleteConfirm';
-import { updatePost } from '@services/PostService';
+import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
+import { fetchPostById, updatePost, deletePost } from '@services/PostService';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -348,17 +347,6 @@ const PostDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const handleShareToSocial = (platform) => {
-    const url = encodeURIComponent(window.location.origin + '/posts/' + post.postId);
-    const text = encodeURIComponent(post.title);
-    
-    if (platform === 'facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    } else if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
-    }
-  };
-
   if (!post) return null;
 
   const statusInfo = getPostStatusInfo(post.status);
@@ -563,7 +551,7 @@ const PostDetail = () => {
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
+                    <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />
                   </Box>
                   <img src={post.imageUrl} alt={post.title}
                     style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />
