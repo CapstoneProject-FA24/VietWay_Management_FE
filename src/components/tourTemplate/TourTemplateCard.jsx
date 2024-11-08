@@ -26,9 +26,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                     color: getTourTemplateStatusInfo(tour.status).color,
                     bgcolor: getTourTemplateStatusInfo(tour.status).backgroundColor,
                     position: 'absolute', top: 12, left: 12,
-                    fontWeight: 700,
-                    borderRadius: '8px',
-                    padding: '4px'
+                    fontWeight: 700, borderRadius: 5, padding: '4px'
                 }}
             />
             <CardMedia
@@ -71,7 +69,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                 <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis' }}>
                     Thời lượng: {tour.duration}
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', pt: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 'auto', pt: 1 }}>
 
                     <Box sx={{ display: 'flex', gap: 1.5 }}>
                         <Button variant="outlined" component={Link} to={`/${getCookie("role")}/tour-mau/chi-tiet/${tour.tourTemplateId}`} endIcon={<Launch />}

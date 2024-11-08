@@ -76,18 +76,18 @@ const TourTemplateDetails = () => {
           <Grid item xs={12}>
             <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
               <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
-                <img src={tourTemplate.imageUrls[0]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                <img src={tourTemplate.imageUrls[0]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
               </Box>
               <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                  <img src={tourTemplate.imageUrls[1]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[1]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                   <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
-                    <img src={tourTemplate.imageUrls[2]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[2]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                   <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
-                    <img src={tourTemplate.imageUrls[3]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[3]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                 </Box>
               </Box>

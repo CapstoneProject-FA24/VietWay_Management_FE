@@ -63,9 +63,9 @@ const ManagerAttractionDetail = () => {
   }
 
   return (
-    <Box className='main' sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
+    <Box className='main' sx={{
+      display: 'flex',
+      flexDirection: 'column',
       minHeight: '100vh',
       width: isSidebarOpen ? 'calc(98.8vw - 230px)' : '98.8vw',
       ml: isSidebarOpen ? '230px' : 0,
@@ -88,16 +88,16 @@ const ManagerAttractionDetail = () => {
           Chi tiết điểm tham quan
         </Typography>
         {attraction?.status === AttractionStatus.Pending && (
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
-              <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
-            </Box>
-          )}
-          {attraction?.status === AttractionStatus.Approved && (
-            <>
-              <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}>Xóa</Button>
-            </>
-          )}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
+            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
+          </Box>
+        )}
+        {attraction?.status === AttractionStatus.Approved && (
+          <>
+            <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}>Xóa</Button>
+          </>
+        )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

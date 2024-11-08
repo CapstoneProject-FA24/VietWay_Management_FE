@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Grid, Paper, CircularProgress, Table, TableBody, TableCell, TableContainer, TableRow, Button, Container, Collapse, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faUser, faClock, faMoneyBill1, faLocationDot, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -10,6 +10,9 @@ import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutl
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
+import SidebarManager from '@layouts/SidebarManager';
+import { TourTemplateStatus } from '@hooks/Statuses';
+import { getTourTemplateStatusInfo } from '@services/StatusService';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -18,6 +21,8 @@ const ManagerTourTemplateDetails = () => {
   const pageTopRef = useRef(null);
   const [expandedDay, setExpandedDay] = useState(null);
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -42,12 +47,23 @@ const ManagerTourTemplateDetails = () => {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} ref={pageTopRef}>
+    <Box className='main' sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      marginLeft: isSidebarOpen ? '250px' : '0px',
+      transition: 'margin-left 0.3s'
+    }} ref={pageTopRef}>
+      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Helmet>
         <title>Chi tiết tour mẫu</title>
       </Helmet>
@@ -60,33 +76,45 @@ const ManagerTourTemplateDetails = () => {
           sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
           Quay lại
         </Button>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
           Chi tiết tour mẫu
         </Typography>
+        {tourTemplate?.status === TourTemplateStatus.Pending && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
+            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
+          </Box>
+        )}
+        {tourTemplate?.status === TourTemplateStatus.Approved && (
+          <>
+            <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}>Xóa</Button>
+          </>
+        )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+        <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="small" sx={{ mb: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
         <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
           {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
         </Typography>
-        <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
           {tourTemplate.tourName}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-          <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
+            <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
               <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
-                <img src={tourTemplate.imageUrls[0]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                <img src={tourTemplate.imageUrls[0]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
               </Box>
               <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                  <img src={tourTemplate.imageUrls[1]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[1]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                   <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
-                    <img src={tourTemplate.imageUrls[2]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[2]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                   <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
-                    <img src={tourTemplate.imageUrls[3]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[3]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                 </Box>
               </Box>
@@ -214,12 +242,6 @@ const ManagerTourTemplateDetails = () => {
                   <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                 </Typography>
               </Box>
-              {tourTemplate.status === 1 && (
-                <>
-                  <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: 'green', '&:hover': { backgroundColor: '#2954B5' } }}>Chấp nhận</Button>
-                  <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: 'red', '&:hover': { backgroundColor: '#2954B5' } }}>Từ chối</Button>
-                </>
-              )}
             </Paper>
           </Grid>
         </Grid>
