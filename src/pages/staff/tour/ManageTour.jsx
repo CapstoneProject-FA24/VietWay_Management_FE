@@ -9,7 +9,7 @@ import makeAnimated from 'react-select/animated';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
 import Helmet from 'react-helmet';
-import TourCard from '@components/staff/tour/TourCard';
+import TourCard from '@components/tour/TourCard';
 import { fetchTours } from '@services/TourService';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';

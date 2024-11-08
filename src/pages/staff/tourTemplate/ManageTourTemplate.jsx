@@ -253,7 +253,7 @@ const ManageTourTemplate = () => {
                 </Grid>
                 <Grid container spacing={2}>
                     {sortedTourTemplates.map(tourTemplate => (
-                        <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
+                        <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
                             <TourTemplateCard
                                 tour={tourTemplate}
                                 isOpen={isSidebarOpen}

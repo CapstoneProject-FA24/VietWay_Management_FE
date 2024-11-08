@@ -8,8 +8,8 @@ import { fetchToursByTemplateId, fetchTourById, calculateEndDate } from '@servic
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ManagerTourCalendar from '@components/manager/tour/ManagerTourCalendar';
-import ManagerTourTemplateInfo from '@components/manager/tour/ManagerTourTemplateInfo';
+import TourCalendar from '@components/tour/TourCalendar';
+import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { getTourStatusInfo } from '@services/StatusService';
 import { TourStatus } from '@hooks/Statuses';
 
@@ -88,12 +88,12 @@ const ManagerTourDetail = () => {
             </Typography>
           </Grid>
           <Grid item xs={12} md={8.5}>
-            <ManagerTourTemplateInfo
+            <TourTemplateInfo
               tourTemplate={tourTemplate}
               isLoading={isLoading}
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <ManagerTourCalendar tourId={id} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
+              <TourCalendar tourId={id} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
             </Box>
           </Grid>
           <Grid item xs={12} md={3.5}>

@@ -2,7 +2,9 @@ import React from 'react';
 import { Card, CardMedia, CardContent, CardActions, Typography, Chip, Button, Stack, Box } from '@mui/material';
 import { CalendarToday, AccessTime, Launch, LocationOn, Group, Subtitles } from '@mui/icons-material';
 import { getTourStatusInfo } from '@services/StatusService';
-import { useNavigate } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
+import { getCookie } from '@services/AuthenService';
+
 const InfoItem = ({ icon, text }) => (
   <Stack
     direction="row" spacing={1} alignItems="center"
@@ -14,10 +16,7 @@ const InfoItem = ({ icon, text }) => (
 );
 
 const TourCard = ({ tour, onViewDetails }) => {
-  const navigate = useNavigate();
-  const handleViewDetails = () => {
-    navigate(`/quan-ly/tour-du-lich/chi-tiet/${tour.id}`);
-  };
+  console.log(tour);
   return (
     <Card
       onClick={onViewDetails}
@@ -30,25 +29,10 @@ const TourCard = ({ tour, onViewDetails }) => {
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img" height="200" alt={tour.tourName}
-          image={'https://r2.nucuoimekong.com/wp-content/uploads/ban-cat-sapa-a.jpg'/* tour.images[0].url */}
+          image={tour.imageUrl}
           sx={{ transition: 'transform 0.3s ease', '&:hover': { transform: 'scale(1.05)' } }}
         />
-        <Chip
-          label={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 13, height: 13, borderRadius: '50%', backgroundColor: getTourStatusInfo(tour.status).color }} />
-              <Typography sx={{ color: getTourStatusInfo(tour.status).textColor, fontWeight: 600, fontSize: 13 }}>
-                {getTourStatusInfo(tour.status).text}
-              </Typography>
-            </Box>
-          }
-          size="small"
-          sx={{
-            position: 'absolute', top: 12, pt: 1.7, pb: 1.7, pr: 0.3, left: 12,
-            backgroundColor: getTourStatusInfo(tour.status).backgroundColor,
-            fontWeight: 600, '& .MuiChip-label': { px: 1 }
-          }}
-        />
+        <Chip label={getTourStatusInfo(tour.status).text} size="small" sx={{ mb: 1, color: `${getTourStatusInfo(tour.status).textColor}`, bgcolor: `${getTourStatusInfo(tour.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
       </Box>
 
       <CardContent sx={{ flexGrow: 1, p: 2 }}>
@@ -63,7 +47,7 @@ const TourCard = ({ tour, onViewDetails }) => {
         </Typography>
 
         <Stack spacing={1}>
-          <InfoItem icon={<Subtitles />} text={`Mã tour: ${tour.tourId}`} />
+          <InfoItem icon={<Subtitles />} text={`Mã tour: ${tour.code}`} />
           <InfoItem icon={<AccessTime />} text={`Thời lượng: ${tour.duration}`} />
           <InfoItem
             icon={<CalendarToday />}
@@ -91,20 +75,17 @@ const TourCard = ({ tour, onViewDetails }) => {
           <Typography variant="caption" color="text.secondary">/người</Typography>
         </Typography>
       </CardContent>
-      <Box sx={{ 
-          display: 'flex',  justifyContent: 'flex-end', pb: 2, pr: 2
-        }}>
-          <Button
-            variant="contained"
-            onClick={() => handleViewDetails()}
-            endIcon={<Launch />}
-            sx={{ 
-              borderRadius: 10, textTransform: 'none', px: 2, fontSize: '0.875rem'
-            }}
-          >
-            Chi tiết
-          </Button>
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 2 }}>
+        <Button variant="outlined" component={Link} to={`/${getCookie("role")}/tour-du-lich/chi-tiet/${tour.id}`} endIcon={<Launch />}
+          sx={{
+            borderRadius: 5, textTransform: 'none', px: 2,
+            fontSize: '0.875rem', backgroundColor: 'transparent', color: 'primary.main',
+            borderColor: 'primary.main', border: '1px solid'
+          }}
+        >
+          Chi tiết
+        </Button>
+      </Box>
       {/* <CardActions sx={{ p: 2, pt: 0, justifyContent: 'center' }}>
         {tour.status === TourStatus.Completed && (
           <Button variant="outlined" size="small" sx={{ borderRadius: 2 }}>Xem đánh giá</Button>
