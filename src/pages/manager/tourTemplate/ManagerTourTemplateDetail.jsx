@@ -22,6 +22,7 @@ const ManagerTourTemplateDetails = () => {
   const [expandedDay, setExpandedDay] = useState(null);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,6 +50,23 @@ const ManagerTourTemplateDetails = () => {
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleDelete = () => {
+    setIsDeletePopupOpen(true);
+  };
+
+  const handleDeleteConfirm = async (templateId) => {
+    try {
+      await deleteTourTemplate(templateId);
+      navigate('/quan-ly/tour-mau');
+    } catch (error) {
+      console.error('Error deleting tour template:', error);
+    }
+  };
+
+  const handleCloseDeletePopup = () => {
+    setIsDeletePopupOpen(false);
   };
 
   if (!tourTemplate) {
@@ -87,7 +105,13 @@ const ManagerTourTemplateDetails = () => {
         )}
         {tourTemplate?.status === TourTemplateStatus.Approved && (
           <>
-            <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}>Xóa</Button>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
+              onClick={handleDelete}
+            >
+              Xóa
+            </Button>
           </>
         )}
       </Box>
@@ -246,6 +270,12 @@ const ManagerTourTemplateDetails = () => {
           </Grid>
         </Grid>
       </Box>
+      <TourTemplateDeletePopup
+        open={isDeletePopupOpen}
+        onClose={handleCloseDeletePopup}
+        template={tourTemplate}
+        onDelete={handleDeleteConfirm}
+      />
     </Box>
   );
 };
