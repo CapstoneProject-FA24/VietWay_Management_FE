@@ -2,8 +2,8 @@ import React, { useState, useCallback } from "react";
 import { GoogleMap, useJsApiLoader, InfoWindow } from '@react-google-maps/api';
 
 const containerStyle = {
-  width: '100vw',
-  height: '100vh'
+  width: '100%',
+  height: '100%'
 };
 
 const center = {
@@ -155,7 +155,8 @@ function Map() {
         placeholder="Tìm điểm đến..."
         style={{
           margin: "10px",
-          width: "350px",
+          width: "calc(100% - 80px)",
+          maxWidth: "350px",
           height: "45px",
           padding: "0 20px",
           border: "none",

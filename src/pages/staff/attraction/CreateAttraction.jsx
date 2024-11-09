@@ -17,6 +17,7 @@ import { createAttraction, updateAttractionImages } from '@services/AttractionSe
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import SidebarStaff from '@layouts/SidebarStaff';
+import Map from '@components/staff/attraction/Map';
 
 const AddAttraction = () => {
   const navigate = useNavigate();
@@ -151,7 +152,7 @@ const AddAttraction = () => {
         const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
         const missingFields = requiredFields.filter(field => !attractionData[field]);
         if (missingFields.length > 0) {
-          alert(`Vui lòng điền đầy đủ thông tin trước khi tạo mới.`);
+          alert(`Vui lòng điền đ���y đủ thông tin trước khi tạo mới.`);
           return;
         }
         if (images.length === 0) {
@@ -197,11 +198,11 @@ const AddAttraction = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
-      
-      <Box sx={{ 
-        flexGrow: 1, 
-        p: 3, 
-        transition: 'margin-left 0.3s', 
+
+      <Box sx={{
+        flexGrow: 1,
+        p: 3,
+        transition: 'margin-left 0.3s',
         marginLeft: isSidebarOpen ? '260px' : '20px',
         width: `calc(100% - ${isSidebarOpen ? '260px' : '20px'})`,
         maxWidth: '100vw'
@@ -209,7 +210,7 @@ const AddAttraction = () => {
         <Helmet>
           <title>Thêm điểm tham quan</title>
         </Helmet>
-        
+
         <Box sx={{ p: 3, flexGrow: 1 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
             <Button
@@ -219,12 +220,12 @@ const AddAttraction = () => {
             >
               Quay lại
             </Button>
-            
-            <Typography 
-              variant="h4" 
-              sx={{ 
-                fontSize: '2.7rem', 
-                fontWeight: 600, 
+
+            <Typography
+              variant="h4"
+              sx={{
+                fontSize: '2.7rem',
+                fontWeight: 600,
                 color: 'primary.main',
                 alignSelf: 'center',
                 alignItems: 'center',
@@ -422,6 +423,12 @@ const AddAttraction = () => {
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
+              <Box sx={{
+                height: '350px', width: '100%', position: 'relative', mb: 3,
+                overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
+              }}>
+                <Map />
+              </Box>
               <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                 <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
                 <Select
