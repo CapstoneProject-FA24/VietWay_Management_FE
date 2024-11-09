@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 class GooglePlaceService {
     static async waitForGoogleMaps() {
         // Wait for up to 10 seconds for Google Maps to be available
