@@ -35,7 +35,8 @@ const AddAttraction = () => {
     description: { value: '', isEditing: true },
     address: { value: '', isEditing: true },
     website: { value: '', isEditing: true },
-    type: { value: '', isEditing: true }
+    type: { value: '', isEditing: true },
+    placeId: { value: '', isEditing: true }
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -152,7 +153,7 @@ const AddAttraction = () => {
         const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
         const missingFields = requiredFields.filter(field => !attractionData[field]);
         if (missingFields.length > 0) {
-          alert(`Vui lòng điền đ���y đủ thông tin trước khi tạo mới.`);
+          alert(`Vui lòng điền đy đủ thông tin trước khi tạo mới.`);
           return;
         }
         if (images.length === 0) {
@@ -430,6 +431,16 @@ const AddAttraction = () => {
                 <Map />
               </Box>
               <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                <Typography sx={{ fontWeight: 700, minWidth: '4rem', mb: 1 }}>Địa điểm Google: </Typography>
+                <TextField
+                  value={editableFields.placeId?.value || ''}
+                  onChange={(e) => handleFieldChange('placeId', e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                  sx={{ mb: 2 }}
+                  placeholder="Nhập Place ID từ Google Places"
+                />
+
                 <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
                 <Select
                   value={selectedProvince}

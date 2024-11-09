@@ -30,7 +30,6 @@ import TourDetail from '@pages/staff/tour/TourDetail.jsx';
 import ManageCategory from '@pages/manager/category/ManageCategory.jsx';
 import ManagerManagePost from '@pages/manager/post/ManagerManagePost.jsx';
 import ManagerPostDetail from '@pages/manager/post/ManagerPostDetail.jsx';
-import Map from '@components/staff/attraction/Map.jsx';
 const App = () => {
   return (
     <Router>
@@ -69,8 +68,6 @@ const App = () => {
         <Route path="/nhan-vien/bai-viet/chi-tiet/:id" element={<PostDetail />} />
         <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
         <Route path="/nhan-vien/bai-viet/them" element={<CreatePost />} />
-
-        <Route path="/nhan-vien/map" element={<Map />} />
       </Routes>
     </Router>
   );

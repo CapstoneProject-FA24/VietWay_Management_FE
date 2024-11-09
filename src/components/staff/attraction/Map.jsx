@@ -11,7 +11,8 @@ const center = {
   lng: 108.2062
 };
 
-const libraries = ['places'];
+// Move libraries array outside component and make it constant
+const GOOGLE_MAPS_LIBRARIES = ['places'];
 
 const infoWindowStyle = `
   .gm-style .gm-style-iw-c {
@@ -98,30 +99,73 @@ const autocompleteStyle = `
   }
 `;
 
+const searchBoxStyle = `
+  .map-search-box {
+    margin: 10px !important;
+    width: 300px !important;
+    height: 45px !important;
+    padding: 0 20px !important;
+    border: none !important;
+    border-radius: 100px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    font-size: 14px !important;
+    outline: none !important;
+    text-overflow: ellipsis !important;
+    background-color: white !important;
+  }
+
+  /* Fullscreen mode */
+  .gm-fullscreen-control ~ div .map-search-box {
+    margin: 20px !important;
+    width: 400px !important;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .map-search-box,
+    .gm-fullscreen-control ~ div .map-search-box {
+      width: calc(100% - 100px) !important;
+      max-width: 300px !important;
+    }
+  }
+`;
+
 function Map() {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries
+    libraries: GOOGLE_MAPS_LIBRARIES
   });
 
   const [map, setMap] = useState(null);
-  const [searchBox, setSearchBox] = useState(null);
+  const [marker, setMarker] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [searchBox, setSearchBox] = useState(null);
 
   const onLoad = useCallback((map) => {
-    const searchBox = new window.google.maps.places.Autocomplete(
-      document.getElementById("pac-input"),
-      {
-        types: ['establishment', 'geocode'],
-      }
-    );
+    const input = document.getElementById("pac-input");
     
-    searchBox.bindTo('bounds', map);
-    setSearchBox(searchBox);
+    // Create the autocomplete object
+    const autocomplete = new window.google.maps.places.Autocomplete(input, {
+      fields: ["place_id", "geometry", "formatted_address", "name", "address_components"],
+      types: ['establishment', 'geocode'],
+    });
 
-    searchBox.addListener("place_changed", () => {
-      const place = searchBox.getPlace();
+    // Bind autocomplete to map bounds
+    autocomplete.bindTo('bounds', map);
+    
+    // Add the input to the map controls
+    map.controls[window.google.maps.ControlPosition.TOP_LEFT].push(input);
+    setSearchBox(input);
+
+    // Create a marker
+    const marker = new window.google.maps.Marker({ map: map });
+    setMarker(marker);
+
+    // Add place_changed event listener
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+
       if (!place.geometry || !place.geometry.location) {
         console.log("Returned place contains no geometry");
         return;
@@ -134,6 +178,10 @@ function Map() {
         map.setZoom(17);
       }
 
+      // Update marker position
+      marker.setPosition(place.geometry.location);
+      marker.setVisible(true);
+
       setSelectedPlace(place);
     });
 
@@ -141,35 +189,30 @@ function Map() {
   }, []);
 
   const onUnmount = useCallback(() => {
+    if (map && searchBox) {
+      // Remove the search box from map controls before unmounting
+      const controls = map.controls[window.google.maps.ControlPosition.TOP_LEFT];
+      const index = controls.getArray().indexOf(searchBox);
+      if (index !== -1) {
+        controls.removeAt(index);
+      }
+    }
     setMap(null);
-  }, []);
+    setSearchBox(null);
+    setMarker(null);
+    setSelectedPlace(null);
+  }, [map, searchBox]);
 
   return isLoaded ? (
     <>
       <style>{infoWindowStyle}</style>
       <style>{autocompleteStyle}</style>
+      <style>{searchBoxStyle}</style>
       <input
         id="pac-input"
         className="map-search-box"
         type="text"
         placeholder="Tìm điểm đến..."
-        style={{
-          margin: "10px",
-          width: "calc(100% - 80px)",
-          maxWidth: "350px",
-          height: "45px",
-          padding: "0 20px",
-          border: "none",
-          borderRadius: "100px",
-          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
-          fontSize: "14px",
-          outline: "none",
-          textOverflow: "ellipsis",
-          position: "absolute",
-          top: "0",
-          left: "0",
-          zIndex: "1"
-        }}
       />
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -180,6 +223,13 @@ function Map() {
         options={{
           mapTypeControlOptions: {
             position: window.google.maps.ControlPosition.BOTTOM_LEFT
+          },
+          fullscreenControl: true,
+          fullscreenControlOptions: {
+            position: window.google.maps.ControlPosition.RIGHT_TOP
+          },
+          zoomControlOptions: {
+            position: window.google.maps.ControlPosition.RIGHT_TOP
           }
         }}
       >
