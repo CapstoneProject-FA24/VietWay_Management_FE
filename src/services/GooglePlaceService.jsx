@@ -1,20 +1,32 @@
 class GooglePlaceService {
     static async waitForGoogleMaps() {
-        // Wait for up to 10 seconds for Google Maps to be available
-        for (let i = 0; i < 100; i++) {
-            if (window.google?.maps?.places) {
-                return true;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
+        if (window.google?.maps?.places) {
+            return true;
         }
-        throw new Error('Google Maps failed to load');
+
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+        script.async = true;
+        document.head.appendChild(script);
+
+        return new Promise((resolve, reject) => {
+            script.onload = () => {
+                setTimeout(() => {
+                    if (window.google?.maps?.places) {
+                        resolve(true);
+                    } else {
+                        reject(new Error('Google Maps Places library failed to load'));
+                    }
+                }, 100);
+            };
+            script.onerror = () => reject(new Error('Failed to load Google Maps script'));
+        });
     }
 
     static async getPlaceDetails(placeId) {
         try {
             await this.waitForGoogleMaps();
             
-            // Create a map div if it doesn't exist
             let mapDiv = document.getElementById('google-map-service');
             if (!mapDiv) {
                 mapDiv = document.createElement('div');
