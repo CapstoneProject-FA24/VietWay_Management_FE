@@ -424,23 +424,7 @@ const AddAttraction = () => {
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Box sx={{
-                height: '350px', width: '100%', position: 'relative', mb: 3,
-                overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
-              }}>
-                <Map />
-              </Box>
               <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem', mb: 1 }}>Địa điểm Google: </Typography>
-                <TextField
-                  value={editableFields.placeId?.value || ''}
-                  onChange={(e) => handleFieldChange('placeId', e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                  placeholder="Nhập Place ID từ Google Places"
-                />
-
                 <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
                 <Select
                   value={selectedProvince}
@@ -541,6 +525,21 @@ const AddAttraction = () => {
               </Paper>
             </Grid>
           </Grid>
+          <Typography sx={{ fontWeight: 700, minWidth: '4rem', mt: 5 }}>Google ID: </Typography>
+          <TextField
+            value={editableFields.placeId?.value || ''}
+            onChange={(e) => handleFieldChange('placeId', e.target.value)}
+            variant="outlined"
+            fullWidth
+            sx={{ mb: 2, width: '35%', '& .MuiInputBase-root': { height: '40px' } }}
+            placeholder="Nhập Place ID từ Google Places"
+          />
+          <Box sx={{
+            height: '500px', width: '100%', position: 'relative', mb: 3,
+            overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
+          }}>
+            <Map />
+          </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
             <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
             <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>

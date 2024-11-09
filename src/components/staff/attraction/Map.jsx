@@ -11,8 +11,7 @@ const center = {
   lng: 108.2062
 };
 
-// Move libraries array outside component and make it constant
-const GOOGLE_MAPS_LIBRARIES = ['places'];
+const libraries = ['places'];
 
 const infoWindowStyle = `
   .gm-style .gm-style-iw-c {
@@ -99,73 +98,35 @@ const autocompleteStyle = `
   }
 `;
 
-const searchBoxStyle = `
-  .map-search-box {
-    margin: 10px !important;
-    width: 300px !important;
-    height: 45px !important;
-    padding: 0 20px !important;
-    border: none !important;
-    border-radius: 100px !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
-    font-size: 14px !important;
-    outline: none !important;
-    text-overflow: ellipsis !important;
-    background-color: white !important;
-  }
-
-  /* Fullscreen mode */
-  .gm-fullscreen-control ~ div .map-search-box {
-    margin: 20px !important;
-    width: 400px !important;
-  }
-
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .map-search-box,
-    .gm-fullscreen-control ~ div .map-search-box {
-      width: calc(100% - 100px) !important;
-      max-width: 300px !important;
-    }
-  }
-`;
-
 function Map() {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: GOOGLE_MAPS_LIBRARIES
+    libraries
   });
 
   const [map, setMap] = useState(null);
-  const [marker, setMarker] = useState(null);
-  const [selectedPlace, setSelectedPlace] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
+  const [selectedPlace, setSelectedPlace] = useState(null);
 
   const onLoad = useCallback((map) => {
-    const input = document.getElementById("pac-input");
+    const searchBox = new window.google.maps.places.Autocomplete(
+      document.getElementById("pac-input"),
+      {
+        types: ['establishment', 'geocode'],
+        fields: ["place_id", "geometry", "formatted_address", "name", "address_components"]
+      }
+    );
     
-    // Create the autocomplete object
-    const autocomplete = new window.google.maps.places.Autocomplete(input, {
-      fields: ["place_id", "geometry", "formatted_address", "name", "address_components"],
-      types: ['establishment', 'geocode'],
-    });
-
-    // Bind autocomplete to map bounds
-    autocomplete.bindTo('bounds', map);
+    map.controls[window.google.maps.ControlPosition.TOP_LEFT].push(
+      document.getElementById("pac-input")
+    );
     
-    // Add the input to the map controls
-    map.controls[window.google.maps.ControlPosition.TOP_LEFT].push(input);
-    setSearchBox(input);
+    searchBox.bindTo('bounds', map);
+    setSearchBox(searchBox);
 
-    // Create a marker
-    const marker = new window.google.maps.Marker({ map: map });
-    setMarker(marker);
-
-    // Add place_changed event listener
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-
+    searchBox.addListener("place_changed", () => {
+      const place = searchBox.getPlace();
       if (!place.geometry || !place.geometry.location) {
         console.log("Returned place contains no geometry");
         return;
@@ -178,10 +139,6 @@ function Map() {
         map.setZoom(17);
       }
 
-      // Update marker position
-      marker.setPosition(place.geometry.location);
-      marker.setVisible(true);
-
       setSelectedPlace(place);
     });
 
@@ -189,30 +146,31 @@ function Map() {
   }, []);
 
   const onUnmount = useCallback(() => {
-    if (map && searchBox) {
-      // Remove the search box from map controls before unmounting
-      const controls = map.controls[window.google.maps.ControlPosition.TOP_LEFT];
-      const index = controls.getArray().indexOf(searchBox);
-      if (index !== -1) {
-        controls.removeAt(index);
-      }
-    }
     setMap(null);
-    setSearchBox(null);
-    setMarker(null);
-    setSelectedPlace(null);
-  }, [map, searchBox]);
+  }, []);
 
   return isLoaded ? (
     <>
       <style>{infoWindowStyle}</style>
       <style>{autocompleteStyle}</style>
-      <style>{searchBoxStyle}</style>
       <input
         id="pac-input"
         className="map-search-box"
         type="text"
         placeholder="Tìm điểm đến..."
+        style={{
+          marginTop: "10px",
+          marginLeft: "-170px",
+          width: "350px",
+          height: "45px",
+          padding: "0 20px",
+          border: "none",
+          borderRadius: "100px",
+          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.3)",
+          fontSize: "14px",
+          outline: "none",
+          textOverflow: "ellipsis",
+        }}
       />
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -223,13 +181,6 @@ function Map() {
         options={{
           mapTypeControlOptions: {
             position: window.google.maps.ControlPosition.BOTTOM_LEFT
-          },
-          fullscreenControl: true,
-          fullscreenControlOptions: {
-            position: window.google.maps.ControlPosition.RIGHT_TOP
-          },
-          zoomControlOptions: {
-            position: window.google.maps.ControlPosition.RIGHT_TOP
           }
         }}
       >
@@ -251,7 +202,7 @@ function Map() {
               </div>
               {selectedPlace.place_id && (
                 <div style={{ marginTop: '10px', color: '#666' }}>
-                  Place ID: {selectedPlace.place_id}
+                  <strong>Place ID:</strong> {selectedPlace.place_id}
                 </div>
               )}
             </div>
