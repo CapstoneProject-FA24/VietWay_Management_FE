@@ -198,6 +198,11 @@ function Map() {
                   </span>
                 ))}
               </div>
+              {selectedPlace.place_id && (
+                <div style={{ marginTop: '10px', color: '#666' }}>
+                  Place ID: {selectedPlace.place_id}
+                </div>
+              )}
             </div>
           </InfoWindow>
         )}
