@@ -53,6 +53,51 @@ const infoWindowStyle = `
   }
 `;
 
+const autocompleteStyle = `
+  /* Main dropdown container */
+  .pac-container {
+    border-radius: 10px;
+    margin-top: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  /* Individual result items */
+  .pac-item {
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Hover state for items */
+  .pac-item:hover {
+    background-color: #f5f5f5;
+  }
+
+  /* The matched text in results */
+  .pac-item-query {
+    font-size: 14px;
+    color: #333333;
+  }
+
+  /* Secondary text (location) */
+  .pac-secondary-query {
+    font-size: 13px;
+    color: #666666;
+  }
+
+  /* Icons in the results */
+  .pac-icon {
+    margin-top: 5px;
+  }
+
+  /* Remove the default Google logo */
+  .pac-logo:after {
+    display: none;
+  }
+`;
+
 function Map() {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -102,6 +147,7 @@ function Map() {
   return isLoaded ? (
     <>
       <style>{infoWindowStyle}</style>
+      <style>{autocompleteStyle}</style>
       <input
         id="pac-input"
         className="map-search-box"
@@ -152,12 +198,6 @@ function Map() {
                   </span>
                 ))}
               </div>
-              {selectedPlace.formatted_phone_number && (
-                <div>{selectedPlace.formatted_phone_number}</div>
-              )}
-              {selectedPlace.rating && (
-                <div>Rating: {selectedPlace.rating} ⭐</div>
-              )}
             </div>
           </InfoWindow>
         )}
