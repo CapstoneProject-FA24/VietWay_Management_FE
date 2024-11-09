@@ -96,6 +96,10 @@ const autocompleteStyle = `
   .pac-logo:after {
     display: none;
   }
+
+  #pac-input{
+    left: 0 !important;
+  }
 `;
 
 function Map() {
@@ -160,7 +164,7 @@ function Map() {
         placeholder="Tìm điểm đến..."
         style={{
           marginTop: "10px",
-          marginLeft: "-170px",
+          marginLeft: "10px",
           width: "350px",
           height: "45px",
           padding: "0 20px",

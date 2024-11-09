@@ -4,6 +4,7 @@ import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { getAttractionStatusInfo } from '@services/StatusService';
+import Map from '@components/staff/attraction/Map';
 
 const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const settings = {
@@ -112,6 +113,20 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
               <Typography sx={{ mb: 1, ml: 1 }}>{attraction.creatorName}</Typography>
             </Box>
           </Paper>
+        </Grid>
+        <Grid item xs={12} md={12}>
+          <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}><strong>Google Place ID:</strong> {attraction.googlePlaceId}</Typography>
+          <Box sx={{
+            height: '500px',
+            width: '100%',
+            position: 'relative',
+            mb: 3,
+            overflow: 'hidden',
+            borderRadius: '10px',
+            border: '1px solid #e0e0e0'
+          }}>
+            <Map />
+          </Box>
         </Grid>
       </Grid>
     </Box>

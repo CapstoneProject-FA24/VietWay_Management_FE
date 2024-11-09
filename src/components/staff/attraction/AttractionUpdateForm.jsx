@@ -9,8 +9,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
+import Map from '@components/staff/attraction/Map';
 
-const AttractionUpdateForm = ({ 
+const AttractionUpdateForm = ({
   attraction,
   provinces,
   attractionTypes,
@@ -30,7 +31,8 @@ const AttractionUpdateForm = ({
     description: { value: '', isEditing: false },
     address: { value: '', isEditing: false },
     website: { value: '', isEditing: false },
-    type: { value: '', isEditing: false }
+    type: { value: '', isEditing: false },
+    placeId: { value: '', isEditing: false }
   });
 
   useEffect(() => {
@@ -43,7 +45,8 @@ const AttractionUpdateForm = ({
         description: { value: attraction.description, isEditing: false },
         address: { value: attraction.address, isEditing: false },
         website: { value: attraction.website, isEditing: false },
-        type: { value: attraction.attractionTypeId, isEditing: false }
+        type: { value: attraction.attractionTypeId, isEditing: false },
+        placeId: { value: attraction.googlePlaceId || '', isEditing: false }
       });
     }
   }, [attraction]);
@@ -145,6 +148,7 @@ const AttractionUpdateForm = ({
       provinceId: selectedProvince,
       attractionTypeId: editableFields.type.value,
       isDraft: isDraft,
+      googlePlaceId: editableFields.placeId.value || null
     };
 
     if (!isDraft) {
@@ -447,11 +451,33 @@ const AttractionUpdateForm = ({
             )}
           </Paper>
         </Grid>
+        <Grid item xs={12} md={12}>
+          <Typography sx={{ fontWeight: 700, minWidth: '4rem', mt: 5 }}>Google Place ID: </Typography>
+          <TextField
+            value={editableFields.placeId.value}
+            onChange={(e) => handleFieldChange('placeId', e.target.value)}
+            variant="outlined"
+            fullWidth
+            sx={{ mb: 2, width: '35%', '& .MuiInputBase-root': { height: '40px' } }}
+            placeholder="Nhập Place ID từ Google Places"
+          />
+          <Box sx={{
+            height: '500px',
+            width: '100%',
+            position: 'relative',
+            mb: 3,
+            overflow: 'hidden',
+            borderRadius: '10px',
+            border: '1px solid #e0e0e0'
+          }}>
+            <Map/>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
+            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Cập nhật </Button>
+          </Box>
+        </Grid>
       </Grid>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-        <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-        <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Cập nhật </Button>
-      </Box>
     </Box>
   );
 };

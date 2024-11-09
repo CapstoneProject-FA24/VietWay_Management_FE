@@ -148,6 +148,7 @@ const AddAttraction = () => {
         provinceId: selectedProvince,
         attractionTypeId: editableFields.type.value,
         isDraft: isDraft,
+        googlePlaceId: editableFields.placeId.value || null
       };
       if (!isDraft) {
         const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
