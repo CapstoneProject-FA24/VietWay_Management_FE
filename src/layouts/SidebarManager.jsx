@@ -6,12 +6,11 @@ import PeopleIcon from '@mui/icons-material/People';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MapIcon from '@mui/icons-material/Map';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import TourIcon from '@mui/icons-material/Tour';
 import PersonIcon from '@mui/icons-material/Person';
 import { styled } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AttractionsIcon from '@mui/icons-material/Attractions';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArticleIcon from '@mui/icons-material/Article';
@@ -156,7 +155,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
             { text: 'Tỉnh thành', url: '/quan-ly/tinh-thanh', icon: <MapIcon /> },
             { text: 'Điểm tham quan', url: '/quan-ly/diem-tham-quan', icon: <AttractionsIcon /> },
             { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <FileCopyIcon /> },
-            { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <TourIcon /> },
             { text: 'Bài viết', url: '/quan-ly/bai-viet', icon: <ArticleIcon /> },
             { text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },

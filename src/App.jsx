@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import ManagerHomepage from '@pages/ManagerHomepage.jsx';
+import ManagerDashboard from '@pages/manager/ManagerDashboard.jsx';
 import ManageCustomer from '@pages/manager/ManageCustomer.jsx';
 import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
@@ -52,6 +52,7 @@ const App = () => {
         <Route path="/quan-ly/danh-muc" element={<ManageCategory />} />
         <Route path="/quan-ly/bai-viet" element={<ManagerManagePost />} />
         <Route path="/quan-ly/bai-viet/chi-tiet/:id" element={<ManagerPostDetail />} />
+        <Route path="/quan-ly" element={<ManagerDashboard />} />
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
