@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TourStatus } from '@hooks/Statuses';
-import { getTourStatusInfo } from '@services/StatusService';
-import { Box, Paper, Typography, Button, ButtonGroup } from '@mui/material';
+import { Box, Paper, Typography, Button, ButtonGroup, Divider } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -11,99 +9,120 @@ import dayjs from 'dayjs';
 // Mock data - replace with actual API data later
 const mockTemplateData = [
     {
-        templateName: 'Hà Nội - Tràng An - Đảo Kong - Bái Đính - Hạ Long - KDL Yên Tử 4 ngày 3 đêm',
-        status0: 15, status1: 3, status2: 25, status3: 8, status4: 12, status5: 20, status6: 5,
-        total: 88
+        templateName: 'Hà Nội - Tràng An - Đảo Kong',
+        bookings: 88,
+        participants: 352,
+        reviews: 75,
+        rating: 4.5,
+        monthlyData: {
+            '01/2024': { bookings: 15, participants: 60, reviews: 12, rating: 4.6 },
+            '02/2024': { bookings: 18, participants: 72, reviews: 15, rating: 4.4 },
+            '03/2024': { bookings: 20, participants: 80, reviews: 18, rating: 4.5 },
+        }
     },
     {
         templateName: 'Hạ Long Bay 2N1Đ',
-        status0: 20, status1: 5, status2: 30, status3: 10, status4: 15, status5: 25, status6: 8,
-        total: 113
+        bookings: 113,
+        participants: 452,
+        reviews: 95,
+        rating: 4.7,
+        monthlyData: {
+            '01/2024': { bookings: 25, participants: 100, reviews: 22, rating: 4.8 },
+            '02/2024': { bookings: 28, participants: 112, reviews: 24, rating: 4.7 },
+            '03/2024': { bookings: 30, participants: 120, reviews: 26, rating: 4.6 },
+        }
     },
     {
-        templateName: 'Sapa Adventure',
-        status0: 18, status1: 4, status2: 28, status3: 7, status4: 14, status5: 22, status6: 6,
-        total: 99
+        templateName: 'Sapa Adventure Tour',
+        bookings: 95,
+        participants: 380,
+        reviews: 82,
+        rating: 4.6,
+        monthlyData: {
+            '01/2024': { bookings: 20, participants: 80, reviews: 18, rating: 4.5 },
+            '02/2024': { bookings: 22, participants: 88, reviews: 19, rating: 4.6 },
+            '03/2024': { bookings: 25, participants: 100, reviews: 21, rating: 4.7 },
+        }
     },
     {
-        templateName: 'Phú Quốc Resort',
-        status0: 25, status1: 6, status2: 35, status3: 12, status4: 18, status5: 28, status6: 9,
-        total: 133
+        templateName: 'Phú Quốc Island Paradise',
+        bookings: 105,
+        participants: 420,
+        reviews: 90,
+        rating: 4.8,
+        monthlyData: {
+            '01/2024': { bookings: 23, participants: 92, reviews: 20, rating: 4.8 },
+            '02/2024': { bookings: 26, participants: 104, reviews: 22, rating: 4.7 },
+            '03/2024': { bookings: 28, participants: 112, reviews: 24, rating: 4.9 },
+        }
     },
     {
-        templateName: 'Đà Nẵng - Hội An',
-        status0: 22, status1: 5, status2: 32, status3: 9, status4: 16, status5: 26, status6: 7,
-        total: 117
-    },
-    {
-        templateName: 'Huế Ancient Tour',
-        status0: 12, status1: 8, status2: 20, status3: 10, status4: 10, status5: 15, status6: 5,
-        total: 80
+        templateName: 'Đà Nẵng - Hội An Heritage Tour',
+        bookings: 98,
+        participants: 392,
+        reviews: 85,
+        rating: 4.6,
+        monthlyData: {
+            '01/2024': { bookings: 21, participants: 84, reviews: 18, rating: 4.5 },
+            '02/2024': { bookings: 24, participants: 96, reviews: 20, rating: 4.6 },
+            '03/2024': { bookings: 26, participants: 104, reviews: 22, rating: 4.7 },
+        }
     },
     {
         templateName: 'Mekong Delta Experience',
-        status0: 18, status1: 4, status2: 28, status3: 5, status4: 10, status5: 25, status6: 7,
-        total: 97
+        bookings: 85,
+        participants: 340,
+        reviews: 72,
+        rating: 4.4,
+        monthlyData: {
+            '01/2024': { bookings: 18, participants: 72, reviews: 15, rating: 4.3 },
+            '02/2024': { bookings: 20, participants: 80, reviews: 17, rating: 4.4 },
+            '03/2024': { bookings: 22, participants: 88, reviews: 19, rating: 4.5 },
+        }
     },
     {
-        templateName: 'Ninh Bình Nature Tour',
-        status0: 10, status1: 6, status2: 15, status3: 5, status4: 8, status5: 18, status6: 4,
-        total: 66
-    },
-    {
-        templateName: 'Saigon Highlights',
-        status0: 17, status1: 3, status2: 22, status3: 6, status4: 12, status5: 24, status6: 10,
-        total: 94
-    },
-    {
-        templateName: 'Cần Thơ Riverside',
-        status0: 8, status1: 5, status2: 12, status3: 4, status4: 6, status5: 10, status6: 3,
-        total: 48
-    },
-    {
-        templateName: 'Bà Nà Hills Day Trip',
-        status0: 20, status1: 7, status2: 30, status3: 9, status4: 14, status5: 20, status6: 5,
-        total: 105
-    },
-    {
-        templateName: 'Mui Ne Beach Escape',
-        status0: 15, status1: 6, status2: 18, status3: 10, status4: 10, status5: 12, status6: 7,
-        total: 78
-    },
-    {
-        templateName: 'Tam Đảo Retreat',
-        status0: 14, status1: 5, status2: 19, status3: 7, status4: 13, status5: 21, status6: 8,
-        total: 87
-    },
-    {
-        templateName: 'Cát Bà Island Tour',
-        status0: 10, status1: 3, status2: 15, status3: 8, status4: 9, status5: 16, status6: 5,
-        total: 66
+        templateName: 'Huế Imperial City Tour',
+        bookings: 78,
+        participants: 312,
+        reviews: 65,
+        rating: 4.5,
+        monthlyData: {
+            '01/2024': { bookings: 16, participants: 64, reviews: 14, rating: 4.4 },
+            '02/2024': { bookings: 19, participants: 76, reviews: 16, rating: 4.5 },
+            '03/2024': { bookings: 21, participants: 84, reviews: 18, rating: 4.6 },
+        }
     }
-].sort((a, b) => b.total - a.total);
-
+].sort((a, b) => b.bookings - a.bookings);
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-        const total = payload.reduce((sum, entry) => sum + entry.value, 0);
+        const data = payload[0]?.payload;
+        const reviewRate = ((data.reviews / data.bookings) * 100).toFixed(1);
+        const avgParticipants = (data.participants / data.bookings).toFixed(1);
 
         return (
             <Paper sx={{ p: 1, backgroundColor: 'white' }}>
                 <Typography variant="body2" sx={{ mb: 1 }}>
                     <strong>{label}</strong>
                 </Typography>
-                {payload.map((entry, index) => (
-                    <Typography
-                        key={index}
-                        variant="body2"
-                        sx={{ color: entry.color }}
-                    >
-                        {entry.name}: {entry.value}
-                        {' '}({((entry.value / total) * 100).toFixed(1)}%)
-                    </Typography>
-                ))}
-                <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
-                    Tổng số tour: {total}
+                <Typography variant="body2" color="primary">
+                    Số lượng đặt: {data.bookings}
+                </Typography>
+                <Typography variant="body2" color="success.main">
+                    Số người tham gia: {data.participants}
+                </Typography>
+                <Typography variant="body2" color="warning.main">
+                    Số đánh giá: {data.reviews}
+                </Typography>
+                <Divider sx={{ my: 1 }} />
+                <Typography variant="body2">
+                    Trung bình {avgParticipants} người/booking
+                </Typography>
+                <Typography variant="body2">
+                    Tỷ lệ đánh giá: {reviewRate}%
+                </Typography>
+                <Typography variant="body2">
+                    Điểm đánh giá: {data.rating.toFixed(1)}/5.0
                 </Typography>
             </Paper>
         );
@@ -111,38 +130,16 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const TourUsingTemplateChart = () => {
+const BookingAndReviewFromTourTemplate = () => {
     const [displayCount, setDisplayCount] = useState(5);
     const [dateRange, setDateRange] = useState({
         startDate: dayjs().subtract(6, 'month'),
         endDate: dayjs()
     });
-
     const [appliedDateRange, setAppliedDateRange] = useState({
         startDate: dayjs().subtract(6, 'month'),
         endDate: dayjs()
     });
-
-    // Transform TourStatus into readable labels with colors from service
-    const statusLabels = {
-        [TourStatus.Pending]: getTourStatusInfo(TourStatus.Pending).text,
-        [TourStatus.Rejected]: getTourStatusInfo(TourStatus.Rejected).text,
-        [TourStatus.Scheduled]: getTourStatusInfo(TourStatus.Scheduled).text,
-        [TourStatus.Closed]: getTourStatusInfo(TourStatus.Closed).text,
-        [TourStatus.OnGoing]: getTourStatusInfo(TourStatus.OnGoing).text,
-        [TourStatus.Completed]: getTourStatusInfo(TourStatus.Completed).text,
-        [TourStatus.Cancelled]: getTourStatusInfo(TourStatus.Cancelled).text
-    };
-
-    const statusColors = {
-        [getTourStatusInfo(TourStatus.Pending).text]: getTourStatusInfo(TourStatus.Pending).color,
-        [getTourStatusInfo(TourStatus.Rejected).text]: getTourStatusInfo(TourStatus.Rejected).color,
-        [getTourStatusInfo(TourStatus.Scheduled).text]: getTourStatusInfo(TourStatus.Scheduled).color,
-        [getTourStatusInfo(TourStatus.Closed).text]: getTourStatusInfo(TourStatus.Closed).color,
-        [getTourStatusInfo(TourStatus.OnGoing).text]: getTourStatusInfo(TourStatus.OnGoing).color,
-        [getTourStatusInfo(TourStatus.Completed).text]: getTourStatusInfo(TourStatus.Completed).color,
-        [getTourStatusInfo(TourStatus.Cancelled).text]: getTourStatusInfo(TourStatus.Cancelled).color
-    };
 
     const handleStartDateChange = (newValue) => {
         setDateRange(prev => ({
@@ -163,16 +160,19 @@ const TourUsingTemplateChart = () => {
         setAppliedDateRange(dateRange);
     };
 
-    // Filter data based on date range
-    // Note: You'll need to modify this when implementing with real data
     const filteredData = mockTemplateData.slice(0, displayCount);
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography sx={{ fontSize: '1.3rem', fontWeight: 600 }}>
-                    Số lượng tour được tạo từ mẫu
-                </Typography>
+                <Box>
+                    <Typography sx={{ fontSize: '1.3rem', fontWeight: 600 }}>
+                        Số lượng booking, khách và đánh giá của các tour
+                    </Typography>
+                    {/* <Typography variant="body2" color="text.secondary">
+                        Sắp xếp theo số lượng đặt tour
+                    </Typography> */}
+                </Box>
                 <ButtonGroup size="small" variant="outlined">
                     <Button
                         onClick={() => setDisplayCount(5)}
@@ -229,8 +229,8 @@ const TourUsingTemplateChart = () => {
             </LocalizationProvider>
 
             <Box sx={{
-                height: displayCount <= 5 ? '250px' :
-                    displayCount <= 10 ? '400px' : '700px',
+                height: displayCount <= 5 ? '350px' :
+                    displayCount <= 10 ? '550px' : '700px',
                 transition: 'height 0.3s ease-in-out'
             }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -247,8 +247,7 @@ const TourUsingTemplateChart = () => {
                             width={150}
                             tickFormatter={(value) => {
                                 const maxLength = 45;
-                                if (value.length <= maxLength) return value;
-                                return value.slice(0, maxLength) + '...';
+                                return value.length <= maxLength ? value : value.slice(0, maxLength) + '...';
                             }}
                             tick={{ 
                                 width: 170,
@@ -258,15 +257,9 @@ const TourUsingTemplateChart = () => {
                         />
                         <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        {Object.entries(statusLabels).map(([status, label]) => (
-                            <Bar
-                                key={status}
-                                dataKey={`status${status}`}
-                                name={label}
-                                fill={statusColors[label]}
-                                stackId="status"
-                            />
-                        ))}
+                        <Bar dataKey="bookings" name="Số lượng đặt" fill="#2196f3" />
+                        <Bar dataKey="participants" name="Số người tham gia" fill="#4caf50" />
+                        <Bar dataKey="reviews" name="Số đánh giá" fill="#ff9800" />
                     </BarChart>
                 </ResponsiveContainer>
             </Box>
@@ -274,4 +267,4 @@ const TourUsingTemplateChart = () => {
     );
 };
 
-export default TourUsingTemplateChart; 
+export default BookingAndReviewFromTourTemplate;

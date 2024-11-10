@@ -14,6 +14,9 @@ import AttractionReviewByProvinceChart from '@components/manager/attraction/Attr
 import BookingChart from '@components/manager/tour/BookingChart';
 import CustomerStatisticsChart from '@components/manager/tour/CustomerStatisticsChart';
 import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateChart';
+import BookingAndReviewFromTourTemplate from '@components/manager/tour/BookingAndReviewFromTourTemplate';
+import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
+import TourTemplateChart from '@components/manager/tour/TourTemplateChart';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -48,6 +51,8 @@ const ManagerDashboard = () => {
     { title: 'Bài viết', value: stats.totalPosts, icon: <ArticleOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
     { title: 'Nhân viên', value: stats.totalStaff, icon: <GroupOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
   ];
+
+  const chartHeight = '500px';
 
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
@@ -95,7 +100,7 @@ const ManagerDashboard = () => {
           ))}
         </Grid>
 
-        <Grid container spacing={3}  sx={{ mt: 1 }}>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={6}>
             <BookingChart />
           </Grid>
@@ -105,7 +110,19 @@ const ManagerDashboard = () => {
         </Grid>
 
         <Typography sx={{ fontSize: '2rem', fontWeight: 600, color: '#30529c', mt: 10 }}> Tour du lịch </Typography>
-        <Grid container spacing={3}>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TourTemplateRevenue/>
+          </Grid>
+          {/* <Grid item xs={6}>
+            <Box sx={{ height: chartHeight }}>
+              <TourTemplateChart fixedHeight={chartHeight} />
+            </Box>
+          </Grid> */}
+
+          <Grid item xs={12}>
+            <BookingAndReviewFromTourTemplate />
+          </Grid>
           <Grid item xs={12}>
             <TourUsingTemplateChart />
           </Grid>
