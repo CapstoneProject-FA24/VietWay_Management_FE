@@ -10,9 +10,10 @@ import TourOutlinedIcon from '@mui/icons-material/TourOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AirplaneTicketOutlinedIcon from '@mui/icons-material/AirplaneTicketOutlined';
-import AttractionReviewChart from '@components/manager/attraction/AttractionReviewChart';
+import AttractionReviewByProvinceChart from '@components/manager/attraction/AttractionReviewByProvinceChart';
 import BookingChart from '@components/manager/tour/BookingChart';
 import CustomerStatisticsChart from '@components/manager/tour/CustomerStatisticsChart';
+import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateChart';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -103,10 +104,17 @@ const ManagerDashboard = () => {
           </Grid>
         </Grid>
 
+        <Typography sx={{ fontSize: '2rem', fontWeight: 600, color: '#30529c', mt: 10 }}> Tour du lịch </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <TourUsingTemplateChart />
+          </Grid>
+        </Grid>
+
         <Typography sx={{ fontSize: '2rem', fontWeight: 600, color: '#30529c', mt: 10 }}> Điểm tham quan </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <AttractionReviewChart />
+            <AttractionReviewByProvinceChart />
           </Grid>
         </Grid>
       </Box>

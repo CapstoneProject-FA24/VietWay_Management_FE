@@ -3,12 +3,23 @@ import {
     BarChart, Bar, XAxis, YAxis,
     CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { Box, Paper, Typography, Button } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Box, Paper, Typography, Button, ButtonGroup } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
-const AttractionReviewChart = ({ data }) => {
+const AttractionReviewByProvinceChart = ({ data }) => {
     const [displayCount, setDisplayCount] = useState(5);
+    const [dateRange, setDateRange] = useState({
+        startDate: dayjs().subtract(6, 'month'),
+        endDate: dayjs()
+    });
+
+    const [appliedDateRange, setAppliedDateRange] = useState({
+        startDate: dayjs().subtract(6, 'month'),
+        endDate: dayjs()
+    });
 
     // Example data structure for provinces
     const mockData = [
@@ -44,10 +55,7 @@ const AttractionReviewChart = ({ data }) => {
                 province['5 sao']
         }))
         .sort((a, b) => {
-            // First sort by average rating
             const ratingDiff = b.average - a.average;
-
-            // If ratings are equal (or very close), sort by total number of ratings
             if (Math.abs(ratingDiff) < 0.1) {
                 return b.totalRatings - a.totalRatings;
             }
@@ -56,53 +64,23 @@ const AttractionReviewChart = ({ data }) => {
 
     const displayData = sortedData.slice(0, displayCount);
 
-    const handleDisplayChange = (newCount) => {
-        setDisplayCount(newCount);
+    const handleStartDateChange = (newValue) => {
+        setDateRange(prev => ({
+            ...prev,
+            startDate: newValue,
+            endDate: newValue.isAfter(prev.endDate) ? newValue : prev.endDate
+        }));
     };
 
-    const renderButtons = () => {
-        if (displayCount === 5) {
-            return (
-                <Button
-                    variant="outlined"
-                    onClick={() => handleDisplayChange(10)}
-                    endIcon={<KeyboardArrowDownIcon />}
-                >
-                    Xem top 10
-                </Button>
-            );
-        }
+    const handleEndDateChange = (newValue) => {
+        setDateRange(prev => ({
+            ...prev,
+            endDate: newValue
+        }));
+    };
 
-        if (displayCount === 10) {
-            return (
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button
-                        variant="outlined"
-                        onClick={() => handleDisplayChange(5)}
-                        endIcon={<KeyboardArrowUpIcon />}
-                    >
-                        Thu gọn
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        onClick={() => handleDisplayChange(sortedData.length)}
-                        endIcon={<KeyboardArrowDownIcon />}
-                    >
-                        Xem tất cả
-                    </Button>
-                </Box>
-            );
-        }
-
-        return (
-            <Button
-                variant="outlined"
-                onClick={() => handleDisplayChange(5)}
-                endIcon={<KeyboardArrowUpIcon />}
-            >
-                Thu gọn
-            </Button>
-        );
+    const handleApply = () => {
+        setAppliedDateRange(dateRange);
     };
 
     const CustomTooltip = ({ active, payload, label }) => {
@@ -132,18 +110,71 @@ const AttractionReviewChart = ({ data }) => {
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
                         Đánh giá của các điểm tham quan theo tỉnh thành
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Sắp xếp theo đánh giá trung bình và số lượng đánh giá
                     </Typography>
                 </Box>
-                {renderButtons()}
+                <ButtonGroup size="small" variant="outlined">
+                    <Button 
+                        onClick={() => setDisplayCount(5)}
+                        variant={displayCount === 5 ? 'contained' : 'outlined'}
+                    >
+                        Top 5
+                    </Button>
+                    <Button 
+                        onClick={() => setDisplayCount(10)}
+                        variant={displayCount === 10 ? 'contained' : 'outlined'}
+                    >
+                        Top 10
+                    </Button>
+                    <Button 
+                        onClick={() => setDisplayCount(sortedData.length)}
+                        variant={displayCount === sortedData.length ? 'contained' : 'outlined'}
+                    >
+                        Tất cả
+                    </Button>
+                </ButtonGroup>
             </Box>
+
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                    <DatePicker
+                        views={['month', 'year']}
+                        value={dateRange.startDate}
+                        onChange={handleStartDateChange}
+                        maxDate={dateRange.endDate}
+                        slotProps={{ textField: { size: 'small' } }}
+                        label="Từ tháng"
+                        format="MM/YYYY"
+                        sx={{ width: 150 }}
+                    />
+                    <DatePicker
+                        views={['month', 'year']}
+                        value={dateRange.endDate}
+                        onChange={handleEndDateChange}
+                        minDate={dateRange.startDate}
+                        maxDate={dayjs()}
+                        slotProps={{ textField: { size: 'small' } }}
+                        label="Đến tháng"
+                        format="MM/YYYY"
+                        sx={{ width: 150 }}
+                    />
+                    <Button
+                        variant="contained"
+                        onClick={handleApply}
+                        sx={{ height: 40 }}
+                    >
+                        Áp dụng
+                    </Button>
+                </Box>
+            </LocalizationProvider>
+
             <Box sx={{
                 height: displayCount <= 5 ? '300px' :
-                    displayCount <= 10 ? '500px' : '100%',
+                    displayCount <= 10 ? '400px' : '700px',
                 transition: 'height 0.3s ease-in-out'
             }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -177,4 +208,4 @@ const AttractionReviewChart = ({ data }) => {
     );
 };
 
-export default AttractionReviewChart;
+export default AttractionReviewByProvinceChart;

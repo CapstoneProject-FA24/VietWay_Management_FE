@@ -133,10 +133,10 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
         <List sx={{ width: '100%' }}>
           <ListItem 
             component={Link} 
-            to="/admin/dashboard" 
+            to="/quan-ly" 
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginTop: 1 }}
           >
-            <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
+            <MenuItemPaper elevation={2} isSelected={location.pathname === '/quan-ly'}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <HomeIcon sx={{ color: '#2196f3' }} />

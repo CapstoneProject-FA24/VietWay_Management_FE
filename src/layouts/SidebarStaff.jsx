@@ -128,26 +128,6 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
 
         <Divider />
 
-        <List sx={{ width: '100%' }}>
-          <ListItem
-            component={Link}
-            to="/admin/dashboard"
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginTop: 1 }}
-          >
-            <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
-              <MenuItemBox>
-                <ListItemIcon sx={{ minWidth: '40px' }}>
-                  <HomeIcon sx={{ color: '#2196f3' }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Dashboard"
-                  primaryTypographyProps={{ fontWeight: 'bold', fontSize: '1rem' }}
-                />
-              </MenuItemBox>
-            </MenuItemPaper>
-          </ListItem>
-        </List>
-
         <List sx={{ width: '110%', maxHeight: '60vh', overflow: 'auto', ml: -1 }}>
           {[
             { text: 'Điểm Tham Quan', url: '/nhan-vien/diem-tham-quan', icon: <AttractionsIcon /> },
