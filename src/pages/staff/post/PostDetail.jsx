@@ -16,6 +16,7 @@ import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
 import { fetchPostById, updatePost, deletePost } from '@services/PostService';
+import { Helmet } from 'react-helmet';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -353,6 +354,9 @@ const PostDetail = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Helmet>
+        <title>Chi tiết bài viết</title>
+      </Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 

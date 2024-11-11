@@ -16,6 +16,7 @@ import { getTourStatusInfo } from '@services/StatusService';
 import { TourStatus } from '@hooks/Statuses';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { Helmet } from 'react-helmet';
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -120,6 +121,9 @@ const TourDetail = () => {
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
+      <Helmet>
+        <title>Chi tiết tour</title>
+      </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>

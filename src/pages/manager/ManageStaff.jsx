@@ -8,6 +8,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
+
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');

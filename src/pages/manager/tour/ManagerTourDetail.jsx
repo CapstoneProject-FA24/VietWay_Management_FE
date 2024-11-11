@@ -12,6 +12,7 @@ import TourCalendar from '@components/tour/TourCalendar';
 import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { getTourStatusInfo } from '@services/StatusService';
 import { TourStatus } from '@hooks/Statuses';
+import { Helmet } from 'react-helmet';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -72,6 +73,9 @@ const ManagerTourDetail = () => {
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
+      <Helmet>
+        <title>Chi tiết tour</title>
+      </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>

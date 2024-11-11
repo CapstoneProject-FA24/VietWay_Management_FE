@@ -235,6 +235,9 @@ const CreateTourTemplate = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Helmet>
+        <title>Tạo tour mẫu mới</title>
+      </Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
         <Box sx={{ 

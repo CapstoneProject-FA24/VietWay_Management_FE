@@ -106,6 +106,9 @@ const AttractionDetail = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Helmet>
+        <title>Chi tiết điểm tham quan</title>
+      </Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 

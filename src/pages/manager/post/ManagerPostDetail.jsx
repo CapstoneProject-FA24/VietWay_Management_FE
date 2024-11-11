@@ -13,6 +13,7 @@ import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
 import { updatePost } from '@services/PostService';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
+import { Helmet } from 'react-helmet';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -163,6 +164,9 @@ const ManagerPostDetail = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Helmet>
+        <title>Chi tiết bài viết</title>
+      </Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarManager isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 

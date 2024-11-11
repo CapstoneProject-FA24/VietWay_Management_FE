@@ -112,7 +112,7 @@ const ManageCategory = () => {
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
-        <title>Quản lý Danh mục</title>
+        <title>Quản lý danh mục</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       

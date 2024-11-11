@@ -8,6 +8,7 @@ import TourTemplateInfo from '@components/staff/tourTemplate/TourTemplateInfo';
 import TourTemplateUpdateForm from '@components/staff/tourTemplate/TourTemplateUpdateForm';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
+import { Helmet } from 'react-helmet';
 
 const TourTemplateDetails = () => {
   const [state, setState] = useState({
@@ -92,6 +93,9 @@ const TourTemplateDetails = () => {
 
     return (
       <Box sx={{ display: 'flex', gap: 2 }}>
+        <Helmet>
+          <title>Chi tiết tour mẫu</title>
+        </Helmet>
         {showEditDelete && (
           <Button
             variant="contained"

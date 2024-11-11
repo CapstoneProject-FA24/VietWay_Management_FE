@@ -13,6 +13,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import TourCalendar from '@components/tour/TourCalendar';
 import TourTemplateInfo from '@components/tour/TourTemplateInfo';
+import { Helmet } from 'react-helmet';
 
 const DATE_FORMAT = "DD/MM/YYYY";
 
@@ -163,6 +164,9 @@ const CreateTour = () => {
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
+      <Helmet>
+        <title>Tạo tour mới</title>
+      </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>

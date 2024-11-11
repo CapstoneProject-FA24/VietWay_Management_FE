@@ -8,6 +8,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import SidebarManager from '@layouts/SidebarManager';
 import { mockManager } from '@hooks/MockAccount';
 import TodayIcon from '@mui/icons-material/Today';
+import { Helmet } from 'react-helmet';
+
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -100,6 +102,9 @@ const ManagerProfile = () => {
 
     return (
         <Box sx={{ display: 'flex' }}>
+            <Helmet>
+                <title>Thông tin tài khoản</title>
+            </Helmet>
             <SidebarManager isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
             <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0 }}>
                 <Box component="header" sx={{ width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw', position: 'relative', height: '400px', borderRadius: '0 0 30px 30px', overflow: 'hidden' }}>

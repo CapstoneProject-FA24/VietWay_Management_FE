@@ -48,7 +48,7 @@ const ManageManager = () => {
   return (
     <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
-        <title>Quản lý</title>
+        <title>Quản lý nhân viên quản lý</title>
       </Helmet>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0', padding: 5, overflowY: 'auto' }}>

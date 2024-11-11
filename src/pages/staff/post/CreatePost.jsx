@@ -9,6 +9,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import dayjs from 'dayjs';
 import { createPost } from '@services/PostService';
+import { Helmet } from 'react-helmet';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -200,6 +201,9 @@ const CreatePost = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '89vw' }}>
+      <Helmet>
+        <title>Tạo bài viết mới</title>
+      </Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
