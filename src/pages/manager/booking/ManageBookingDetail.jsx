@@ -1,15 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Card, Button, Typography, Tabs, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Stack, Grid } from '@mui/material';
-import { getBookingById, updateBookingStatus } from '../../../hooks/MockBooking';
-import { ArrowBack, CalendarToday } from '@mui/icons-material';
+import { Box, Button, Typography, Tabs, Tab, CircularProgress, Alert } from '@mui/material';
+import { getBookingById, updateBookingStatus } from '@hooks/MockBooking';
+import { ArrowBack, CalendarToday, Person, Payment, Info } from '@mui/icons-material';
+import SidebarManager from '@layouts/SidebarManager';
+import { Helmet } from 'react-helmet';
+import { BookingStatus } from '@hooks/Statuses';
+import { getBookingStatusInfo } from '@services/StatusService';
+import BookingDetail from '@components/manager/booking/BookingDetail';
+import Participant from '@components/manager/booking/Participant';
+import PaymentDetail from '@components/manager/booking/PaymentDetail';
 
 const ManageBookingDetail = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  const [error, setError] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
+  const pageTopRef = useRef(null);
 
   useEffect(() => {
     fetchBookingDetail();
@@ -18,10 +28,11 @@ const ManageBookingDetail = () => {
   const fetchBookingDetail = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getBookingById(id);
       setBooking(data);
     } catch (error) {
-      console.error('Không thể tải thông tin đặt tour');
+      setError('Không thể tải thông tin đặt tour');
     } finally {
       setLoading(false);
     }
@@ -30,202 +41,151 @@ const ManageBookingDetail = () => {
   const handleStatusUpdate = async (newStatus) => {
     try {
       await updateBookingStatus(id, newStatus);
-      console.log('Cập nhật trạng thái thành công');
       fetchBookingDetail();
     } catch (error) {
-      console.error('Không thể cập nhật trạng thái');
+      setError('Không thể cập nhật trạng thái');
     }
   };
 
-  const statusColors = {
-    'PENDING': 'warning',
-    'CONFIRMED': 'info',
-    'PAID': 'success',
-    'CANCELLED': 'error',
-    'COMPLETED': 'secondary'
+  const getActionButtons = (status) => {
+    switch (status) {
+      case BookingStatus.Pending:
+        return (
+          <>
+            <Button
+              variant="contained"
+              onClick={() => handleStatusUpdate(BookingStatus.Confirmed)}
+              sx={{ backgroundColor: getBookingStatusInfo(BookingStatus.Confirmed).color }}
+            >
+              Xác nhận đặt tour
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => handleStatusUpdate(BookingStatus.Cancelled)}
+              sx={{ backgroundColor: getBookingStatusInfo(BookingStatus.Cancelled).color }}
+            >
+              Hủy đặt tour
+            </Button>
+          </>
+        );
+      case BookingStatus.Confirmed:
+        return (
+          <>
+            <Button
+              variant="contained"
+              onClick={() => handleStatusUpdate(BookingStatus.Completed)}
+              sx={{ backgroundColor: getBookingStatusInfo(BookingStatus.Completed).color }}
+            >
+              Hoàn thành tour
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => handleStatusUpdate(BookingStatus.Cancelled)}
+              sx={{ backgroundColor: getBookingStatusInfo(BookingStatus.Cancelled).color }}
+            >
+              Hủy đặt tour
+            </Button>
+          </>
+        );
+      default:
+        return null;
+    }
   };
 
-  const touristColumns = [
-    { id: 'fullName', label: 'Họ tên' },
-    { id: 'phoneNumber', label: 'Số điện thoại' },
-    { id: 'gender', label: 'Giới tính' },
-    { id: 'dateOfBirth', label: 'Ngày sinh' },
-    { id: 'price', label: 'Giá' }
-  ];
-
-  const paymentColumns = [
-    { id: 'paymentId', label: 'Mã thanh toán' },
-    { id: 'amount', label: 'Số tiền' },
-    { id: 'bankCode', label: 'Ngân hàng' },
-    { id: 'bankTransactionNumber', label: 'Mã giao dịch' },
-    { id: 'note', label: 'Ghi chú' },
-    { id: 'createAt', label: 'Thời gian' },
-    { id: 'status', label: 'Trạng thái' }
-  ];
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack spacing={3} width="100%">
-        <Stack direction="row" spacing={2}>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }} ref={pageTopRef}>
+      <Helmet>
+        <title>Chi tiết đặt tour | Quản lý</title>
+      </Helmet>
+
+      <SidebarManager
+        isOpen={isSidebarOpen}
+        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+
+      <Box sx={{
+        flexGrow: 1,
+        transition: 'margin-left 0.3s',
+        marginLeft: isSidebarOpen ? '250px' : 0,
+        width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw'
+      }}>
+        <Box sx={{
+          boxShadow: 2,
+          pt: 4, pl: 4, pr: 4, pb: 1, mb: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: 'white'
+        }}>
           <Button
-            startIcon={<ArrowBack />}
             onClick={() => navigate('/quan-ly/dat-tour')}
-            variant="outlined"
+            variant="contained"
+            startIcon={<ArrowBack />}
+            sx={{
+              height: '55px',
+              backgroundColor: 'transparent',
+              boxShadow: 0,
+              color: 'gray',
+              mt: -1,
+              ":hover": {
+                backgroundColor: 'transparent',
+                boxShadow: 0,
+                color: 'black',
+                fontWeight: 700
+              }
+            }}
           >
             Quay lại
           </Button>
-          {booking?.status === 'PENDING' && (
-            <Button variant="contained" onClick={() => handleStatusUpdate('CONFIRMED')}>
-              Xác nhận đặt tour
-            </Button>
-          )}
-          {booking?.status === 'CONFIRMED' && (
-            <Button variant="contained" onClick={() => handleStatusUpdate('PAID')}>
-              Xác nhận thanh toán
-            </Button>
-          )}
-          {(booking?.status === 'CONFIRMED' || booking?.status === 'PENDING') && (
-            <Button color="error" variant="contained" onClick={() => handleStatusUpdate('CANCELLED')}>
-              Hủy đặt tour
-            </Button>
-          )}
-        </Stack>
+          <Typography
+            variant="h4"
+            gutterBottom
+            sx={{
+              fontWeight: '700',
+              fontFamily: 'Inter, sans-serif',
+              textAlign: 'center',
+              color: '#05073C',
+              flexGrow: 1,
+              ml: -15
+            }}
+          >
+            Chi tiết đặt tour
+          </Typography>
+          {booking && getActionButtons(booking.status)}
+        </Box>
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2, mx: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {booking && (
-          <Box>
-            <Tabs value={activeTab} onChange={handleTabChange}>
-              <Tab label="Thông tin đặt tour" />
-              <Tab label="Danh sách khách" />
-              <Tab label="Lịch sử thanh toán" />
+          <Box sx={{ pl: 8, pr: 8, pt: 3, pb: 5 }}>
+            <Tabs
+              value={activeTab}
+              onChange={(e, newValue) => setActiveTab(newValue)}
+              sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+            >
+              <Tab icon={<Info />} label="Thông tin đặt tour" iconPosition="start" />
+              <Tab icon={<Person />} label="Danh sách khách" iconPosition="start" />
+              <Tab icon={<Payment />} label="Lịch sử thanh toán" iconPosition="start" />
             </Tabs>
 
-            {activeTab === 0 && (
-              <Card sx={{ p: 2, mt: 2 }}>
-                <Stack spacing={3}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={4}>
-                      <Box
-                        component="img"
-                        src={booking.tour?.thumbnailUrl}
-                        alt={booking.tour?.name}
-                        sx={{ width: '100%', borderRadius: 1 }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={8}>
-                      <Stack spacing={2}>
-                        <Typography variant="h5">{booking.tour?.name}</Typography>
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <CalendarToday fontSize="small" />
-                          <Typography>
-                            {new Date(booking.tour?.startDate).toLocaleDateString('vi-VN')} - {new Date(booking.tour?.endDate).toLocaleDateString('vi-VN')}
-                          </Typography>
-                        </Stack>
-                        <Chip label={booking.status} color={statusColors[booking.status]} />
-                      </Stack>
-                    </Grid>
-                  </Grid>
-
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell component="th">Mã đặt tour</TableCell>
-                          <TableCell>{booking.bookingId}</TableCell>
-                          <TableCell component="th">Ngày đặt</TableCell>
-                          <TableCell>{new Date(booking.createdAt).toLocaleString('vi-VN')}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell component="th">Số người</TableCell>
-                          <TableCell>{booking.numberOfParticipants}</TableCell>
-                          <TableCell component="th">Tổng tiền</TableCell>
-                          <TableCell>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking.totalPrice)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell component="th">Người liên hệ</TableCell>
-                          <TableCell>{booking.contactFullName}</TableCell>
-                          <TableCell component="th">Email</TableCell>
-                          <TableCell>{booking.contactEmail}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell component="th">Số điện thoại</TableCell>
-                          <TableCell>{booking.contactPhoneNumber}</TableCell>
-                          <TableCell component="th">Địa chỉ</TableCell>
-                          <TableCell>{booking.contactAddress}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell component="th">Ghi chú</TableCell>
-                          <TableCell colSpan={3}>{booking.note}</TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Stack>
-              </Card>
-            )}
-
-            {activeTab === 1 && (
-              <TableContainer component={Paper} sx={{ mt: 2 }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      {touristColumns.map((column) => (
-                        <TableCell key={column.id}>{column.label}</TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {booking.bookingTourists.map((tourist) => (
-                      <TableRow key={tourist.touristId}>
-                        <TableCell>{tourist.fullName}</TableCell>
-                        <TableCell>{tourist.phoneNumber}</TableCell>
-                        <TableCell>{tourist.gender === 'MALE' ? 'Nam' : 'Nữ'}</TableCell>
-                        <TableCell>{new Date(tourist.dateOfBirth).toLocaleDateString('vi-VN')}</TableCell>
-                        <TableCell>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourist.price)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-
-            {activeTab === 2 && (
-              <TableContainer component={Paper} sx={{ mt: 2 }}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      {paymentColumns.map((column) => (
-                        <TableCell key={column.id}>{column.label}</TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {booking.bookingPayments.map((payment) => (
-                      <TableRow key={payment.paymentId}>
-                        <TableCell>{payment.paymentId}</TableCell>
-                        <TableCell>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(payment.amount)}</TableCell>
-                        <TableCell>{payment.bankCode}</TableCell>
-                        <TableCell>{payment.bankTransactionNumber}</TableCell>
-                        <TableCell>{payment.note}</TableCell>
-                        <TableCell>{new Date(payment.createAt).toLocaleString('vi-VN')}</TableCell>
-                        <TableCell>
-                          <Chip 
-                            label={payment.status}
-                            color={payment.status === 'COMPLETED' ? 'success' : 'warning'}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
+            {activeTab === 0 && <BookingDetail booking={booking} />}
+            {activeTab === 1 && <Participant participants={booking.bookingTourists} />}
+            {activeTab === 2 && <PaymentDetail payments={booking.bookingPayments} />}
           </Box>
         )}
-      </Stack>
+      </Box>
     </Box>
   );
 };

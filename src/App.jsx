@@ -56,8 +56,8 @@ const App = () => {
         <Route path="/quan-ly/bai-viet" element={<ManagerManagePost />} />
         <Route path="/quan-ly/bai-viet/chi-tiet/:id" element={<ManagerPostDetail />} />
         <Route path="/quan-ly" element={<ManagerDashboard />} />
-        <Route path="/quan-ly/dat-tour" element={<ManageBooking />} />
-        <Route path="/quan-ly/dat-tour/chi-tiet/:id" element={<ManageBookingDetail />} />
+        <Route path="/quan-ly/booking" element={<ManageBooking />} />
+        <Route path="/quan-ly/booking/chi-tiet/:id" element={<ManageBookingDetail />} />
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
