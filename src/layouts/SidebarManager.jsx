@@ -160,7 +160,8 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
             { text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
             { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> },
-            { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> }
+            { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> },
+            { text: 'Đặt tour', url: '/quan-ly/dat-tour', icon: <EventIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text} component={Link}  to={url}
