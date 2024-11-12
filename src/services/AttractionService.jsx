@@ -1,6 +1,5 @@
 import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
-
 import { getCookie } from '@services/AuthenService';
 
 export const fetchAttractions = async (params) => {
@@ -35,7 +34,6 @@ export const fetchAttractions = async (params) => {
             province: item.province,
             imageUrl: item.imageUrl
         }));
-
         return ({
             data: attractions,
             pageIndex: response.data?.data?.pageIndex,
@@ -160,6 +158,25 @@ export const updateAttraction = async (attractionData) => {
         return response;
     } catch (error) {
         console.error('Error updating attraction:', error.response);
+        throw error;
+    }
+};
+
+export const changeAttractionStatus = async (attractionId, status, reason) => {
+    const token = getCookie('token');
+    try {
+        const requestData = {
+            status: status,
+            reason: reason
+        };
+        const response = await axios.patch(`${baseURL}/api/attractions/${attractionId}/status`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing tour template status:', error.response);
         throw error;
     }
 };

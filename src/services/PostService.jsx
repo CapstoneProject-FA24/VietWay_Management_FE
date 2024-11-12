@@ -127,3 +127,23 @@ export const deletePost = async (id) => {
         throw error;
     }
 };
+
+export const changePostStatus = async (postId, status, reason) => {
+    const token = getCookie('token');
+    try {
+        const requestData = {
+            status: status,
+            reason: reason
+        };
+
+        const response = await axios.patch(`${baseURL}/api/Post/change-post-status/${postId}`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing tour template status:', error.response);
+        throw error;
+    }
+};
