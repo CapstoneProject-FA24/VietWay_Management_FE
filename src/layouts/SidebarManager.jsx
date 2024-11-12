@@ -17,6 +17,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CategoryIcon from '@mui/icons-material/Category';
+import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
 import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
@@ -156,12 +157,12 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
             { text: 'Điểm tham quan', url: '/quan-ly/diem-tham-quan', icon: <AttractionsIcon /> },
             { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <TourIcon /> },
+            { text: 'Booking', url: '/quan-ly/booking', icon: <AirplaneTicketIcon /> },
             { text: 'Bài viết', url: '/quan-ly/bai-viet', icon: <ArticleIcon /> },
             /*{ text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },*/
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
             { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> },
             { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> },
-            { text: 'Đặt tour', url: '/quan-ly/booking', icon: <EventIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text} component={Link}  to={url}

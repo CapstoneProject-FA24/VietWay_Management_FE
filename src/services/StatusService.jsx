@@ -82,7 +82,7 @@ export const getTourTemplateStatusInfo = (statusCode) => {
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
     case BookingStatus.Pending:
-      return { text: "Đang chờ thanh to��n", color: "#fff746" };
+      return { text: "Đang chờ thanh toán", color: "#fff746" };
     case BookingStatus.Confirmed:
       return { text: "Đã thanh toán", color: "#66e3ff" };
     case BookingStatus.Completed:
@@ -103,39 +103,14 @@ export const getBookingStatusInfo = (statusCode) => {
 export const getPaymentStatusInfo = (statusCode) => {
   switch (statusCode) {
     case PaymentStatus.Pending:
-      return { 
-        text: "Chờ thanh toán", 
-        color: "#fff746", 
-        textColor: "#8f8800",
-        backgroundColor: "#fff9b8" 
-      };
+      return { text: "Chờ thanh toán", color: "#fff746", textColor: "#8f8800", backgroundColor: "#fff9b8" };
     case PaymentStatus.Paid:
-      return { 
-        text: "Đã thanh toán", 
-        color: "#19cd00", 
-        textColor: "#0f7c00",
-        backgroundColor: "#d3ffa4" 
-      };
+      return { text: "Đã thanh toán", color: "#19cd00", textColor: "#0f7c00", backgroundColor: "#d3ffa4" };
     case PaymentStatus.Failed:
-      return { 
-        text: "Thất bại", 
-        color: "#ff0000", 
-        textColor: "#600000",
-        backgroundColor: "#ffb8b8" 
-      };
+      return { text: "Thất bại", color: "#ff0000", textColor: "#600000", backgroundColor: "#ffb8b8" };
     case PaymentStatus.Refunded:
-      return { 
-        text: "Đã hoàn tiền", 
-        color: "#3f6eec", 
-        textColor: "#002687",
-        backgroundColor: "#b8d4ff" 
-      };
+      return { text: "Đã hoàn tiền", color: "#3f6eec", textColor: "#002687", backgroundColor: "#b8d4ff" };
     default:
-      return { 
-        text: "Không xác định", 
-        color: "#9E9E9E", 
-        textColor: "#424242",
-        backgroundColor: "#E0E0E0" 
-      };
+      return { text: "Không xác định", color: "#9E9E9E", textColor: "#424242", backgroundColor: "#E0E0E0" };
   }
 };
