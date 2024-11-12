@@ -145,16 +145,16 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
                       alignItems: 'center', 
                       gap: 1, 
                       mb: 2,
-                      color: openingHours.opening_hours.open_now ? 'success.main' : 'error.main'
+                      color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
                     }}>
-                      {openingHours.opening_hours.open_now ? (
+                      {openingHours.opening_hours?.open_now ? (
                         <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
                       ) : (
                         <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
                       )}
                     </Box>
                     <Box>
-                      {openingHours.opening_hours.periods.map((period, index) => {
+                      {openingHours.opening_hours?.periods?.map((period, index) => {
                         const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
                         const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
                         const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
