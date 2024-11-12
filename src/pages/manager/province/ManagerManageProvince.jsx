@@ -104,9 +104,9 @@ const ManagerManageProvince = () => {
                         </Button>
                     </Grid>
 
-                    <Grid item xs={7}>
+                    <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <TextField variant="outlined" placeholder="Tìm kiếm tỉnh thành..."
-                            size="small" sx={{ width: '100%' }}
+                            size="small" sx={{ width: '82%' }}
                             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                             InputProps={{
                                 startAdornment: (
@@ -116,6 +116,9 @@ const ManagerManageProvince = () => {
                                 ),
                             }}
                         />
+                        <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
+                            Tìm kiếm
+                        </Button>
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                         <Typography>

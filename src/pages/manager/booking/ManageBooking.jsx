@@ -1,22 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Box, 
-  Card, 
-  Typography, 
-  Stack, 
-  TextField, 
-  MenuItem, 
-  Grid,
-  Button,
-  Tabs,
-  Tab,
-  Select,
-  Pagination,
-  InputAdornment
-} from '@mui/material';
+import { Box, Card, Typography, TextField, MenuItem, Grid, Button, Tabs, Tab, Select, Pagination, InputAdornment } from '@mui/material';
 import { getBookings, deleteBooking } from '@hooks/MockBooking';
-import { Search, FilterList } from '@mui/icons-material';
+import { Search } from '@mui/icons-material';
 import BookingCard from '@components/manager/booking/BookingCard';
 import { Snackbar, Alert } from '@mui/material';
 import SidebarManager from '@layouts/SidebarManager';
@@ -151,24 +137,12 @@ const ManageBooking = () => {
 
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
-      <Helmet>
-        <title>Quản lý đặt tour</title>
-      </Helmet>
+      <Helmet> <title>Quản lý đặt tour</title> </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      
-      <Box sx={{ 
-        flexGrow: 1, 
-        p: 3, 
-        transition: 'margin-left 0.3s', 
-        marginLeft: isSidebarOpen ? '260px' : '20px', 
-        width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', 
-        overflowX: 'hidden' 
-      }}>
-        <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+      <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', overflowX: 'hidden' }}>
+        <Grid container spacing={3} sx={{ mb: 3}}>
           <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-            <Typography sx={{ fontSize: '3rem', fontWeight: 600, color: 'primary.main' }}>
-              Quản lý đặt tour
-            </Typography>
+            <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý đặt tour </Typography>
           </Grid>
 
           <Grid item xs={12} md={7}>

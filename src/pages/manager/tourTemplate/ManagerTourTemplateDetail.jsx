@@ -13,6 +13,8 @@ import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDelete
 import SidebarManager from '@layouts/SidebarManager';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import { getTourTemplateStatusInfo } from '@services/StatusService';
+import FeedbackBreakdown from '@components/manager/feedbackTour/FeedbackBreakdown';
+import FeedbackList from '@components/manager/feedbackTour/FeedbackList';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -240,6 +242,20 @@ const ManagerTourTemplateDetails = () => {
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
               <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.note}</Typography>
             </Box>
+
+            {tourTemplate.status === TourTemplateStatus.Approved && (
+              <Box sx={{ mb: 5 }}>
+                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Đánh giá từ khách hàng</Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={4}>
+                    <FeedbackBreakdown reviews={tourTemplate.feedbacks || []} />
+                  </Grid>
+                  <Grid item xs={12} md={8}>
+                    <FeedbackList tourTemplateId={tourTemplate.id} />
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>

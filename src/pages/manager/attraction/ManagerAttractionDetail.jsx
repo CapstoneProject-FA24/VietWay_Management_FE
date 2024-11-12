@@ -16,6 +16,9 @@ import { fetchPlaceDetails } from '@services/GooglePlaceService';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ReviewBreakdown from '@components/manager/reviewAttraction/ReviewBreakdown';
+import ReviewCard from '@components/manager/reviewAttraction/ReviewCard';
+import { mockReviews } from '@hooks/MockReviews';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -275,6 +278,22 @@ const ManagerAttractionDetail = () => {
           <Map placeId={attraction.googlePlaceId}/>
         </Box>
       </Grid>
+
+      {attraction?.status === AttractionStatus.Approved && (
+        <>
+          <Typography sx={{ mt: 5, mb: -5, fontWeight: 700, fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '32px' }}>Danh sách đánh giá của điểm tham quan</Typography>
+          <Grid container spacing={3} sx={{ mt: 5 }}>
+            <Grid item xs={12} md={4}>
+            <ReviewBreakdown reviews={mockReviews} />
+          </Grid>
+          <Grid item xs={12} md={8}>
+              {mockReviews.map(review => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </Grid>
+          </Grid>
+        </>
+      )}
     </Box >
   );
 };

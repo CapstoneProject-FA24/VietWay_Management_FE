@@ -195,17 +195,11 @@ const ManagerManageTour = () => {
       <Helmet>
         <title>Quản lý Tour</title>
       </Helmet>
-      <SidebarManager
-        isOpen={isOpen} 
-        toggleSidebar={() => setIsOpen(!isOpen)}
-      />
-      <Box sx={{ flexGrow: 1, mt: 1.5, p: isOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
-          <Button component={Link} to={currentPage + "/tour-mau-duoc-duyet"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: "55px", borderRadius: 2 }}>
-            Tạo Tour Mới
-          </Button>
-        </Box>
+      <SidebarManager isOpen={isOpen} toggleSidebar={() => setIsOpen(!isOpen)} />
+      <Box sx={{ flexGrow: 1, p: isOpen ? 3 : 5, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
+        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
+        </Grid>
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={12} sm={4}>
