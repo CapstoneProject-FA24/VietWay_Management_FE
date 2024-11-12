@@ -1,90 +1,93 @@
-import { Box, Card, Grid, Stack, Typography, Chip, TableContainer, Table, TableBody, TableRow, TableCell, Paper } from '@mui/material';
+import { Box, Grid, Typography, Button, Paper } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
 import { getBookingStatusInfo } from '@services/StatusService';
+import { BookingStatus } from '@hooks/Statuses';
+
+const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+    const formattedTime = date.toLocaleString('vi-VN', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    return `${formattedDate} ${formattedTime}`;
+};
 
 const BookingDetail = ({ booking }) => {
-  const statusInfo = getBookingStatusInfo(booking.status);
-
-  return (
-    <Card sx={{ p: 2, mt: 2 }}>
-      <Stack spacing={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Box
-              component="img"
-              src={booking.tour?.thumbnailUrl}
-              alt={booking.tour?.name}
-              sx={{ width: '100%', borderRadius: 1 }}
-            />
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Stack spacing={2}>
-              <Chip
-                label={statusInfo.text}
-                sx={{
-                  backgroundColor: statusInfo.color,
-                  color: '#000000',
-                  fontWeight: 600
-                }}
-              />
-              <Typography variant="h5">{booking.tour?.name}</Typography>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <CalendarToday fontSize="small" />
-                <Typography>
-                  {new Date(booking.tour?.startDate).toLocaleDateString('vi-VN')} - {new Date(booking.tour?.endDate).toLocaleDateString('vi-VN')}
-                </Typography>
-              </Stack>
-            </Stack>
-          </Grid>
+    return (
+        <Grid container spacing={1.5}>
+            <Grid item xs={12} md={7}>
+                <Paper elevation={3} sx={{ p: 3, borderRadius: '8px' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Thông tin liên hệ</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2.5 }}>
+                        <Typography variant="body1">Họ tên:</Typography>
+                        <Typography variant="body1">{booking.contactFullName}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Email:</Typography>
+                        <Typography variant="body1">{booking.contactEmail}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Số điện thoại:</Typography>
+                        <Typography variant="body1">{booking.contactPhoneNumber}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Địa chỉ:</Typography>
+                        <Typography variant="body1">{booking.contactAddress}</Typography>
+                    </Box>
+                </Paper>
+                <Paper elevation={3} sx={{ p: 3, borderRadius: '8px', mt: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Chi tiết booking</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2.5 }}>
+                        <Typography variant="body1">Mã booking:</Typography>
+                        <Typography variant="body1">{booking.code}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Ngày đặt tour:</Typography>
+                        <Typography variant="body1">{formatDateTime(booking.createdAt)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Trị giá booking:</Typography>
+                        <Typography variant="body1">{booking.totalPrice.toLocaleString()} đ</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Tình trạng:</Typography>
+                        <Typography variant="body1" sx={{ color: getBookingStatusInfo(booking.status).color }}>{getBookingStatusInfo(booking.status).text}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                        <Typography variant="body1">Ghi chú:</Typography>
+                        <Typography variant="body1">{booking.note}</Typography>
+                    </Box>
+                </Paper>
+            </Grid>
+            <Grid item xs={12} md={5}>
+                <Paper elevation={3} sx={{ p: 2, borderRadius: '8px' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Thông tin tour</Typography>
+                    <img src={booking.tour?.imageUrl} alt={booking.tour?.name}
+                        style={{ width: '100%', height: '220px', objectFit: 'cover', borderRadius: '8px' }}
+                    />
+                    <Typography variant="h5" sx={{ mt: 1 }}>{booking.tour?.name}</Typography>
+                    <Typography variant="body1" sx={{ mt: 1 }}><strong>Mã tour:</strong> {booking.code}</Typography>
+                    <Typography variant="body1" sx={{ mt: 1 }}>
+                        <strong>Ngày đi:</strong> {formatDateTime(booking.tour?.startDate)}
+                    </Typography><hr />
+                    <Typography variant="h5" color="primary.main" sx={{ mt: 1, fontWeight: 'bold' }}>
+                        Tổng tiền: {booking.totalPrice.toLocaleString()} đ
+                    </Typography>
+                    {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                            <Button variant="contained" color="error" sx={{ width: '48%' }}>Hủy booking</Button>
+                            <Button variant="contained" color="primary" sx={{ width: '48%' }}>Chuyển tour</Button>
+                        </Box>
+                    )}
+                </Paper>
+            </Grid>
         </Grid>
-
-        <TableContainer component={Paper}>
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell component="th">Mã đặt tour</TableCell>
-                <TableCell>{booking.bookingId}</TableCell>
-                <TableCell component="th">Ngày đặt</TableCell>
-                <TableCell>{new Date(booking.createdAt).toLocaleString('vi-VN')}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th">Người đặt</TableCell>
-                <TableCell>{booking.customerName}</TableCell>
-                <TableCell component="th">Số điện thoại</TableCell>
-                <TableCell>{booking.customerPhone}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th">Email</TableCell>
-                <TableCell>{booking.customerEmail}</TableCell>
-                <TableCell component="th">Số lượng khách</TableCell>
-                <TableCell>{booking.bookingTourists?.length || 0} người</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th">Tổng tiền</TableCell>
-                <TableCell>
-                  {new Intl.NumberFormat('vi-VN', { 
-                    style: 'currency', 
-                    currency: 'VND' 
-                  }).format(booking.totalPrice)}
-                </TableCell>
-                <TableCell component="th">Đã thanh toán</TableCell>
-                <TableCell>
-                  {new Intl.NumberFormat('vi-VN', { 
-                    style: 'currency', 
-                    currency: 'VND' 
-                  }).format(booking.paidAmount)}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell component="th">Ghi chú</TableCell>
-                <TableCell colSpan={3}>{booking.note || 'Không có ghi chú'}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Stack>
-    </Card>
-  );
+    );
 };
 
 export default BookingDetail;

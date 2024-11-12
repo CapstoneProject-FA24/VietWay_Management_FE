@@ -252,7 +252,7 @@ const ManageBooking = () => {
 
         <Grid container spacing={2}>
           {sortedAndFilteredBookings.map((booking) => (
-            <Grid item xs={12} md={6} key={booking.bookingId}>
+            <Grid item xs={12} md={12} key={booking.bookingId}>
               <BookingCard
                 booking={booking}
                 onDelete={handleDelete}

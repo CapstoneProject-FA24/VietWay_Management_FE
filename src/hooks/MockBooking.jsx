@@ -2,7 +2,7 @@
 const mockBookings = [
   {
     bookingId: "BK20240320001",
-    tourId: "TOUR001",
+    code: "TOUR001",
     customerId: "CUS001",
     numberOfParticipants: 2,
     contactFullName: "Nguyễn Văn An",
@@ -10,12 +10,12 @@ const mockBookings = [
     contactPhoneNumber: "0912345678",
     contactAddress: "123 Nguyễn Văn Linh, Quận 7, TP.HCM",
     totalPrice: 4990000,
-    status: "PENDING",
+    status: 3,
     createdAt: new Date().toISOString(),
     note: "Cần hỗ trợ xe đưa đón tại sân bay",
     tour: {
       name: "Tour Đà Lạt - Thành phố ngàn hoa 3N2Đ",
-      thumbnailUrl: "https://images.unsplash.com/photo-1589995186011-a7b485edc4bf",
+      imageUrl: "https://images.unsplash.com/photo-1589995186011-a7b485edc4bf",
       startDate: "2024-04-01T07:00:00Z",
       endDate: "2024-04-03T20:00:00Z",
       price: 2495000,
@@ -46,13 +46,13 @@ const mockBookings = [
         createAt: new Date().toISOString(),
         bankCode: "VCB",
         bankTransactionNumber: "VCB20240320001",
-        status: "COMPLETED",
+        status: 3,
       }
     ]
   },
   {
     bookingId: "BK20240319001",
-    tourId: "TOUR002",
+    code: "TOUR002",
     customerId: "CUS002",
     numberOfParticipants: 4,
     contactFullName: "Trần Thị Cúc",
@@ -60,12 +60,12 @@ const mockBookings = [
     contactPhoneNumber: "0898765432",
     contactAddress: "45 Lê Lợi, Quận 1, TP.HCM",
     totalPrice: 15960000,
-    status: "CONFIRMED",
+    status: 0,
     createdAt: "2024-03-19T10:00:00Z",
     note: "Yêu cầu phòng view biển",
     tour: {
       name: "Tour Phú Quốc - Thiên đường biển đảo 4N3Đ",
-      thumbnailUrl: "https://images.unsplash.com/photo-1589995186011-a7b485edc4bf",
+      imageUrl: "https://images.unsplash.com/photo-1589995186011-a7b485edc4bf",
       startDate: "2024-04-10T05:00:00Z",
       endDate: "2024-04-13T21:00:00Z",
       price: 3990000,
@@ -112,13 +112,13 @@ const mockBookings = [
         createAt: "2024-03-19T10:30:00Z",
         bankCode: "TCB",
         bankTransactionNumber: "TCB20240319001",
-        status: "COMPLETED",
+        status: 4,
       }
     ]
   },
   {
     bookingId: "BK20240318001",
-    tourId: "TOUR003",
+    code: "TOUR003",
     customerId: "CUS003",
     numberOfParticipants: 1,
     contactFullName: "Lê Hoàng Giang",
@@ -126,12 +126,12 @@ const mockBookings = [
     contactPhoneNumber: "0934567890",
     contactAddress: "78 Võ Văn Tần, Quận 3, TP.HCM",
     totalPrice: 6490000,
-    status: "PAID",
+    status: 1,
     createdAt: "2024-03-18T14:00:00Z",
     note: "Ăn chay, không hành tỏi",
     tour: {
       name: "Tour Nha Trang - Vinpearl Land 3N2Đ",
-      thumbnailUrl: "https://images.unsplash.com/photo-1589995186011-a7b485edc4bf",
+      imageUrl: "https://images.unsplash.com/photo-1589995186011-a7b485edc4bf",
       startDate: "2024-04-05T06:00:00Z",
       endDate: "2024-04-07T20:00:00Z",
       price: 6490000,
@@ -154,7 +154,7 @@ const mockBookings = [
         createAt: "2024-03-18T14:30:00Z",
         bankCode: "VCB",
         bankTransactionNumber: "VCB20240318001",
-        status: "COMPLETED",
+        status: 2,
       },
       {
         paymentId: "PAY20240319002",
@@ -163,7 +163,7 @@ const mockBookings = [
         createAt: "2024-03-19T15:00:00Z",
         bankCode: "VCB",
         bankTransactionNumber: "VCB20240319002",
-        status: "COMPLETED",
+        status: 3,
       }
     ]
   }
