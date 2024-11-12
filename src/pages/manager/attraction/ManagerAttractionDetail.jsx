@@ -192,10 +192,10 @@ const ManagerAttractionDetail = () => {
 
               {attraction.googlePlaceId && (
                 <Box sx={{ mt: 4 }}>
-                  <Typography variant="h4" sx={{ 
-                    fontWeight: '700', 
-                    fontFamily: 'Inter, sans-serif', 
-                    color: '#05073C', 
+                  <Typography variant="h4" sx={{
+                    fontWeight: '700',
+                    fontFamily: 'Inter, sans-serif',
+                    color: '#05073C',
                     fontSize: '27px',
                     display: 'flex',
                     alignItems: 'center',
@@ -204,22 +204,27 @@ const ManagerAttractionDetail = () => {
                   }}>
                     <AccessTimeIcon /> Giờ mở cửa
                   </Typography>
-                  
+
                   {loading ? (
                     <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
                   ) : openingHours ? (
                     <Box>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 1, 
+                      <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
                         mb: 2,
                         color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
                       }}>
-                        {openingHours.opening_hours?.open_now ? (
-                          <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
+                        {openingHours.opening_hours ? (
+                          <>
+                            {openingHours.opening_hours?.open_now === true ? (
+                              <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
+                            ) : (
+                              <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
+                            )}</>
                         ) : (
-                          <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
+                          <Typography>Không có thông tin giờ mở cửa</Typography>
                         )}
                       </Box>
                       <Box>
@@ -227,9 +232,9 @@ const ManagerAttractionDetail = () => {
                           const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
                           const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
                           const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-                          
+
                           return (
-                            <Typography key={index} sx={{ 
+                            <Typography key={index} sx={{
                               py: 1,
                               display: 'flex',
                               justifyContent: 'space-between',
