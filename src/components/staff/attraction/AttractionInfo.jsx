@@ -208,7 +208,9 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
           </Paper>
         </Grid>
         <Grid item xs={12} md={12}>
-          <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}><strong>Google Place ID:</strong> {attraction.googlePlaceId}</Typography>
+          <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}>
+            <strong>Google Place ID:</strong> {attraction.googlePlaceId}
+          </Typography>
           <Box sx={{
             height: '500px',
             width: '100%',
@@ -218,7 +220,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             borderRadius: '10px',
             border: '1px solid #e0e0e0'
           }}>
-            <Map />
+            <Map placeId={attraction.googlePlaceId} />
           </Box>
         </Grid>
       </Grid>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { GoogleMap, useJsApiLoader, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, InfoWindow, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
@@ -102,7 +102,7 @@ const autocompleteStyle = `
   }
 `;
 
-function Map() {
+function Map({ placeId }) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -112,8 +112,41 @@ function Map() {
   const [map, setMap] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [marker, setMarker] = useState(null);
 
   const onLoad = useCallback((map) => {
+    const placesService = new window.google.maps.places.PlacesService(map);
+    
+    // Function to handle place selection and marker placement
+    const handlePlaceSelection = (place) => {
+      if (!place.geometry || !place.geometry.location) {
+        console.log("Returned place contains no geometry");
+        return;
+      }
+
+      // Create marker with all necessary data
+      const newMarker = {
+        position: place.geometry.location,
+        title: place.name,
+        geometry: place.geometry,
+        name: place.name,
+        address_components: place.address_components,
+        place_id: place.place_id
+      };
+
+      setMarker(newMarker);
+      setSelectedPlace(newMarker);
+
+      // Center map on the location
+      if (place.geometry.viewport) {
+        map.fitBounds(place.geometry.viewport);
+      } else {
+        map.setCenter(place.geometry.location);
+        map.setZoom(17);
+      }
+    };
+
+    // Initialize search box
     const searchBox = new window.google.maps.places.Autocomplete(
       document.getElementById("pac-input"),
       {
@@ -131,23 +164,27 @@ function Map() {
 
     searchBox.addListener("place_changed", () => {
       const place = searchBox.getPlace();
-      if (!place.geometry || !place.geometry.location) {
-        console.log("Returned place contains no geometry");
-        return;
-      }
-
-      if (place.geometry.viewport) {
-        map.fitBounds(place.geometry.viewport);
-      } else {
-        map.setCenter(place.geometry.location);
-        map.setZoom(17);
-      }
-
-      setSelectedPlace(place);
+      handlePlaceSelection(place);
     });
 
+    // If placeId is provided, fetch and display the place
+    if (placeId) {
+      const request = {
+        placeId: placeId,
+        fields: ["place_id", "geometry", "formatted_address", "name", "address_components"]
+      };
+
+      placesService.getDetails(request, (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+          handlePlaceSelection(place);
+        } else {
+          console.error("Place details request failed:", status);
+        }
+      });
+    }
+
     setMap(map);
-  }, []);
+  }, [placeId]);
 
   const onUnmount = useCallback(() => {
     setMap(null);
@@ -188,9 +225,16 @@ function Map() {
           }
         }}
       >
-        {selectedPlace && (
+        {marker && (
+          <Marker
+            position={marker.position}
+            title={marker.title}
+            onClick={() => setSelectedPlace(marker)}
+          />
+        )}
+        {selectedPlace && selectedPlace.position && (
           <InfoWindow
-            position={selectedPlace.geometry.location}
+            position={selectedPlace.position}
             onCloseClick={() => setSelectedPlace(null)}
           >
             <div>
