@@ -177,8 +177,8 @@ const ManagerAttractionDetail = () => {
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-              <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px', mb: 2 }}>Thông tin liên hệ</Typography>
+              <Typography sx={{ mb: 3 }}><strong>Địa chỉ: </strong> {attraction.address}</Typography>
 
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
               <Box sx={{ mb: 3 }}>
@@ -187,7 +187,7 @@ const ManagerAttractionDetail = () => {
                 </a>
               </Box>
 
-              <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
+              <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px' }}>Các thông tin liên hệ khác</Typography>
               <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
 
               {attraction.googlePlaceId && (
@@ -272,7 +272,7 @@ const ManagerAttractionDetail = () => {
           borderRadius: '10px',
           border: '1px solid #e0e0e0'
         }}>
-          <Map placeId={attraction.googlePlaceId}/>
+          <Map placeId={attraction.googlePlaceId} />
         </Box>
       </Grid>
     </Box >
