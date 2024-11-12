@@ -157,7 +157,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
             { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <TourIcon /> },
             { text: 'Bài viết', url: '/quan-ly/bai-viet', icon: <ArticleIcon /> },
-            { text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },
+            /*{ text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },*/
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
             { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> },
             { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> },
