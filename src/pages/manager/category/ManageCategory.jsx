@@ -26,7 +26,7 @@ const ManageCategory = () => {
     { label: 'Loại Tour', endpoint: 'tour-categories' },
     { label: 'Loại Điểm Du Lịch', endpoint: 'attraction-types' },
     { label: 'Loại Bài Viết', endpoint: 'post-categories' },
-    { label: 'Loại Sự Kiện', endpoint: 'event-categories' },
+    /*{ label: 'Loại Sự Kiện', endpoint: 'event-categories' },*/
     { label: 'Thời Lượng Tour', endpoint: 'tour-durations' }
   ];
 
