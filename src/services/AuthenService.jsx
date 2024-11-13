@@ -16,6 +16,7 @@ export const login = async (credentials) => {
                 throw new Error('Không có quyền truy cập');
             }
             setCookie('token', data.token);
+            setCookie('username', data.fullName);
             setCookie('role', getRole(data.role));
         }
         return {

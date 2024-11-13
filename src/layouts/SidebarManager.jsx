@@ -197,7 +197,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
                   <SettingsIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Tài khoản" 
+                  primary={getCookie('username')} 
                   primaryTypographyProps={{ fontSize: '0.97rem' }}
                 />
               </MenuItemBox>
