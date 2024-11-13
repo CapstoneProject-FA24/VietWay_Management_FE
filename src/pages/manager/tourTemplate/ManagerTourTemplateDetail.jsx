@@ -15,6 +15,7 @@ import { TourTemplateStatus } from '@hooks/Statuses';
 import { getTourTemplateStatusInfo } from '@services/StatusService';
 import FeedbackBreakdown from '@components/manager/feedbackTour/FeedbackBreakdown';
 import FeedbackList from '@components/manager/feedbackTour/FeedbackList';
+import { mockFeedbacks } from '@hooks/MockFeedback';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -245,13 +246,15 @@ const ManagerTourTemplateDetails = () => {
 
             {tourTemplate.status === TourTemplateStatus.Approved && (
               <Box sx={{ mb: 5 }}>
-                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Đánh giá từ khách hàng</Typography>
+                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+                  Đánh giá từ khách hàng
+                </Typography>
                 <Grid container spacing={3}>
                   <Grid item xs={12} md={4}>
-                    <FeedbackBreakdown reviews={tourTemplate.feedbacks || []} />
+                    <FeedbackBreakdown reviews={mockFeedbacks.filter(f => f.tourTemplateId === String(tourTemplate.id))} />
                   </Grid>
                   <Grid item xs={12} md={8}>
-                    <FeedbackList tourTemplateId={tourTemplate.id} />
+                    <FeedbackList tourTemplateId={String(tourTemplate.id)} />
                   </Grid>
                 </Grid>
               </Box>

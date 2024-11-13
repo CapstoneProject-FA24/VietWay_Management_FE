@@ -10,13 +10,9 @@ const FeedbackList = ({ tourTemplateId }) => {
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      // Simulate API call with mock data
-      // Filter feedbacks based on tourTemplateId
       const filteredFeedbacks = mockFeedbacks.filter(
-        feedback => feedback.tourTemplateId === tourTemplateId
+        feedback => feedback.tourTemplateId === String(tourTemplateId)
       );
-      
-      // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       setFeedbacks(filteredFeedbacks);
@@ -28,9 +24,7 @@ const FeedbackList = ({ tourTemplateId }) => {
   };
 
   useEffect(() => {
-    if (tourTemplateId) {
-      fetchFeedbacks();
-    }
+    fetchFeedbacks();
   }, [tourTemplateId]);
 
   const onDelete = (id) => {
@@ -41,42 +35,40 @@ const FeedbackList = ({ tourTemplateId }) => {
     <Paper 
       elevation={0} 
       sx={{ 
-        height: '80vh',
+        height: 'auto',
+        maxHeight: '80vh',
         overflow: 'hidden',
         p: 2,
         backgroundColor: 'transparent'
       }}
     >
-      <Typography variant="h5" fontWeight="bold" mb={2}>
-        Danh sách đánh giá
-      </Typography>
-
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box sx={{ 
-          height: 'calc(80vh - 60px)',
-          overflowY: 'auto',
-          pr: 2,
-          mr: -2
-        }}>
-          {feedbacks.length > 0 ? (
-            feedbacks.map((feedback) => (
-              <FeedbackCard
-                key={feedback.id}
-                feedback={feedback}
-                onDelete={onDelete}
-              />
-            ))
-          ) : (
-            <Typography variant="body2" color="text.secondary" textAlign="center" mt={2}>
-              Chưa có đánh giá nào
-            </Typography>
-          )}
-        </Box>
-      )}
+      <Box sx={{ 
+        overflowY: 'auto',
+        pr: 2,
+        mr: -2
+      }}>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            {feedbacks.length > 0 ? (
+              feedbacks.map((feedback) => (
+                <FeedbackCard
+                  key={feedback.id}
+                  feedback={feedback}
+                  onDelete={onDelete}
+                />
+              ))
+            ) : (
+              <Typography variant="body1" color="text.secondary" alignSelf="center" mt={2}>
+                Chưa có đánh giá nào
+              </Typography>
+            )}
+          </>
+        )}
+      </Box>
     </Paper>
   );
 };

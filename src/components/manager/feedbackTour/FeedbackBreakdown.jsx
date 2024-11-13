@@ -3,91 +3,70 @@ import { Box, Typography, LinearProgress, Stack } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 
-const ratingLabels = ['Tuyệt vời', 'Tốt', 'Khá tốt', 'Tệ', 'Rất tệ'];
-const ratingColors = ['primary.main', 'primary.main', 'primary.main', 'primary.main', 'primary.main'];
-
-const ReviewBreakdown = ({ reviews }) => {
-  const { totalReviews, averageRating, ratings } = useMemo(() => {
+const FeedbackBreakdown = ({ reviews }) => {
+  const { totalReviews, averageRating, ratingCounts } = useMemo(() => {
     const totalReviews = reviews.length;
     const averageRating = totalReviews > 0 
       ? reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews 
       : 0;
     
-    // Initialize ratings array [5★, 4★, 3★, 2★, 1★]
-    const ratings = [0, 0, 0, 0, 0];
+    // Initialize rating counts
+    const ratingCounts = {
+      5: 0, // Tuyệt vời
+      4: 0, // Tốt
+      3: 0, // Khá tốt
+      2: 0, // Tệ
+      1: 0  // Rất tệ
+    };
+    
+    // Count ratings
     reviews.forEach(review => {
-      ratings[5 - review.rating]++;
+      ratingCounts[review.rating]++;
     });
 
-    return { totalReviews, averageRating, ratings };
+    return { totalReviews, averageRating, ratingCounts };
   }, [reviews]);
 
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const decimalPart = rating - fullStars;
-
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(<StarIcon key={i} sx={{ color: 'primary.main', fontSize: '1.5rem' }} />);
-      } else if (i === fullStars + 1 && decimalPart > 0) {
-        const partialStarPercentage = decimalPart * 100;
-        stars.push(
-          <Box key={i} sx={{ position: 'relative', display: 'inline-flex', fontSize: '1.5rem' }}>
-            <StarOutlineIcon sx={{ color: '#e0e0e0' }} />
-            <Box
-              sx={{
-                position: 'absolute',
-                overflow: 'hidden',
-                display: 'flex',
-                width: `${partialStarPercentage}%`,
-              }}
-            >
-              <StarIcon sx={{ color: 'primary.main' }} />
-            </Box>
-          </Box>
-        );
-      } else {
-        stars.push(<StarOutlineIcon key={i} sx={{ color: '#e0e0e0', fontSize: '1.5rem' }} />);
-      }
-    }
-    return stars;
+  const ratingLabels = {
+    5: 'Tuyệt vời',
+    4: 'Tốt',
+    3: 'Khá tốt',
+    2: 'Tệ',
+    1: 'Rất tệ'
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 400, p: 2 }}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+    <Box sx={{ p: 2 }}>
+      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
         <Typography variant="h3" fontWeight="bold">
           {averageRating.toFixed(1)}
         </Typography>
         <Stack>
-          <Stack direction="row" spacing={0.5}>
-            {renderStars(averageRating)}
-          </Stack>
+          <Rating value={averageRating} readOnly precision={0.5} />
           <Typography variant="body2" color="text.secondary">
             {totalReviews} đánh giá
           </Typography>
         </Stack>
       </Stack>
 
-      {ratingLabels.map((label, index) => (
-        <Box key={label} sx={{ mb: 1 }}>
+      {Object.entries(ratingLabels).reverse().map(([rating, label]) => (
+        <Box key={rating} sx={{ mb: 1 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="body1">{label}</Typography>
-            <Typography variant="body1" color="text.secondary">
-              {ratings[index]}
+            <Typography variant="body2">{label}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {ratingCounts[rating]}
             </Typography>
           </Stack>
           <LinearProgress
             variant="determinate"
-            value={totalReviews > 0 ? (ratings[index] / totalReviews) * 100 : 0}
+            value={(ratingCounts[rating] / totalReviews) * 100 || 0}
             sx={{
-              height: 15,
-              borderRadius: 3,
-              [`& .MuiLinearProgress-bar`]: {
-                borderRadius: 3,
-                backgroundColor: ratingColors[index],
-              },
+              height: 8,
+              borderRadius: 1,
+              bgcolor: 'grey.200',
+              '& .MuiLinearProgress-bar': {
+                bgcolor: 'primary.main'
+              }
             }}
           />
         </Box>
@@ -96,4 +75,4 @@ const ReviewBreakdown = ({ reviews }) => {
   );
 };
 
-export default ReviewBreakdown;
+export default FeedbackBreakdown;
