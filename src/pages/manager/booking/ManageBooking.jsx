@@ -158,13 +158,13 @@ const ManageBooking = () => {
       
       <Box sx={{ 
         flexGrow: 1, 
-        p: 3, 
+        p: 4, 
         transition: 'margin-left 0.3s', 
         marginLeft: isSidebarOpen ? '260px' : '20px', 
         width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', 
         overflowX: 'hidden' 
       }}>
-        <Grid container spacing={3} sx={{ mb: 3, mt: 2 }}>
+        <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '3rem', fontWeight: 600, color: 'primary.main' }}>
               Quản lý đặt tour

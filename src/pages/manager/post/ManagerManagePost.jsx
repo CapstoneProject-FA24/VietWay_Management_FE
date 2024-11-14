@@ -120,7 +120,7 @@ const ManagerManagePost = () => {
         <title>Quản lý bài viết</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+      <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 4 : 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>Quản lý bài viết</Typography>
@@ -211,7 +211,7 @@ const ManagerManagePost = () => {
             <>
               <Grid container spacing={2}>
                 {posts.map((post) => (
-                  <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
+                  <Grid item xs={12} sm={6} md={4} key={post.id}>
                     <PostsCard post={post} />
                   </Grid>
                 ))}

@@ -1,5 +1,6 @@
 const baseURL = import.meta.env.VITE_API_URL;
 import axios from 'axios';
+import { getCookie } from '@services/AuthenService';
 
 export const fetchProvinces = async () => {
     try {
@@ -24,11 +25,12 @@ export const fetchProvinces = async () => {
 };
 
 export const updateProvince = async (provinceId, formData) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.put(`${baseURL}/api/provinces/${provinceId}`, formData, {
+        const response = await axios.put(`${baseURL}/api/Province/${provinceId}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
         return response.data;
@@ -39,10 +41,11 @@ export const updateProvince = async (provinceId, formData) => {
 };
 
 export const deleteProvince = async (provinceId) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.delete(`${baseURL}/api/provinces/${provinceId}`, {
+        const response = await axios.delete(`${baseURL}/api/Province/${provinceId}`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
         return response.data;
@@ -52,14 +55,18 @@ export const deleteProvince = async (provinceId) => {
     }
 };
 
-export const createProvince = async (formData) => {
+export const createProvince = async (provinceName) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/provinces`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+        const response = await axios.post(`${baseURL}/api/Province`, 
+            JSON.stringify({ provinceName }),
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error creating province:', error);

@@ -5,12 +5,11 @@ import { ArrowBack, Edit, Delete, Save, Send, CheckCircle } from '@mui/icons-mat
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
-import { fetchPostById, deletePost } from '@services/PostService';
+import { fetchPostById, deletePost, sharePostOnFacebook, sharePostOnTwitter } from '@services/PostService';
 import { getPostStatusInfo } from '@services/StatusService';
 import 'react-quill/dist/quill.snow.css';
 import { PostStatus } from '@hooks/Statuses';
 import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
-import { updatePost } from '@services/PostService';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import { Helmet } from 'react-helmet';
@@ -181,14 +180,29 @@ const ManagerPostDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const handleShareToSocial = (platform) => {
-    const url = encodeURIComponent(window.location.origin + '/posts/' + post.postId);
-    const text = encodeURIComponent(post.title);
-
-    if (platform === 'facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    } else if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+  const handleShareToSocial = async (platform) => {
+    try {
+      if (platform === 'facebook') {
+        await sharePostOnFacebook(post.postId);
+        setSnackbar({
+          open: true,
+          message: 'Đã đăng bài viết lên Facebook thành công',
+          severity: 'success'
+        });
+      } else if (platform === 'twitter') {
+        await sharePostOnTwitter(post.postId);
+        setSnackbar({
+          open: true,
+          message: 'Đã đăng bài viết lên Twitter thành công',
+          severity: 'success'
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+        severity: 'error'
+      });
     }
   };
 
