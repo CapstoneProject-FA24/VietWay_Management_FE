@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionById } from '@services/AttractionService';
+import { fetchAttractionById, changeAttractionStatus } from '@services/AttractionService';
 import { AttractionStatus } from '@hooks/Statuses';
 import { getAttractionStatusInfo } from '@services/StatusService';
 import SidebarManager from '@layouts/SidebarManager';
@@ -29,6 +29,14 @@ const ManagerAttractionDetail = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [openingHours, setOpeningHours] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
+  const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
     const fetchAttraction = async () => {
@@ -86,6 +94,52 @@ const ManagerAttractionDetail = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleApprove = async () => {
+    try {
+      await changeAttractionStatus(id, 2);
+      setAttraction({ ...attraction, status: 2 });
+      setSnackbar({
+        open: true,
+        message: 'Điểm tham quan đã được duyệt',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi duyệt điểm tham quan',
+        severity: 'error'
+      });
+    } finally {
+      setIsApprovePopupOpen(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await changeAttractionStatus(id, 3, rejectReason);
+      setAttraction({ ...attraction, status: 3 });
+      setSnackbar({
+        open: true,
+        message: 'Điểm tham quan đã bị từ chối',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi từ chối điểm tham quan',
+        severity: 'error'
+      });
+    } finally {
+      setIsRejectPopupOpen(false);
+      setRejectReason('');
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   if (!attraction) {
     return <Typography>Loading...</Typography>;
   }
@@ -117,8 +171,20 @@ const ManagerAttractionDetail = () => {
         </Typography>
         {attraction?.status === AttractionStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
-            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
+              onClick={() => setIsApprovePopupOpen(true)}
+            >
+              Duyệt
+            </Button>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
+              onClick={() => setIsRejectPopupOpen(true)}
+            >
+              Từ chối
+            </Button>
           </Box>
         )}
         {attraction?.status === AttractionStatus.Approved && (
@@ -180,8 +246,8 @@ const ManagerAttractionDetail = () => {
           </Grid>
           <Grid item xs={12} md={4}>
             <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-              <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
+              <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px', mb: 2 }}>Thông tin liên hệ</Typography>
+              <Typography sx={{ mb: 3 }}><strong>Địa chỉ: </strong> {attraction.address}</Typography>
 
               <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
               <Box sx={{ mb: 3 }}>
@@ -190,7 +256,7 @@ const ManagerAttractionDetail = () => {
                 </a>
               </Box>
 
-              <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
+              <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px' }}>Các thông tin liên hệ khác</Typography>
               <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
 
               {attraction.googlePlaceId && (
@@ -275,25 +341,67 @@ const ManagerAttractionDetail = () => {
           borderRadius: '10px',
           border: '1px solid #e0e0e0'
         }}>
-          <Map placeId={attraction.googlePlaceId}/>
+          <Map placeId={attraction.googlePlaceId} />
         </Box>
       </Grid>
-
-      {attraction?.status === AttractionStatus.Approved && (
-        <>
-          <Typography sx={{ mt: 5, mb: -5, fontWeight: 700, fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '32px' }}>Danh sách đánh giá của điểm tham quan</Typography>
-          <Grid container spacing={3} sx={{ mt: 5 }}>
-            <Grid item xs={12} md={4}>
-            <ReviewBreakdown reviews={mockReviews} />
-          </Grid>
-          <Grid item xs={12} md={8}>
-              {mockReviews.map(review => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
-            </Grid>
-          </Grid>
-        </>
-      )}
+      <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
+        <DialogTitle>Xác nhận duyệt</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn duyệt điểm tham quan này?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsApprovePopupOpen(false)}>Hủy</Button>
+          <Button onClick={handleApprove} variant="contained" color="primary">
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={isRejectPopupOpen} onClose={() => setIsRejectPopupOpen(false)}>
+        <DialogTitle>Xác nhận từ chối</DialogTitle>
+        <DialogContent sx={{ width: '30rem' }}>
+          <DialogContentText>
+            Vui lòng nhập lý do từ chối:
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do"
+            fullWidth
+            multiline
+            rows={4}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
+          <Button 
+            onClick={handleReject} 
+            variant="contained" 
+            color="error"
+            disabled={!rejectReason.trim()}
+          >
+            Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box >
   );
 };

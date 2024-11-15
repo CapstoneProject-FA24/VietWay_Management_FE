@@ -208,7 +208,7 @@ const ManagerManagePost = () => {
             <>
               <Grid container spacing={2}>
                 {posts.map((post) => (
-                  <Grid item xs={12} sm={6} md={isSidebarOpen ? 4 : 3} key={post.id}>
+                  <Grid item xs={12} sm={6} md={4} key={post.id}>
                     <PostsCard post={post} />
                   </Grid>
                 ))}

@@ -1,5 +1,6 @@
 import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
+import { getCookie } from '@services/AuthenService';
 
 const getStatusText = (status) => {
     switch (status) {
@@ -24,7 +25,7 @@ export const fetchTourTemplates = async (params) => {
 
         const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`);
         const items = response.data?.data?.items;
-        
+
         if (!items || !Array.isArray(items)) {
             throw new Error('Invalid response structure: items not found or not an array');
         }
@@ -42,14 +43,14 @@ export const fetchTourTemplates = async (params) => {
             provinces: item.provinces,
             imageUrl: item.imageUrl
         }));
-
+        console.log(templates);
         return ({
             data: templates,
             pageIndex: response.data?.data?.pageIndex,
             pageSize: response.data?.data?.pageSize,
             total: response.data?.data?.total
         })
-        
+
     } catch (error) {
         console.error('Error fetching tour templates:', error);
         throw error;
@@ -163,6 +164,26 @@ export const updateTemplateImages = async (tourTemplateId, newImages, deletedIma
         return response.data;
     } catch (error) {
         console.error('Error updating tour template images:', error.response);
+        throw error;
+    }
+};
+
+export const changeTourTemplateStatus = async (tourTemplateId, status, reason) => {
+    const token = getCookie('token');
+    try {
+        const requestData = {
+            status: status,
+            reason: reason
+        };
+
+        const response = await axios.patch(`${baseURL}/api/TourTemplate/change-tour-template-status/${tourTemplateId}`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing tour template status:', error.response);
         throw error;
     }
 };

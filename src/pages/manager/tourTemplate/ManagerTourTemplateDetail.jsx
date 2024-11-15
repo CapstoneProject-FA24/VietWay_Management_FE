@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
@@ -8,7 +8,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById } from '@services/TourTemplateService';
+import { fetchTourTemplateById, changeTourTemplateStatus } from '@services/TourTemplateService';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -26,6 +26,14 @@ const ManagerTourTemplateDetails = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
+  const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +80,54 @@ const ManagerTourTemplateDetails = () => {
     setIsDeletePopupOpen(false);
   };
 
+  // Function to handle approval
+  const handleApprove = async () => {
+    try {
+      await changeTourTemplateStatus(id, 2);
+      setTourTemplate({ ...tourTemplate, status: 2 });
+      setSnackbar({
+        open: true,
+        message: 'Tour mẫu đã được duyệt',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi duyệt tour mẫu',
+        severity: 'error'
+      });
+    } finally {
+      setIsApprovePopupOpen(false);
+    }
+  };
+
+  // Function to handle rejection
+  const handleReject = async () => {
+    try {
+      await changeTourTemplateStatus(id, 3, rejectReason);
+      setTourTemplate({ ...tourTemplate, status: 3 });
+      setSnackbar({
+        open: true,
+        message: 'Tour mẫu đã bị từ chối',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi từ chối tour mẫu',
+        severity: 'error'
+      });
+    } finally {
+      setIsRejectPopupOpen(false);
+      setRejectReason('');
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
   }
@@ -102,8 +158,20 @@ const ManagerTourTemplateDetails = () => {
         </Typography>
         {tourTemplate?.status === TourTemplateStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}>Duyệt</Button>
-            <Button variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}>Từ chối</Button>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
+              onClick={() => setIsApprovePopupOpen(true)}
+            >
+              Duyệt
+            </Button>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
+              onClick={() => setIsRejectPopupOpen(true)}
+            >
+              Từ chối
+            </Button>
           </Box>
         )}
         {tourTemplate?.status === TourTemplateStatus.Approved && (
@@ -295,6 +363,66 @@ const ManagerTourTemplateDetails = () => {
         template={tourTemplate}
         onDelete={handleDeleteConfirm}
       />
+      {/* Approve Popup */}
+      <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
+        <DialogTitle>Xác nhận duyệt</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn duyệt tour mẫu này?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsApprovePopupOpen(false)}>Hủy</Button>
+          <Button onClick={handleApprove} variant="contained" color="primary">
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Reject Popup */}
+      <Dialog open={isRejectPopupOpen} onClose={() => setIsRejectPopupOpen(false)}>
+        <DialogTitle>Xác nhận từ chối</DialogTitle>
+        <DialogContent sx={{ width: '30rem' }}>
+          <DialogContentText>
+            Vui lòng nhập lý do từ chối:
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do"
+            fullWidth
+            multiline
+            rows={4}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
+          <Button 
+            onClick={handleReject} 
+            variant="contained" 
+            color="error"
+            disabled={!rejectReason.trim()}
+          >
+            Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

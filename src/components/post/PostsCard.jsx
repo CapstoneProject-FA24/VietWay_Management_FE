@@ -39,21 +39,14 @@ const PostsCard = ({ post }) => {
 
         <Typography
           variant={isMobile ? "h6" : "h5"}
-          sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.35rem' } }}
-          overflow="hidden"
-          display="-webkit-box"
-          WebkitLineClamp="2"
-          WebkitBoxOrient="vertical"
+          sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.35rem' }, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', }}
           color="text.primary"
         >
           {post.title}
         </Typography>
-        <Typography
-          color="text.secondary"
-          sx={{
-            overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical', fontSize: { xs: '0.8rem', sm: '0.85rem' }, flexGrow: 1, mb: 1
-          }}>
+        <Typography color="text.secondary"
+          sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', mb: 1 }}
+        >
           {post.description}
         </Typography>
 

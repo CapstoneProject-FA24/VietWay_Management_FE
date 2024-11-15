@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
 import { ArrowBack, Edit, Delete, Save, Send, CheckCircle } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
-import { fetchPostById, deletePost } from '@services/PostService';
+import { fetchPostById, deletePost, sharePostOnFacebook, sharePostOnTwitter } from '@services/PostService';
 import { getPostStatusInfo } from '@services/StatusService';
 import 'react-quill/dist/quill.snow.css';
 import { PostStatus } from '@hooks/Statuses';
 import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
-import { updatePost } from '@services/PostService';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import { Helmet } from 'react-helmet';
+import { changePostStatus } from '@services/PostService';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -26,6 +26,9 @@ const ManagerPostDetail = () => {
     severity: 'success'
   });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
+  const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     const loadPost = async () => {
@@ -48,22 +51,44 @@ const ManagerPostDetail = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleApprovePost = async () => {
+  const handleApprove = async () => {
     try {
-      await updatePost(post.postId, { status: PostStatus.Approved });
+      await changePostStatus(post.postId, 2);
+      setPost({ ...post, status: 2 });
       setSnackbar({
         open: true,
         message: 'Bài viết đã được duyệt',
         severity: 'success'
       });
-      const updatedPost = await fetchPostById(id);
-      setPost(updatedPost);
     } catch (error) {
       setSnackbar({
         open: true,
         message: 'Lỗi khi duyệt bài viết',
         severity: 'error'
       });
+    } finally {
+      setIsApprovePopupOpen(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await changePostStatus(post.postId, 3, rejectReason);
+      setPost({ ...post, status: 3 });
+      setSnackbar({
+        open: true,
+        message: 'Bài viết đã bị từ chối',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi từ chối bài viết',
+        severity: 'error'
+      });
+    } finally {
+      setIsRejectPopupOpen(false);
+      setRejectReason('');
     }
   };
 
@@ -71,12 +96,20 @@ const ManagerPostDetail = () => {
     switch (post.status) {
       case PostStatus.Pending:
         return (
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" color="primary" startIcon={<CheckCircle />} onClick={handleApprovePost} sx={{ height: 'fit-content' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
+              onClick={() => setIsApprovePopupOpen(true)}
+            >
               Duyệt
             </Button>
-            <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost} sx={{ height: 'fit-content' }}>
-              Xóa
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
+              onClick={() => setIsRejectPopupOpen(true)}
+            >
+              Từ chối
             </Button>
           </Box>
         );
@@ -147,14 +180,29 @@ const ManagerPostDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const handleShareToSocial = (platform) => {
-    const url = encodeURIComponent(window.location.origin + '/posts/' + post.postId);
-    const text = encodeURIComponent(post.title);
-
-    if (platform === 'facebook') {
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-    } else if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+  const handleShareToSocial = async (platform) => {
+    try {
+      if (platform === 'facebook') {
+        await sharePostOnFacebook(post.postId);
+        setSnackbar({
+          open: true,
+          message: 'Đã đăng bài viết lên Facebook thành công',
+          severity: 'success'
+        });
+      } else if (platform === 'twitter') {
+        await sharePostOnTwitter(post.postId);
+        setSnackbar({
+          open: true,
+          message: 'Đã đăng bài viết lên Twitter thành công',
+          severity: 'success'
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+        severity: 'error'
+      });
     }
   };
 
@@ -254,6 +302,49 @@ const ManagerPostDetail = () => {
         postId={post.postId}
         onDelete={handleConfirmDelete}
       />
+      <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
+        <DialogTitle>Xác nhận duyệt</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn duyệt bài viết này?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsApprovePopupOpen(false)}>Hủy</Button>
+          <Button onClick={handleApprove} variant="contained" color="primary">
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={isRejectPopupOpen} onClose={() => setIsRejectPopupOpen(false)}>
+        <DialogTitle>Xác nhận từ chối</DialogTitle>
+        <DialogContent sx={{ width: '30rem' }}>
+          <DialogContentText>
+            Vui lòng nhập lý do từ chối:
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do"
+            fullWidth
+            multiline
+            rows={4}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
+          <Button 
+            onClick={handleReject} 
+            variant="contained" 
+            color="error"
+            disabled={!rejectReason.trim()}
+          >
+            Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

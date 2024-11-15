@@ -44,16 +44,7 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                 return;
             }
 
-            if (!formData.imageFile) {
-                setError('Vui lòng chọn ảnh cho tỉnh thành');
-                return;
-            }
-
-            const createData = new FormData();
-            createData.append('provinceName', formData.provinceName.trim());
-            createData.append('imageFile', formData.imageFile);
-
-            await createProvince(createData);
+            await createProvince(formData.provinceName);
             onCreateSuccess();
             handleClose();
             // Reset form
