@@ -97,15 +97,15 @@ const ManagerPostDetail = () => {
       case PostStatus.Pending:
         return (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
               onClick={() => setIsApprovePopupOpen(true)}
             >
               Duyệt
             </Button>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
               onClick={() => setIsRejectPopupOpen(true)}
             >
@@ -119,33 +119,36 @@ const ManagerPostDetail = () => {
             <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost} sx={{ height: 'fit-content' }}>
               Xóa
             </Button>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <Typography>
-                Đăng bài:
-              </Typography>
-              <Button
-                variant="contained"
-                startIcon={<FacebookIcon />}
-                onClick={() => handleShareToSocial('facebook')}
-                sx={{
-                  backgroundColor: '#1877F2', height: 'fit-content',
-                  '&:hover': { backgroundColor: '#0d6efd' }
-                }}
-              >
-                Facebook
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<XIcon />}
-                onClick={() => handleShareToSocial('twitter')}
-                sx={{
-                  backgroundColor: '#000000',
-                  '&:hover': { backgroundColor: '#2c2c2c' }
-                }}
-              >
-                Twitter
-              </Button>
-            </Box>
+            {(!post.xTweetId || !post.facebookPostId) && (
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Typography>Đăng bài:</Typography>
+                {!post.facebookPostId && (
+                  <Button variant="contained" startIcon={<FacebookIcon />} onClick={() => handleShareToSocial('facebook')}
+                    sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                  >Facebook</Button>
+                )}
+                {!post.xTweetId && (
+                  <Button variant="contained" startIcon={<XIcon />} onClick={() => handleShareToSocial('twitter')}
+                    sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                  >Twitter</Button>
+                )}
+              </Box>
+            )}
+            {(post.xTweetId || post.facebookPostId) && (
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Typography>Xem bài đã đăng tại:</Typography>
+                {post.facebookPostId && (
+                  <Button variant="contained" startIcon={<FacebookIcon />} onClick={() => handleViewOnSocial('facebook')}
+                    sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                  >Facebook</Button>
+                )}
+                {post.xTweetId && (
+                  <Button variant="contained" startIcon={<XIcon />} onClick={() => handleViewOnSocial('twitter')}
+                    sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                  >Twitter</Button>
+                )}
+              </Box>
+            )}
           </Box>
         );
       default:
@@ -204,6 +207,18 @@ const ManagerPostDetail = () => {
         severity: 'error'
       });
     }
+  };
+
+  const handleViewOnSocial = (platform) => {
+      let url;
+      if (platform === 'facebook') {
+        url = `https://www.facebook.com/${post.facebookPostId}`;
+      } else if (platform === 'twitter') {
+        url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${post.xTweetId}`;
+      }
+      if (url) {
+        window.open(url, '_blank');
+      }
   };
 
   if (!post) return null;
@@ -335,9 +350,9 @@ const ManagerPostDetail = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
-          <Button 
-            onClick={handleReject} 
-            variant="contained" 
+          <Button
+            onClick={handleReject}
+            variant="contained"
             color="error"
             disabled={!rejectReason.trim()}
           >

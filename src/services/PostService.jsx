@@ -59,7 +59,9 @@ export const fetchPostById = async (id) => {
             provinceId: item.provinceId,
             description: item.description,
             createdAt: item.createAt,
-            status: item.status
+            status: item.status,
+            xTweetId: item.xTweetId,
+            facebookPostId: item.facebookPostId
         };
     } catch (error) {
         console.error('Error fetching post:', error);
