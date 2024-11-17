@@ -8,7 +8,7 @@ import { fetchPostCategory } from '@services/PostCategoryService';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import dayjs from 'dayjs';
-import { createPost } from '@services/PostService';
+import { createPost, updatePostImages } from '@services/PostService';
 import { Helmet } from 'react-helmet';
 
 const commonStyles = {
@@ -139,59 +139,70 @@ const CreatePost = () => {
 
   const handleCreatePost = async (isDraft = false) => {
     try {
-      // Validate required fields
-      if (!newPost.title || !newPost.content || !newPost.category || !newPost.provinceId) {
+        // Validate required fields
+        if (!newPost.title || !newPost.content || !newPost.category || !newPost.provinceId) {
+            setSnackbar({
+                open: true,
+                message: 'Vui lòng điền đầy đủ thông tin bắt buộc',
+                severity: 'error'
+            });
+            return;
+        }
+
+        // Validate content length
+        if (newPost.content.length < 50) {
+            setSnackbar({
+                open: true,
+                message: 'Nội dung bài viết phải có ít nhất 50 ký tự',
+                severity: 'error'
+            });
+            return;
+        }
+
+        // Prepare post data without image
+        const postData = {
+            title: newPost.title.trim(),
+            content: newPost.content,
+            description: newPost.description.trim(),
+            postCategoryId: newPost.category,
+            provinceId: newPost.provinceId,
+            createdAt: dayjs(newPost.createDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+            isDraft: isDraft
+        };
+
+        // Create post first
+        const createdPost = await createPost(postData);
+        console.log(createdPost);
+        // If there's an image, upload it
+        if (newPost.image) {
+            // Convert base64 to blob
+            const response = await fetch(newPost.image);
+            const blob = await response.blob();
+            const imageFile = new File([blob], 'post-image.jpg', { type: 'image/jpeg' });
+            
+            // Upload image
+            await updatePostImages(createdPost.data, [imageFile]);
+        }
+
+        // Show success message
         setSnackbar({
-          open: true,
-          message: 'Vui lòng điền đầy đủ thông tin bắt buộc',
-          severity: 'error'
+            open: true,
+            message: `Bài viết đã được ${isDraft ? 'lưu nháp' : 'gửi duyệt'} thành công`,
+            severity: 'success'
         });
-        return;
-      }
 
-      // Validate content length
-      if (newPost.content.length < 50) {
-        setSnackbar({
-          open: true,
-          message: 'Nội dung bài viết phải có ít nhất 50 ký tự',
-          severity: 'error'
-        });
-        return;
-      }
-
-      // Prepare post data without image
-      const postData = {
-        title: newPost.title.trim(),
-        content: newPost.content,
-        description: newPost.description.trim(),
-        postCategoryId: newPost.category,
-        provinceId: newPost.provinceId,
-        createdAt: dayjs(newPost.createDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-        isDraft: isDraft
-      };
-
-      // Create post first
-      const createdPost = await createPost(postData);
-
-      // Show success message
-      setSnackbar({
-        open: true,
-        message: `Bài viết đã được ${isDraft ? 'lưu nháp' : 'gửi duyệt'} thành công`,
-        severity: 'success'
-      });
-
-      // Navigate back after successful creation
-      setTimeout(() => {
-        navigate('/nhan-vien/bai-viet');
-      }, 1500);
+        // Navigate back after successful creation
+        setTimeout(() => {
+            navigate('/nhan-vien/bai-viet');
+        }, 1500);
 
     } catch (error) {
-      console.error('Error creating post:', error);
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo bài viết',
-        severity: 'error'
-      });
+        console.error('Error creating post:', error);
+        setSnackbar({
+            open: true,
+            message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo bài viết',
+            severity: 'error'
+        });
     }
   };
 

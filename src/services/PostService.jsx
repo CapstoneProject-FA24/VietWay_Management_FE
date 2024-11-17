@@ -179,3 +179,27 @@ export const sharePostOnFacebook = async (postId) => {
         throw error;
     }
 };
+
+export const updatePostImages = async (postId, newImages) => {
+    console.log(newImages);
+    const token = getCookie('token');
+    try {
+        const formData = new FormData();
+        if (newImages) {
+            newImages.forEach((image) => {
+                formData.append("newImage", image);
+            });
+        }
+
+        const response = await axios.patch(`${baseURL}/api/Post/${postId}/images`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating post images:', error.response);
+        throw error;
+    }
+};

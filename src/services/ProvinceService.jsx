@@ -60,7 +60,8 @@ export const deleteProvince = async (provinceId) => {
 export const createProvince = async (provinceName) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/Province`, 
+        const response = await axios.post(
+            `${baseURL}/api/Province`, 
             JSON.stringify({ provinceName }),
             {
                 headers: {
@@ -72,6 +73,28 @@ export const createProvince = async (provinceName) => {
         return response.data;
     } catch (error) {
         console.error('Error creating province:', error);
+        throw error;
+    }
+};
+
+export const addProvinceImage = async (provinceId, imageFile) => {
+    const token = getCookie('token');
+    try {
+        const formData = new FormData();
+        formData.append('ImageFile', imageFile);
+
+        const response = await axios.post(
+            `${baseURL}/api/Province/${provinceId}/image`,
+            formData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error adding province image:', error);
         throw error;
     }
 };

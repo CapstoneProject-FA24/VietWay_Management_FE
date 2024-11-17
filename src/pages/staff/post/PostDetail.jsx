@@ -15,7 +15,7 @@ import IconButton from '@mui/material/IconButton';
 import { PostStatus } from '@hooks/Statuses';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
-import { fetchPostById, updatePost, deletePost } from '@services/PostService';
+import { fetchPostById, updatePost, deletePost, updatePostImages } from '@services/PostService';
 import { Helmet } from 'react-helmet';
 
 const commonStyles = {
@@ -202,12 +202,18 @@ const PostDetail = () => {
       };
 
       await updatePost(id, updatedPost);
+
+      if (editablePost.imageFile) {
+        await updatePostImages(id, [editablePost.imageFile]);
+      }
+
       setPost(prevPost => ({
         ...prevPost,
         ...updatedPost,
         postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
         provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
       }));
+      
       setIsEditMode(false);
       setSnackbar({
         open: true,
@@ -237,12 +243,18 @@ const PostDetail = () => {
       };
 
       await updatePost(id, updatedPost);
+
+      if (editablePost.imageFile) {
+        await updatePostImages(id, [editablePost.imageFile]);
+      }
+
       setPost(prevPost => ({
         ...prevPost,
         ...updatedPost,
         postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
         provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
       }));
+      
       setIsEditMode(false);
       setSnackbar({
         open: true,
@@ -348,6 +360,24 @@ const PostDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        // Store the file for later upload
+        setEditablePost(prev => ({
+            ...prev,
+            imageFile: file  // Store the actual file
+        }));
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            handleFieldChange('image', reader.result);
+        };
+        reader.readAsDataURL(file);
+    }
+  };
+
   if (!post) return null;
 
   const statusInfo = getPostStatusInfo(post.status);
@@ -450,7 +480,7 @@ const PostDetail = () => {
                     }}>
                       {editablePost.image ? (
                         <img 
-                          src={editablePost.image} 
+                          src={editablePost.imageUrl} 
                           alt={editablePost.title}
                           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
@@ -486,7 +516,7 @@ const PostDetail = () => {
                           type="file" 
                           hidden 
                           accept="image/*"
-                          onChange={(e) => handleFieldChange('image', e.target.files[0])} 
+                          onChange={handleImageChange}
                         />
                       </Button>
                     </Box>

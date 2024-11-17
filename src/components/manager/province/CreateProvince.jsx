@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Box, TextField, Button, Typography } from '@mui/material';
-import { createProvince } from '@services/ProvinceService';
+import { createProvince, addProvinceImage } from '@services/ProvinceService';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -44,7 +44,21 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                 return;
             }
 
-            await createProvince(formData.provinceName);
+            if (!formData.imageFile) {
+                setError('Vui lòng chọn ảnh cho tỉnh thành');
+                return;
+            }
+
+            // First create the province
+            const provinceResponse = await createProvince(formData.provinceName);
+            
+            // Then upload the image using the returned provinceId
+            if (provinceResponse.data && provinceResponse.data.provinceId) {
+                await addProvinceImage(provinceResponse.data.provinceId, formData.imageFile);
+            } else {
+                throw new Error('Không nhận được ID tỉnh thành');
+            }
+
             onCreateSuccess();
             handleClose();
             // Reset form
@@ -55,7 +69,11 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
             setPreviewImage('');
             setError('');
         } catch (error) {
-            setError('Có lỗi xảy ra khi thêm tỉnh thành');
+            if (error.response && error.response.data) {
+                setError(error.response.data.message || 'Có lỗi xảy ra khi thêm tỉnh thành');
+            } else {
+                setError('Có lỗi xảy ra khi thêm tỉnh thành');
+            }
             console.error('Error creating province:', error);
         }
     };
