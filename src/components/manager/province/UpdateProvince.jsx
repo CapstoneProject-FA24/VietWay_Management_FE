@@ -9,7 +9,7 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
         provinceName: province?.provinceName || '',
         imageFile: null
     });
-    const [previewImage, setPreviewImage] = useState(province?.imageURL || '');
+    const [previewImage, setPreviewImage] = useState(province?.imageUrl || '');
     const [error, setError] = useState('');
 
     const handleInputChange = (e) => {

@@ -38,7 +38,7 @@ export const fetchTourTemplates = async (params) => {
             tourCategory: item.tourCategory,
             status: item.status,
             statusName: getStatusText(item.status),
-            createdDate: item.createdDate,
+            createdDate: item.createdAt,
             creatorName: item.creatorName,
             provinces: item.provinces,
             imageUrl: item.imageUrl
@@ -74,7 +74,7 @@ export const fetchTourTemplateById = async (id) => {
             note: response.data.data.note,
             status: response.data.data.status,
             statusName: getStatusText(response.data.data.status),
-            createdDate: response.data.data.createdDate,
+            createdDate: response.data.data.createdAt,
             creatorName: response.data.data.creatorName,
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,

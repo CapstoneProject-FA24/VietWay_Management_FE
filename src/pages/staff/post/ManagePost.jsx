@@ -82,7 +82,7 @@ const ManagePost = () => {
   // Fetch provinces
   const fetchProvincesData = async () => {
     try {
-      const fetchedProvinces = await fetchProvinces();
+      const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
       setProvinces(fetchedProvinces);
     } catch (error) {
       console.error('Error fetching provinces:', error);

@@ -31,12 +31,12 @@ const ManagerManageProvince = () => {
 
     const fetchData = async () => {
         try {
-            /* const params = {
+            const params = {
                 pageSize: pageSize,
                 pageIndex: page,
                 nameSearch: searchTerm,
-            }; */
-            const result = await fetchProvinces();
+            };
+            const result = await fetchProvinces(params);
             setProvinces(result);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {

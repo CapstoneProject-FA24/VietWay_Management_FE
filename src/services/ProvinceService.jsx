@@ -2,20 +2,22 @@ const baseURL = import.meta.env.VITE_API_URL;
 import axios from 'axios';
 import { getCookie } from '@services/AuthenService';
 
-export const fetchProvinces = async () => {
+export const fetchProvinces = async (params) => {
+    const token = getCookie('token');
     try {
-        /* const { pageSize, pageIndex, nameSearch } = params;
-        const queryParams = new URLSearchParams({
-            pageSize: pageSize || 12,
-            pageIndex: pageIndex || 1,
-            ...(nameSearch && { nameSearch })
-        }).toString(); */
-        //To do: api => Province -> provinces
-        const response = await axios.get(`${baseURL}/api/Province?`);
-        const data = response.data.data.map(province => ({
+        const queryParams = new URLSearchParams();
+        queryParams.append('pageSize', params.pageSize || 63);
+        queryParams.append('pageIndex', params.pageIndex || 1);
+        if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
+        const response = await axios.get(`${baseURL}/api/Province?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = response.data.data.items.map(province => ({
             provinceId: province.provinceId,
             provinceName: province.provinceName,
-            imageURL: province.imageUrl
+            imageUrl: province.imageUrl
         }));
         return data;
     } catch (error) {

@@ -79,7 +79,7 @@ const CreatePost = () => {
     const loadProvinces = async () => {
       setIsLoadingProvinces(true);
       try {
-        const fetchedProvinces = await fetchProvinces();
+        const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
         const formattedProvinces = fetchedProvinces.map(province => ({
           value: province.provinceId,
           label: province.provinceName

@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 
 export const fetchToursByTemplateId = async (id) => {
     try {
-        const response = await axios.get(`${baseURL}/api/tours/get-tours-by-template-id?tourTemplateId=${id}`);
+        const response = await axios.get(`${baseURL}/api/tours/get-by-template-id/${id}`);
         const tours = response.data.data.map(item => ({
             id: item.tourId,
             tourTemplateId: item.tourTemplateId,

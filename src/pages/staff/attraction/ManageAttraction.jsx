@@ -63,7 +63,7 @@ const ManageAttraction = () => {
     useEffect(() => {
         const fetchProvincesData = async () => {
             try {
-                const fetchedProvinces = await fetchProvinces();
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const fetchedAttractionType = await fetchAttractionType();
                 setProvinces(fetchedProvinces);
                 setAttractionTypes(fetchedAttractionType);

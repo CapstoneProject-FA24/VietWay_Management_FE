@@ -51,7 +51,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const fetchedProvinces = await fetchProvinces();
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const duration = await fetchTourDuration();
                 const categories = await fetchTourCategory();
                 setProvinces(fetchedProvinces);
@@ -397,7 +397,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                         </Select>
                                         <Button
                                             variant="contained" onClick={() => handleFieldSubmit('duration')}
-                                            disabled={!editableFields.duration.value.trim()}
+                                            disabled={!editableFields.duration.value}
                                             sx={{ minWidth: '40px', padding: '8px' }}><CheckIcon /></Button>
                                     </>
                                 ) : (
