@@ -82,7 +82,7 @@ const ManagerManagePost = () => {
   // Fetch provinces
   const fetchProvincesData = async () => {
     try {
-      const fetchedProvinces = await fetchProvinces();
+      const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
       setProvinces(fetchedProvinces);
     } catch (error) {
       console.error('Error fetching provinces:', error);
@@ -124,9 +124,6 @@ const ManagerManagePost = () => {
         <Grid container spacing={2}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>Quản lý bài viết</Typography>
-            <Button component={Link} to={`${currentPage}/them`} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
-              Tạo bài viết mới
-            </Button>
           </Grid>
 
           <Grid container spacing={2} sx={{ mb: 2 }}>

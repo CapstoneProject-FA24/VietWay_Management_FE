@@ -16,7 +16,6 @@ const InfoItem = ({ icon, text }) => (
 );
 
 const TourCard = ({ tour, onViewDetails }) => {
-  console.log(tour);
   return (
     <Card
       onClick={onViewDetails}

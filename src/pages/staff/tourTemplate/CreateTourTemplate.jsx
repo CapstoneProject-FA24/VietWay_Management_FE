@@ -58,7 +58,7 @@ const CreateTourTemplate = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedProvinces = await fetchProvinces();
+        const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
         const duration = await fetchTourDuration();
         const categories = await fetchTourCategory();
         setProvinces(fetchedProvinces);

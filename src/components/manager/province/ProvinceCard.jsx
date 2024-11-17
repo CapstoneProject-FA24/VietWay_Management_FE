@@ -40,7 +40,7 @@ const ProvinceCard = ({ province, onUpdate }) => {
                     height: '100%',
                     objectFit: 'cover',
                 }}
-                image={province.imageURL}
+                image={province.imageUrl}
                 alt={province.provinceName}
             />
             <Box sx={{ display: 'flex', position: 'absolute', bottom: 12, right: 15, padding: '10px', backgroundColor: 'rgba(30,30,30,0.8)', borderRadius: '10px', alignItems: 'center'}}>

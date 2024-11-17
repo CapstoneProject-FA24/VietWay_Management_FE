@@ -67,7 +67,7 @@ const ManagerManageTourTemplate = () => {
     useEffect(() => {
         const fetchProvincesData = async () => {
             try {
-                const fetchedProvinces = await fetchProvinces();
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const fetchedCategories = await fetchTourCategory();
                 const fetchedDurations = await fetchTourDuration();
                 setProvinces(fetchedProvinces);

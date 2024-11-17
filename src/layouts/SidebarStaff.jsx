@@ -134,7 +134,6 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
             { text: 'Tour Mẫu', url: '/nhan-vien/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour Du Lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
             { text: 'Bài viết', url: '/nhan-vien/bai-viet', icon: <ArticleIcon /> },
-            { text: 'Sự kiện', url: '/nhan-vien/su-kien', icon: <EventIcon /> }
           ].map(({ text, url, icon }) => (
             <ListItem
               key={text}

@@ -83,7 +83,7 @@ const ManagerManageTour = () => {
   useEffect(() => {
     const fetchApprovedTourTemplates = async () => {
       try {
-        const fetchedProvinces = await fetchProvinces();
+        const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
         setProvinces(fetchedProvinces);
       } catch (error) {
         console.error('Error fetching tour templates:', error);
@@ -135,12 +135,12 @@ const ManagerManageTour = () => {
 
     fetchToursData();
   }, [
-    searchTerm, 
-    searchCode, 
-    filters, 
-    statusTab, 
-    dateRange, 
-    pagination.pageIndex, 
+    searchTerm,
+    searchCode,
+    filters,
+    statusTab,
+    dateRange,
+    pagination.pageIndex,
     pagination.pageSize
   ]);
 
@@ -158,7 +158,7 @@ const ManagerManageTour = () => {
 
   const tourTypeOptions = tourCategories.map(category => ({
     value: category.tourCategoryId,
-      label: category.tourCategoryName
+    label: category.tourCategoryName
   }));
 
   const handleTempFilterChange = (selectedOptions, filterType) => {
@@ -173,7 +173,7 @@ const ManagerManageTour = () => {
       ...prev,
       pageIndex: 1
     }));
-    
+
     setFilters({
       tourType: tempFilters.tourType,
       duration: tempFilters.duration,
@@ -196,15 +196,12 @@ const ManagerManageTour = () => {
         <title>Quản lý Tour</title>
       </Helmet>
       <SidebarManager
-        isOpen={isOpen} 
+        isOpen={isOpen}
         toggleSidebar={() => setIsOpen(!isOpen)}
       />
       <Box sx={{ flexGrow: 1, mt: 1.5, p: isOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isOpen ? '280px' : '20px' }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
-          <Button component={Link} to={currentPage + "/tour-mau-duoc-duyet"} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: "55px", borderRadius: 2 }}>
-            Tạo Tour Mới
-          </Button>
+          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý tour du lịch </Typography>
         </Box>
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -254,30 +251,30 @@ const ManagerManageTour = () => {
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{
-                  width: { xs: '100%', md: '100%' }, 
+                  width: { xs: '100%', md: '100%' },
                   display: 'flex',
-                  flexDirection: 'column', 
+                  flexDirection: 'column',
                   gap: 1
                 }}>
                   <Typography>Ngày khởi hành</Typography>
                   <Box sx={{ display: 'flex', gap: 2, mt: -0.5 }}>
                     <DatePicker
-                      label="Từ ngày" 
+                      label="Từ ngày"
                       value={tempDateRange.from}
                       onChange={(newValue) => {
                         setTempDateRange(prev => ({ ...prev, from: newValue }));
                       }}
-                      sx={{ width: '100%' }} 
+                      sx={{ width: '100%' }}
                       format="DD/MM/YYYY"
                       slotProps={{ textField: { size: "small", error: false } }}
                     />
                     <DatePicker
-                      label="Đến ngày" 
+                      label="Đến ngày"
                       value={tempDateRange.to}
-                      onChange={(newValue) => { 
-                        setTempDateRange(prev => ({ ...prev, to: newValue })); 
+                      onChange={(newValue) => {
+                        setTempDateRange(prev => ({ ...prev, to: newValue }));
                       }}
-                      sx={{ width: '100%' }} 
+                      sx={{ width: '100%' }}
                       format="DD/MM/YYYY"
                       slotProps={{ textField: { size: "small", error: false } }}
                       minDate={tempDateRange.from ? dayjs(tempDateRange.from) : undefined}
@@ -289,9 +286,9 @@ const ManagerManageTour = () => {
           </Grid>
 
           <Grid item xs={12} sm={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button 
-              variant="contained" 
-              startIcon={<FilterListIcon />} 
+            <Button
+              variant="contained"
+              startIcon={<FilterListIcon />}
               onClick={handleApplyFilter}
               sx={{ mt: 3.5, backgroundColor: 'lightGray', color: 'black', width: '12rem' }}
             >
@@ -318,8 +315,8 @@ const ManagerManageTour = () => {
                     ),
                   }}
                 />
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   onClick={handleSearchByName}
                   sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}
                 >
@@ -344,7 +341,7 @@ const ManagerManageTour = () => {
                     ),
                   }}
                 />
-                <Button 
+                <Button
                   variant="contained"
                   onClick={handleSearchByCode}
                   sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: 'fit-content' }}
@@ -356,7 +353,7 @@ const ManagerManageTour = () => {
           </Grid>
         </Grid>
 
-        <Tabs 
+        <Tabs
           value={statusTab}
           onChange={handleStatusTabChange}
           aria-label="tour status tabs"
@@ -365,7 +362,7 @@ const ManagerManageTour = () => {
         >
           <Tab label="Tất cả" value="all" />
           {Object.entries(TourStatus).map(([key, value]) => (
-            <Tab 
+            <Tab
               key={value}
               label={getTourStatusInfo(value).text}
               value={value.toString()}
@@ -378,7 +375,7 @@ const ManagerManageTour = () => {
             <Grid container spacing={2} sx={{ mt: 2 }}>
               {tours.map((tour) => (
                 <Grid item xs={12} sm={6} md={4} key={tour.tourId}>
-                  <TourCard 
+                  <TourCard
                     tour={tour}
                     onViewDetails={() => {
                       console.log('View details for tour:', tour.tourId);
@@ -387,9 +384,9 @@ const ManagerManageTour = () => {
                 </Grid>
               ))}
             </Grid>
-            
+
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, width: '100%' }}>
-              <Box sx={{ width: '10%' }}/>
+              <Box sx={{ width: '10%' }} />
               <Pagination
                 count={Math.ceil(pagination.total / pagination.pageSize)}
                 page={pagination.pageIndex}

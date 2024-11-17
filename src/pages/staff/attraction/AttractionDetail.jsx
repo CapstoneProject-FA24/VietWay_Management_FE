@@ -29,7 +29,7 @@ const AttractionDetail = () => {
     const fetchData = async () => {
       try {
         const [fetchedProvinces, fetchedAttractionType, fetchedAttraction] = await Promise.all([
-          fetchProvinces(),
+          fetchProvinces({ pageSize: 63, pageIndex: 1 }),
           fetchAttractionType(),
           fetchAttractionById(id)
         ]);

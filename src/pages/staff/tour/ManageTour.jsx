@@ -83,7 +83,7 @@ const ManageTour = () => {
   useEffect(() => {
     const fetchApprovedTourTemplates = async () => {
       try {
-        const fetchedProvinces = await fetchProvinces();
+        const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
         setProvinces(fetchedProvinces);
       } catch (error) {
         console.error('Error fetching tour templates:', error);
