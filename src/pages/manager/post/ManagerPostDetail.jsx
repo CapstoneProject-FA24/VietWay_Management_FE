@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
-import { ArrowBack, Edit, Delete, Save, Send, CheckCircle } from '@mui/icons-material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { ArrowBack, Delete } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
@@ -135,18 +135,89 @@ const ManagerPostDetail = () => {
               </Box>
             )}
             {(post.xTweetId || post.facebookPostId) && (
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography>Xem bài đã đăng tại:</Typography>
-                {post.facebookPostId && (
-                  <Button variant="contained" startIcon={<FacebookIcon />} onClick={() => handleViewOnSocial('facebook')}
-                    sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
-                  >Facebook</Button>
-                )}
-                {post.xTweetId && (
-                  <Button variant="contained" startIcon={<XIcon />} onClick={() => handleViewOnSocial('twitter')}
-                    sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                  >Twitter</Button>
-                )}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <Typography>Xem bài đã đăng tại:</Typography>
+                  {post.facebookPostId && (
+                    <Button 
+                      variant="contained" 
+                      startIcon={<FacebookIcon />} 
+                      onClick={() => handleViewOnSocial('facebook')}
+                      sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                    >
+                      Facebook
+                    </Button>
+                  )}
+                  {post.xTweetId && (
+                    <Button 
+                      variant="contained" 
+                      startIcon={<XIcon />} 
+                      onClick={() => handleViewOnSocial('twitter')}
+                      sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                    >
+                      Twitter
+                    </Button>
+                  )}
+                </Box>
+
+                {/* Statistics Table */}
+                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto' }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                        {post.xTweetId && (
+                          <>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {post.xTweetId && (
+                        <TableRow>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <XIcon sx={{ fontSize: 20 }} />
+                              Twitter
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center">{post.likeCount || 0}</TableCell>
+                          <TableCell align="center">{post.retweetCount || 0}</TableCell>
+                          <TableCell align="center">{post.replyCount || 0}</TableCell>
+                          <TableCell align="center">{post.impressionCount || 0}</TableCell>
+                          <TableCell align="center">{post.quoteCount || 0}</TableCell>
+                          <TableCell align="center">{post.bookmarkCount || 0}</TableCell>
+                        </TableRow>
+                      )}
+                      {post.facebookPostId && (
+                        <TableRow>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <FacebookIcon sx={{ fontSize: 20 }} />
+                              Facebook
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center">{post.facebookEngagementCount || 0}</TableCell>
+                          <TableCell align="center">{post.facebookShareCount || 0}</TableCell>
+                          <TableCell align="center">{post.facebookCommentCount || 0}</TableCell>
+                          <TableCell align="center">-</TableCell>
+                          {post.xTweetId && (
+                            <>
+                              <TableCell align="center">-</TableCell>
+                              <TableCell align="center">-</TableCell>
+                            </>
+                          )}
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </Box>
               </Box>
             )}
           </Box>
