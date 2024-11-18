@@ -19,7 +19,7 @@ const ManagerManageAttraction = () => {
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [attractions, setAttractions] = useState([]);
     const [sortOrder, setSortOrder] = useState('nameA-Z');
-    const [statusTab, setStatusTab] = useState('all');
+    const [statusTab, setStatusTab] = useState('1');
     const [provinces, setProvinces] = useState([]);
     const [attractionTypes, setAttractionTypes] = useState([]);
     const [page, setPage] = useState(1);
@@ -47,13 +47,13 @@ const ManagerManageAttraction = () => {
                 nameSearch: searchTerm,
                 attractionTypeIds: selectedTypes.map(c => c.value),
                 provinceIds: selectedProvinces.map(p => p.value),
-                status: statusTab === 'all' ? null : parseInt(statusTab)
+                status: parseInt(statusTab)
             };
             const result = await fetchAttractions(params);
             setAttractions(result.data);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
-            console.error('Error fetching tour templates:', error);
+            console.error('Error fetching attractions:', error);
         }
     };
 
@@ -198,8 +198,6 @@ const ManagerManageAttraction = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="attraction status tabs">
-                            <Tab label="Tất cả" value="all" />
-                            <Tab label="Bản nháp" value="0" />
                             <Tab label="Chờ duyệt" value="1" />
                             <Tab label="Đã duyệt" value="2" />
                             <Tab label="Từ chối" value="3" />
