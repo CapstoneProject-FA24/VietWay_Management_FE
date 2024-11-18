@@ -203,3 +203,18 @@ export const updatePostImages = async (postId, newImages) => {
         throw error;
     }
 };
+
+export const getTwitterReactionsByPostId = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/Post/${postId}/twitter/reactions-by-post-id`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching Twitter reactions:', error.response);
+        throw error;
+    }
+};

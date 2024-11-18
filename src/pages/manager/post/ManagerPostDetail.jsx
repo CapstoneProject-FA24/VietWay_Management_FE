@@ -5,7 +5,7 @@ import { ArrowBack, Delete } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
-import { fetchPostById, deletePost, sharePostOnFacebook, sharePostOnTwitter } from '@services/PostService';
+import { fetchPostById, deletePost, sharePostOnFacebook, sharePostOnTwitter, getTwitterReactionsByPostId, changePostStatus } from '@services/PostService';
 import { getPostStatusInfo } from '@services/StatusService';
 import 'react-quill/dist/quill.snow.css';
 import { PostStatus } from '@hooks/Statuses';
@@ -13,7 +13,6 @@ import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import { Helmet } from 'react-helmet';
-import { changePostStatus } from '@services/PostService';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -29,6 +28,7 @@ const ManagerPostDetail = () => {
   const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
   const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [twitterReactions, setTwitterReactions] = useState(null);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -46,6 +46,36 @@ const ManagerPostDetail = () => {
     };
     loadPost();
   }, [id]);
+
+  useEffect(() => {
+    const fetchTwitterReactions = async () => {
+      if (post?.xTweetId) {
+        try {
+          const data = await getTwitterReactionsByPostId(post.postId);
+          if (data.data) {
+            setPost(prevPost => ({
+              ...prevPost,
+              likeCount: data.data.likeCount,
+              retweetCount: data.data.retweetCount,
+              replyCount: data.data.replyCount,
+              impressionCount: data.data.impressionCount,
+              quoteCount: data.data.quoteCount,
+              bookmarkCount: data.data.bookmarkCount
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching Twitter reactions:', error);
+          setSnackbar({
+            open: true,
+            message: 'Không thể tải thông tin tương tác Twitter',
+            severity: 'error'
+          });
+        }
+      }
+    };
+
+    fetchTwitterReactions();
+  }, [post?.postId, post?.xTweetId]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -139,9 +169,9 @@ const ManagerPostDetail = () => {
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <Typography>Xem bài đã đăng tại:</Typography>
                   {post.facebookPostId && (
-                    <Button 
-                      variant="contained" 
-                      startIcon={<FacebookIcon />} 
+                    <Button
+                      variant="contained"
+                      startIcon={<FacebookIcon />}
                       onClick={() => handleViewOnSocial('facebook')}
                       sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
                     >
@@ -149,74 +179,15 @@ const ManagerPostDetail = () => {
                     </Button>
                   )}
                   {post.xTweetId && (
-                    <Button 
-                      variant="contained" 
-                      startIcon={<XIcon />} 
+                    <Button
+                      variant="contained"
+                      startIcon={<XIcon />}
                       onClick={() => handleViewOnSocial('twitter')}
                       sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
                     >
                       Twitter
                     </Button>
                   )}
-                </Box>
-
-                {/* Statistics Table */}
-                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto' }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                        {post.xTweetId && (
-                          <>
-                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-                          </>
-                        )}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {post.xTweetId && (
-                        <TableRow>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <XIcon sx={{ fontSize: 20 }} />
-                              Twitter
-                            </Box>
-                          </TableCell>
-                          <TableCell align="center">{post.likeCount || 0}</TableCell>
-                          <TableCell align="center">{post.retweetCount || 0}</TableCell>
-                          <TableCell align="center">{post.replyCount || 0}</TableCell>
-                          <TableCell align="center">{post.impressionCount || 0}</TableCell>
-                          <TableCell align="center">{post.quoteCount || 0}</TableCell>
-                          <TableCell align="center">{post.bookmarkCount || 0}</TableCell>
-                        </TableRow>
-                      )}
-                      {post.facebookPostId && (
-                        <TableRow>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <FacebookIcon sx={{ fontSize: 20 }} />
-                              Facebook
-                            </Box>
-                          </TableCell>
-                          <TableCell align="center">{post.facebookEngagementCount || 0}</TableCell>
-                          <TableCell align="center">{post.facebookShareCount || 0}</TableCell>
-                          <TableCell align="center">{post.facebookCommentCount || 0}</TableCell>
-                          <TableCell align="center">-</TableCell>
-                          {post.xTweetId && (
-                            <>
-                              <TableCell align="center">-</TableCell>
-                              <TableCell align="center">-</TableCell>
-                            </>
-                          )}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
                 </Box>
               </Box>
             )}
@@ -281,15 +252,15 @@ const ManagerPostDetail = () => {
   };
 
   const handleViewOnSocial = (platform) => {
-      let url;
-      if (platform === 'facebook') {
-        url = `https://www.facebook.com/${post.facebookPostId}`;
-      } else if (platform === 'twitter') {
-        url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${post.xTweetId}`;
-      }
-      if (url) {
-        window.open(url, '_blank');
-      }
+    let url;
+    if (platform === 'facebook') {
+      url = `https://www.facebook.com/${post.facebookPostId}`;
+    } else if (platform === 'twitter') {
+      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${post.xTweetId}`;
+    }
+    if (url) {
+      window.open(url, '_blank');
+    }
   };
 
   if (!post) return null;
@@ -317,6 +288,65 @@ const ManagerPostDetail = () => {
                 </Button>
                 {renderActionButtons()}
               </Box>
+              {(post.xTweetId || post.facebookPostId) && (
+                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                        {post.xTweetId && (
+                          <>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+                          </>
+                        )}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {post.xTweetId && (
+                        <TableRow>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <XIcon sx={{ fontSize: 20 }} />
+                              Twitter
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center">{post.likeCount || 0}</TableCell>
+                          <TableCell align="center">{post.retweetCount || 0}</TableCell>
+                          <TableCell align="center">{post.replyCount || 0}</TableCell>
+                          <TableCell align="center">{post.impressionCount || 0}</TableCell>
+                          <TableCell align="center">{post.quoteCount || 0}</TableCell>
+                          <TableCell align="center">{post.bookmarkCount || 0}</TableCell>
+                        </TableRow>
+                      )}
+                      {post.facebookPostId && (
+                        <TableRow>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <FacebookIcon sx={{ fontSize: 20 }} />
+                              Facebook
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center">{post.facebookEngagementCount || 0}</TableCell>
+                          <TableCell align="center">{post.facebookShareCount || 0}</TableCell>
+                          <TableCell align="center">{post.facebookCommentCount || 0}</TableCell>
+                          <TableCell align="center">-</TableCell>
+                          {post.xTweetId && (
+                            <>
+                              <TableCell align="center">-</TableCell>
+                              <TableCell align="center">-</TableCell>
+                            </>
+                          )}
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </Box>
+              )}
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />
