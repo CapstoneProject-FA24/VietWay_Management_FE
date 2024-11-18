@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip } from '@mui/material';
 import { ArrowBack, Delete } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
-import { fetchPostById, deletePost, sharePostOnFacebook, sharePostOnTwitter, getTwitterReactionsByPostId, changePostStatus } from '@services/PostService';
+import { fetchPostById, deletePost, sharePostOnFacebook, sharePostOnTwitter, getTwitterReactionsByPostId, changePostStatus, getFacebookReactionsByPostId } from '@services/PostService';
 import { getPostStatusInfo } from '@services/StatusService';
 import 'react-quill/dist/quill.snow.css';
 import { PostStatus } from '@hooks/Statuses';
@@ -28,7 +28,10 @@ const ManagerPostDetail = () => {
   const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
   const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [twitterReactions, setTwitterReactions] = useState(null);
+  const [socialMetrics, setSocialMetrics] = useState({
+    twitter: null,
+    facebook: null
+  });
 
   useEffect(() => {
     const loadPost = async () => {
@@ -52,15 +55,17 @@ const ManagerPostDetail = () => {
       if (post?.xTweetId) {
         try {
           const data = await getTwitterReactionsByPostId(post.postId);
-          if (data.data) {
-            setPost(prevPost => ({
-              ...prevPost,
-              likeCount: data.data.likeCount,
-              retweetCount: data.data.retweetCount,
-              replyCount: data.data.replyCount,
-              impressionCount: data.data.impressionCount,
-              quoteCount: data.data.quoteCount,
-              bookmarkCount: data.data.bookmarkCount
+          if (data) {
+            setSocialMetrics(prev => ({
+              ...prev,
+              twitter: {
+                likeCount: data.likeCount,
+                retweetCount: data.retweetCount,
+                replyCount: data.replyCount,
+                impressionCount: data.impressionCount,
+                quoteCount: data.quoteCount,
+                bookmarkCount: data.bookmarkCount
+              }
             }));
           }
         } catch (error) {
@@ -75,7 +80,44 @@ const ManagerPostDetail = () => {
     };
 
     fetchTwitterReactions();
+    const interval = setInterval(fetchTwitterReactions, 30000);
+    return () => clearInterval(interval);
   }, [post?.postId, post?.xTweetId]);
+
+  useEffect(() => {
+    const fetchFacebookReactions = async () => {
+      if (post?.facebookPostId) {
+        try {
+          const data = await getFacebookReactionsByPostId(post.postId);
+          if (data) {
+            const totalReactions = data.postReactions ? Object.values(data.postReactions).reduce((sum, count) => sum + count, 0) : 0;
+            
+            setSocialMetrics(prev => ({
+              ...prev,
+              facebook: {
+                reactionCount: totalReactions,
+                reactionDetails: data.postReactions || {},
+                shareCount: data.shareCount,
+                commentCount: data.commentCount,
+                impressionCount: data.impressionCount
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching Facebook reactions:', error);
+          setSnackbar({
+            open: true,
+            message: 'Không thể tải thông tin tương tác Facebook',
+            severity: 'error'
+          });
+        }
+      }
+    };
+
+    fetchFacebookReactions();
+    const interval = setInterval(fetchFacebookReactions, 30000);
+    return () => clearInterval(interval);
+  }, [post?.postId, post?.facebookPostId]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -263,6 +305,78 @@ const ManagerPostDetail = () => {
     }
   };
 
+  const renderSocialMetricsTable = () => (
+    <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
+      <Table size="small">
+        <TableHead>
+          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+            <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+            {post.xTweetId && (
+              <>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+              </>
+            )}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {post.xTweetId && socialMetrics.twitter && (
+            <TableRow>
+              <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <XIcon sx={{ fontSize: 20 }} />
+                  Twitter
+                </Box>
+              </TableCell>
+              <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.replyCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.impressionCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.quoteCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.bookmarkCount || 0}</TableCell>
+            </TableRow>
+          )}
+          {post.facebookPostId && socialMetrics.facebook && (
+            <TableRow>
+              <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FacebookIcon sx={{ fontSize: 20 }} />
+                  Facebook
+                </Box>
+              </TableCell>
+              <TableCell align="center">
+                <Tooltip title={
+                  <Box>
+                    {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
+                      <Typography key={type} variant="body2">
+                        {type}: {count}
+                      </Typography>
+                    ))}
+                  </Box>
+                }>
+                  <span>{socialMetrics.facebook.reactionCount || 0}</span>
+                </Tooltip>
+              </TableCell>
+              <TableCell align="center">{socialMetrics.facebook.shareCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
+              {post.xTweetId && (
+                <>
+                  <TableCell align="center">-</TableCell>
+                  <TableCell align="center">-</TableCell>
+                </>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Box>
+  );
+
   if (!post) return null;
 
   const statusInfo = getPostStatusInfo(post.status);
@@ -288,65 +402,7 @@ const ManagerPostDetail = () => {
                 </Button>
                 {renderActionButtons()}
               </Box>
-              {(post.xTweetId || post.facebookPostId) && (
-                <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                        {post.xTweetId && (
-                          <>
-                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-                          </>
-                        )}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {post.xTweetId && (
-                        <TableRow>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <XIcon sx={{ fontSize: 20 }} />
-                              Twitter
-                            </Box>
-                          </TableCell>
-                          <TableCell align="center">{post.likeCount || 0}</TableCell>
-                          <TableCell align="center">{post.retweetCount || 0}</TableCell>
-                          <TableCell align="center">{post.replyCount || 0}</TableCell>
-                          <TableCell align="center">{post.impressionCount || 0}</TableCell>
-                          <TableCell align="center">{post.quoteCount || 0}</TableCell>
-                          <TableCell align="center">{post.bookmarkCount || 0}</TableCell>
-                        </TableRow>
-                      )}
-                      {post.facebookPostId && (
-                        <TableRow>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <FacebookIcon sx={{ fontSize: 20 }} />
-                              Facebook
-                            </Box>
-                          </TableCell>
-                          <TableCell align="center">{post.facebookEngagementCount || 0}</TableCell>
-                          <TableCell align="center">{post.facebookShareCount || 0}</TableCell>
-                          <TableCell align="center">{post.facebookCommentCount || 0}</TableCell>
-                          <TableCell align="center">-</TableCell>
-                          {post.xTweetId && (
-                            <>
-                              <TableCell align="center">-</TableCell>
-                              <TableCell align="center">-</TableCell>
-                            </>
-                          )}
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </Box>
-              )}
+              {(post.xTweetId || post.facebookPostId) && renderSocialMetricsTable()}
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />

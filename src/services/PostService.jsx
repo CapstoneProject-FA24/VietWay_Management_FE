@@ -11,7 +11,7 @@ export const fetchPosts = async (params) => {
         if (params.postCategoryIds?.length > 0) params.postCategoryIds.forEach(id => queryParams.append('postCategoryIds', id));
         if (params.provinceIds?.length > 0) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
-        
+
         const response = await axios.get(`${baseURL}/api/Post?${queryParams.toString()}`);
         const items = response.data?.data?.items;
 
@@ -97,7 +97,7 @@ export const updatePost = async (id, postData) => {
     try {
         const post = {
             title: postData.title,
-            content: postData.content, 
+            content: postData.content,
             postCategoryId: postData.postCategoryId,
             provinceId: postData.provinceId,
             description: postData.description,
@@ -212,9 +212,36 @@ export const getTwitterReactionsByPostId = async (postId) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        return response.data;
+        return {
+            retweetCount: response.data.data.retweetCount,
+            replyCount: response.data.data.replyCount,
+            likeCount: response.data.data.likeCount,
+            quoteCount: response.data.data.quoteCount,
+            bookmarkCount: response.data.data.bookmarkCount,
+            impressionCount: response.data.data.impressionCount
+        };
     } catch (error) {
         console.error('Error fetching Twitter reactions:', error.response);
+        throw error;
+    }
+};
+
+export const getFacebookReactionsByPostId = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/Post/${postId}/facebook/metrics`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return {
+            impressionCount: response.data.data.impressionCount,
+            shareCount: response.data.data.shareCount,
+            commentCount: response.data.data.commentCount,
+            postReactions: response.data.data.postReactions
+        };
+    } catch (error) {
+        console.error('Error fetching Facebook reactions:', error.response);
         throw error;
     }
 };
