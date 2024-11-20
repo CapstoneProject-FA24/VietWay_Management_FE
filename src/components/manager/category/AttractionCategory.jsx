@@ -10,7 +10,6 @@ const AttractionCategory = ({ onDelete }) => {
         const loadDurations = async () => {
             try {
                 const response = await fetchAttractionType();
-                console.log(response);
                 const data = response.map(item => ({
                     id: item.attractionTypeId,
                     name: item.attractionTypeName,

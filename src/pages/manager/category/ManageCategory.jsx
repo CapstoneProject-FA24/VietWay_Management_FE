@@ -10,7 +10,6 @@ import DeleteCategory from '@components/manager/category/DeleteCategory';
 import TourDuration from '@components/manager/category/TourDuration';
 import TourCategory from '@components/manager/category/TourCategory';
 import PostCategory from '@components/manager/category/PostCategory';
-import EventCategory from '@components/manager/category/EventCategory';
 import AttractionCategory from '@components/manager/category/AttractionCategory';
 
 const ManageCategory = () => {
@@ -26,7 +25,6 @@ const ManageCategory = () => {
     { label: 'Loại Tour', endpoint: 'tour-categories' },
     { label: 'Loại Điểm Du Lịch', endpoint: 'attraction-types' },
     { label: 'Loại Bài Viết', endpoint: 'post-categories' },
-    /*{ label: 'Loại Sự Kiện', endpoint: 'event-categories' },*/
     { label: 'Thời Lượng Tour', endpoint: 'tour-durations' }
   ];
 
@@ -69,14 +67,11 @@ const ManageCategory = () => {
     if (activeTab === 2) { // Post Category tab
       return <PostCategory onDelete={handleOpenDelete} />;
     }
-    if (activeTab === 3) { // Event Category tab
-      return <EventCategory onDelete={handleOpenDelete} />;
-    }
-    if (activeTab === 4) { // Tour Duration tab
+    if (activeTab === 3) { // Tour Duration tab
       return <TourDuration onDelete={handleOpenDelete} />;
     }
-    
-    
+
+
     return (
       <Grid container spacing={2}>
         {categories.map((category) => (
@@ -115,19 +110,12 @@ const ManageCategory = () => {
         <title>Quản lý danh mục</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      
+
       <Box sx={{ flexGrow: 1, mt: 1.5, p: 3, marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>
             Quản lý Danh mục
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleOpenCreate}
-          >
-            Thêm mới
-          </Button>
         </Box>
 
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
@@ -136,21 +124,30 @@ const ManageCategory = () => {
           ))}
         </Tabs>
 
-        <Box sx={{ mb: 2 }}>
-          <TextField
-            placeholder="Tìm kiếm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            size="small"
-            InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1 }} />
-            }}
-          />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box>
+            <TextField
+              placeholder="Tìm kiếm..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              size="small"
+              sx={{ minWidth: '500px' }}
+              InputProps={{
+                startAdornment: <SearchIcon sx={{ mr: 1 }} />
+              }}
+            />
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpenCreate}
+          >
+            Thêm mới
+          </Button>
         </Box>
-
         {renderContent()}
       </Box>
-
+      
       <CreateCategory
         open={openCreate}
         onClose={() => setOpenCreate(false)}
@@ -159,7 +156,7 @@ const ManageCategory = () => {
           fetchCategories();
         }}
         categoryType={tabs[activeTab].endpoint}
-        isTourDuration={activeTab === 4}
+        isTourDuration={activeTab === 3}
       />
 
       <DeleteCategory

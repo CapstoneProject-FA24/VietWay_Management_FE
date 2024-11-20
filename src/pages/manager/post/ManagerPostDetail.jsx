@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress } from '@mui/material';
 import { ArrowBack, Delete } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -31,6 +31,10 @@ const ManagerPostDetail = () => {
   const [socialMetrics, setSocialMetrics] = useState({
     twitter: null,
     facebook: null
+  });
+  const [isPublishing, setIsPublishing] = useState({
+    facebook: false,
+    twitter: false
   });
 
   useEffect(() => {
@@ -70,11 +74,17 @@ const ManagerPostDetail = () => {
           }
         } catch (error) {
           console.error('Error fetching Twitter reactions:', error);
-          setSnackbar({
-            open: true,
-            message: 'Không thể tải thông tin tương tác Twitter',
-            severity: 'error'
-          });
+          setSocialMetrics(prev => ({
+            ...prev,
+            twitter: {
+              likeCount: 0,
+              retweetCount: 0,
+              replyCount: 0,
+              impressionCount: 0,
+              quoteCount: 0,
+              bookmarkCount: 0
+            }
+          }));
         }
       }
     };
@@ -195,14 +205,26 @@ const ManagerPostDetail = () => {
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Typography>Đăng bài:</Typography>
                 {!post.facebookPostId && (
-                  <Button variant="contained" startIcon={<FacebookIcon />} onClick={() => handleShareToSocial('facebook')}
+                  <Button 
+                    variant="contained" 
+                    startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
+                    onClick={() => handleShareToSocial('facebook')}
+                    disabled={isPublishing.facebook}
                     sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
-                  >Facebook</Button>
+                  >
+                    {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+                  </Button>
                 )}
                 {!post.xTweetId && (
-                  <Button variant="contained" startIcon={<XIcon />} onClick={() => handleShareToSocial('twitter')}
+                  <Button 
+                    variant="contained" 
+                    startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
+                    onClick={() => handleShareToSocial('twitter')}
+                    disabled={isPublishing.twitter}
                     sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                  >Twitter</Button>
+                  >
+                    {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+                  </Button>
                 )}
               </Box>
             )}
@@ -268,6 +290,7 @@ const ManagerPostDetail = () => {
   };
 
   const handleShareToSocial = async (platform) => {
+    setIsPublishing(prev => ({ ...prev, [platform]: true }));
     try {
       if (platform === 'facebook') {
         await sharePostOnFacebook(post.postId);
@@ -284,12 +307,16 @@ const ManagerPostDetail = () => {
           severity: 'success'
         });
       }
+      const updatedPost = await fetchPostById(post.postId);
+      setPost(updatedPost);
     } catch (error) {
       setSnackbar({
         open: true,
         message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
         severity: 'error'
       });
+    } finally {
+      setIsPublishing(prev => ({ ...prev, [platform]: false }));
     }
   };
 

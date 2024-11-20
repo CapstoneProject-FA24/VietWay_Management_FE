@@ -20,9 +20,24 @@ const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration
     }
   };
 
+  const getCategoryTypeText = () => {
+    switch (categoryType) {
+      case 'attraction-types':
+        return 'loại điểm tham quan';
+      case 'tour-categories':
+        return 'loại tour';
+      case 'tour-durations':
+        return 'thời lượng tour';
+      case 'post-categories':
+        return 'loại bài viết';
+      default:
+        return categoryType;
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Thêm mới</DialogTitle>
+      <DialogTitle>Thêm mới {getCategoryTypeText()}</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <TextField
