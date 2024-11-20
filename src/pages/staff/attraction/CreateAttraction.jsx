@@ -238,72 +238,38 @@ const AddAttraction = () => {
             </Typography>
           </Box>
 
-          {editableFields.type.isEditing ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
-              <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
-                Loại điểm tham quan
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Select
-                  value={editableFields.type.value}
-                  onChange={(e) => handleFieldChange('type', e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ mr: 2 }}
-                >
-                  {attractionTypes.map((type) => (
-                    <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
-                  ))}
-                </Select>
-                <Button
-                  variant="contained"
-                  onClick={() => handleFieldSubmit('type')}
-                  disabled={!editableFields.type.value}
-                  sx={{ minWidth: '40px', padding: '8px' }}
-                >
-                  <CheckIcon />
-                </Button>
-              </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
+            <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+              Loại điểm tham quan
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Select
+                value={editableFields.type.value}
+                onChange={(e) => handleFieldChange('type', e.target.value)}
+                variant="outlined"
+                fullWidth
+                sx={{ mr: 2 }}
+              >
+                {attractionTypes.map((type) => (
+                  <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
+                ))}
+              </Select>
             </Box>
-          ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-                {attractionTypes.find(type => type.attractionTypeId === editableFields.type.value)?.attractionTypeName || ''}
-              </Typography>
-              <IconButton onClick={() => handleFieldEdit('type')} sx={{ ml: 2 }}>
-                <EditIcon />
-              </IconButton>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+              Tên điểm tham quan
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <TextField
+                value={editableFields.name.value}
+                onChange={(e) => handleFieldChange('name', e.target.value)}
+                variant="outlined"
+                fullWidth
+                sx={{ mr: 2 }}
+              />
             </Box>
-          )}
-          {editableFields.name.isEditing ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
-                Tên điểm tham quan
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <TextField
-                  value={editableFields.name.value}
-                  onChange={(e) => handleFieldChange('name', e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ mr: 2 }}
-                />
-                <Button
-                  variant="contained"
-                  onClick={() => handleFieldSubmit('name')}
-                  disabled={!editableFields.name.value.trim()}
-                  sx={{ minWidth: '40px', padding: '8px' }}  // Reduce button width and padding
-                ><CheckIcon /></Button>
-              </Box>
-            </Box>
-          ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-                {editableFields.name.value}
-              </Typography>
-              <IconButton onClick={() => handleFieldEdit('name')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-            </Box>
-          )}
+          </Box>
           <Grid container spacing={3}>
             <Grid item xs={12} md={8} sx={{ width: '100%' }}>
               <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
@@ -393,35 +359,12 @@ const AddAttraction = () => {
               </Box>
               <Box>
                 <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
-                {editableFields.description.isEditing ? (
-                  <Box >
-                    <ReactQuill
-                      value={editableFields.description.value}
-                      onChange={(value) => handleFieldChange('description', value)}
-                      theme="snow"
-                      modules={modules}
-                    />
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleFieldSubmit('description')}
-                        disabled={!editableFields.description.value.trim() || editableFields.description.value.trim() === '<p><br></p>'}
-                        sx={{ minWidth: '40px', padding: '8px' }}
-                      >
-                        <CheckIcon />
-                      </Button>
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', mt: -3 }}>
-                    <div dangerouslySetInnerHTML={{ __html: editableFields.description.value }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                      <IconButton onClick={() => handleFieldEdit('description')}>
-                        <EditIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                )}
+                <ReactQuill
+                  value={editableFields.description.value}
+                  onChange={(value) => handleFieldChange('description', value)}
+                  theme="snow"
+                  modules={modules}
+                />
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
@@ -438,91 +381,34 @@ const AddAttraction = () => {
                     <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
                   ))}
                 </Select>
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-                {editableFields.address.isEditing ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
-                      <TextField
-                        value={editableFields.address.value}
-                        onChange={(e) => handleFieldChange('address', e.target.value)}
-                        variant="outlined"
-                        fullWidth
-                        sx={{ mr: 1, mt: -1 }}
-                      />
-                      <Button
-                        variant="contained"
-                        onClick={() => handleFieldSubmit('address')}
-                        disabled={!editableFields.address.value.trim()}
-                        sx={{ minWidth: '40px', padding: '8px', mr: -1.5 }}  // Reduce button width and padding
-                      ><CheckIcon /></Button>
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <Typography>{editableFields.address.value}</Typography>
-                    <IconButton onClick={() => handleFieldEdit('address')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
-                  </Box>
-                )}
-
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-                {editableFields.website.isEditing ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
-                      <TextField
-                        value={editableFields.website.value}
-                        onChange={(e) => handleFieldChange('website', e.target.value)}
-                        variant="outlined"
-                        fullWidth
-                        sx={{ mr: 1, mt: -1 }}
-                      />
-                      <Button
-                        variant="contained"
-                        onClick={() => handleFieldSubmit('website')}
-                        disabled={!editableFields.website.value.trim()}
-                        sx={{ minWidth: '40px', padding: '8px', mr: -1.5 }}  // Reduce button width and padding
-                      ><CheckIcon /></Button>
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                    <a href={editableFields.website.value} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                      {editableFields.website.value}
-                    </a>
-                    <IconButton onClick={() => handleFieldEdit('website')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
-                  </Box>
-                )}
-
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
+                  <TextField
+                    value={editableFields.address.value}
+                    onChange={(e) => handleFieldChange('address', e.target.value)}
+                    variant="outlined"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
+                  <TextField
+                    value={editableFields.website.value}
+                    onChange={(e) => handleFieldChange('website', e.target.value)}
+                    variant="outlined"
+                    fullWidth
+                    sx={{ mb: 2 }}
+                  />
+                </Box>
                 <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
-                {editableFields.contactInfo.isEditing ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: -1, mr: -1, mt: 2 }}>
-                    <ReactQuill
-                      value={editableFields.contactInfo.value}
-                      onChange={(value) => handleFieldChange('contactInfo', value)}
-                      theme="snow"
-                      modules={modules}
-                      style={{ width: '100%' }}
-                    />
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                      <Button
-                        variant="contained"
-                        onClick={() => handleFieldSubmit('contactInfo')}
-                        disabled={!editableFields.contactInfo.value.trim() || editableFields.contactInfo.value.trim() === '<p><br></p>'}
-                        sx={{ minWidth: '40px', padding: '8px' }}
-                      >
-                        <CheckIcon />
-                      </Button>
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
-                    <div style={{ width: '100%', wordBreak: 'break-all' }} dangerouslySetInnerHTML={{ __html: editableFields.contactInfo.value }} />
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                      <IconButton onClick={() => handleFieldEdit('contactInfo')}>
-                        <EditIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                )}
+                <ReactQuill
+                  value={editableFields.contactInfo.value}
+                  onChange={(value) => handleFieldChange('contactInfo', value)}
+                  theme="snow"
+                  modules={modules}
+                  style={{ width: '100%' }}
+                />
               </Paper>
             </Grid>
           </Grid>

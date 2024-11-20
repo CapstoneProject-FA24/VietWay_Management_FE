@@ -9,7 +9,7 @@ import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
-import { Check as CheckIcon, Edit as EditIcon, Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import TemplateAddAttractionPopup from '@components/staff/tourTemplate/TemplateAddAttractionPopup';
 import { fetchTourTemplateById, updateTourTemplate, updateTemplateImages } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
@@ -26,14 +26,13 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const [editableFields, setEditableFields] = useState({
         tourName: { value: initialTourTemplate.tourName, isEditing: false },
         description: { value: initialTourTemplate.description, isEditing: false },
-        policy: { value: initialTourTemplate.policy, isEditing: false },
         note: { value: initialTourTemplate.note, isEditing: false },
-        provinces: { 
-            value: initialTourTemplate.provinces.map(p => ({ 
-                value: p.provinceId, 
-                label: p.provinceName 
-            })), 
-            isEditing: false 
+        provinces: {
+            value: initialTourTemplate.provinces.map(p => ({
+                value: p.provinceId,
+                label: p.provinceName
+            })),
+            isEditing: false
         },
         duration: { value: initialTourTemplate.duration, isEditing: false },
         departurePoint: { value: initialTourTemplate.departurePoint, isEditing: false },
@@ -164,9 +163,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
 
     const handleScheduleSubmit = (day) => {
         const schedule = tourTemplate.schedule.find(item => item.dayNumber === day);
-        const isValid = schedule.title.trim() !== '' && 
-                       schedule.description.trim() !== '' && 
-                       schedule.attractions.length > 0;
+        if (!schedule) return;
+
+        const isValid = schedule.title?.trim() !== '' &&
+            schedule.description?.trim() !== '' &&
+            schedule.attractions?.length > 0;
 
         if (isValid) {
             setTourTemplate(prev => ({
@@ -210,7 +211,6 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 description: editableFields.description.value,
                 durationId: editableFields.duration.value,
                 tourCategoryId: editableFields.tourCategory.value,
-                policy: editableFields.policy.value,
                 note: editableFields.note.value,
                 provinceIds: editableFields.provinces.value.map(province => province.value),
                 schedules: tourTemplate.schedule.map(s => ({
@@ -223,7 +223,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             };
 
             if (!isDraft) {
-                const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'policy', 'note', 'provinceIds', 'schedules'];
+                const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'note', 'provinceIds', 'schedules'];
                 const missingFields = requiredFields.filter(field => {
                     if (Array.isArray(tourTemplateData[field])) {
                         return tourTemplateData[field].length === 0;
@@ -266,47 +266,22 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     return (
 
         <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-            {editableFields.provinces.isEditing ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography gutterBottom>Tỉnh thành</Typography>
+                <ReactSelect isMulti name="provinces" options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
+                    className="basic-multi-select" classNamePrefix="select" placeholder="Chọn tỉnh/thành phố" value={editableFields.provinces.value}
+                    onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)} />
+            </Box>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Typography gutterBottom>Tên tour</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <ReactSelect isMulti name="provinces" options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
-                        className="basic-multi-select" classNamePrefix="select" placeholder="Chọn tỉnh/thành phố" value={editableFields.provinces.value}
-                        onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)} />
-                    <Button variant="contained" onClick={() => handleFieldSubmit('provinces')} disabled={!editableFields.provinces.value.length} sx={{ minWidth: '40px', p: 1, ml: 2 }}>
-                        <CheckIcon />
-                    </Button>
+                    <TextField
+                        value={editableFields.tourName.value} onChange={(e) => handleFieldChange('tourName', e.target.value)}
+                        variant="outlined" fullWidth sx={{ mr: 2 }}
+                    />
                 </Box>
-            ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
-                        {editableFields.provinces.value.map(province => province.label).join(' - ')}
-                    </Typography>
-                    <IconButton onClick={() => handleFieldEdit('provinces')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                </Box>
-            )}
-            {editableFields.tourName.isEditing ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography gutterBottom>
-                        Tên tour
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <TextField
-                            value={editableFields.tourName.value} onChange={(e) => handleFieldChange('tourName', e.target.value)}
-                            variant="outlined" fullWidth sx={{ mr: 2 }}
-                        />
-                        <Button
-                            variant="contained" onClick={() => handleFieldSubmit('tourName')}
-                            disabled={!editableFields.tourName.value.trim()} sx={{ minWidth: '40px', padding: '8px' }}
-                        ><CheckIcon /></Button>
-                    </Box>
-                </Box>
-            ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-                        {editableFields.tourName.value}
-                    </Typography>
-                    <IconButton onClick={() => handleFieldEdit('tourName')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                </Box>
-            )}
+            </Box>
             <Grid container spacing={3}>
                 <Grid item xs={12} sx={{ minWidth: '100%' }}>
                     <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
@@ -386,78 +361,36 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                             <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
-                                {editableFields.duration.isEditing ? (
-                                    <>
-                                        <Select sx={{ width: '100%', mr: 1 }}
-                                            value={editableFields.duration.value}
-                                            onChange={(e) => handleFieldChange('duration', e.target.value)}>
-                                            {tourDurations.map((tourDuration) => (
-                                                <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>{tourDuration.durationName}</MenuItem>
-                                            ))}
-                                        </Select>
-                                        <Button
-                                            variant="contained" onClick={() => handleFieldSubmit('duration')}
-                                            disabled={!editableFields.duration.value}
-                                            sx={{ minWidth: '40px', padding: '8px' }}><CheckIcon /></Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Typography sx={{ color: '#05073C' }}>
-                                            {tourDurations.find(duration => duration.durationId === editableFields.duration.value)?.durationName || ''}
-                                        </Typography>
-                                        <IconButton onClick={() => handleFieldEdit('duration')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                                    </>
-                                )}
+                                <Select sx={{ width: '100%', mr: 1 }}
+                                    value={editableFields.duration.value}
+                                    onChange={(e) => handleFieldChange('duration', e.target.value)}>
+                                    {tourDurations.map((tourDuration) => (
+                                        <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>{tourDuration.durationName}</MenuItem>
+                                    ))}
+                                </Select>
                             </Box>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
                             <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
-                                {editableFields.tourCategory.isEditing ? (
-                                    <>
-                                        <Select sx={{ width: '100%', mr: 1 }}
-                                            value={editableFields.tourCategory.value}
-                                            onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
-                                            {tourCategories.map((tourCategory) => (
-                                                <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>{tourCategory.tourCategoryName}</MenuItem>
-                                            ))}
-                                        </Select>
-                                        <Button
-                                            variant="contained" onClick={() => handleFieldSubmit('tourCategory')}
-                                            disabled={!editableFields.tourCategory.value} sx={{ minWidth: '40px', padding: '8px' }}
-                                        ><CheckIcon /></Button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Typography sx={{ color: '#05073C' }}>
-                                            {tourCategories.find(category => category.tourCategoryId === editableFields.tourCategory.value)?.tourCategoryName || ''}
-                                        </Typography>
-                                        <IconButton onClick={() => handleFieldEdit('tourCategory')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                                    </>
-                                )}
+                                <Select sx={{ width: '100%', mr: 1 }}
+                                    value={editableFields.tourCategory.value}
+                                    onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
+                                    {tourCategories.map((tourCategory) => (
+                                        <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>{tourCategory.tourCategoryName}</MenuItem>
+                                    ))}
+                                </Select>
                             </Box>
                         </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
                         <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-                        {editableFields.description.isEditing ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <TextField value={editableFields.description.value}
-                                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                                    variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
-                                <Button variant="contained" onClick={() => handleFieldSubmit('description')}
-                                    disabled={!editableFields.description.value.trim()}
-                                    sx={{ minWidth: '40px', padding: '8px' }} >
-                                    <CheckIcon />
-                                </Button>
-                            </Box>
-                        ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{editableFields.description.value}</Typography>
-                                <IconButton onClick={() => handleFieldEdit('description')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                            </Box>
-                        )}
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <TextField value={editableFields.description.value}
+                                onChange={(e) => handleFieldChange('description', e.target.value)}
+                                variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
+                        </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
                         <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3 }}>
@@ -484,79 +417,46 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                         width: '2px', backgroundColor: '#3572EF', zIndex: 0
                                     }} />
                                 )}
-                                {s.isEditing ? (
-                                    <>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(s.dayNumber)}>
-                                            <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
-                                                {`Ngày ${s.dayNumber}`}
-                                            </Typography>
-                                            <IconButton size="small">
-                                                {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                            </IconButton>
-                                        </Box>
-                                        <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Tiêu đề:</Typography>
-                                                <TextField value={s.title} onChange={(e) => handleScheduleChange(s.dayNumber, 'title', e.target.value)} variant="outlined" fullWidth />
+                                <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(s.dayNumber)}>
+                                    <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
+                                        {`Ngày ${s.dayNumber}`}
+                                    </Typography>
+                                    <IconButton size="small">
+                                        {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                    </IconButton>
+                                </Box>
+                                <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Tiêu đề:</Typography>
+                                        <TextField value={s.title} onChange={(e) => handleScheduleChange(s.dayNumber, 'title', e.target.value)} variant="outlined" fullWidth />
+                                    </Box>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Mô tả:</Typography>
+                                        <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
+                                    </Box>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
+                                        <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
+                                            Chọn điểm đến
+                                        </Button>
+                                        {s.attractions.length > 0 && (
+                                            <Box sx={{ mt: 1 }}>
+                                                <Typography variant="subtitle2">Đã chọn:</Typography>
+                                                <ul style={{ listStyleType: 'none', padding: 0 }}>
+                                                    {s.attractions.map((attraction) => (
+                                                        <li key={attraction.AttractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                                            <Typography>{attraction.name}</Typography>
+                                                            <IconButton size="small" sx={{ ml: 1 }}
+                                                                onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
+                                                                <CloseIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </li>
+                                                    ))}
+                                                </ul>
                                             </Box>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Mô tả:</Typography>
-                                                <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
-                                            </Box>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
-                                                <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
-                                                    Chọn điểm đến
-                                                </Button>
-                                                {s.attractions.length > 0 && (
-                                                    <Box sx={{ mt: 1 }}>
-                                                        <Typography variant="subtitle2">Đã chọn:</Typography>
-                                                        <ul style={{ listStyleType: 'none', padding: 0 }}>
-                                                            {s.attractions.map((attraction) => (
-                                                                <li key={attraction.AttractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                                                                    <Typography>{attraction.name}</Typography>
-                                                                    <IconButton size="small" sx={{ ml: 1 }}
-                                                                        onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
-                                                                        <CloseIcon fontSize="small" />
-                                                                    </IconButton>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </Box>
-                                                )}
-                                            </Box>
-                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                                                <Button variant="contained" onClick={() => handleScheduleSubmit(s.dayNumber)} sx={{ minWidth: '40px', padding: '8px' }}
-                                                    disabled={!s.title.trim() || !s.description.trim() || s.attractions.length === 0}>
-                                                    <CheckIcon />
-                                                </Button>
-                                            </Box>
-                                        </Collapse>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(s.dayNumber)}>
-                                            <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
-                                                {`Ngày ${s.dayNumber}: ${s.title}`}
-                                            </Typography>
-                                            <IconButton size="small">
-                                                {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                                            </IconButton>
-                                        </Box>
-                                        <Collapse in={expandedDay === s.dayNumber} sx={{ ml: 1 }}>
-                                            <Typography paragraph sx={{ mb: 2 }}>{s.description}</Typography>
-                                            <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Điểm đến:</Typography>
-                                            <ul>
-                                                {s.attractions.map((attraction) => (
-                                                    <li key={attraction.attractionId}>{attraction.name}</li>
-                                                ))}
-                                            </ul>
-                                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                                                <IconButton onClick={() => handleScheduleEdit(s.dayNumber)}><EditIcon /></IconButton>
-                                            </Box>
-                                        </Collapse>
-                                    </>
-                                )}
+                                        )}
+                                    </Box>
+                                </Collapse>
                                 {tourTemplate.schedule.length > 1 && (
                                     <Button variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={() => handleRemoveDay(s.dayNumber)} sx={{ mt: 2 }}>
                                         Xóa ngày
@@ -569,32 +469,10 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Button>
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Chính sách</Typography>
-                        {editableFields.policy.isEditing ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <TextField value={editableFields.policy.value} onChange={(e) => handleFieldChange('policy', e.target.value)} variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
-                                <Button variant="contained" onClick={() => handleFieldSubmit('policy')} disabled={!editableFields.policy.value.trim()} sx={{ minWidth: '40px', padding: '8px' }}><CheckIcon /></Button>
-                            </Box>
-                        ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{editableFields.policy.value}</Typography>
-                                <IconButton onClick={() => handleFieldEdit('policy')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                            </Box>
-                        )}
-                    </Box>
-                    <Box sx={{ mb: 5 }}>
                         <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
-                        {editableFields.note.isEditing ? (
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <TextField value={editableFields.note.value} onChange={(e) => handleFieldChange('note', e.target.value)} variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
-                                <Button variant="contained" onClick={() => handleFieldSubmit('note')} disabled={!editableFields.note.value.trim()} sx={{ minWidth: '40px', padding: '8px' }}><CheckIcon /></Button>
-                            </Box>
-                        ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{editableFields.note.value}</Typography>
-                                <IconButton onClick={() => handleFieldEdit('note')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-                            </Box>
-                        )}
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <TextField value={editableFields.note.value} onChange={(e) => handleFieldChange('note', e.target.value)} variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
+                        </Box>
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4} >
@@ -603,17 +481,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
                             <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
-                            {editableFields.code.isEditing ? (
-                                <>
-                                    <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth sx={{ mr: 2 }} placeholder="Nhập mã tour" />
-                                    <Button variant="contained" onClick={() => handleFieldSubmit('code')} disabled={!editableFields.code.value.trim()} sx={{ minWidth: '40px', padding: '8px' }}><CheckIcon /></Button>
-                                </>
-                            ) : (
-                                <>
-                                    <Typography sx={{ ml: 1, color: 'primary.main', fontWeight: 700 }}>{tourTemplate.code}</Typography>
-                                    <IconButton onClick={() => handleFieldEdit('code')}><EditIcon /></IconButton>
-                                </>
-                            )}
+                            <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth sx={{ mr: 2 }} placeholder="Nhập mã tour" />
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />

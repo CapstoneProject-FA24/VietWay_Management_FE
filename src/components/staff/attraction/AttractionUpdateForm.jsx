@@ -5,8 +5,6 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import Map from '@components/staff/attraction/Map';
@@ -26,13 +24,13 @@ const AttractionUpdateForm = ({
   const fileInputRef = useRef(null);
   const [selectedProvince, setSelectedProvince] = useState('');
   const [editableFields, setEditableFields] = useState({
-    name: { value: '', isEditing: false },
-    contactInfo: { value: '', isEditing: false },
-    description: { value: '', isEditing: false },
-    address: { value: '', isEditing: false },
-    website: { value: '', isEditing: false },
-    type: { value: '', isEditing: false },
-    placeId: { value: '', isEditing: false }
+    name: { value: '' },
+    contactInfo: { value: '' },
+    description: { value: '' },
+    address: { value: '' },
+    website: { value: '' },
+    type: { value: '' },
+    placeId: { value: '' }
   });
 
   useEffect(() => {
@@ -40,13 +38,13 @@ const AttractionUpdateForm = ({
       setSelectedProvince(attraction.provinceId);
       setImages(attraction.images || []);
       setEditableFields({
-        name: { value: attraction.name, isEditing: false },
-        contactInfo: { value: attraction.contactInfo, isEditing: false },
-        description: { value: attraction.description, isEditing: false },
-        address: { value: attraction.address, isEditing: false },
-        website: { value: attraction.website, isEditing: false },
-        type: { value: attraction.attractionTypeId, isEditing: false },
-        placeId: { value: attraction.googlePlaceId || '', isEditing: false }
+        name: { value: attraction.name },
+        contactInfo: { value: attraction.contactInfo },
+        description: { value: attraction.description },
+        address: { value: attraction.address },
+        website: { value: attraction.website },
+        type: { value: attraction.attractionTypeId },
+        placeId: { value: attraction.googlePlaceId || '' }
       });
     }
   }, [attraction]);
@@ -54,25 +52,7 @@ const AttractionUpdateForm = ({
   const handleFieldChange = (field, value) => {
     setEditableFields(prev => ({
       ...prev,
-      [field]: { ...prev[field], value }
-    }));
-  };
-
-  const handleFieldSubmit = (field) => {
-    if (!editableFields[field].value) {
-      alert(`${field} cannot be blank or empty.`);
-      return;
-    }
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], isEditing: false }
-    }));
-  };
-
-  const handleFieldEdit = (field) => {
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], isEditing: true }
+      [field]: { value }
     }));
   };
 
@@ -177,73 +157,35 @@ const AttractionUpdateForm = ({
 
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-      {editableFields.type.isEditing ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
-          <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
-            Loại điểm tham quan
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Select
-              value={editableFields.type.value}
-              onChange={(e) => handleFieldChange('type', e.target.value)}
-              variant="outlined"
-              fullWidth
-              sx={{ mr: 2 }}
-            >
-              {attractionTypes.map((type) => (
-                <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
-              ))}
-            </Select>
-            <Button
-              variant="contained"
-              onClick={() => handleFieldSubmit('type')}
-              disabled={!editableFields.type.value}
-              sx={{ minWidth: '40px', padding: '8px' }}
-            >
-              <CheckIcon />
-            </Button>
-          </Box>
-        </Box>
-      ) : (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-            {attractionTypes.find(type => type.attractionTypeId === editableFields.type.value)?.attractionTypeName}
-          </Typography>
-          <IconButton onClick={() => handleFieldEdit('type')} sx={{ ml: 2 }}>
-            <EditIcon />
-          </IconButton>
-        </Box>
-      )}
+      <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
+        <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+          Loại điểm tham quan
+        </Typography>
+        <Select
+          value={editableFields.type.value}
+          onChange={(e) => handleFieldChange('type', e.target.value)}
+          variant="outlined"
+          fullWidth
+          sx={{ mb: 2 }}
+        >
+          {attractionTypes.map((type) => (
+            <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
+          ))}
+        </Select>
+      </Box>
 
-      {editableFields.name.isEditing ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-          <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
-            Tên điểm tham quan
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <TextField
-              value={editableFields.name.value}
-              onChange={(e) => handleFieldChange('name', e.target.value)}
-              variant="outlined"
-              fullWidth
-              sx={{ mr: 2 }}
-            />
-            <Button
-              variant="contained"
-              onClick={() => handleFieldSubmit('name')}
-              disabled={!editableFields.name.value.trim()}
-              sx={{ minWidth: '40px', padding: '8px' }}
-            ><CheckIcon /></Button>
-          </Box>
-        </Box>
-      ) : (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-            {editableFields.name.value}
-          </Typography>
-          <IconButton onClick={() => handleFieldEdit('name')} sx={{ ml: 2 }}><EditIcon /></IconButton>
-        </Box>
-      )}
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+          Tên điểm tham quan
+        </Typography>
+        <TextField
+          value={editableFields.name.value}
+          onChange={(e) => handleFieldChange('name', e.target.value)}
+          variant="outlined"
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+      </Box>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
@@ -309,43 +251,15 @@ const AttractionUpdateForm = ({
           </Box>
 
           <Box sx={{ mb: 5 }}>
-            <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu</Typography>
-            {editableFields.description.isEditing ? (
-              <Box>
-                <ReactQuill
-                  value={editableFields.description.value}
-                  onChange={(value) => handleFieldChange('description', value)}
-                  theme="snow"
-                  modules={modules}
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleFieldSubmit('description')}
-                    disabled={!editableFields.description.value.trim() || editableFields.description.value.trim() === '<p><br></p>'}
-                    sx={{ minWidth: '40px', padding: '8px' }}
-                  >
-                    <CheckIcon />
-                  </Button>
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: -4 }}>
-                  <IconButton onClick={() => handleFieldEdit('description')}><EditIcon /></IconButton>
-                </Box>
-                <Box
-                  dangerouslySetInnerHTML={{ __html: editableFields.description.value }}
-                  sx={{
-                    '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                    '& p': { lineHeight: 1.7, mb: 2 },
-                    flexGrow: 1,
-                    width: '100%',
-                    margin: '0 auto'
-                  }}
-                />
-              </Box>
-            )}
+            <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>
+              Giới thiệu
+            </Typography>
+            <ReactQuill
+              value={editableFields.description.value}
+              onChange={(value) => handleFieldChange('description', value)}
+              theme="snow"
+              modules={modules}
+            />
           </Box>
         </Grid>
 
@@ -357,7 +271,7 @@ const AttractionUpdateForm = ({
               onChange={handleProvinceChange}
               variant="outlined"
               fullWidth
-              sx={{ mr: 2, mb: 2 }}
+              sx={{ mb: 2 }}
             >
               {provinces.map((province) => (
                 <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
@@ -365,92 +279,36 @@ const AttractionUpdateForm = ({
             </Select>
 
             <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-            {editableFields.address.isEditing ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
-                  <TextField
-                    value={editableFields.address.value}
-                    onChange={(e) => handleFieldChange('address', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mr: 1 }}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={() => handleFieldSubmit('address')}
-                    disabled={!editableFields.address.value.trim()}
-                    sx={{ minWidth: '40px', padding: '8px', mr: -1.5 }}
-                  ><CheckIcon /></Button>
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Typography>{editableFields.address.value}</Typography>
-                <IconButton onClick={() => handleFieldEdit('address')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
-              </Box>
-            )}
+            <TextField
+              value={editableFields.address.value}
+              onChange={(e) => handleFieldChange('address', e.target.value)}
+              variant="outlined"
+              fullWidth
+              sx={{ mb: 2 }}
+            />
 
             <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-            {editableFields.website.isEditing ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
-                  <TextField
-                    value={editableFields.website.value}
-                    onChange={(e) => handleFieldChange('website', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mr: 1 }}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={() => handleFieldSubmit('website')}
-                    disabled={!editableFields.website?.value?.trim()}
-                    sx={{ minWidth: '40px', padding: '8px', mr: -1.5 }}
-                  ><CheckIcon /></Button>
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <a href={editableFields.website.value} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                  {editableFields.website.value}
-                </a>
-                <IconButton onClick={() => handleFieldEdit('website')} sx={{ mr: -1, ml: -0.5 }}><EditIcon /></IconButton>
-              </Box>
-            )}
+            <TextField
+              value={editableFields.website.value}
+              onChange={(e) => handleFieldChange('website', e.target.value)}
+              variant="outlined"
+              fullWidth
+              sx={{ mb: 3 }}
+            />
 
-            <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
-            {editableFields.contactInfo.isEditing ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', ml: -1, mr: -1, mt: 2 }}>
-                <ReactQuill
-                  value={editableFields.contactInfo.value}
-                  onChange={(value) => handleFieldChange('contactInfo', value)}
-                  theme="snow"
-                  modules={modules}
-                  style={{ width: '100%' }}
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleFieldSubmit('contactInfo')}
-                    disabled={!editableFields.contactInfo.value.trim() || editableFields.contactInfo.value.trim() === '<p><br></p>'}
-                    sx={{ minWidth: '40px', padding: '8px' }}
-                  >
-                    <CheckIcon />
-                  </Button>
-                </Box>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
-                <div style={{ width: '100%', wordBreak: 'break-all' }} dangerouslySetInnerHTML={{ __html: editableFields.contactInfo.value }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                  <IconButton onClick={() => handleFieldEdit('contactInfo')}>
-                    <EditIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-            )}
+            <Typography variant="h4" sx={{ mt: 4, mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>
+              Thông tin liên hệ
+            </Typography>
+            <ReactQuill
+              value={editableFields.contactInfo.value}
+              onChange={(value) => handleFieldChange('contactInfo', value)}
+              theme="snow"
+              modules={modules}
+              style={{ width: '100%' }}
+            />
           </Paper>
         </Grid>
+
         <Grid item xs={12} md={12}>
           <Typography sx={{ fontWeight: 700, minWidth: '4rem', mt: 5 }}>Google Place ID: </Typography>
           <TextField
@@ -473,8 +331,12 @@ const AttractionUpdateForm = ({
             <Map/>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Cập nhật </Button>
+            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> 
+              Lưu bản nháp 
+            </Button>
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> 
+              Cập nhật 
+            </Button>
           </Box>
         </Grid>
       </Grid>
