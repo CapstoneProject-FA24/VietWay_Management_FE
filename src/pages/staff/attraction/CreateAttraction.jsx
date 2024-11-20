@@ -185,12 +185,11 @@ const AddAttraction = () => {
         }
         navigate('/nhan-vien/diem-tham-quan');
       }
-      console.log('Attraction created:', response);
     } catch (error) {
       if (error.response && error.response.data.message === 'Incomplete attraction information') {
         alert('Vui lòng điền đầy đủ thông tin trước khi tạo mới.');
       } else {
-        alert('Đã xảy ra lỗi khi lưu điểm tham quan. Vui lòng thử lại sau.');
+        alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
       console.error('Error creating attraction:', error);
     }

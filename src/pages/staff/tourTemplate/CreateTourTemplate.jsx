@@ -246,11 +246,11 @@ const CreateTourTemplate = () => {
           }
         }
 
-        alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo tour mẫu thành công.');
+        alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.');
         navigate('/nhan-vien/tour-mau');
       } else {
         console.error('Error creating tour template:', response);
-        alert('Có lỗi xảy ra khi tạo tour mẫu. Vui lòng thử lại.');
+        alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
       }
     } catch (error) {
       console.error('Error creating tour template:', error);

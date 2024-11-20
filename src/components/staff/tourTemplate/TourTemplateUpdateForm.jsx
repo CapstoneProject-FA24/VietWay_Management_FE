@@ -255,11 +255,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã cập nhật và gửi tour mẫu thành công.');
                 navigate('/nhan-vien/tour-mau');
             } else {
-                alert('Có lỗi xảy ra khi cập nhật tour mẫu.');
+                alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
             }
         } catch (error) {
             console.error('Error updating tour template:', error);
-            alert('Đã xảy ra lỗi khi cập nhật tour mẫu.');
+            alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
         }
     };
 
