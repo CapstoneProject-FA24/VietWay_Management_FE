@@ -9,6 +9,8 @@ import { fetchPlaceDetails } from '@services/GooglePlaceService';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { AttractionStatus } from '@hooks/Statuses';
+import ReviewList from '@components/review/ReviewList';
 
 const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const [openingHours, setOpeningHours] = useState(null);
@@ -228,7 +230,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
               Đánh giá từ khách hàng
             </Typography>
-            <ReviewList attractionId={id} />
+            <ReviewList attractionId={attraction.attractionId} />
           </Grid>
         )}
       </Grid>

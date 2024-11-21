@@ -190,7 +190,6 @@ export const getAttractionReviews = async (attractionId, options) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        console.log(response.data.data);
         return {
             total: response.data.data.total,
             pageSize: response.data.data.pageSize,

@@ -5,6 +5,8 @@ import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Collapse, Button } from '@mui/material';
+import { TourTemplateStatus } from '@hooks/Statuses';
+import ReviewListTour from '@components/review/ReviewListTour';
 
 const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
   return (
@@ -180,7 +182,7 @@ const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
                 <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
                   Đánh giá từ khách hàng
                 </Typography>
-                <ReviewListTour tourTemplateId={id} />
+                <ReviewListTour tourTemplateId={tourTemplate.tourTemplateId} />
               </Box>
             )}
           </Grid>
