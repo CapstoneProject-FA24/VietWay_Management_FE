@@ -16,9 +16,7 @@ import { fetchPlaceDetails } from '@services/GooglePlaceService';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import ReviewBreakdown from '@components/manager/reviewAttraction/ReviewBreakdown';
-import ReviewCard from '@components/manager/reviewAttraction/ReviewCard';
-import { mockReviews } from '@hooks/MockReviews';
+import ReviewList from '@components/review/ReviewList';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -171,15 +169,15 @@ const ManagerAttractionDetail = () => {
         </Typography>
         {attraction?.status === AttractionStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
               onClick={() => setIsApprovePopupOpen(true)}
             >
               Duyệt
             </Button>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
               onClick={() => setIsRejectPopupOpen(true)}
             >
@@ -344,6 +342,14 @@ const ManagerAttractionDetail = () => {
           <Map placeId={attraction.googlePlaceId} />
         </Box>
       </Grid>
+      {attraction.status === AttractionStatus.Approved && (
+        <Grid item xs={12} md={12}>
+          <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+            Đánh giá từ khách hàng
+          </Typography>
+          <ReviewList attractionId={id} />
+        </Grid>
+      )}
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>
         <DialogContent>
@@ -377,9 +383,9 @@ const ManagerAttractionDetail = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
-          <Button 
-            onClick={handleReject} 
-            variant="contained" 
+          <Button
+            onClick={handleReject}
+            variant="contained"
             color="error"
             disabled={!rejectReason.trim()}
           >

@@ -180,3 +180,51 @@ export const changeAttractionStatus = async (attractionId, status, reason) => {
         throw error;
     }
 };
+
+export const getAttractionReviews = async (attractionId, options) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/attractions/${attractionId}/reviews`, {
+            params: options,
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        console.log(response.data.data);
+        return {
+            total: response.data.data.total,
+            pageSize: response.data.data.pageSize,
+            pageIndex: response.data.data.pageIndex,
+            items: response.data.data.items.map(review => ({
+                reviewId: review.reviewId,
+                rating: review.rating,
+                review: review.review,
+                createdAt: review.createdAt,
+                reviewer: review.reviewer,
+                likeCount: review.likeCount,
+                isDeleted: review.isDeleted
+            }))
+        };
+    } catch (error) {
+        console.error('Error fetching attraction reviews:', error.response);
+        throw error;
+    }
+};
+
+export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(`${baseURL}/api/attractions/reviews/${reviewId}/hide`, {
+            isHided: isHidden,
+            reason: reason
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling review visibility:', error.response);
+        throw error;
+    }
+};

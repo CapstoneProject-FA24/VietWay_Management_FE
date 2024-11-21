@@ -49,7 +49,7 @@ const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
             </Box>
           </Box>
-          
+
           {/* Overview section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
@@ -174,6 +174,16 @@ const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
             )}
           </Paper>
         </Grid>
+        <Grid item xs={12} md={12}>
+          {tourTemplate.status === TourTemplateStatus.Approved && (
+              <Box sx={{ mb: 5 }}>
+                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+                  Đánh giá từ khách hàng
+                </Typography>
+                <ReviewListTour tourTemplateId={id} />
+              </Box>
+            )}
+          </Grid>
       </Grid>
     </Box>
   );

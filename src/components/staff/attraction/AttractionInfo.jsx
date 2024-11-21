@@ -223,6 +223,14 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             <Map placeId={attraction.googlePlaceId} />
           </Box>
         </Grid>
+        {attraction.status === AttractionStatus.Approved && (
+          <Grid item xs={12} md={12}>
+            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+              Đánh giá từ khách hàng
+            </Typography>
+            <ReviewList attractionId={id} />
+          </Grid>
+        )}
       </Grid>
     </Box>
   );
