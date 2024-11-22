@@ -62,7 +62,7 @@ const ManagerManageAttraction = () => {
             try {
                 const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const fetchedAttractionType = await fetchAttractionType();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setAttractionTypes(fetchedAttractionType);
             } catch (error) {
                 console.error('Error fetching provinces:', error);

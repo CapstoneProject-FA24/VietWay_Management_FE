@@ -69,7 +69,7 @@ const ListApprovedTourTemplate = () => {
         const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
         const duration = await fetchTourDuration();
         const categories = await fetchTourCategory();
-        setProvinces(fetchedProvinces);
+        setProvinces(fetchedProvinces.items);
         setTourCategories(categories);
         setTourDurations(duration);
       } catch (error) {

@@ -12,6 +12,7 @@ import CreateProvince from '@components/manager/province/CreateProvince';
 const ManagerManageProvince = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [provinces, setProvinces] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
@@ -23,7 +24,7 @@ const ManagerManageProvince = () => {
 
     useEffect(() => {
         fetchData();
-    }, [page, pageSize, searchTerm]);
+    }, [page, pageSize, searchQuery]);
 
     useEffect(() => {
         sortProvinces();
@@ -34,10 +35,10 @@ const ManagerManageProvince = () => {
             const params = {
                 pageSize: pageSize,
                 pageIndex: page,
-                nameSearch: searchTerm,
+                nameSearch: searchQuery,
             };
             const result = await fetchProvinces(params);
-            setProvinces(result);
+            setProvinces(result.items);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
             console.error('Error fetching provinces:', error);
@@ -68,7 +69,7 @@ const ManagerManageProvince = () => {
     };
 
     const handleSearch = () => {
-        setSearchTerm(searchTerm);
+        setSearchQuery(searchTerm);
         setPage(1);
     };
 

@@ -14,12 +14,17 @@ export const fetchProvinces = async (params) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        const data = response.data.data.items.map(province => ({
-            provinceId: province.provinceId,
-            provinceName: province.provinceName,
-            imageUrl: province.imageUrl
-        }));
-        return data;
+        return {
+            total: response.data.data.total,
+            pageSize: response.data.data.pageSize,
+            pageIndex: response.data.data.pageIndex,
+            items: response.data.data.items.map(province => ({
+                provinceId: province.provinceId,
+                provinceName: province.provinceName,
+                description: province.description,
+                imageUrl: province.imageUrl
+            }))
+        };
     } catch (error) {
         console.error('Error fetching provinces:', error);
         throw error;
@@ -57,12 +62,11 @@ export const deleteProvince = async (provinceId) => {
     }
 };
 
-export const createProvince = async (provinceName) => {
+export const createProvince = async (request) => {
     const token = getCookie('token');
     try {
         const response = await axios.post(
-            `${baseURL}/api/Province`, 
-            JSON.stringify({ provinceName }),
+            `${baseURL}/api/Province`, request ,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,13 +85,14 @@ export const addProvinceImage = async (provinceId, imageFile) => {
     const token = getCookie('token');
     try {
         const formData = new FormData();
-        formData.append('ImageFile', imageFile);
+        formData.append('newImage', imageFile);
 
-        const response = await axios.post(
-            `${baseURL}/api/Province/${provinceId}/image`,
+        const response = await axios.patch(
+            `${baseURL}/api/Province/${provinceId}/images`,
             formData,
             {
                 headers: {
+                    'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`
                 }
             }

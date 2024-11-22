@@ -110,6 +110,7 @@ export const createAttraction = async (attractionData) => {
 
 
 export const updateAttractionImages = async (attractionId, newImages, deletedImageIds) => {
+    console.log(newImages);
     const token = getCookie('token');
     try {
         const formData = new FormData();

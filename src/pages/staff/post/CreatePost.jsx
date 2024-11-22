@@ -80,7 +80,7 @@ const CreatePost = () => {
       setIsLoadingProvinces(true);
       try {
         const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
-        const formattedProvinces = fetchedProvinces.map(province => ({
+        const formattedProvinces = fetchedProvinces.items.map(province => ({
           value: province.provinceId,
           label: province.provinceName
         }));

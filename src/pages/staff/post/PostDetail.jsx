@@ -137,7 +137,7 @@ const PostDetail = () => {
       setIsLoadingProvinces(true);
       try {
         const provinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
-        setProvinceOptions(provinces.map(province => ({
+        setProvinceOptions(provinces.items.map(province => ({
           value: province.provinceId,
           label: province.provinceName
         })));

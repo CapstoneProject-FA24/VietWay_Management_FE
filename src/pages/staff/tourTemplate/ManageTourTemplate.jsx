@@ -72,7 +72,7 @@ const ManageTourTemplate = () => {
                 const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const duration = await fetchTourDuration();
                 const categories = await fetchTourCategory();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setTourDurations(duration);
                 setTourCategories(categories);
             } catch (error) {

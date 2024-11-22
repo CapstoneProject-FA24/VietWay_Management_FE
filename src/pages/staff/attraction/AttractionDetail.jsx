@@ -33,7 +33,7 @@ const AttractionDetail = () => {
           fetchAttractionType(),
           fetchAttractionById(id)
         ]);
-        setProvinces(fetchedProvinces);
+        setProvinces(fetchedProvinces.items);
         setAttractionTypes(fetchedAttractionType);
         setAttraction(fetchedAttraction);
       } catch (error) {
@@ -105,7 +105,7 @@ const AttractionDetail = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Helmet>
         <title>Chi tiết điểm tham quan</title>
       </Helmet>
