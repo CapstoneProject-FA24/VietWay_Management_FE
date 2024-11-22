@@ -147,26 +147,7 @@ export const createTour = async (tourData) => {
             minParticipant: parseInt(tourData.minParticipants),
             currentParticipant: 0,
             createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-            tourPrices: [
-                {
-                    name: "Người lớn",
-                    price: parseFloat(tourData.adultPrice),
-                    ageFrom: 12,
-                    ageTo: 200
-                },
-                {
-                    name: "Trẻ em", 
-                    price: parseFloat(tourData.childPrice),
-                    ageFrom: 5,
-                    ageTo: 11
-                },
-                {
-                    name: "Em bé",
-                    price: parseFloat(tourData.infantPrice),
-                    ageFrom: 0,
-                    ageTo: 4
-                }
-            ],
+            tourPrices: tourData.tourPrices,
             refundPolicies: tourData.refundPolicies.map(policy => ({
                 cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
                 refundPercent: Number(policy.refundRate)

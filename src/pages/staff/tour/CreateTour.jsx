@@ -117,9 +117,18 @@ const CreateTour = () => {
       setSnackbar({ open: true, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền', severity: 'error' });
       return false;
     }
+
+    // Check if registration open date exists
+    if (!newTourData.registerOpenDate) {
+      setSnackbar({ open: true, message: 'Vui lòng chọn ngày mở đăng ký trước khi thêm chính sách hoàn tiền', severity: 'error' });
+      return false;
+    }
+
     const sortedPolicies = [...refundPolicies].sort((a, b) => 
       dayjs(b.cancelBefore).valueOf() - dayjs(a.cancelBefore).valueOf()
     );
+
+    // Validate data completion and percentage range
     const isValidData = sortedPolicies.every(policy => 
       policy.cancelBefore && 
       policy.refundRate !== '' && 
@@ -130,13 +139,21 @@ const CreateTour = () => {
       setSnackbar({ open: true, message: 'Vui lòng điền đầy đủ thông tin cho tất cả các chính sách hoàn tiền', severity: 'error' });
       return false;
     }
+
+    // Validate date range (between registration open date and tour start date)
     const isValidDates = sortedPolicies.every(policy => 
+      dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.registerOpenDate)) && 
       dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.startDate))
     );
     if (!isValidDates) {
-      setSnackbar({ open: true, message: 'Ngày hủy tour phải trước ngày khởi hành', severity: 'error' });
+      setSnackbar({ 
+        open: true, 
+        message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành', 
+        severity: 'error' 
+      });
       return false;
     }
+
     return true;
   };
 
@@ -147,11 +164,31 @@ const CreateTour = () => {
       cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DD'),
       refundRate: Number(policy.refundRate)
     }));
+
+    // Create tourPrices array only for child and infant prices
+    const tourPrices = [
+      {
+        name: "Trẻ em",
+        price: Number(newTourData.childPrice),
+        ageFrom: 5,
+        ageTo: 12
+      },
+      {
+        name: "Em bé",
+        price: Number(newTourData.infantPrice),
+        ageFrom: 0,
+        ageTo: 4
+      }
+    ];
+
     const tourData = {
       tourTemplateId: id,
       ...newTourData,
+      defaultTouristPrice: Number(newTourData.adultPrice), // Set adult price as defaultTouristPrice
+      tourPrices: tourPrices,
       refundPolicies: formattedPolicies
     };
+
     try {
       await createTour(tourData);
       setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
@@ -351,19 +388,26 @@ const CreateTour = () => {
             <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', backgroundColor: 'background.paper', p: 2, borderRadius: 1, boxShadow: 1 }} >
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Hủy trước ngày" value={policy.cancelBefore} format={DATE_FORMAT}
+                  label="Hủy trước ngày" 
+                  value={policy.cancelBefore} 
+                  format={DATE_FORMAT}
                   onChange={(newValue) => handlePolicyChange(index, 'cancelBefore', newValue)}
+                  minDate={dayjs(newTourData.registerOpenDate)}
                   maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
-                  minDate={newTourData.registerOpenDate || dayjs()}
                   slotProps={{
-                    textField: { fullWidth: true, inputProps: { style: { height: '15px' }},
-                      error: policy.cancelBefore &&
-                        (dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate)) ||
-                        dayjs(newTourData.registerOpenDate).isAfter(dayjs(policy.cancelBefore))),
-                      helperText: policy.cancelBefore &&
-                        (dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate)) ||
-                        dayjs(newTourData.registerOpenDate).isAfter(dayjs(policy.cancelBefore))) ?
-                        "Ngày hủy phải trước ngày khởi hành và sau ngày mở đăng ký" : ""
+                    textField: { 
+                      fullWidth: true, 
+                      inputProps: { style: { height: '15px' }},
+                      error: policy.cancelBefore && (
+                        dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
+                        dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
+                      ),
+                      helperText: policy.cancelBefore && (
+                        dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
+                        dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
+                      ) ? 
+                        "Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành" : 
+                        ""
                     }
                   }}
                 />
