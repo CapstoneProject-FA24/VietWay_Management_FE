@@ -115,7 +115,7 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
                         onClick={handleClose} 
                         sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }}
                     />
-                    <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
+                    <Typography variant="h4" component="h2" gutterBottom align='center' color='primary' fontWeight='bold'>
                         Cập nhật tỉnh thành
                     </Typography>
 

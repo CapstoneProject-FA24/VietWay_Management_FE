@@ -129,7 +129,7 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                         onClick={handleClose} 
                         sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }}
                     />
-                    <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
+                    <Typography variant="h4" component="h2" gutterBottom align='center' color='primary' fontWeight='bold'>
                         Thêm tỉnh thành mới
                     </Typography>
 
