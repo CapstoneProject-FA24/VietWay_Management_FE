@@ -270,7 +270,7 @@ const CreateTourTemplate = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <Helmet>
         <title>Tạo tour mẫu mới</title>
       </Helmet>

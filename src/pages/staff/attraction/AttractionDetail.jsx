@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { AttractionStatus } from '@hooks/Statuses';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -24,6 +25,7 @@ const AttractionDetail = () => {
   const [provinces, setProvinces] = useState([]);
   const [attractionTypes, setAttractionTypes] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,6 +98,47 @@ const AttractionDetail = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleCancelClick = () => {
+    setIsCancelPopupOpen(true);
+  };
+
+  const handleCloseCancelPopup = () => {
+    setIsCancelPopupOpen(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setIsEditing(false);
+    setIsCancelPopupOpen(false);
+  };
+
+  const CancelConfirmationDialog = () => (
+    <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        Xác nhận hủy
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button
+          onClick={handleCloseCancelPopup}
+          sx={{ color: '#666666' }}
+        >
+          Không
+        </Button>
+        <Button
+          onClick={handleCancelConfirm}
+          variant="contained"
+          sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+        >
+          Có
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   if (error) {
     return <Typography color="error">Error: {error}</Typography>;
   }
@@ -105,7 +148,7 @@ const AttractionDetail = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <Helmet>
         <title>Chi tiết điểm tham quan</title>
       </Helmet>
@@ -140,30 +183,47 @@ const AttractionDetail = () => {
                   Quản lý điểm tham quan
                 </Typography>
                 {(attraction.status === AttractionStatus.Draft || attraction.status === AttractionStatus.Rejected) && (
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button
-                    variant="contained" startIcon={<EditIcon />} onClick={handleEdit}
-                    sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                  >
-                    Sửa
-                  </Button>
-                  <Button
-                    variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
-                    sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
-                  >
-                    Xóa
-                  </Button>
-                </Box>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    {isEditing ? (
+                      <Button
+                        variant="contained"
+                        startIcon={<CancelIcon />}
+                        onClick={handleCancelClick}
+                        sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                      >
+                        Hủy sửa
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        startIcon={<EditIcon />}
+                        onClick={handleEdit}
+                        sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                      >
+                        Sửa
+                      </Button>
+                    )}
+                    <Button
+                      variant="contained"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDelete}
+                      sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                    >
+                      Xóa
+                    </Button>
+                  </Box>
                 )}
                 {attraction.status === AttractionStatus.Pending && (
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button
-                    variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
-                    sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
-                  >
-                    Xóa
-                  </Button>
-                </Box>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDelete}
+                      sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                    >
+                      Xóa
+                    </Button>
+                  </Box>
                 )}
               </Box>
 
@@ -191,6 +251,7 @@ const AttractionDetail = () => {
           </Box>
         </Box>
       </Box>
+      <CancelConfirmationDialog />
     </Box>
   );
 };

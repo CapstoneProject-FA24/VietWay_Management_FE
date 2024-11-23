@@ -38,6 +38,8 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         departurePoint: { value: initialTourTemplate.departurePoint, isEditing: false },
         tourCategory: { value: initialTourTemplate.tourCategory, isEditing: false },
         code: { value: initialTourTemplate.code, isEditing: false },
+        minPrice: { value: initialTourTemplate.minPrice || '', isEditing: false },
+        maxPrice: { value: initialTourTemplate.maxPrice || '', isEditing: false },
     });
 
     const [expandedDay, setExpandedDay] = useState(null);
@@ -46,6 +48,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const pageTopRef = useRef(null);
 
     const navigate = useNavigate();
+
+    const [priceErrors, setPriceErrors] = useState({
+        minPrice: '',
+        maxPrice: ''
+    });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -202,8 +209,40 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         }));
     };
 
+    const validatePrice = (minPrice, maxPrice) => {
+        const min = parseFloat(minPrice);
+        const max = parseFloat(maxPrice);
+        let isValid = true;
+        const newErrors = {
+            minPrice: '',
+            maxPrice: ''
+        };
+
+        if (min < 0) {
+            newErrors.minPrice = 'Giá thấp nhất phải lớn hơn 0';
+            isValid = false;
+        }
+
+        if (max < 0) {
+            newErrors.maxPrice = 'Giá cao nhất phải lớn hơn 0';
+            isValid = false;
+        }
+
+        if (max && min && max <= min) {
+            newErrors.maxPrice = 'Giá cao nhất phải lớn hơn giá thấp nhất';
+            isValid = false;
+        }
+
+        setPriceErrors(newErrors);
+        return isValid;
+    };
+
     const handleSubmit = async (isDraft) => {
         try {
+            if (!validatePrice(editableFields.minPrice.value, editableFields.maxPrice.value)) {
+                return;
+            }
+
             const tourTemplateData = {
                 tourTemplateId: id,
                 code: editableFields.code.value,
@@ -219,11 +258,13 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     description: s.description,
                     attractionIds: s.attractions.map(attr => attr.attractionId)
                 })),
+                minPrice: parseFloat(editableFields.minPrice.value) || 0,
+                maxPrice: parseFloat(editableFields.maxPrice.value) || 0,
                 isDraft: isDraft
             };
 
             if (!isDraft) {
-                const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'note', 'provinceIds', 'schedules'];
+                const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'note', 'provinceIds', 'schedules', 'minPrice', 'maxPrice'];
                 const missingFields = requiredFields.filter(field => {
                     if (Array.isArray(tourTemplateData[field])) {
                         return tourTemplateData[field].length === 0;
@@ -264,8 +305,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     };
 
     return (
-
-        <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+        <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%', minWidth: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Typography gutterBottom>Tỉnh thành</Typography>
                 <ReactSelect isMulti name="provinces" options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
@@ -479,11 +519,6 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
-                            <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
-                            <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth sx={{ mr: 2 }} placeholder="Nhập mã tour" />
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
                             <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
                         </Box>
@@ -497,6 +532,50 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 Trạng thái:
                                 <Typography sx={{ ml: 1, color: tourTemplate.statusName === 'Bản nháp' ? 'gray' : tourTemplate.statusName === 'Chờ duyệt' ? 'primary.main' : tourTemplate.statusName === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                             </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
+                            <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
+                            <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth placeholder="Nhập mã tour" />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+                            <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Giá từ: </Typography>
+                            <TextField
+                                type="number"
+                                value={editableFields.minPrice.value}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    handleFieldChange('minPrice', newValue);
+                                    validatePrice(newValue, editableFields.maxPrice.value);
+                                }}
+                                variant="outlined"
+                                fullWidth
+                                placeholder="Giá thấp nhất"
+                                inputProps={{ min: 0 }}
+                                error={!!priceErrors.minPrice}
+                                helperText={priceErrors.minPrice}
+                            />
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+                            <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Đến: </Typography>
+                            <TextField
+                                type="number"
+                                value={editableFields.maxPrice.value}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    handleFieldChange('maxPrice', newValue);
+                                    validatePrice(editableFields.minPrice.value, newValue);
+                                }}
+                                variant="outlined"
+                                fullWidth
+                                placeholder="Giá cao nhất"
+                                inputProps={{ min: 0 }}
+                                error={!!priceErrors.maxPrice}
+                                helperText={priceErrors.maxPrice}
+                            />
                         </Box>
                         <Button
                             variant="contained"

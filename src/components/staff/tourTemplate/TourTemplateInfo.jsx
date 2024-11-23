@@ -10,7 +10,7 @@ import ReviewListTour from '@components/review/ReviewListTour';
 
 const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
   return (
-    <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+    <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%' }}>
       <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
         {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
       </Typography>
