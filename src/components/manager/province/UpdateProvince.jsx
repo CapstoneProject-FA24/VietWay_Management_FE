@@ -11,7 +11,11 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
         imageFile: null
     });
     const [previewImage, setPreviewImage] = useState(province?.imageUrl || '');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({
+        provinceName: '',
+        description: '',
+        image: ''
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -25,13 +29,20 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
             ...prev,
             [name]: value
         }));
+        setErrors(prev => ({
+            ...prev,
+            [name]: ''
+        }));
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
-                setError('Kích thước ảnh không được vượt quá 5MB');
+                setErrors(prev => ({
+                    ...prev,
+                    image: 'Kích thước ảnh không được vượt quá 5MB'
+                }));
                 return;
             }
             setFormData(prev => ({
@@ -39,7 +50,10 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
                 imageFile: file
             }));
             setPreviewImage(URL.createObjectURL(file));
-            setError('');
+            setErrors(prev => ({
+                ...prev,
+                image: ''
+            }));
         }
     };
 
@@ -52,8 +66,25 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
 
     const handleSubmit = async () => {
         try {
+            const newErrors = {
+                provinceName: '',
+                description: '',
+                image: ''
+            };
+            let hasError = false;
+
             if (!formData.provinceName.trim()) {
-                setError('Vui lòng nhập tên tỉnh thành');
+                newErrors.provinceName = 'Vui lòng nhập tên tỉnh thành';
+                hasError = true;
+            }
+
+            if (!formData.imageFile && !previewImage) {
+                newErrors.image = 'Vui lòng thêm hình ảnh';
+                hasError = true;
+            }
+
+            if (hasError) {
+                setErrors(newErrors);
                 return;
             }
 
@@ -79,22 +110,12 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
             onUpdateSuccess();
             handleClose();
         } catch (error) {
-            if (error.response && error.response.data) {
-                setError(error.response.data.message || 'Có lỗi xảy ra khi cập nhật tỉnh thành');
-                setSnackbar({
-                    open: true,
-                    message: error.response.data.message || 'Có lỗi xảy ra khi cập nhật tỉnh thành',
-                    severity: 'error'
-                });
-            } else {
-                setError('Có lỗi xảy ra khi cập nhật tỉnh thành');
-                setSnackbar({
-                    open: true,
-                    message: 'Có lỗi xảy ra khi cập nhật tỉnh thành',
-                    severity: 'error'
-                });
-            }
-            console.error('Error updating province:', error);
+            const errorMessage = error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật tỉnh thành';
+            setSnackbar({
+                open: true,
+                message: errorMessage,
+                severity: 'error'
+            });
         } finally {
             setIsLoading(false);
         }
@@ -127,8 +148,9 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
                             value={formData.provinceName}
                             onChange={handleInputChange}
                             margin="normal"
-                            error={!!error && !formData.provinceName}
-                            helperText={error && !formData.provinceName ? error : ''}
+                            error={!!errors.provinceName}
+                            helperText={errors.provinceName}
+                            required
                         />
 
                         <TextField
@@ -156,10 +178,25 @@ const UpdateProvince = ({ open, handleClose, province, onUpdateSuccess }) => {
                                     }}
                                 />
                             )}
-                            <Button variant="outlined" component="label" startIcon={<CloudUploadIcon />}>
+                            <Button 
+                                variant="outlined" 
+                                component="label" 
+                                startIcon={<CloudUploadIcon />}
+                            >
                                 Chọn ảnh mới
-                                <input type="file" hidden accept="image/*" onChange={handleImageChange}/>
+                                <input 
+                                    type="file" 
+                                    hidden 
+                                    accept="image/*" 
+                                    onChange={handleImageChange}
+                                    required
+                                />
                             </Button>
+                            {errors.image && (
+                                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                                    {errors.image}
+                                </Typography>
+                            )}
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>

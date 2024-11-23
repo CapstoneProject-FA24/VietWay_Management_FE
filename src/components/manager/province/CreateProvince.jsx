@@ -11,7 +11,11 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
         imageFile: null
     });
     const [previewImage, setPreviewImage] = useState('');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState({
+        provinceName: '',
+        description: '',
+        image: ''
+    });
     const [isLoading, setIsLoading] = useState(false);
     const [snackbar, setSnackbar] = useState({
         open: false,
@@ -32,14 +36,20 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
             ...prev,
             [name]: value
         }));
-        setError('');
+        setErrors(prev => ({
+            ...prev,
+            [name]: ''
+        }));
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             if (file.size > 5 * 1024 * 1024) {
-                setError('Kích thước ảnh không được vượt quá 5MB');
+                setErrors(prev => ({
+                    ...prev,
+                    image: 'Kích thước ảnh không được vượt quá 5MB'
+                }));
                 return;
             }
             setFormData(prev => ({
@@ -47,19 +57,34 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                 imageFile: file
             }));
             setPreviewImage(URL.createObjectURL(file));
-            setError('');
+            setErrors(prev => ({
+                ...prev,
+                image: ''
+            }));
         }
     };
 
     const handleSubmit = async () => {
         try {
+            const newErrors = {
+                provinceName: '',
+                description: '',
+                image: ''
+            };
+            let hasError = false;
+
             if (!formData.provinceName.trim()) {
-                setError('Vui lòng nhập tên tỉnh thành');
-                return;
+                newErrors.provinceName = 'Vui lòng nhập tên tỉnh thành';
+                hasError = true;
             }
 
             if (!formData.imageFile) {
-                setError('Vui lòng chọn ảnh cho tỉnh thành');
+                newErrors.image = 'Vui lòng thêm hình ảnh';
+                hasError = true;
+            }
+
+            if (hasError) {
+                setErrors(newErrors);
                 return;
             }
 
@@ -90,18 +115,32 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                     imageFile: null
                 });
                 setPreviewImage('');
-                setError('');
+                setErrors({
+                    provinceName: '',
+                    description: '',
+                    image: ''
+                });
             }
         } catch (error) {
             if (error.response && error.response.data) {
-                setError(error.response.data.message || 'Có lỗi xảy ra khi thêm tỉnh thành');
+                setErrors(prev => ({
+                    ...prev,
+                    provinceName: error.response.data.message || 'Có lỗi xảy ra khi thêm tỉnh thành',
+                    description: error.response.data.message || 'Có lỗi xảy ra khi thêm tỉnh thành',
+                    image: error.response.data.message || 'Có lỗi xảy ra khi thêm tỉnh thành'
+                }));
                 setSnackbar({
                     open: true,
                     message: error.response.data.message || 'Có lỗi xảy ra khi thêm tỉnh thành',
                     severity: 'error'
                 });
             } else {
-                setError('Có lỗi xảy ra khi thêm tỉnh thành');
+                setErrors(prev => ({
+                    ...prev,
+                    provinceName: 'Có lỗi xảy ra khi thêm tỉnh thành',
+                    description: 'Có lỗi xảy ra khi thêm tỉnh thành',
+                    image: 'Có lỗi xảy ra khi thêm tỉnh thành'
+                }));
                 setSnackbar({
                     open: true,
                     message: 'Có lỗi xảy ra khi thêm tỉnh thành',
@@ -141,8 +180,9 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                             value={formData.provinceName}
                             onChange={handleInputChange}
                             margin="normal"
-                            error={!!error && !formData.provinceName}
-                            helperText={error && !formData.provinceName ? error : ''}
+                            error={!!errors.provinceName}
+                            helperText={errors.provinceName}
+                            required
                         />
 
                         <TextField
@@ -156,21 +196,14 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                             rows={3}
                         />
 
-                        <Box sx={{ 
-                            mt: 3, 
-                            textAlign: 'center', 
-                            width: '100%', 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            alignItems: 'center' 
-                        }}>
+                        <Box sx={{ mt: 1, textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             {previewImage && (
                                 <img
                                     src={previewImage}
                                     alt="Preview"
                                     style={{ 
                                         maxWidth: '100%', 
-                                        maxHeight: '200px', 
+                                        maxHeight: '250px', 
                                         objectFit: 'cover', 
                                         marginBottom: '15px',
                                         borderRadius: '8px'
@@ -181,7 +214,6 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                                 variant="outlined" 
                                 component="label" 
                                 startIcon={<CloudUploadIcon />}
-                                sx={{ mt: 1 }}
                             >
                                 Chọn ảnh
                                 <input 
@@ -189,8 +221,14 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
                                     hidden 
                                     accept="image/*" 
                                     onChange={handleImageChange}
+                                    required
                                 />
                             </Button>
+                            {errors.image && (
+                                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                                    {errors.image}
+                                </Typography>
+                            )}
                         </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
