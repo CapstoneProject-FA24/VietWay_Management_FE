@@ -10,7 +10,7 @@ import ReviewListTour from '@components/review/ReviewListTour';
 
 const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
   return (
-    <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+    <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%' }}>
       <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
         {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
       </Typography>
@@ -163,6 +163,18 @@ const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px', color: '#3572EF' }} />
               <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.creatorName}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+              <Typography sx={{ color: '#05073C' }}>
+                Giá từ: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.minPrice)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+              <Typography sx={{ color: '#05073C' }}>
+                Đến: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.maxPrice)}
+              </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
               <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />

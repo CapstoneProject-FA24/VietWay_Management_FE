@@ -211,7 +211,7 @@ const CreatePost = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '89vw' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '89vw', minHeight: '100vh' }}>
       <Helmet>
         <title>Tạo bài viết mới</title>
       </Helmet>

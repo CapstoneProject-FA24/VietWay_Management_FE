@@ -18,7 +18,12 @@ import { fetchTourCategory } from '@services/TourCategoryService';
 import PropTypes from 'prop-types';
 
 const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onCancel }) => {
-    const [tourTemplate, setTourTemplate] = useState(initialTourTemplate);
+    const [tourTemplate, setTourTemplate] = useState({
+        ...initialTourTemplate,
+        imageUrls: Array(4).fill(null).map((_, index) => 
+            initialTourTemplate.imageUrls?.[index] || null
+        )
+    });
     const [provinces, setProvinces] = useState([]);
     const [tourCategories, setTourCategories] = useState([]);
     const [tourDurations, setTourDurations] = useState([]);
@@ -34,10 +39,12 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             })),
             isEditing: false
         },
-        duration: { value: initialTourTemplate.duration, isEditing: false },
+        duration: { value: initialTourTemplate.duration.durationId, isEditing: false },
         departurePoint: { value: initialTourTemplate.departurePoint, isEditing: false },
-        tourCategory: { value: initialTourTemplate.tourCategory, isEditing: false },
+        tourCategory: { value: initialTourTemplate.tourCategoryId, isEditing: false },
         code: { value: initialTourTemplate.code, isEditing: false },
+        minPrice: { value: initialTourTemplate.minPrice || '', isEditing: false },
+        maxPrice: { value: initialTourTemplate.maxPrice || '', isEditing: false },
     });
 
     const [expandedDay, setExpandedDay] = useState(null);
@@ -47,13 +54,18 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
 
     const navigate = useNavigate();
 
+    const [priceErrors, setPriceErrors] = useState({
+        minPrice: '',
+        maxPrice: ''
+    });
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const duration = await fetchTourDuration();
                 const categories = await fetchTourCategory();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setTourDurations(duration);
                 setTourCategories(categories);
             } catch (error) {
@@ -92,7 +104,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         if (file) {
             setTourTemplate(prev => ({
                 ...prev,
-                imageUrls: prev.imageUrls.map((img, i) => i === index ? file : img)
+                imageUrls: prev.imageUrls.map((img, i) => 
+                    i === index ? file : img
+                )
             }));
         }
     };
@@ -100,7 +114,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const handleImageRemove = (index) => {
         setTourTemplate(prev => ({
             ...prev,
-            imageUrls: prev.imageUrls.map((img, i) => i === index ? null : img)
+            imageUrls: prev.imageUrls.map((img, i) => 
+                i === index ? null : img
+            )
         }));
     };
 
@@ -202,10 +218,42 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         }));
     };
 
+    const validatePrice = (minPrice, maxPrice) => {
+        const min = parseFloat(minPrice);
+        const max = parseFloat(maxPrice);
+        let isValid = true;
+        const newErrors = {
+            minPrice: '',
+            maxPrice: ''
+        };
+
+        if (min < 0) {
+            newErrors.minPrice = 'Giá thấp nhất phải lớn hơn 0';
+            isValid = false;
+        }
+
+        if (max < 0) {
+            newErrors.maxPrice = 'Giá cao nhất phải lớn hơn 0';
+            isValid = false;
+        }
+
+        if (max && min && max <= min) {
+            newErrors.maxPrice = 'Giá cao nhất phải lớn hơn giá thấp nhất';
+            isValid = false;
+        }
+
+        setPriceErrors(newErrors);
+        return isValid;
+    };
+
     const handleSubmit = async (isDraft) => {
         try {
+            if (!validatePrice(editableFields.minPrice.value, editableFields.maxPrice.value)) {
+                return;
+            }
+
             const tourTemplateData = {
-                tourTemplateId: id,
+                tourTemplateId: initialTourTemplate.tourTemplateId,
                 code: editableFields.code.value,
                 tourName: editableFields.tourName.value,
                 description: editableFields.description.value,
@@ -219,11 +267,13 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     description: s.description,
                     attractionIds: s.attractions.map(attr => attr.attractionId)
                 })),
+                minPrice: parseFloat(editableFields.minPrice.value) || null,
+                maxPrice: parseFloat(editableFields.maxPrice.value) || null,
                 isDraft: isDraft
             };
 
             if (!isDraft) {
-                const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'note', 'provinceIds', 'schedules'];
+                const requiredFields = ['tourName', 'description', 'durationId', 'tourCategoryId', 'note', 'provinceIds', 'schedules', 'minPrice', 'maxPrice'];
                 const missingFields = requiredFields.filter(field => {
                     if (Array.isArray(tourTemplateData[field])) {
                         return tourTemplateData[field].length === 0;
@@ -242,14 +292,17 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 }
             }
 
-            const response = await updateTourTemplate(id, tourTemplateData);
+            const templateResponse = await updateTourTemplate(tourTemplateData.tourTemplateId, tourTemplateData);
 
-            if (response.statusCode === 200) {
+            if (templateResponse.statusCode === 200) {
                 const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
-                const deletedImageIds = [];
+                const deletedImageIds = initialTourTemplate.imageUrls
+                    .filter(originalImg => !tourTemplate.imageUrls.some(currentImg => 
+                        currentImg?.imageUrl === originalImg?.imageUrl))
+                    .map(img => img.imageId);
 
                 if (newImages.length > 0 || deletedImageIds.length > 0) {
-                    await updateTemplateImages(id, newImages, deletedImageIds);
+                    await updateTemplateImages(tourTemplateData.tourTemplateId, newImages, deletedImageIds);
                 }
 
                 alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã cập nhật và gửi tour mẫu thành công.');
@@ -263,8 +316,55 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         }
     };
 
-    return (
+    const renderImageSlot = (index, dimensions) => {
+        const image = tourTemplate.imageUrls[index];
+        
+        return image ? (
+            <>
+                <img 
+                    src={image instanceof File ? URL.createObjectURL(image) : image.imageUrl}
+                    alt={`Tour image ${index + 1}`}
+                    style={{ 
+                        width: '100%', 
+                        height: dimensions.height, 
+                        objectFit: 'cover' 
+                    }}
+                />
+                <IconButton 
+                    onClick={() => handleImageRemove(index)}
+                    sx={{ 
+                        position: 'absolute', 
+                        top: 10, 
+                        right: 10, 
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)', 
+                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } 
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </>
+        ) : (
+            <Button 
+                component="label" 
+                variant="outlined" 
+                sx={{ 
+                    width: '100%', 
+                    height: dimensions.buttonHeight || dimensions.height, 
+                    border: '2px dashed #3572EF' 
+                }}
+            >
+                Thêm ảnh
+                <input 
+                    type="file" 
+                    hidden 
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(index, e)} 
+                />
+            </Button>
+        );
+    };
 
+    return (
         <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Typography gutterBottom>Tỉnh thành</Typography>
@@ -286,70 +386,18 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 <Grid item xs={12} sx={{ minWidth: '100%' }}>
                     <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
                         <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
-                            {tourTemplate.imageUrls[0] ? (
-                                <>
-                                    <img src={tourTemplate.imageUrls[0] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[0]) : tourTemplate.imageUrls[0]?.imageUrl} alt="Tour image 1" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
-                                    <IconButton onClick={() => handleImageRemove(0)}
-                                        sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                        <CloseIcon />
-                                    </IconButton>
-                                </>
-                            ) : (
-                                <Button component="label" variant="outlined" sx={{ width: '100%', height: '100%', border: '2px dashed #3572EF' }}>
-                                    Thêm ảnh
-                                    <input type="file" hidden onChange={(e) => handleImageUpload(0, e)} />
-                                </Button>
-                            )}
+                            {renderImageSlot(0, { height: '450px' })}
                         </Box>
                         <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                                {tourTemplate.imageUrls[1] ? (
-                                    <>
-                                        <img src={tourTemplate.imageUrls[1] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[1]) : tourTemplate.imageUrls[1]?.imageUrl} alt="Tour image 2" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
-                                        <IconButton onClick={() => handleImageRemove(1)}
-                                            sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </>
-                                ) : (
-                                    <Button component="label" variant="outlined" sx={{ width: '100%', height: '100%', border: '2px dashed #3572EF' }}>
-                                        Thêm ảnh
-                                        <input type="file" hidden onChange={(e) => handleImageUpload(1, e)} />
-                                    </Button>
-                                )}
+                                {renderImageSlot(1, { height: '215px' })}
                             </Box>
                             <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                                 <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
-                                    {tourTemplate.imageUrls[2] ? (
-                                        <>
-                                            <img src={tourTemplate.imageUrls[2] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[2]) : tourTemplate.imageUrls[2]?.imageUrl} alt="Tour image 3" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
-                                            <IconButton onClick={() => handleImageRemove(2)}
-                                                sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                                <CloseIcon />
-                                            </IconButton>
-                                        </>
-                                    ) : (
-                                        <Button component="label" variant="outlined" sx={{ width: '100%', height: '96%', border: '2px dashed #3572EF' }}>
-                                            Thêm ảnh
-                                            <input type="file" hidden onChange={(e) => handleImageUpload(2, e)} />
-                                        </Button>
-                                    )}
+                                    {renderImageSlot(2, { height: '215px', buttonHeight: '96%' })}
                                 </Box>
                                 <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
-                                    {tourTemplate.imageUrls[3] ? (
-                                        <>
-                                            <img src={tourTemplate.imageUrls[3] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[3]) : tourTemplate.imageUrls[3]?.imageUrl} alt="Tour image 4" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
-                                            <IconButton onClick={() => handleImageRemove(3)}
-                                                sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                                <CloseIcon />
-                                            </IconButton>
-                                        </>
-                                    ) : (
-                                        <Button component="label" variant="outlined" sx={{ width: '100%', height: '96%', border: '2px dashed #3572EF' }}>
-                                            Thêm ảnh
-                                            <input type="file" hidden onChange={(e) => handleImageUpload(3, e)} />
-                                        </Button>
-                                    )}
+                                    {renderImageSlot(3, { height: '215px', buttonHeight: '96%' })}
                                 </Box>
                             </Box>
                         </Box>
@@ -357,9 +405,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '48%' }}>
                             <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
                                 <Select sx={{ width: '100%', mr: 1 }}
                                     value={editableFields.duration.value}
@@ -370,7 +418,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 </Select>
                             </Box>
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '48%' }}>
                             <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
@@ -479,11 +527,6 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
-                            <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
-                            <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth sx={{ mr: 2 }} placeholder="Nhập mã tour" />
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
                             <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
                         </Box>
@@ -497,6 +540,50 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 Trạng thái:
                                 <Typography sx={{ ml: 1, color: tourTemplate.statusName === 'Bản nháp' ? 'gray' : tourTemplate.statusName === 'Chờ duyệt' ? 'primary.main' : tourTemplate.statusName === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                             </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
+                            <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
+                            <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth placeholder="Nhập mã tour" />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+                            <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Giá từ: </Typography>
+                            <TextField
+                                type="number"
+                                value={editableFields.minPrice.value}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    handleFieldChange('minPrice', newValue);
+                                    validatePrice(newValue, editableFields.maxPrice.value);
+                                }}
+                                variant="outlined"
+                                fullWidth
+                                placeholder="Giá thấp nhất"
+                                inputProps={{ min: 0 }}
+                                error={!!priceErrors.minPrice}
+                                helperText={priceErrors.minPrice}
+                            />
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+                            <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Đến: </Typography>
+                            <TextField
+                                type="number"
+                                value={editableFields.maxPrice.value}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    handleFieldChange('maxPrice', newValue);
+                                    validatePrice(editableFields.minPrice.value, newValue);
+                                }}
+                                variant="outlined"
+                                fullWidth
+                                placeholder="Giá cao nhất"
+                                inputProps={{ min: 0 }}
+                                error={!!priceErrors.maxPrice}
+                                helperText={priceErrors.maxPrice}
+                            />
                         </Box>
                         <Button
                             variant="contained"

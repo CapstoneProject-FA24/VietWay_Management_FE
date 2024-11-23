@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert } from '@mui/material';
-import { ArrowBack, Edit, Delete, Save, Send } from '@mui/icons-material';
+import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { ArrowBack, Edit, Delete, Save, Send, Cancel as CancelIcon } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarStaff from '@layouts/SidebarStaff';
@@ -82,6 +82,7 @@ const PostDetail = () => {
     severity: 'success' // 'success' | 'error' | 'warning' | 'info'
   });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -292,9 +293,20 @@ const PostDetail = () => {
       case PostStatus.Rejected:
         return (
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}>
-              Chỉnh sửa
-            </Button>
+            {isEditMode ? (
+              <Button 
+                variant="contained" 
+                startIcon={<CancelIcon />}
+                onClick={handleCancelClick}
+                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+              >
+                Hủy sửa
+              </Button>
+            ) : (
+              <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}>
+                Chỉnh sửa
+              </Button>
+            )}
             <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
               Xóa
             </Button>
@@ -378,12 +390,53 @@ const PostDetail = () => {
     }
   };
 
+  const handleCancelClick = () => {
+    setIsCancelPopupOpen(true);
+  };
+
+  const handleCloseCancelPopup = () => {
+    setIsCancelPopupOpen(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setIsEditMode(false);
+    setIsCancelPopupOpen(false);
+  };
+
+  const CancelConfirmationDialog = () => (
+    <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        Xác nhận hủy
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button
+          onClick={handleCloseCancelPopup}
+          sx={{ color: '#666666' }}
+        >
+          Không
+        </Button>
+        <Button
+          onClick={handleCancelConfirm}
+          variant="contained"
+          sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+        >
+          Có
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   if (!post) return null;
 
   const statusInfo = getPostStatusInfo(post.status);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <Helmet>
         <title>Chi tiết bài viết</title>
       </Helmet>
@@ -652,6 +705,7 @@ const PostDetail = () => {
         postId={post.postId} 
         onDelete={handleConfirmDelete} 
       />
+      <CancelConfirmationDialog />
     </Box>
   );
 };
