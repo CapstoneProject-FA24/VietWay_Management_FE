@@ -97,25 +97,40 @@ const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinc
                         <Button variant="contained" onClick={handleSearch} sx={{ ml: 1, minWidth: '14.5%' }}>Tìm kiếm</Button>
                     </Box>
                 </Box>
-                <Box sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                <Box sx={{ maxHeight: '55vh', overflowY: 'auto', height: '55vh' }}>
                     <Grid container spacing={0.5}>
-                        {attractions.map(attraction => (
-                            <Grid item xs={12} key={attraction.attractionId}>
-                                <Card sx={{ display: 'flex', height: '6.5rem', p: '0.5rem', borderRadius: 1 }}
-                                    onClick={() => handleAttractionClick(attraction)}>
-                                    <CardMedia component="img" sx={{ width: '8rem', height: 'auto', borderRadius: 1 }}
-                                        image={attraction.imageUrl} alt={attraction.name} />
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', ml: 2 }}>
-                                        <Typography variant="h6" component="div"> {attraction.name} </Typography>
-                                        <Typography variant="body2" color="text.secondary"> {attraction.province}</Typography>
-                                        <Typography variant="body2" color="text.secondary"> Địa chỉ: {attraction.address}</Typography>
-                                    </Box>
-                                </Card>
-                            </Grid>
-                        ))}
+                        {attractions.length > 0 ? (
+                            attractions.map(attraction => (
+                                <Grid item xs={12} key={attraction.attractionId}>
+                                    <Card sx={{ display: 'flex', height: '6.5rem', p: '0.5rem', borderRadius: 1 }}
+                                        onClick={() => handleAttractionClick(attraction)}>
+                                        <CardMedia component="img" sx={{ width: '8rem', height: 'auto', borderRadius: 1 }}
+                                            image={attraction.imageUrl} alt={attraction.name} />
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', ml: 2 }}>
+                                            <Typography variant="h6" component="div"> {attraction.name} </Typography>
+                                            <Typography variant="body2" color="text.secondary"> {attraction.province}</Typography>
+                                            <Typography variant="body2" color="text.secondary"> Địa chỉ: {attraction.address}</Typography>
+                                        </Box>
+                                    </Card>
+                                </Grid>
+                            ))
+                        ) : (
+                            <Box sx={{ 
+                                width: '100%', 
+                                display: 'flex', 
+                                justifyContent: 'center', 
+                                alignItems: 'center',
+                                height: '55vh',
+                                color: 'text.secondary'
+                            }}>
+                                <Typography variant="h6">
+                                    Không tìm thấy điểm tham quan phù hợp
+                                </Typography>
+                            </Box>
+                        )}
                     </Grid>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5, ml: 10 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5, ml: 8 }}>
                     <Pagination count={totalPages} page={page} onChange={handlePageChange} color="primary" sx={{ m: '0 auto' }} />
                 </Box>
             </Box>
