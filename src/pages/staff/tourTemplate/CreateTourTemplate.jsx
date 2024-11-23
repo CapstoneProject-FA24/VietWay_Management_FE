@@ -204,8 +204,8 @@ const CreateTourTemplate = () => {
           attractionIds: s.attractions.map(attr => attr.attractionId)
         })),
         isDraft: isDraft,
-        minPrice: parseFloat(editableFields.minPrice.value) || 0,
-        maxPrice: parseFloat(editableFields.maxPrice.value) || 0
+        minPrice: parseFloat(editableFields.minPrice.value) || null,
+        maxPrice: parseFloat(editableFields.maxPrice.value) || null
       };
 
       if (!isDraft) {

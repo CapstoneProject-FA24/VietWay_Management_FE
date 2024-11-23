@@ -30,6 +30,7 @@ const TourTemplateDetails = () => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
+        console.log(fetchedTourTemplate);
         setState(prev => ({
           ...prev,
           tourTemplate: fetchedTourTemplate,
@@ -110,7 +111,7 @@ const TourTemplateDetails = () => {
     if (!showEditDelete && !showDeleteOnly) return null;
 
     return (
-      <Box sx={{ display: 'flex', gap: 2, height: '100%' , minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', gap: 2 }}>
         <Helmet>
           <title>Chi tiết tour mẫu</title>
         </Helmet>

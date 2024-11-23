@@ -34,9 +34,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             })),
             isEditing: false
         },
-        duration: { value: initialTourTemplate.duration, isEditing: false },
+        duration: { value: initialTourTemplate.duration.durationId, isEditing: false },
         departurePoint: { value: initialTourTemplate.departurePoint, isEditing: false },
-        tourCategory: { value: initialTourTemplate.tourCategory, isEditing: false },
+        tourCategory: { value: initialTourTemplate.tourCategoryId, isEditing: false },
         code: { value: initialTourTemplate.code, isEditing: false },
         minPrice: { value: initialTourTemplate.minPrice || '', isEditing: false },
         maxPrice: { value: initialTourTemplate.maxPrice || '', isEditing: false },
@@ -60,7 +60,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const duration = await fetchTourDuration();
                 const categories = await fetchTourCategory();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setTourDurations(duration);
                 setTourCategories(categories);
             } catch (error) {
@@ -244,7 +244,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             }
 
             const tourTemplateData = {
-                tourTemplateId: id,
+                tourTemplateId: initialTourTemplate.tourTemplateId,
                 code: editableFields.code.value,
                 tourName: editableFields.tourName.value,
                 description: editableFields.description.value,
@@ -258,8 +258,8 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     description: s.description,
                     attractionIds: s.attractions.map(attr => attr.attractionId)
                 })),
-                minPrice: parseFloat(editableFields.minPrice.value) || 0,
-                maxPrice: parseFloat(editableFields.maxPrice.value) || 0,
+                minPrice: parseFloat(editableFields.minPrice.value) || null,
+                maxPrice: parseFloat(editableFields.maxPrice.value) || null,
                 isDraft: isDraft
             };
 
@@ -283,7 +283,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 }
             }
 
-            const response = await updateTourTemplate(id, tourTemplateData);
+            const response = await updateTourTemplate(tourTemplateData.tourTemplateId, tourTemplateData);
 
             if (response.statusCode === 200) {
                 const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
@@ -305,7 +305,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     };
 
     return (
-        <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%', minWidth: '100%' }}>
+        <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <Typography gutterBottom>Tỉnh thành</Typography>
                 <ReactSelect isMulti name="provinces" options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
@@ -397,9 +397,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '48%' }}>
                             <FontAwesomeIcon icon={faClock} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
                                 <Select sx={{ width: '100%', mr: 1 }}
                                     value={editableFields.duration.value}
@@ -410,7 +410,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 </Select>
                             </Box>
                         </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '48%' }}>
                             <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', fontSize: '1.6rem', color: '#3572EF' }} />
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
