@@ -283,14 +283,17 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 }
             }
 
-            const response = await updateTourTemplate(tourTemplateData.tourTemplateId, tourTemplateData);
+            const templateResponse = await updateTourTemplate(tourTemplateData.tourTemplateId, tourTemplateData);
 
-            if (response.statusCode === 200) {
+            if (templateResponse.statusCode === 200) {
                 const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
-                const deletedImageIds = [];
+                const deletedImageIds = initialTourTemplate.imageUrls
+                    .filter(originalImg => !tourTemplate.imageUrls.some(currentImg => 
+                        currentImg?.imageUrl === originalImg?.imageUrl))
+                    .map(img => img.imageId);
 
                 if (newImages.length > 0 || deletedImageIds.length > 0) {
-                    await updateTemplateImages(id, newImages, deletedImageIds);
+                    await updateTemplateImages(tourTemplateData.tourTemplateId, newImages, deletedImageIds);
                 }
 
                 alert(isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã cập nhật và gửi tour mẫu thành công.');
