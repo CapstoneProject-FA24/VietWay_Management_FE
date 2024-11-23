@@ -18,6 +18,12 @@ const ProvinceCard = ({ province, onUpdate }) => {
         setAnchorEl(null);
     };
 
+    const handleUpdateSuccess = () => {
+        setUpdateDialogOpen(false);  // Close update dialog
+        setAnchorEl(null);          // Close more menu
+        onUpdate();                  // Call parent's update handler
+    };
+
     return (
         <Card
             sx={{
@@ -113,8 +119,18 @@ const ProvinceCard = ({ province, onUpdate }) => {
                     open={Boolean(anchorEl)}
                     onClose={handleClose}
                 >
-                    <MenuItem onClick={() => setUpdateDialogOpen(true)}>Cập nhật</MenuItem>
-                    <MenuItem onClick={() => setDeleteDialogOpen(true)}>Xóa</MenuItem>
+                    <MenuItem onClick={() => {
+                        setUpdateDialogOpen(true);
+                        handleClose();  // Close menu when clicking update
+                    }}>
+                        Cập nhật
+                    </MenuItem>
+                    <MenuItem onClick={() => {
+                        setDeleteDialogOpen(true);
+                        handleClose();  // Close menu when clicking delete
+                    }}>
+                        Xóa
+                    </MenuItem>
                 </Menu>
             </Box>
 
@@ -122,7 +138,7 @@ const ProvinceCard = ({ province, onUpdate }) => {
                 open={updateDialogOpen}
                 handleClose={() => setUpdateDialogOpen(false)}
                 province={province}
-                onUpdateSuccess={onUpdate}
+                onUpdateSuccess={handleUpdateSuccess}
             />
             <DeleteProvince
                 open={deleteDialogOpen}

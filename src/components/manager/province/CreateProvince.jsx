@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Box, TextField, Button, Typography, CircularProgress, Snackbar, Alert } from '@mui/material';
-import { createProvince, addProvinceImage } from '@services/ProvinceService';
+import { createProvince, addOrUpdateProvinceImage } from '@services/ProvinceService';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -73,7 +73,7 @@ const CreateProvince = ({ open, handleClose, onCreateSuccess }) => {
             const provinceResponse = await createProvince(provinceData);
             
             if (provinceResponse.data) {
-                await addProvinceImage(provinceResponse.data, formData.imageFile);
+                await addOrUpdateProvinceImage(provinceResponse.data, formData.imageFile);
                 
                 setSnackbar({
                     open: true,

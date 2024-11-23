@@ -77,6 +77,10 @@ const ManagerManageProvince = () => {
         fetchData();
     };
 
+    const handleUpdateSuccess = () => {
+        fetchData();
+    };
+
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
@@ -140,7 +144,10 @@ const ManagerManageProvince = () => {
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedProvinces.map(province => (
                         <Grid item xs={isSidebarOpen ? 6 : 4} key={province.provinceId}>
-                            <ProvinceCard province={province} />
+                            <ProvinceCard 
+                                province={province} 
+                                onUpdate={handleUpdateSuccess} 
+                            />
                         </Grid>
                     ))}
                     {sortedProvinces.length === 0 && (

@@ -31,12 +31,11 @@ export const fetchProvinces = async (params) => {
     }
 };
 
-export const updateProvince = async (provinceId, formData) => {
+export const updateProvince = async (provinceId, request) => {
     const token = getCookie('token');
     try {
-        const response = await axios.put(`${baseURL}/api/Province/${provinceId}`, formData, {
+        const response = await axios.put(`${baseURL}/api/Province/${provinceId}`, request, {
             headers: {
-                'Content-Type': 'multipart/form-data',
                 'Authorization': `Bearer ${token}`
             }
         });
@@ -81,7 +80,7 @@ export const createProvince = async (request) => {
     }
 };
 
-export const addProvinceImage = async (provinceId, imageFile) => {
+export const addOrUpdateProvinceImage = async (provinceId, imageFile) => {
     const token = getCookie('token');
     try {
         const formData = new FormData();
