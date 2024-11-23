@@ -18,7 +18,12 @@ import { fetchTourCategory } from '@services/TourCategoryService';
 import PropTypes from 'prop-types';
 
 const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onCancel }) => {
-    const [tourTemplate, setTourTemplate] = useState(initialTourTemplate);
+    const [tourTemplate, setTourTemplate] = useState({
+        ...initialTourTemplate,
+        imageUrls: Array(4).fill(null).map((_, index) => 
+            initialTourTemplate.imageUrls?.[index] || null
+        )
+    });
     const [provinces, setProvinces] = useState([]);
     const [tourCategories, setTourCategories] = useState([]);
     const [tourDurations, setTourDurations] = useState([]);
@@ -99,7 +104,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         if (file) {
             setTourTemplate(prev => ({
                 ...prev,
-                imageUrls: prev.imageUrls.map((img, i) => i === index ? file : img)
+                imageUrls: prev.imageUrls.map((img, i) => 
+                    i === index ? file : img
+                )
             }));
         }
     };
@@ -107,7 +114,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const handleImageRemove = (index) => {
         setTourTemplate(prev => ({
             ...prev,
-            imageUrls: prev.imageUrls.map((img, i) => i === index ? null : img)
+            imageUrls: prev.imageUrls.map((img, i) => 
+                i === index ? null : img
+            )
         }));
     };
 
@@ -307,6 +316,54 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         }
     };
 
+    const renderImageSlot = (index, dimensions) => {
+        const image = tourTemplate.imageUrls[index];
+        
+        return image ? (
+            <>
+                <img 
+                    src={image instanceof File ? URL.createObjectURL(image) : image.imageUrl}
+                    alt={`Tour image ${index + 1}`}
+                    style={{ 
+                        width: '100%', 
+                        height: dimensions.height, 
+                        objectFit: 'cover' 
+                    }}
+                />
+                <IconButton 
+                    onClick={() => handleImageRemove(index)}
+                    sx={{ 
+                        position: 'absolute', 
+                        top: 10, 
+                        right: 10, 
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)', 
+                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } 
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </>
+        ) : (
+            <Button 
+                component="label" 
+                variant="outlined" 
+                sx={{ 
+                    width: '100%', 
+                    height: dimensions.buttonHeight || dimensions.height, 
+                    border: '2px dashed #3572EF' 
+                }}
+            >
+                Thêm ảnh
+                <input 
+                    type="file" 
+                    hidden 
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(index, e)} 
+                />
+            </Button>
+        );
+    };
+
     return (
         <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -329,70 +386,18 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 <Grid item xs={12} sx={{ minWidth: '100%' }}>
                     <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
                         <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
-                            {tourTemplate.imageUrls[0] ? (
-                                <>
-                                    <img src={tourTemplate.imageUrls[0] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[0]) : tourTemplate.imageUrls[0]?.imageUrl} alt="Tour image 1" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
-                                    <IconButton onClick={() => handleImageRemove(0)}
-                                        sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                        <CloseIcon />
-                                    </IconButton>
-                                </>
-                            ) : (
-                                <Button component="label" variant="outlined" sx={{ width: '100%', height: '100%', border: '2px dashed #3572EF' }}>
-                                    Thêm ảnh
-                                    <input type="file" hidden onChange={(e) => handleImageUpload(0, e)} />
-                                </Button>
-                            )}
+                            {renderImageSlot(0, { height: '450px' })}
                         </Box>
                         <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
                             <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                                {tourTemplate.imageUrls[1] ? (
-                                    <>
-                                        <img src={tourTemplate.imageUrls[1] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[1]) : tourTemplate.imageUrls[1]?.imageUrl} alt="Tour image 2" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
-                                        <IconButton onClick={() => handleImageRemove(1)}
-                                            sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                            <CloseIcon />
-                                        </IconButton>
-                                    </>
-                                ) : (
-                                    <Button component="label" variant="outlined" sx={{ width: '100%', height: '100%', border: '2px dashed #3572EF' }}>
-                                        Thêm ảnh
-                                        <input type="file" hidden onChange={(e) => handleImageUpload(1, e)} />
-                                    </Button>
-                                )}
+                                {renderImageSlot(1, { height: '215px' })}
                             </Box>
                             <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                                 <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
-                                    {tourTemplate.imageUrls[2] ? (
-                                        <>
-                                            <img src={tourTemplate.imageUrls[2] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[2]) : tourTemplate.imageUrls[2]?.imageUrl} alt="Tour image 3" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
-                                            <IconButton onClick={() => handleImageRemove(2)}
-                                                sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                                <CloseIcon />
-                                            </IconButton>
-                                        </>
-                                    ) : (
-                                        <Button component="label" variant="outlined" sx={{ width: '100%', height: '96%', border: '2px dashed #3572EF' }}>
-                                            Thêm ảnh
-                                            <input type="file" hidden onChange={(e) => handleImageUpload(2, e)} />
-                                        </Button>
-                                    )}
+                                    {renderImageSlot(2, { height: '215px', buttonHeight: '96%' })}
                                 </Box>
                                 <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
-                                    {tourTemplate.imageUrls[3] ? (
-                                        <>
-                                            <img src={tourTemplate.imageUrls[3] instanceof File ? URL.createObjectURL(tourTemplate.imageUrls[3]) : tourTemplate.imageUrls[3]?.imageUrl} alt="Tour image 4" style={{ width: '100%', height: '215px', objectFit: 'cover' }} />
-                                            <IconButton onClick={() => handleImageRemove(3)}
-                                                sx={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)', '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } }}>
-                                                <CloseIcon />
-                                            </IconButton>
-                                        </>
-                                    ) : (
-                                        <Button component="label" variant="outlined" sx={{ width: '100%', height: '96%', border: '2px dashed #3572EF' }}>
-                                            Thêm ảnh
-                                            <input type="file" hidden onChange={(e) => handleImageUpload(3, e)} />
-                                        </Button>
-                                    )}
+                                    {renderImageSlot(3, { height: '215px', buttonHeight: '96%' })}
                                 </Box>
                             </Box>
                         </Box>

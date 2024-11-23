@@ -30,7 +30,6 @@ const TourTemplateDetails = () => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
-        console.log(fetchedTourTemplate);
         setState(prev => ({
           ...prev,
           tourTemplate: fetchedTourTemplate,
