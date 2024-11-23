@@ -48,7 +48,8 @@ const TourCalendar = ({ tourId, tours, selectedMonth, handleMonthChange }) => {
                     flexDirection: 'column',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    border: info.id === tourId ? '2px solid #1976d2' : 'none'
+                    border: info.id === tourId ? '2px solid #1976d2' : 'none',
+                    color: '#102371'
                   }}
                 >
                   {`${getTourStatusInfo(info.status).text}`} {`(${info.participants})`}

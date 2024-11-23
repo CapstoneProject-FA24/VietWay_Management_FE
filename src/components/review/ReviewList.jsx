@@ -277,32 +277,11 @@ const ReviewList = ({ attractionId }) => {
         autoHideDuration={3000}
         onClose={handleCloseNotification}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        sx={{ 
-          position: 'fixed', 
-          top: '24px', 
-          right: '24px',
-          '& .MuiPaper-root': {
-            minWidth: '300px'
-          }
-        }}
       >
         <Alert 
           onClose={handleCloseNotification} 
           severity={isApiError ? "error" : "success"}
-          sx={{ 
-            width: '100%', mt: 10,
-            bgcolor: 'rgba(0, 0, 0, 0.8)', 
-            color: 'white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)', 
-            '& .MuiAlert-icon': { 
-              color: isApiError ? '#f44336' : '#4caf50'
-            },
-            '& .MuiSvgIcon-root': { 
-              color: 'white'
-            },
-            fontSize: '0.95rem',
-            py: 1.5
-          }}
+          variant="filled" sx={{ width: '100%' }}
         >
           {notificationMessage}
         </Alert>

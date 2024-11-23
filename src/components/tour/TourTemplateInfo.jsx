@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, IconButton, Collapse } from '@mui/material';
+import { Box, Typography, Paper, IconButton, Collapse, CircularProgress} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
@@ -14,7 +14,7 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
     if (isLoading) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '200px' }}>
-                <img src="/loading.gif" alt="Loading..." />
+                <CircularProgress />
             </div>
         );
     }

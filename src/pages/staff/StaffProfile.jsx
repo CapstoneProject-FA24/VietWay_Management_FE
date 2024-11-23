@@ -211,11 +211,12 @@ const StaffProfile = () => {
                     open={snackbar.open}
                     autoHideDuration={6000}
                     onClose={handleCloseSnackbar}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
                     <Alert
                         onClose={handleCloseSnackbar}
                         severity={snackbar.severity}
+                        variant="filled"
                         sx={{ width: '100%' }}
                     >
                         {snackbar.message}

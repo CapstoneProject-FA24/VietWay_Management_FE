@@ -431,7 +431,7 @@ const CreatePost = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
           {snackbar.message}
         </Alert>
       </Snackbar>
