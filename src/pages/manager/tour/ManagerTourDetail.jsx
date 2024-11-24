@@ -8,10 +8,11 @@ import { fetchToursByTemplateId, fetchTourById, calculateEndDate } from '@servic
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ManagerTourCalendar from '@components/manager/tour/ManagerTourCalendar';
-import ManagerTourTemplateInfo from '@components/manager/tour/ManagerTourTemplateInfo';
+import TourCalendar from '@components/tour/TourCalendar';
+import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { getTourStatusInfo } from '@services/StatusService';
 import { TourStatus } from '@hooks/Statuses';
+import { Helmet } from 'react-helmet';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -72,6 +73,9 @@ const ManagerTourDetail = () => {
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
+      <Helmet>
+        <title>Chi tiết tour</title>
+      </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>
@@ -88,12 +92,12 @@ const ManagerTourDetail = () => {
             </Typography>
           </Grid>
           <Grid item xs={12} md={8.5}>
-            <ManagerTourTemplateInfo
+            <TourTemplateInfo
               tourTemplate={tourTemplate}
               isLoading={isLoading}
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <ManagerTourCalendar tourId={id} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
+              <TourCalendar tourId={id} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
             </Box>
           </Grid>
           <Grid item xs={12} md={3.5}>

@@ -1,34 +1,42 @@
-import baseURL from '@api/BaseURL'
+const baseURL = import.meta.env.VITE_API_URL;
 import axios from 'axios';
+import { getCookie } from '@services/AuthenService';
 
-export const fetchProvinces = async () => {
+export const fetchProvinces = async (params) => {
+    const token = getCookie('token');
     try {
-        /* const { pageSize, pageIndex, nameSearch } = params;
-        const queryParams = new URLSearchParams({
-            pageSize: pageSize || 12,
-            pageIndex: pageIndex || 1,
-            ...(nameSearch && { nameSearch })
-        }).toString(); */
-        //To do: api => Province -> provinces
-        const response = await axios.get(`${baseURL}/api/Province?`);
-        const data = response.data.data.map(province => ({
-            provinceId: province.provinceId,
-            provinceName: province.provinceName,
-            imageURL: province.imageUrl
-        }));
-        return data;
+        const queryParams = new URLSearchParams();
+        queryParams.append('pageSize', params.pageSize || 63);
+        queryParams.append('pageIndex', params.pageIndex || 1);
+        if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
+        const response = await axios.get(`${baseURL}/api/Province?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return {
+            total: response.data.data.total,
+            pageSize: response.data.data.pageSize,
+            pageIndex: response.data.data.pageIndex,
+            items: response.data.data.items.map(province => ({
+                provinceId: province.provinceId,
+                provinceName: province.provinceName,
+                description: province.description,
+                imageUrl: province.imageUrl
+            }))
+        };
     } catch (error) {
         console.error('Error fetching provinces:', error);
         throw error;
     }
 };
 
-export const updateProvince = async (provinceId, formData) => {
+export const updateProvince = async (provinceId, request) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.put(`${baseURL}/api/provinces/${provinceId}`, formData, {
+        const response = await axios.put(`${baseURL}/api/Province/${provinceId}`, request, {
             headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
         return response.data;
@@ -39,10 +47,11 @@ export const updateProvince = async (provinceId, formData) => {
 };
 
 export const deleteProvince = async (provinceId) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.delete(`${baseURL}/api/provinces/${provinceId}`, {
+        const response = await axios.delete(`${baseURL}/api/Province/${provinceId}`, {
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                'Authorization': `Bearer ${token}`
             }
         });
         return response.data;
@@ -52,17 +61,44 @@ export const deleteProvince = async (provinceId) => {
     }
 };
 
-export const createProvince = async (formData) => {
+export const createProvince = async (request) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/provinces`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+        const response = await axios.post(
+            `${baseURL}/api/Province`, request ,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error creating province:', error);
+        throw error;
+    }
+};
+
+export const addOrUpdateProvinceImage = async (provinceId, imageFile) => {
+    const token = getCookie('token');
+    try {
+        const formData = new FormData();
+        formData.append('newImage', imageFile);
+
+        const response = await axios.patch(
+            `${baseURL}/api/Province/${provinceId}/images`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error adding province image:', error);
         throw error;
     }
 };

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Button } from '@mui/material';
-import Slider from 'react-slick';
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Helmet } from 'react-helmet';
-import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionById } from '@services/AttractionService';
+import { fetchAttractionById, updateAttraction, updateAttractionImages } from '@services/AttractionService';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import AttractionInfo from '@components/staff/attraction/AttractionInfo';
+import AttractionUpdateForm from '@components/staff/attraction/AttractionUpdateForm';
+import { fetchProvinces } from '@services/ProvinceService';
+import { fetchAttractionType } from '@services/AttractionTypeService';
+import SidebarStaff from '@layouts/SidebarStaff';
+import { AttractionStatus } from '@hooks/Statuses';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -15,40 +20,124 @@ const AttractionDetail = () => {
   const [attraction, setAttraction] = useState(null);
   const [error, setError] = useState(null);
   const { id } = useParams();
+  const navigate = useNavigate();
+  const [isEditing, setIsEditing] = useState(false);
+  const [provinces, setProvinces] = useState([]);
+  const [attractionTypes, setAttractionTypes] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
 
   useEffect(() => {
-    const fetchAttraction = async () => {
+    const fetchData = async () => {
       try {
-        const fetchedAttraction = await fetchAttractionById(id);
+        const [fetchedProvinces, fetchedAttractionType, fetchedAttraction] = await Promise.all([
+          fetchProvinces({ pageSize: 63, pageIndex: 1 }),
+          fetchAttractionType(),
+          fetchAttractionById(id)
+        ]);
+        setProvinces(fetchedProvinces.items);
+        setAttractionTypes(fetchedAttractionType);
         setAttraction(fetchedAttraction);
       } catch (error) {
-        console.error('Error fetching attraction:', error);
+        console.error('Error fetching data:', error);
         setError(error.message || 'An error occurred while fetching data');
       }
     };
-    fetchAttraction();
+    fetchData();
   }, [id]);
 
-  const settings = {
-    dots: true,
-    dotsClass: 'slick-dots custom-dots slider-dots',
-    customPaging: i => (
-      <div className="custom-dot"></div>
-    ),
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    className: 'attraction-slider',
+  const handleEdit = () => {
+    setIsEditing(true);
   };
 
-  const handleThumbnailClick = (index) => {
-    setCurrentSlide(index);
-    if (sliderRef) {
-      sliderRef.slickGoTo(index);
+  const handleSave = async (attractionData, newImages, removedImageIds) => {
+    try {
+      const response = await updateAttraction(attractionData);
+      if (response.status === 200) {
+        if (newImages.length > 0 || removedImageIds.length > 0) {
+          const imagesResponse = await updateAttractionImages(
+            id,
+            newImages.length > 0 ? newImages : null,
+            removedImageIds.length > 0 ? removedImageIds : null
+          );
+          if (imagesResponse.statusCode !== 200) {
+            alert('Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.');
+            return;
+          }
+        }
+        setIsEditing(false);
+        // Refresh attraction data
+        const updatedAttraction = await fetchAttractionById(id);
+        setAttraction(updatedAttraction);
+      } else {
+        alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Error updating attraction:', error);
+      alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
     }
   };
+
+  const handleDelete = async () => {
+    /* if (window.confirm('Bạn có chắc chắn muốn xóa điểm tham quan này?')) {
+      try {
+        const response = await deleteAttraction(id);
+        if (response.status === 200) {
+          navigate('/nhan-vien/diem-tham-quan');
+        } else {
+          alert('Có lỗi xảy ra khi xóa điểm tham quan. Vui lòng thử lại.');
+        }
+      } catch (error) {
+        console.error('Error deleting attraction:', error);
+        alert('Có lỗi xảy ra khi xóa điểm tham quan. Vui lòng thử lại.');
+      }
+    } */
+  };
+
+  const handleSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleCancelClick = () => {
+    setIsCancelPopupOpen(true);
+  };
+
+  const handleCloseCancelPopup = () => {
+    setIsCancelPopupOpen(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setIsEditing(false);
+    setIsCancelPopupOpen(false);
+  };
+
+  const CancelConfirmationDialog = () => (
+    <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        Xác nhận hủy
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button
+          onClick={handleCloseCancelPopup}
+          sx={{ color: '#666666' }}
+        >
+          Không
+        </Button>
+        <Button
+          onClick={handleCancelConfirm}
+          variant="contained"
+          sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+        >
+          Có
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
   if (error) {
     return <Typography color="error">Error: {error}</Typography>;
@@ -59,106 +148,110 @@ const AttractionDetail = () => {
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '98vw' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <Helmet>
         <title>Chi tiết điểm tham quan</title>
       </Helmet>
-      <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Button
-          component={Link}
-          to="/nhan-vien/diem-tham-quan"
-          variant="contained"
-          startIcon={<ArrowBackIosNewOutlinedIcon />}
-          sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
-          Quay lại
-        </Button>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
-          Chi tiết điểm tham quan
-        </Typography>
-      </Box>
-      <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-            {attraction.attractionTypeName}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-            {attraction.name}
-          </Typography>
-        </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
-              <Box className="slick-slider-container" sx={{ height: '450px' }}>
-                <Slider ref={setSliderRef} {...settings}>
-                  {attraction.images.map((image, index) => (
-                    <div key={index} style={{ position: 'relative' }}>
-                      <img
-                        src={image.url}
-                        alt={`Attraction ${index + 1}`}
-                        style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-                      />
-                    </div>
-                  ))}
-                </Slider>
-              </Box>
-            </Paper>
-            <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
-              {attraction.images.map((image, index) => (
-                <Box
-                  key={index}
-                  sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
-                  onClick={() => handleThumbnailClick(index)}
-                >
-                  <img
-                    src={image.url}
-                    alt={`Thumbnail ${index + 1}`}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </Box>
-              ))}
-            </Box>
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-              <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
+      <Box sx={{ display: 'flex' }}>
+        <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
-              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-              <Box sx={{ mb: 3 }}>
-                <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                  {attraction.website}
-                </a>
+        <Box sx={{
+          flexGrow: 1,
+          p: 3,
+          transition: 'margin-left 0.3s',
+          marginLeft: isSidebarOpen ? '260px' : '20px',
+          mt: 5
+        }}>
+          <Box maxWidth="89vw">
+            <Box elevation={2} sx={{
+              p: 1,
+              mb: 3,
+              marginTop: -1.5,
+              height: '100%',
+              width: isSidebarOpen ? 'calc(93vw - 260px)' : 'calc(93vw - 20px)'
+            }}>
+              <Box sx={{ m: '-60px -60px 0px -60px', boxShadow: 2, pt: 3, pl: 4, pr: 4, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Button
+                  component={Link}
+                  to="/nhan-vien/diem-tham-quan"
+                  variant="contained"
+                  startIcon={<ArrowBackIosNewOutlinedIcon />}
+                  sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
+                  Quay lại
+                </Button>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
+                  Quản lý điểm tham quan
+                </Typography>
+                {(attraction.status === AttractionStatus.Draft || attraction.status === AttractionStatus.Rejected) && (
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    {isEditing ? (
+                      <Button
+                        variant="contained"
+                        startIcon={<CancelIcon />}
+                        onClick={handleCancelClick}
+                        sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                      >
+                        Hủy sửa
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        startIcon={<EditIcon />}
+                        onClick={handleEdit}
+                        sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                      >
+                        Sửa
+                      </Button>
+                    )}
+                    <Button
+                      variant="contained"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDelete}
+                      sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                    >
+                      Xóa
+                    </Button>
+                  </Box>
+                )}
+                {attraction.status === AttractionStatus.Pending && (
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<DeleteIcon />}
+                      onClick={handleDelete}
+                      sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                    >
+                      Xóa
+                    </Button>
+                  </Box>
+                )}
               </Box>
 
-              <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
-            </Paper>
-            <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-              <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px', mb: 2 }}>
-                Thông tin tạo điểm tham quan
-              </Typography>
-              <Box sx={{ display: 'flex', width: '100%' }}>
-                <Typography sx={{ fontWeight: 700 }}>Mã: </Typography>
-                <Typography sx={{ mb: 1, ml: 1, color: 'primary.main' }}>{attraction.attractionId}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', width: '100%' }}>
-                <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
-                <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', width: '100%' }}>
-                <Typography sx={{ fontWeight: 700 }}>Tạo bởi: </Typography>
-                <Typography sx={{ mb: 1, ml: 1 }}>{attraction.creatorName}</Typography>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
+              {isEditing ? (
+                <AttractionUpdateForm
+                  attraction={attraction}
+                  provinces={provinces}
+                  attractionTypes={attractionTypes}
+                  onSave={handleSave}
+                  currentSlide={currentSlide}
+                  setCurrentSlide={setCurrentSlide}
+                  sliderRef={sliderRef}
+                  setSliderRef={setSliderRef}
+                />
+              ) : (
+                <AttractionInfo
+                  attraction={attraction}
+                  currentSlide={currentSlide}
+                  setCurrentSlide={setCurrentSlide}
+                  sliderRef={sliderRef}
+                  setSliderRef={setSliderRef}
+                />
+              )}
+            </Box>
+          </Box>
+        </Box>
       </Box>
+      <CancelConfirmationDialog />
     </Box>
   );
 };

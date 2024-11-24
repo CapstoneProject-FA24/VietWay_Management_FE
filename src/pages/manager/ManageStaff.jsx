@@ -1,13 +1,13 @@
-import React, { useState, useEffect  } from 'react';
-import { mockCompanyStaff } from '@hooks/MockAccount';
+import React, { useState, useEffect } from 'react';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import StaffUpdatePopup from '@components/manager/StaffUpdatePopup';
-import StaffCreatePopup from '@components/manager/StaffCreatePopup';
+import StaffUpdatePopup from '@components/manager/staff/StaffUpdatePopup';
+import StaffCreatePopup from '@components/manager/staff/StaffCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
+import { fetchStaff } from '@services/StaffService';
+
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
@@ -16,17 +16,39 @@ const ManageStaff = () => {
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [staff, setStaff] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(1);
+  const [total, setTotal] = useState(0);
 
-  const searchTermWithoutAccents = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const filteredStaff = mockCompanyStaff.filter(staff =>
-    staff.fullname && staff.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
-  );
+  useEffect(() => {
+    const loadStaff = async () => {
+      setLoading(true);
+      try {
+        const result = await fetchStaff({
+          pageSize,
+          pageIndex,
+          nameSearch: searchTerm,
+        });
+        setStaff(result.data);
+        setTotal(result.total);
+      } catch (error) {
+        console.error('Failed to fetch staff:', error);
+        // Consider adding error handling UI here
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const sortedStaff = [...filteredStaff].sort((a, b) => {
+    loadStaff();
+  }, [pageSize, pageIndex, searchTerm]);
+
+  const sortedStaff = [...staff].sort((a, b) => {
     if (sortOrder === 'name-asc') {
-      return a.fullname.localeCompare(b.fullname);
+      return a.fullName.localeCompare(b.fullName);
     } else if (sortOrder === 'name-desc') {
-      return b.fullname.localeCompare(a.fullname);
+      return b.fullName.localeCompare(a.fullName);
     }
     return 0;
   });
@@ -47,11 +69,12 @@ const ManageStaff = () => {
   return (
     <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
-        <title>Nhân viên</title>
+        <title>Quản lý nhân viên</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0', padding: 5, overflowY: 'auto' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2  }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant='h3' color='primary' sx={{ fontWeight: 700 }}>Quản lý nhân viên</Typography>
           <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />}>
             Thêm nhân viên
           </Button>
@@ -102,18 +125,18 @@ const ManageStaff = () => {
             </TableHead>
             <TableBody>
               {sortedStaff.map((staff) => (
-                <TableRow key={staff.id}>
-                  <TableCell sx={{ padding: '10px', textAlign: 'left' }}>{staff.id}</TableCell>
-                  <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullname}</TableCell>
+                <TableRow key={staff.staffId}>
+                  <TableCell sx={{ padding: '10px', textAlign: 'left' }}>{staff.staffId}</TableCell>
+                  <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullName}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{staff.phone}</TableCell>
                   <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{staff.email}</TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
-                      <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: staff.status === 1 ? '#4caf50' : '#ea4747' }} />
-                      <Typography sx={{ fontSize: '0.9rem' }}> {staff.status === 1 ? 'Hoạt động' : 'Đã xóa'}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+                      <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: !staff.isDeleted ? '#4caf50' : '#ea4747' }} />
+                      <Typography sx={{ fontSize: '0.9rem' }}>{!staff.isDeleted ? 'Hoạt động' : 'Đã xóa'}</Typography>
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(staff.createDate).toLocaleDateString()}</TableCell>
+                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(staff.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
                     <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(staff)} sx={{ width: '4rem' }}>Sửa</Button>
                   </TableCell>

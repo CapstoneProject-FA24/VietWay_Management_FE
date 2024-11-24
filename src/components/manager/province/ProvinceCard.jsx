@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardMedia, Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Card, CardMedia, Box, Typography, IconButton, Menu, MenuItem, Chip, Slide } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import UpdateProvince from './UpdateProvince';
 import DeleteProvince from './DeleteProvince';
@@ -8,7 +7,6 @@ import DeleteProvince from './DeleteProvince';
 const ProvinceCard = ({ province, onUpdate }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
     const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -20,59 +18,127 @@ const ProvinceCard = ({ province, onUpdate }) => {
         setAnchorEl(null);
     };
 
+    const handleUpdateSuccess = () => {
+        setUpdateDialogOpen(false);  // Close update dialog
+        setAnchorEl(null);          // Close more menu
+        onUpdate();                  // Call parent's update handler
+    };
+
     return (
         <Card
             sx={{
-                position: 'relative',
+                maxWidth: '100%',
                 height: '300px',
+                display: 'flex',
+                flexDirection: 'column',
                 borderRadius: '10px',
                 overflow: 'hidden',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease-in-out',
+                boxShadow: '0 0px 8px rgba(0,0,0,0.3)',
+                position: 'relative'
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
             <CardMedia
                 component="img"
-                sx={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                }}
-                image={province.imageURL}
+                height="100%"
+                image={province.imageUrl}
                 alt={province.provinceName}
+                sx={{ objectFit: 'cover' }}
             />
-            <Box sx={{ display: 'flex', position: 'absolute', bottom: 12, right: 15, padding: '10px', backgroundColor: 'rgba(30,30,30,0.8)', borderRadius: '10px', alignItems: 'center'}}>
-                <Typography variant="h4" component="div" sx={{
-                    fontWeight: 'bold', fontSize: '1.8rem', color: 'white',
-                    textShadow: '1px 1px 2px rgba(0,0,0,1)', marginRight: '8px'
-                }}>
-                    {province.provinceName}
-                </Typography>
-                <IconButton aria-label="more" aria-controls="province-menu" aria-haspopup="true"
-                    onClick={handleClick} sx={{ color: 'white', mr: -1.5, ml: -1, filter: 'drop-shadow(1px 1px 3px rgba(0,0,0,1))' }}
-                >
-                    <MoreVertIcon />
-                </IconButton>
-                <Menu
-                    id="province-menu"
-                    anchorEl={anchorEl}
-                    open={open}
-                    onClose={handleClose}
-                    MenuListProps={{
-                        'aria-labelledby': 'province-menu-button',
+            
+            {/* Gradient Overlay */}
+            <Box sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                background: isHovered 
+                    ? 'linear-gradient(to bottom, rgba(0,0,0,0) 25%, rgba(0,0,0,0.85) 55%)'
+                    : 'linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(0,0,0,0.85) 72%)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+                padding: '16px'
+            }}>
+                <Typography
+                    variant="h4"
+                    component="div"
+                    sx={{
+                        fontWeight: 'bold',
+                        fontSize: '1.8rem',
+                        color: 'white',
+                        mb: isHovered ? 0.5 : -0.2,
+                        textShadow: '1px 1px 2px rgba(0,0,0,1)'
                     }}
                 >
-                    <MenuItem onClick={() => setUpdateDialogOpen(true)}>Cập nhật</MenuItem>
-                    <MenuItem onClick={() => setDeleteDialogOpen(true)}>Xóa</MenuItem>
+                    {province.provinceName}
+                </Typography>
+
+                {isHovered && (
+                    <Slide direction="up" in={isHovered}>
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                fontSize: '0.9rem',
+                                color: 'lightGray',
+                                mb: -0.2,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical'
+                            }}
+                        >
+                            {province.description || 'Không có mô tả'}
+                        </Typography>
+                    </Slide>
+                )}
+            </Box>
+
+            {/* Menu Button */}
+            <Box sx={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+            }}>
+                <IconButton
+                    onClick={handleClick}
+                    sx={{
+                        backgroundColor: 'white',
+                        width: '35px',
+                        height: '35px',
+                        '&:hover': { backgroundColor: 'white' }
+                    }}
+                >
+                    <MoreVertIcon sx={{ color: '#666', fontSize: '23px' }} />
+                </IconButton>
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                >
+                    <MenuItem onClick={() => {
+                        setUpdateDialogOpen(true);
+                        handleClose();  // Close menu when clicking update
+                    }}>
+                        Cập nhật
+                    </MenuItem>
+                    <MenuItem onClick={() => {
+                        setDeleteDialogOpen(true);
+                        handleClose();  // Close menu when clicking delete
+                    }}>
+                        Xóa
+                    </MenuItem>
                 </Menu>
             </Box>
+
             <UpdateProvince
                 open={updateDialogOpen}
                 handleClose={() => setUpdateDialogOpen(false)}
                 province={province}
-                onUpdateSuccess={onUpdate}
+                onUpdateSuccess={handleUpdateSuccess}
             />
             <DeleteProvince
                 open={deleteDialogOpen}

@@ -56,7 +56,14 @@ export default function Login() {
   useEffect(() => {
     const role = getCookie('role');
     const token = getCookie('token');
-    if (role && token) { navigate(`/${role}/diem-tham-quan`); } //dash-board
+    if (role && token) {
+      if (role === 'nhan-vien') {
+        navigate(`/${role}/diem-tham-quan`);
+      } else {
+        //navigate(`/${role}/dashboard`);
+        navigate(`/${role}/diem-tham-quan`);
+      }
+    }
   }, [location]);
 
   const validateEmailOrPhone = (input) => {
@@ -93,7 +100,12 @@ export default function Login() {
     try {
       const response = await login({ email, password });
       if (response.token && response.role) {
-        navigate(`/${response.role}/diem-tham-quan`);
+        if (response.role === 'nhan-vien') {
+          navigate(`/${response.role}/diem-tham-quan`);
+        } else {
+          //navigate(`/${response.role}/dashboard`);
+          navigate(`/${response.role}/diem-tham-quan`);
+        }
       } else {
         setError('Đã xảy ra lỗi. Vui lòng thử lại.');
       }
@@ -123,9 +135,9 @@ export default function Login() {
       <Helmet>
         <title>Đăng nhập</title>
       </Helmet>
-      <Grid component="main" sx={{ width: '150vh'}}>
+      <Grid component="main" sx={{ width: '150vh' }}>
         <CssBaseline />
-        <Grid item square md={12} sx={{ display: 'flex '}}>
+        <Grid item square md={12} sx={{ display: 'flex ' }}>
           <Box
             sx={{
               my: 1,
@@ -135,7 +147,7 @@ export default function Login() {
               textAlign: 'left',
               width: '47%',
               marginRight: 10,
-              mt: 6 
+              mt: 6
             }}
           >
             <img style={{ width: 90, marginBottom: 20 }} src='/logo1_color.png' alt="Logo" />
@@ -148,7 +160,7 @@ export default function Login() {
                 required
                 fullWidth
                 id="email"
-                label="Email"
+                label="Email hoặc số điện thoại"
                 name="email"
                 autoComplete="email"
                 autoFocus

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import baseURL from '@api/BaseURL';
+const baseURL = import.meta.env.VITE_API_URL;
+import { getCookie } from '@services/AuthenService';
 
 export const fetchPosts = async (params) => {
     try {
@@ -10,7 +11,7 @@ export const fetchPosts = async (params) => {
         if (params.postCategoryIds?.length > 0) params.postCategoryIds.forEach(id => queryParams.append('postCategoryIds', id));
         if (params.provinceIds?.length > 0) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
-        
+
         const response = await axios.get(`${baseURL}/api/Post?${queryParams.toString()}`);
         const items = response.data?.data?.items;
 
@@ -45,39 +46,45 @@ export const fetchPosts = async (params) => {
 
 export const fetchPostById = async (id) => {
     try {
-        const response = await axios.get(`${baseURL}/api/posts/${id}`);
-        const item = response.data.data
+        const response = await axios.get(`${baseURL}/api/Post/${id}`);
+        const item = response.data.data;
         return {
             postId: item.postId,
             title: item.title,
             imageUrl: item.imageUrl,
             content: item.content,
-            postCategory: item.postCategory,
-            province: item.province,
+            postCategoryName: item.postCategoryName,
+            postCategoryId: item.postCategoryId,
+            provinceName: item.provinceName,
+            provinceId: item.provinceId,
             description: item.description,
-            createdAt: item.createdAt,
-            status: item.status
+            createdAt: item.createAt,
+            status: item.status,
+            xTweetId: item.xTweetId,
+            facebookPostId: item.facebookPostId
         };
     } catch (error) {
-        console.error('Error fetching tour template:', error);
+        console.error('Error fetching post:', error);
         throw error;
     }
 };
 
 export const createPost = async (postData) => {
+    const token = getCookie('token');
     try {
         const post = {
             title: postData.title,
-            imageUrl: postData.imageUrl,
             content: postData.content,
             postCategoryId: postData.postCategoryId,
             provinceId: postData.provinceId,
             description: postData.description,
-            createdAt: postData.createdAt,
-            status: postData.status,
             isDraft: postData.isDraft
         };
-        const response = await axios.post(`${baseURL}/api/posts`, post);
+        const response = await axios.post(`${baseURL}/api/Post`, post, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error creating post:', error);
@@ -85,3 +92,156 @@ export const createPost = async (postData) => {
     }
 };
 
+export const updatePost = async (id, postData) => {
+    const token = getCookie('token');
+    try {
+        const post = {
+            title: postData.title,
+            content: postData.content,
+            postCategoryId: postData.postCategoryId,
+            provinceId: postData.provinceId,
+            description: postData.description,
+            isDraft: postData.isDraft
+        };
+        const response = await axios.put(`${baseURL}/api/Post/${id}`, post, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating post:', error);
+        throw error;
+    }
+};
+
+export const deletePost = async (id) => {
+    console.log(id);
+    const token = getCookie('token');
+    try {
+        await axios.delete(`${baseURL}/api/Post/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        throw error;
+    }
+};
+
+export const changePostStatus = async (postId, status, reason) => {
+    const token = getCookie('token');
+    try {
+        const requestData = {
+            status: status,
+            reason: reason
+        };
+
+        const response = await axios.patch(`${baseURL}/api/Post/change-post-status/${postId}`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing tour template status:', error.response);
+        throw error;
+    }
+};
+
+export const sharePostOnTwitter = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.post(`${baseURL}/api/Post/${postId}/twitter`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing post on Twitter:', error);
+        throw error;
+    }
+};
+
+export const sharePostOnFacebook = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.post(`${baseURL}/api/Post/${postId}/facebook`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing post on Twitter:', error);
+        throw error;
+    }
+};
+
+export const updatePostImages = async (postId, newImages) => {
+    console.log(newImages);
+    const token = getCookie('token');
+    try {
+        const formData = new FormData();
+        if (newImages) {
+            newImages.forEach((image) => {
+                formData.append("newImage", image);
+            });
+        }
+
+        const response = await axios.patch(`${baseURL}/api/Post/${postId}/images`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating post images:', error.response);
+        throw error;
+    }
+};
+
+export const getTwitterReactionsByPostId = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/Post/${postId}/twitter/reactions-by-post-id`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return {
+            retweetCount: response.data.data.retweetCount,
+            replyCount: response.data.data.replyCount,
+            likeCount: response.data.data.likeCount,
+            quoteCount: response.data.data.quoteCount,
+            bookmarkCount: response.data.data.bookmarkCount,
+            impressionCount: response.data.data.impressionCount
+        };
+    } catch (error) {
+        console.error('Error fetching Twitter reactions:', error.response);
+        throw error;
+    }
+};
+
+export const getFacebookReactionsByPostId = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/Post/${postId}/facebook/metrics`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return {
+            impressionCount: response.data.data.impressionCount,
+            shareCount: response.data.data.shareCount,
+            commentCount: response.data.data.commentCount,
+            postReactions: response.data.data.postReactions
+        };
+    } catch (error) {
+        console.error('Error fetching Facebook reactions:', error.response);
+        throw error;
+    }
+};

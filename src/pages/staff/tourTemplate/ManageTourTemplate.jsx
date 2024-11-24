@@ -3,13 +3,11 @@ import { Link, useParams, useNavigate, useLocation } from 'react-router-dom';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import TourTemplateCard from '@components/staff/TourTemplateCard';
+import TourTemplateCard from '@components/tourTemplate/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-
-import TourTemplateDeletePopup from '@components/staff/TourTemplateDeletePopup';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
@@ -30,7 +28,6 @@ const ManageTourTemplate = () => {
     const [statusTab, setStatusTab] = useState('all');
     const location = useLocation();
     const currentPage = location.pathname;
-    const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
@@ -72,10 +69,10 @@ const ManageTourTemplate = () => {
     useEffect(() => {
         const fetchProvincesData = async () => {
             try {
-                const fetchedProvinces = await fetchProvinces();
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const duration = await fetchTourDuration();
                 const categories = await fetchTourCategory();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setTourDurations(duration);
                 setTourCategories(categories);
             } catch (error) {
@@ -105,24 +102,6 @@ const ManageTourTemplate = () => {
     };
 
     const animatedComponents = makeAnimated();
-
-    const handleOpenDeletePopup = (template) => {
-        setSelectedTemplate(template);
-        setOpenDeletePopup(true);
-    };
-
-    const handleCloseDeletePopup = () => {
-        setOpenDeletePopup(false);
-        setSelectedTemplate(null);
-    };
-
-    const handleDeleteTemplate = (templateId) => {
-        /*  // Implement the delete logic here
-         console.log(`Deleting template with ID: ${templateId}`);
-         // After deletion, update the tourTemplates state and close the popup
-         setTourTemplates(prevTemplates => prevTemplates.filter(t => t.TourTemplateId !== templateId));
-         handleCloseDeletePopup(); */
-    };
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -166,7 +145,7 @@ const ManageTourTemplate = () => {
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
-                <title>Manage Tour Template</title>
+                <title>Quản lý tour mẫu</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
             <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
@@ -253,11 +232,10 @@ const ManageTourTemplate = () => {
                 </Grid>
                 <Grid container spacing={2}>
                     {sortedTourTemplates.map(tourTemplate => (
-                        <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
+                        <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
                             <TourTemplateCard
                                 tour={tourTemplate}
                                 isOpen={isSidebarOpen}
-                                onOpenDeletePopup={handleOpenDeletePopup}
                             />
                         </Grid>
                     ))}
@@ -281,12 +259,6 @@ const ManageTourTemplate = () => {
                         <MenuItem value={24}>24 / trang</MenuItem>
                     </Select>
                 </Box>
-                <TourTemplateDeletePopup
-                    open={openDeletePopup}
-                    onClose={handleCloseDeletePopup}
-                    template={selectedTemplate}
-                    onDelete={handleDeleteTemplate}
-                />
             </Box>
         </Box>
     );

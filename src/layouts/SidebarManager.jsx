@@ -6,18 +6,18 @@ import PeopleIcon from '@mui/icons-material/People';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MapIcon from '@mui/icons-material/Map';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import TourIcon from '@mui/icons-material/Tour';
 import PersonIcon from '@mui/icons-material/Person';
 import { styled } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AttractionsIcon from '@mui/icons-material/Attractions';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArticleIcon from '@mui/icons-material/Article';
 import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CategoryIcon from '@mui/icons-material/Category';
+import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
 import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
@@ -134,10 +134,10 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
         <List sx={{ width: '100%' }}>
           <ListItem 
             component={Link} 
-            to="/admin/dashboard" 
+            to="/quan-ly" 
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginTop: 1 }}
           >
-            <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
+            <MenuItemPaper elevation={2} isSelected={location.pathname === '/quan-ly'}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <HomeIcon sx={{ color: '#2196f3' }} />
@@ -156,12 +156,13 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
             { text: 'Tỉnh thành', url: '/quan-ly/tinh-thanh', icon: <MapIcon /> },
             { text: 'Điểm tham quan', url: '/quan-ly/diem-tham-quan', icon: <AttractionsIcon /> },
             { text: 'Tour mẫu', url: '/quan-ly/tour-mau', icon: <FileCopyIcon /> },
-            { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Tour du lịch', url: '/quan-ly/tour-du-lich', icon: <TourIcon /> },
+            { text: 'Booking', url: '/quan-ly/booking', icon: <AirplaneTicketIcon /> },
             { text: 'Bài viết', url: '/quan-ly/bai-viet', icon: <ArticleIcon /> },
-            { text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },
+            /*{ text: 'Sự kiện', url: '/quan-ly/su-kien', icon: <EventIcon /> },*/
             { text: 'Nhân viên', url: '/quan-ly/nhan-vien', icon: <PeopleIcon /> },
             { text: 'Khách hàng', url: '/quan-ly/khach-hang', icon: <PersonIcon /> },
-            { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> }
+            { text: 'Danh mục', url: '/quan-ly/danh-muc', icon: <CategoryIcon /> },
           ].map(({ text, url, icon }) => (
             <ListItem 
               key={text} component={Link}  to={url}
@@ -196,7 +197,7 @@ const SidebarManager = ({ isOpen, toggleSidebar }) => {
                   <SettingsIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Tài khoản" 
+                  primary={getCookie('username')} 
                   primaryTypographyProps={{ fontSize: '0.97rem' }}
                 />
               </MenuItemBox>

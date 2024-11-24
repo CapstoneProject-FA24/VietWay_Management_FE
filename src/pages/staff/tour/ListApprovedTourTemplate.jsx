@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Pagination } from '@mui/material';
-import ApprovedTourTemplateCard from "@components/staff/ApprovedTourTemplateCard";
+import ApprovedTourTemplateCard from "@components/staff/tourTemplate/ApprovedTourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
@@ -66,10 +66,10 @@ const ListApprovedTourTemplate = () => {
   useEffect(() => {
     const fetchProvincesData = async () => {
       try {
-        const fetchedProvinces = await fetchProvinces();
+        const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
         const duration = await fetchTourDuration();
         const categories = await fetchTourCategory();
-        setProvinces(fetchedProvinces);
+        setProvinces(fetchedProvinces.items);
         setTourCategories(categories);
         setTourDurations(duration);
       } catch (error) {

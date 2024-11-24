@@ -5,7 +5,6 @@ import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornm
 import ProvinceCard from '@components/manager/province/ProvinceCard';
 import SearchIcon from '@mui/icons-material/Search';
 import { fetchProvinces } from '@services/ProvinceService';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import CreateProvince from '@components/manager/province/CreateProvince';
@@ -13,6 +12,7 @@ import CreateProvince from '@components/manager/province/CreateProvince';
 const ManagerManageProvince = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [provinces, setProvinces] = useState([]);
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
@@ -24,7 +24,7 @@ const ManagerManageProvince = () => {
 
     useEffect(() => {
         fetchData();
-    }, [page, pageSize, searchTerm]);
+    }, [page, pageSize, searchQuery]);
 
     useEffect(() => {
         sortProvinces();
@@ -32,13 +32,13 @@ const ManagerManageProvince = () => {
 
     const fetchData = async () => {
         try {
-            /* const params = {
+            const params = {
                 pageSize: pageSize,
                 pageIndex: page,
-                nameSearch: searchTerm,
-            }; */
-            const result = await fetchProvinces();
-            setProvinces(result);
+                nameSearch: searchQuery,
+            };
+            const result = await fetchProvinces(params);
+            setProvinces(result.items);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
             console.error('Error fetching provinces:', error);
@@ -69,11 +69,15 @@ const ManagerManageProvince = () => {
     };
 
     const handleSearch = () => {
-        setSearchTerm(searchTerm);
+        setSearchQuery(searchTerm);
         setPage(1);
     };
 
     const handleCreateSuccess = () => {
+        fetchData();
+    };
+
+    const handleUpdateSuccess = () => {
         fetchData();
     };
 
@@ -105,9 +109,9 @@ const ManagerManageProvince = () => {
                         </Button>
                     </Grid>
 
-                    <Grid item xs={7}>
+                    <Grid item xs={7} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <TextField variant="outlined" placeholder="Tìm kiếm tỉnh thành..."
-                            size="small" sx={{ width: '100%' }}
+                            size="small" sx={{ width: '82%' }}
                             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
                             InputProps={{
                                 startAdornment: (
@@ -117,6 +121,9 @@ const ManagerManageProvince = () => {
                                 ),
                             }}
                         />
+                        <Button variant="contained" onClick={handleSearch} sx={{ backgroundColor: 'lightGray', color: 'black', minWidth: '7rem' }} >
+                            Tìm kiếm
+                        </Button>
                     </Grid>
                     <Grid item xs={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                         <Typography>
@@ -137,7 +144,10 @@ const ManagerManageProvince = () => {
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedProvinces.map(province => (
                         <Grid item xs={isSidebarOpen ? 6 : 4} key={province.provinceId}>
-                            <ProvinceCard province={province} />
+                            <ProvinceCard 
+                                province={province} 
+                                onUpdate={handleUpdateSuccess} 
+                            />
                         </Grid>
                     ))}
                     {sortedProvinces.length === 0 && (

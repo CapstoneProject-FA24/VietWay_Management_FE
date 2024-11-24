@@ -1,5 +1,6 @@
 import axios from 'axios';
-import baseURL from '@api/baseURL'
+const baseURL = import.meta.env.VITE_API_URL;
+import { getCookie } from '@services/AuthenService';
 
 const getStatusText = (status) => {
     switch (status) {
@@ -12,6 +13,7 @@ const getStatusText = (status) => {
 };
 
 export const fetchTourTemplates = async (params) => {
+    const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
         queryParams.append('pageSize', params.pageSize);
@@ -22,9 +24,13 @@ export const fetchTourTemplates = async (params) => {
         if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
         if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
 
-        const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`);
+        const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         const items = response.data?.data?.items;
-        
+
         if (!items || !Array.isArray(items)) {
             throw new Error('Invalid response structure: items not found or not an array');
         }
@@ -37,19 +43,19 @@ export const fetchTourTemplates = async (params) => {
             tourCategory: item.tourCategory,
             status: item.status,
             statusName: getStatusText(item.status),
-            createdDate: item.createdDate,
+            createdDate: item.createdAt,
             creatorName: item.creatorName,
             provinces: item.provinces,
             imageUrl: item.imageUrl
         }));
-
+        console.log(templates);
         return ({
             data: templates,
             pageIndex: response.data?.data?.pageIndex,
             pageSize: response.data?.data?.pageSize,
             total: response.data?.data?.total
         })
-        
+
     } catch (error) {
         console.error('Error fetching tour templates:', error);
         throw error;
@@ -57,8 +63,13 @@ export const fetchTourTemplates = async (params) => {
 };
 
 export const fetchTourTemplateById = async (id) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/TourTemplate/${id}`);
+        const response = await axios.get(`${baseURL}/api/TourTemplate/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         return {
             tourTemplateId: response.data.data.tourTemplateId,
             code: response.data.data.code,
@@ -73,7 +84,7 @@ export const fetchTourTemplateById = async (id) => {
             note: response.data.data.note,
             status: response.data.data.status,
             statusName: getStatusText(response.data.data.status),
-            createdDate: response.data.data.createdDate,
+            createdDate: response.data.data.createdAt,
             creatorName: response.data.data.creatorName,
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,
@@ -86,6 +97,7 @@ export const fetchTourTemplateById = async (id) => {
 };
 
 export const createTourTemplate = async (tourTemplateData) => {
+    const token = getCookie('token');
     try {
         const requestData = {
             code: tourTemplateData.code,
@@ -95,6 +107,8 @@ export const createTourTemplate = async (tourTemplateData) => {
             tourCategoryId: tourTemplateData.tourCategoryId,
             policy: tourTemplateData.policy,
             note: tourTemplateData.note,
+            minPrice: tourTemplateData.minPrice,
+            maxPrice: tourTemplateData.maxPrice,
             provinceIds: tourTemplateData.provinceIds,
             schedules: tourTemplateData.schedules.map(s => ({
                 dayNumber: s.dayNumber,
@@ -104,8 +118,11 @@ export const createTourTemplate = async (tourTemplateData) => {
             })),
             isDraft: tourTemplateData.isDraft
         };
-        console.log(requestData);
-        const response = await axios.post(`${baseURL}/api/TourTemplate`, requestData);
+        const response = await axios.post(`${baseURL}/api/TourTemplate`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error saving tour template:', error);
@@ -114,6 +131,7 @@ export const createTourTemplate = async (tourTemplateData) => {
 };
 
 export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
+    const token = getCookie('token');
     try {
         const requestData = {
             code: tourTemplateData.code,
@@ -123,6 +141,8 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
             tourCategoryId: tourTemplateData.tourCategoryId,
             policy: tourTemplateData.policy,
             note: tourTemplateData.note,
+            minPrice: tourTemplateData.minPrice,
+            maxPrice: tourTemplateData.maxPrice,
             provinceIds: tourTemplateData.provinceIds,
             schedules: tourTemplateData.schedules.map(s => ({
                 dayNumber: s.dayNumber,
@@ -133,7 +153,11 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
             isDraft: tourTemplateData.isDraft
         };
         console.log(requestData);
-        const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData);
+        const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
         return response.data;
     } catch (error) {
         console.error('Error updating tour template:', error);
@@ -142,6 +166,7 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
 };
 
 export const updateTemplateImages = async (tourTemplateId, newImages, deletedImageIds) => {
+    const token = getCookie('token');
     try {
         const formData = new FormData();
         if (newImages) {
@@ -157,12 +182,87 @@ export const updateTemplateImages = async (tourTemplateId, newImages, deletedIma
 
         const response = await axios.patch(`${baseURL}/api/TourTemplate/${tourTemplateId}/images`, formData, {
             headers: {
+                'Authorization': `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data'
             }
         });
         return response.data;
     } catch (error) {
         console.error('Error updating tour template images:', error.response);
+        throw error;
+    }
+};
+
+export const changeTourTemplateStatus = async (tourTemplateId, status, reason) => {
+    const token = getCookie('token');
+    try {
+        const requestData = {
+            status: status,
+            reason: reason
+        };
+
+        const response = await axios.patch(`${baseURL}/api/TourTemplate/change-tour-template-status/${tourTemplateId}`, requestData, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing tour template status:', error.response);
+        throw error;
+    }
+};
+
+export const getTourTemplateReviews = async (tourTemplateId, options) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/TourTemplate/${tourTemplateId}/reviews`, {
+            params: {
+                ratingValue: options.ratingValue,
+                hasReviewContent: options.hasReviewContent,
+                pageSize: options.pageSize,
+                pageIndex: options.pageIndex,
+                isDeleted: options.isDeleted
+            },
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        console.log(response.data.data);
+        return {
+            total: response.data.data.total,
+            pageSize: response.data.data.pageSize,
+            pageIndex: response.data.data.pageIndex,
+            items: response.data.data.items.map(review => ({
+                reviewId: review.reviewId,
+                rating: review.rating,
+                review: review.review,
+                createdAt: review.createdAt,
+                reviewer: review.reviewer,
+                likeCount: review.likeCount,
+                isDeleted: review.isDeleted
+            }))
+        };
+    } catch (error) {
+        console.error('Error fetching attraction reviews:', error.response);
+        throw error;
+    }
+};
+
+export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(`${baseURL}/api/TourTemplate/reviews/${reviewId}/hide`, {
+            isHided: isHidden,
+            reason: reason
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error toggling review visibility:', error.response);
         throw error;
     }
 };

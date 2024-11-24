@@ -1,4 +1,4 @@
-import baseURL from '@api/BaseURL';
+const baseURL = import.meta.env.VITE_API_URL;
 import axios from 'axios';
 import { getRole } from '@services/StatusService';
 import { UserRole } from "@hooks/Statuses";
@@ -16,6 +16,7 @@ export const login = async (credentials) => {
                 throw new Error('Không có quyền truy cập');
             }
             setCookie('token', data.token);
+            setCookie('username', data.fullName);
             setCookie('role', getRole(data.role));
         }
         return {

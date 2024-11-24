@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Grid, Paper, CircularProgress, Table, TableBody, TableCell, TableContainer, TableRow, Button, Container, Collapse, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faUser, faClock, faMoneyBill1, faLocationDot, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById } from '@services/TourTemplateService';
+import { fetchTourTemplateById, changeTourTemplateStatus } from '@services/TourTemplateService';
+import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
+import SidebarManager from '@layouts/SidebarManager';
+import { TourTemplateStatus } from '@hooks/Statuses';
+import { getTourTemplateStatusInfo } from '@services/StatusService';
+import ReviewListTour from '@components/review/ReviewListTour';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -17,6 +22,17 @@ const ManagerTourTemplateDetails = () => {
   const pageTopRef = useRef(null);
   const [expandedDay, setExpandedDay] = useState(null);
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
+  const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,12 +57,88 @@ const ManagerTourTemplateDetails = () => {
     setExpandedDay(expandedDay === day ? null : day);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const handleDelete = () => {
+    setIsDeletePopupOpen(true);
+  };
+
+  const handleDeleteConfirm = async (templateId) => {
+    try {
+      await deleteTourTemplate(templateId);
+      navigate('/quan-ly/tour-mau');
+    } catch (error) {
+      console.error('Error deleting tour template:', error);
+    }
+  };
+
+  const handleCloseDeletePopup = () => {
+    setIsDeletePopupOpen(false);
+  };
+
+  // Function to handle approval
+  const handleApprove = async () => {
+    try {
+      await changeTourTemplateStatus(id, 2);
+      setTourTemplate({ ...tourTemplate, status: 2 });
+      setSnackbar({
+        open: true,
+        message: 'Tour mẫu đã được duyệt',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi duyệt tour mẫu',
+        severity: 'error'
+      });
+    } finally {
+      setIsApprovePopupOpen(false);
+    }
+  };
+
+  // Function to handle rejection
+  const handleReject = async () => {
+    try {
+      await changeTourTemplateStatus(id, 3, rejectReason);
+      setTourTemplate({ ...tourTemplate, status: 3 });
+      setSnackbar({
+        open: true,
+        message: 'Tour mẫu đã bị từ chối',
+        severity: 'success'
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi từ chối tour mẫu',
+        severity: 'error'
+      });
+    } finally {
+      setIsRejectPopupOpen(false);
+      setRejectReason('');
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
   }
 
   return (
-    <Box className='main' sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }} ref={pageTopRef}>
+    <Box className='main' sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      marginLeft: isSidebarOpen ? '250px' : '0px',
+      transition: 'margin-left 0.3s'
+    }} ref={pageTopRef}>
+      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <Helmet>
         <title>Chi tiết tour mẫu</title>
       </Helmet>
@@ -59,33 +151,63 @@ const ManagerTourTemplateDetails = () => {
           sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', mt: -1, ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
           Quay lại
         </Button>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
           Chi tiết tour mẫu
         </Typography>
+        {tourTemplate?.status === TourTemplateStatus.Pending && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
+              onClick={() => setIsApprovePopupOpen(true)}
+            >
+              Duyệt
+            </Button>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
+              onClick={() => setIsRejectPopupOpen(true)}
+            >
+              Từ chối
+            </Button>
+          </Box>
+        )}
+        {tourTemplate?.status === TourTemplateStatus.Approved && (
+          <>
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
+              onClick={handleDelete}
+            >
+              Xóa
+            </Button>
+          </>
+        )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+        <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="small" sx={{ mb: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
         <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
           {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
         </Typography>
-        <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
           {tourTemplate.tourName}
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-          <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
+            <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
               <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
-                <img src={tourTemplate.imageUrls[0]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+                <img src={tourTemplate.imageUrls[0]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
               </Box>
               <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                  <img src={tourTemplate.imageUrls[1]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[1]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                   <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
-                    <img src={tourTemplate.imageUrls[2]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[2]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                   <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
-                    <img src={tourTemplate.imageUrls[3]?.url || 'https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg'} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                    <img src={tourTemplate.imageUrls[3]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                   </Box>
                 </Box>
               </Box>
@@ -206,6 +328,18 @@ const ManagerTourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.creatorName}</Typography>
               </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+              <Typography sx={{ color: '#05073C' }}>
+                Giá từ: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.minPrice)}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+              <Typography sx={{ color: '#05073C' }}>
+                Đến: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.maxPrice)}
+              </Typography>
+            </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
@@ -213,16 +347,86 @@ const ManagerTourTemplateDetails = () => {
                   <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                 </Typography>
               </Box>
-              {tourTemplate.status === 1 && (
-                <>
-                  <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: 'green', '&:hover': { backgroundColor: '#2954B5' } }}>Chấp nhận</Button>
-                  <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: 'red', '&:hover': { backgroundColor: '#2954B5' } }}>Từ chối</Button>
-                </>
-              )}
             </Paper>
+          </Grid>
+          <Grid item xs={12} md={12}>
+          {tourTemplate.status === TourTemplateStatus.Approved && (
+              <Box sx={{ mb: 5 }}>
+                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+                  Đánh giá từ khách hàng
+                </Typography>
+                <ReviewListTour tourTemplateId={id} />
+              </Box>
+            )}
           </Grid>
         </Grid>
       </Box>
+      <TourTemplateDeletePopup
+        open={isDeletePopupOpen}
+        onClose={handleCloseDeletePopup}
+        template={tourTemplate}
+        onDelete={handleDeleteConfirm}
+      />
+      {/* Approve Popup */}
+      <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
+        <DialogTitle>Xác nhận duyệt</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn duyệt tour mẫu này?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsApprovePopupOpen(false)}>Hủy</Button>
+          <Button onClick={handleApprove} variant="contained" color="primary">
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Reject Popup */}
+      <Dialog open={isRejectPopupOpen} onClose={() => setIsRejectPopupOpen(false)}>
+        <DialogTitle>Xác nhận từ chối</DialogTitle>
+        <DialogContent sx={{ width: '30rem' }}>
+          <DialogContentText>
+            Vui lòng nhập lý do từ chối:
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do"
+            fullWidth
+            multiline
+            rows={4}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
+          <Button 
+            onClick={handleReject} 
+            variant="contained" 
+            color="error"
+            disabled={!rejectReason.trim()}
+          >
+            Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

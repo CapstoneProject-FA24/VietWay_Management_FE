@@ -8,6 +8,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { mockManager } from '@hooks/MockAccount';
 import TodayIcon from '@mui/icons-material/Today';
+import { Helmet } from 'react-helmet';
+
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -101,9 +103,12 @@ const StaffProfile = () => {
 
     return (
         <Box sx={{ display: 'flex' }}>
+            <Helmet>
+                <title>Thông tin tài khoản</title>
+            </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0 }}>
-                <Box component="header" sx={{ width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw', position: 'relative', height: '400px', borderRadius: '0 0 30px 30px', overflow: 'hidden' }}>
+            <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0, mt: -1 }}>
+                <Box component="header" sx={{ width: isSidebarOpen ? 'calc(100vw - 250px)' : '100vw', position: 'relative', height: '400px', borderRadius: '0 0 30px 30px', overflow: 'hidden' }}>
                     <Box className="hero-text" sx={{
                         width: "100%", height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center',
                         alignItems: 'center', textAlign: 'center', position: "relative", zIndex: 1
@@ -127,7 +132,7 @@ const StaffProfile = () => {
                         <Typography variant="h5" sx={{ mb: 1, color: 'white', fontWeight: 'bold' }}>
                             Thông tin tài khoản
                         </Typography>
-                        <Paper sx={{ p: 7, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                        <Paper sx={{ p: 6, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
                             {fields.map((field) => (
                                 <Grid container spacing={1} key={field.key} sx={{ mb: 3 }}>
                                     <Grid item xs={12} sm={2} md={0.6}>
@@ -145,7 +150,7 @@ const StaffProfile = () => {
                                     </Grid>
                                 </Grid>
                             ))}
-                            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
                                 <Button
                                     variant="contained"
                                     startIcon={<LockIcon />}
@@ -206,11 +211,12 @@ const StaffProfile = () => {
                     open={snackbar.open}
                     autoHideDuration={6000}
                     onClose={handleCloseSnackbar}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
                     <Alert
                         onClose={handleCloseSnackbar}
                         severity={snackbar.severity}
+                        variant="filled"
                         sx={{ width: '100%' }}
                     >
                         {snackbar.message}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import AttractionCard from '@components/manager/AttractionCard';
+import AttractionCard from '@components/attraction/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
@@ -19,7 +19,7 @@ const ManagerManageAttraction = () => {
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [attractions, setAttractions] = useState([]);
     const [sortOrder, setSortOrder] = useState('nameA-Z');
-    const [statusTab, setStatusTab] = useState('all');
+    const [statusTab, setStatusTab] = useState('1');
     const [provinces, setProvinces] = useState([]);
     const [attractionTypes, setAttractionTypes] = useState([]);
     const [page, setPage] = useState(1);
@@ -47,22 +47,22 @@ const ManagerManageAttraction = () => {
                 nameSearch: searchTerm,
                 attractionTypeIds: selectedTypes.map(c => c.value),
                 provinceIds: selectedProvinces.map(p => p.value),
-                status: statusTab === 'all' ? null : parseInt(statusTab)
+                status: parseInt(statusTab)
             };
             const result = await fetchAttractions(params);
             setAttractions(result.data);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
-            console.error('Error fetching tour templates:', error);
+            console.error('Error fetching attractions:', error);
         }
     };
 
     useEffect(() => {
         const fetchFilterData = async () => {
             try {
-                const fetchedProvinces = await fetchProvinces();
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const fetchedAttractionType = await fetchAttractionType();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setAttractionTypes(fetchedAttractionType);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
@@ -133,10 +133,10 @@ const ManagerManageAttraction = () => {
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
-                <title>Duyệt điểm tham quan</title>
+                <title>Quản lý điểm tham quan</title>
             </Helmet>
             <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+            <Box sx={{ flexGrow: 1, p: isSidebarOpen ? 3 : 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                         <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý điểm tham quan </Typography>
@@ -198,8 +198,6 @@ const ManagerManageAttraction = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="attraction status tabs">
-                            <Tab label="Tất cả" value="all" />
-                            <Tab label="Bản nháp" value="0" />
                             <Tab label="Chờ duyệt" value="1" />
                             <Tab label="Đã duyệt" value="2" />
                             <Tab label="Từ chối" value="3" />
@@ -208,7 +206,7 @@ const ManagerManageAttraction = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedAttractions.map(attraction => (
-                        <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.attractionId}>
+                        <Grid item xs={4} key={attraction.attractionId}>
                             <AttractionCard attraction={attraction} isOpen={isSidebarOpen} />
                         </Grid>
                     ))}

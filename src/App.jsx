@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import ManagerHomepage from '@pages/ManagerHomepage.jsx';
+import ManagerDashboard from '@pages/manager/ManagerDashboard.jsx';
 import ManageCustomer from '@pages/manager/ManageCustomer.jsx';
 import ManageManager from '@pages/admin/ManageManager.jsx';
 import Login from '@pages/authen/Login.jsx'
@@ -9,11 +9,9 @@ import CreateTour from '@pages/staff/tour/CreateTour.jsx';
 import ManageAttraction from '@pages/staff/attraction/ManageAttraction.jsx';
 import ManageTourTemplate from '@pages/staff/tourTemplate/ManageTourTemplate.jsx';
 import CreateAttraction from '@pages/staff/attraction/CreateAttraction.jsx';
-import UpdateAttraction from '@pages/staff/attraction/UpdateAttraction.jsx';
 import AttractionDetail from '@pages/staff/attraction/AttractionDetail.jsx';
 import TourTemplateDetail from '@pages/staff/tourTemplate/TourTemplateDetail.jsx';
 import CreateTourTemplate from '@pages/staff/tourTemplate/CreateTourTemplate.jsx';
-import UpdateTourTemplate from '@pages/staff/tourTemplate/UpdateTourTemplate.jsx';
 import ManagerManageTourTemplate from '@pages/manager/tourTemplate/ManagerManageTourTemplate.jsx';
 import ManagerTourTemplateDetail from '@pages/manager/tourTemplate/ManagerTourTemplateDetail.jsx';
 import ManagerManageAttraction from '@pages/manager/attraction/ManagerManageAttraction.jsx';
@@ -29,6 +27,10 @@ import ManagerManageTour from '@pages/manager/tour/ManagerManageTour.jsx';
 import ManagerTourDetail from '@pages/manager/tour/ManagerTourDetail.jsx';
 import TourDetail from '@pages/staff/tour/TourDetail.jsx';
 import ManageCategory from '@pages/manager/category/ManageCategory.jsx';
+import ManagerManagePost from '@pages/manager/post/ManagerManagePost.jsx';
+import ManagerPostDetail from '@pages/manager/post/ManagerPostDetail.jsx';
+import ManageBooking from '@pages/manager/booking/ManageBooking.jsx';
+import ManageBookingDetail from '@pages/manager/booking/ManageBookingDetail.jsx';
 
 const App = () => {
   return (
@@ -50,21 +52,24 @@ const App = () => {
         <Route path="/quan-ly/tour-du-lich" element={<ManagerManageTour />} />
         <Route path="/quan-ly/tour-du-lich/chi-tiet/:id" element={<ManagerTourDetail />} />
         <Route path="/quan-ly/danh-muc" element={<ManageCategory />} />
+        <Route path="/quan-ly/bai-viet" element={<ManagerManagePost />} />
+        <Route path="/quan-ly/bai-viet/chi-tiet/:id" element={<ManagerPostDetail />} />
+        <Route path="/quan-ly/dashboard" element={<ManagerDashboard />} />
+        <Route path="/quan-ly/booking" element={<ManageBooking />} />
+        <Route path="/quan-ly/booking/chi-tiet/:id" element={<ManageBookingDetail />} />
 
         <Route path="/nhan-vien/diem-tham-quan" element={<ManageAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/them" element={<CreateAttraction/>} />
-        <Route path="/nhan-vien/diem-tham-quan/sua/:id" element={<UpdateAttraction/>} />
         <Route path="/nhan-vien/diem-tham-quan/chi-tiet/:id" element={<AttractionDetail/>} />
         <Route path="/nhan-vien/tour-mau" element={<ManageTourTemplate/>} />
         <Route path="/nhan-vien/tour-mau/chi-tiet/:id" element={<TourTemplateDetail/>} />
         <Route path="/nhan-vien/tour-mau/them" element={<CreateTourTemplate/>} />
-        <Route path="/nhan-vien/tour-mau/sua/:id" element={<UpdateTourTemplate/>} />
         <Route path="/nhan-vien/tour-du-lich" element={<ManageTour />} />
         <Route path="/nhan-vien/tour-du-lich/chi-tiet/:id" element={<TourDetail />} />
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet" element={<ListApprovedTourTemplate />} />
         <Route path="/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/:id" element={<CreateTour />} />
         <Route path="/nhan-vien/bai-viet" element={<ManagePost />} />
-        <Route path="/nhan-vien/bai-viet/:id" element={<PostDetail />} />
+        <Route path="/nhan-vien/bai-viet/chi-tiet/:id" element={<PostDetail />} />
         <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
         <Route path="/nhan-vien/bai-viet/them" element={<CreatePost />} />
       </Routes>

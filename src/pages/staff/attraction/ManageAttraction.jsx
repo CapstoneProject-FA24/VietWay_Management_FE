@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Tabs, Tab, Pagination } from '@mui/material';
-import AttractionCard from '@components/staff/AttractionCard';
+import AttractionCard from '@components/attraction/AttractionCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
 import { Link, useNavigate } from 'react-router-dom';
-import AttractionDeletePopup from '@components/staff/AttractionDeletePopup';
+import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
 import { fetchAttractions } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
@@ -63,9 +63,9 @@ const ManageAttraction = () => {
     useEffect(() => {
         const fetchProvincesData = async () => {
             try {
-                const fetchedProvinces = await fetchProvinces();
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
                 const fetchedAttractionType = await fetchAttractionType();
-                setProvinces(fetchedProvinces);
+                setProvinces(fetchedProvinces.items);
                 setAttractionTypes(fetchedAttractionType);
             } catch (error) {
                 console.error('Error fetching provinces:', error);
@@ -144,10 +144,10 @@ const ManageAttraction = () => {
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
-                <title>Manage Attractions</title>
+                <title>Quản lý điểm tham quan</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-            <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+            <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
                 <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
                     <Grid item xs={12} md={8} sx={{ display: 'flex', justifyContent: 'flex-start', mb: 1 }}>
                         <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}> Quản lý điểm tham quan </Typography>
@@ -225,7 +225,7 @@ const ManageAttraction = () => {
                 </Grid>
                 <Grid container spacing={2} sx={{ minHeight: '15.2rem' }}>
                     {sortedAttractions.map(attraction => (
-                        <Grid item xs={isSidebarOpen ? 11.5 : 6} key={attraction.AttractionId}>
+                        <Grid item xs={4} key={attraction.AttractionId}>
                             <AttractionCard attraction={attraction} isOpen={isSidebarOpen} onOpenDeletePopup={handleOpenDeletePopup} />
                         </Grid>
                     ))}
