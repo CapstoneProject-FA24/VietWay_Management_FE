@@ -16,10 +16,12 @@ const ManageCategory = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState('');
   const [categories, setCategories] = useState([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const tabs = [
     { label: 'Loại Tour', endpoint: 'tour-categories' },
@@ -57,18 +59,35 @@ const ManageCategory = () => {
     setOpenDelete(true);
   };
 
+  const handleSearch = () => {
+    setAppliedSearch(searchTerm);
+  };
+
+  const handleKeyPress = (event) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleCreateSuccess = () => {
+    setOpenCreate(false);
+    setSearchTerm('');
+    setAppliedSearch('');
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   const renderContent = () => {
-    if (activeTab === 0) { // Tour Category tab
-      return <TourCategory onDelete={handleOpenDelete} />;
+    if (activeTab === 0) {
+      return <TourCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} refreshTrigger={refreshTrigger} />;
     }
     if (activeTab === 1) { // Attraction Type tab
-      return <AttractionCategory onDelete={handleOpenDelete} />;
+      return <AttractionCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
     }
     if (activeTab === 2) { // Post Category tab
-      return <PostCategory onDelete={handleOpenDelete} />;
+      return <PostCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
     }
     if (activeTab === 3) { // Tour Duration tab
-      return <TourDuration onDelete={handleOpenDelete} />;
+      return <TourDuration onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
     }
 
 
@@ -125,17 +144,25 @@ const ManageCategory = () => {
         </Tabs>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
               placeholder="Tìm kiếm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleKeyPress}
               size="small"
               sx={{ minWidth: '500px' }}
               InputProps={{
                 startAdornment: <SearchIcon sx={{ mr: 1 }} />
               }}
             />
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              sx={{ minWidth: '100px' }}
+            >
+              Tìm kiếm
+            </Button>
           </Box>
           <Button
             variant="contained"
@@ -151,10 +178,7 @@ const ManageCategory = () => {
       <CreateCategory
         open={openCreate}
         onClose={() => setOpenCreate(false)}
-        onSuccess={() => {
-          setOpenCreate(false);
-          fetchCategories();
-        }}
+        onSuccess={handleCreateSuccess}
         categoryType={tabs[activeTab].endpoint}
         isTourDuration={activeTab === 3}
       />

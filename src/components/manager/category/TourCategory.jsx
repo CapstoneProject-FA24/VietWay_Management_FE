@@ -3,41 +3,57 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchTourCategory } from '@services/TourCategoryService';
 
-const TourCategory = ({ onDelete }) => {
+const TourCategory = ({ onDelete, searchTerm, refreshTrigger }) => {
     const [tourCategories, setTourCategories] = useState([]);
     const [sortBy, setSortBy] = useState('id');
+    const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        const loadCategories = async () => {
-            try {
-                const response = await fetchTourCategory();
-                const data = response.map(item => ({
-                    id: item.tourCategoryId,
-                    name: item.tourCategoryName,
-                    description: item.description,
-                    createdAt: new Date(item.createdAt).toLocaleDateString('vi-VN')
-                })).sort((a, b) => a.id - b.id);
-                setTourCategories(data);
-            } catch (error) {
-                console.error('Error loading tour categories:', error);
+    const loadCategories = async (search = '') => {
+        try {
+            setIsLoading(true);
+            const response = await fetchTourCategory(search);
+            const data = response.map(item => ({
+                id: item.tourCategoryId,
+                name: item.tourCategoryName,
+                description: item.description,
+                createdAt: item.createdAt,
+                displayDate: new Date(item.createdAt).toLocaleDateString('vi-VN')
+            }));
+            
+            if (refreshTrigger) {
+                setSortBy('createdAt');
+                setTourCategories(sortCategories(data, 'createdAt'));
+            } else {
+                setTourCategories(sortCategories(data, sortBy));
             }
-        };
-        loadCategories();
-    }, []);
+        } catch (error) {
+            console.error('Error loading tour categories:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    const handleSort = (event) => {
-        const sortValue = event.target.value;
-        setSortBy(sortValue);
-        
-        const sortedCategories = [...tourCategories].sort((a, b) => {
+    const sortCategories = (categories, sortValue) => {
+        return [...categories].sort((a, b) => {
             if (sortValue === 'id') {
                 return a.id - b.id;
             } else if (sortValue === 'name') {
                 return a.name.localeCompare(b.name);
+            } else if (sortValue === 'createdAt') {
+                return new Date(b.createdAt) - new Date(a.createdAt);
             }
             return 0;
         });
-        
+    };
+
+    useEffect(() => {
+        loadCategories(searchTerm);
+    }, [searchTerm, refreshTrigger]);
+
+    const handleSort = (event) => {
+        const sortValue = event.target.value;
+        setSortBy(sortValue);
+        const sortedCategories = sortCategories(tourCategories, sortValue);
         setTourCategories(sortedCategories);
     };
 
@@ -52,6 +68,7 @@ const TourCategory = ({ onDelete }) => {
                 >
                     <MenuItem value="id">Mã A-Z</MenuItem>
                     <MenuItem value="name">Tên A-Z</MenuItem>
+                    <MenuItem value="createdAt">Mới nhất</MenuItem>
                 </Select>
             </FormControl>
 
@@ -68,11 +85,11 @@ const TourCategory = ({ onDelete }) => {
                     </TableHead>
                     <TableBody>
                         {tourCategories.map((tourCategory) => (
-                            <TableRow key={tourCategory.tourCategoryId}>
+                            <TableRow key={tourCategory.id}>
                                 <TableCell align="center">{tourCategory.id}</TableCell>
                                 <TableCell align="left">{tourCategory.name}</TableCell>
                                 <TableCell align="left">{tourCategory.description}</TableCell>
-                                <TableCell align="center">{tourCategory.createdAt}</TableCell>
+                                <TableCell align="center">{tourCategory.displayDate}</TableCell>
                                 <TableCell align="center">
                                     <Button
                                         startIcon={<DeleteIcon />}
