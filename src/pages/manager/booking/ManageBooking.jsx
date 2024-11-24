@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Card, Typography, TextField, MenuItem, Grid, Button, Tabs, Tab, Select, Pagination, InputAdornment } from '@mui/material';
-import { getBookings, deleteBooking } from '@hooks/MockBooking';
+import { getBookings } from '@services/BookingService';
 import { Search } from '@mui/icons-material';
 import BookingCard from '@components/manager/booking/BookingCard';
 import { Snackbar, Alert } from '@mui/material';
@@ -61,10 +61,28 @@ const ManageBooking = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const data = await getBookings();
-      setBookings(data);
-      setTotalPages(Math.ceil(data.length / pageSize));
+      console.log('Fetching bookings with params:', {
+        pageSize,
+        page,
+        searchText,
+        status: statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
+      });
+      
+      const response = await getBookings(
+        pageSize,
+        page,
+        searchText,
+        searchText,
+        searchText,
+        statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
+      );
+      
+      console.log('API Response:', response);
+      setBookings(response.items || []);
+      setTotalPages(Math.ceil(response.total / pageSize));
     } catch (error) {
+      console.error('Error fetching bookings:', error);
+      setBookings([]);
       showSnackbar('Không thể tải danh sách đặt tour', 'error');
     } finally {
       setLoading(false);
@@ -112,13 +130,7 @@ const ManageBooking = () => {
     setPage(1);
   };
 
-  const sortedAndFilteredBookings = bookings
-    .filter(booking => 
-      (statusFilter === 'ALL' || booking.status === parseInt(statusFilter)) &&
-      (booking.bookingId.toLowerCase().includes(searchText.toLowerCase()) ||
-       booking.contactFullName.toLowerCase().includes(searchText.toLowerCase()) ||
-       booking.contactPhoneNumber.includes(searchText))
-    )
+  const sortedBookings = bookings
     .sort((a, b) => {
       switch (sortOrder) {
         case 'newest':
@@ -132,8 +144,7 @@ const ManageBooking = () => {
         default:
           return 0;
       }
-    })
-    .slice((page - 1) * pageSize, page * pageSize);
+    });
 
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
@@ -233,7 +244,7 @@ const ManageBooking = () => {
         </Grid>
 
         <Grid container spacing={2}>
-          {sortedAndFilteredBookings.map((booking) => (
+          {sortedBookings.map((booking) => (
             <Grid item xs={12} md={12} key={booking.bookingId}>
               <BookingCard
                 booking={booking}
@@ -242,7 +253,7 @@ const ManageBooking = () => {
               />
             </Grid>
           ))}
-          {sortedAndFilteredBookings.length === 0 && (
+          {sortedBookings.length === 0 && (
             <Grid item xs={12}>
               <Typography variant="body1" align="center" color="error">
                 Không tìm thấy đặt tour phù hợp.

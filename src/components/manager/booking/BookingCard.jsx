@@ -92,15 +92,15 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
             <Typography sx={{ fontWeight: 'bold', fontSize: '1.3rem', mb: 1 }}> Thông tin tour:</Typography>
             <Box sx={{ display: 'flex' }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Tour:</Typography>
-              <Typography>{booking.tour?.name}</Typography>
+              <Typography>{booking.tourName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', mt: 1 }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Mã tour:</Typography>
-              <Typography>{booking.code}</Typography>
+              <Typography>{booking.tourCode}</Typography>
             </Box>
             <Box sx={{ display: 'flex', mt: 1 }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Khởi hành lúc:</Typography>
-              <Typography>{formatDateTime(booking.tour?.startDate)}</Typography>
+              <Typography>{formatDateTime(booking.startDate)}</Typography>
             </Box>
             <Box sx={{ display: 'flex', mt: 1 }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Khởi hành từ:</Typography>
