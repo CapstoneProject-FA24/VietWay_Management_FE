@@ -38,12 +38,29 @@ export const getTourStatusInfo = (statusCode) => {
 
 export const getRole = (role) => {
   switch (role) {
+    case UserRole.Customer:
+      return "khach-hang";
     case UserRole.Manager:
       return "quan-ly";
     case UserRole.Staff:
       return "nhan-vien";
     case UserRole.Admin:
       return "admin";
+    default:
+      return "Không xác định";
+  }
+};
+
+export const getRoleName = (role) => {
+  switch (role) {
+    case UserRole.Customer:
+      return "Khách hàng";
+    case UserRole.Manager:
+      return "Quản lý";
+    case UserRole.Staff:
+      return "Nhân viên";
+    case UserRole.Admin:
+      return "Admin";
     default:
       return "Không xác định";
   }

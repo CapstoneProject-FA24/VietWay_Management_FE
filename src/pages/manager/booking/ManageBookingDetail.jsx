@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Button, Typography, Tabs, Tab, CircularProgress, Alert } from '@mui/material';
-import { getBookingById } from '@hooks/MockBooking';
+import { fetchBookingById } from '@services/BookingService';
 import { ArrowBack, Person, Payment, Info } from '@mui/icons-material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
@@ -27,7 +27,7 @@ const ManageBookingDetail = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getBookingById(id);
+      const data = await fetchBookingById(id);
       setBooking(data);
     } catch (error) {
       setError('Không thể tải thông tin đặt tour');
@@ -85,8 +85,8 @@ const ManageBookingDetail = () => {
               <Tab icon={<Payment />} label="Lịch sử thanh toán" iconPosition="start" />
             </Tabs>
             {activeTab === 0 && <BookingDetail booking={booking} />}
-            {activeTab === 1 && <Participant participants={booking.bookingTourists} />}
-            {activeTab === 2 && <PaymentDetail payments={booking.bookingPayments} />}
+            {activeTab === 1 && <Participant participants={booking.tourists} />}
+            {activeTab === 2 && <PaymentDetail payments={booking.payments} />}
           </Box>
         )}
       </Box>

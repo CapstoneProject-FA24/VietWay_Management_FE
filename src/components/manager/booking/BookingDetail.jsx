@@ -1,6 +1,6 @@
 import { Box, Grid, Typography, Button, Paper } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
-import { getBookingStatusInfo } from '@services/StatusService';
+import { getBookingStatusInfo, getRoleName } from '@services/StatusService';
 import { BookingStatus } from '@hooks/Statuses';
 
 const formatDateTime = (dateString) => {
@@ -58,6 +58,24 @@ const BookingDetail = ({ booking }) => {
                         <Typography variant="body1">Tình trạng:</Typography>
                         <Typography variant="body1" sx={{ color: getBookingStatusInfo(booking.status).color }}>{getBookingStatusInfo(booking.status).text}</Typography>
                     </Box>
+                    {(booking.status === BookingStatus.PendingRefund || booking.status === BookingStatus.Refunded) && (
+                        <>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                <Typography variant="body1">Hủy lúc:</Typography>
+                                <Typography variant="body1">{formatDateTime(booking.cancelAt)}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                <Typography variant="body1">Hủy bởi:</Typography>
+                                <Typography variant="body1">{getRoleName(booking.cancelBy)}</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                <Typography variant="body1">
+                                    {booking.status === BookingStatus.PendingRefund ? 'Tổng tiền cần hoàn:' : 'Tổng tiền đã hoàn:'}
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: 'red'}}>{booking.refundAmount.toLocaleString()} đ</Typography>
+                            </Box>
+                        </>
+                    )}
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                         <Typography variant="body1">Ghi chú:</Typography>
                         <Typography variant="body1">{booking.note}</Typography>
@@ -67,13 +85,10 @@ const BookingDetail = ({ booking }) => {
             <Grid item xs={12} md={5}>
                 <Paper elevation={3} sx={{ p: 2, borderRadius: '8px' }}>
                     <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Thông tin tour</Typography>
-                    <img src={booking.tour?.imageUrl} alt={booking.tour?.name}
-                        style={{ width: '100%', height: '220px', objectFit: 'cover', borderRadius: '8px' }}
-                    />
-                    <Typography variant="h5" sx={{ mt: 1 }}>{booking.tour?.name}</Typography>
-                    <Typography variant="body1" sx={{ mt: 1 }}><strong>Mã tour:</strong> {booking.code}</Typography>
+                    <Typography variant="h5" sx={{ mt: 1 }}>{booking.tourName}</Typography>
+                    <Typography variant="body1" sx={{ mt: 1 }}><strong>Mã tour:</strong> {booking.tourCode}</Typography>
                     <Typography variant="body1" sx={{ mt: 1 }}>
-                        <strong>Ngày đi:</strong> {formatDateTime(booking.tour?.startDate)}
+                        <strong>Ngày đi:</strong> {formatDateTime(booking.startDate)}
                     </Typography><hr />
                     <Typography variant="h5" color="primary.main" sx={{ mt: 1, fontWeight: 'bold' }}>
                         Tổng tiền: {booking.totalPrice.toLocaleString()} đ
@@ -83,6 +98,24 @@ const BookingDetail = ({ booking }) => {
                             <Button variant="contained" color="error" sx={{ width: '48%' }}>Hủy booking</Button>
                             <Button variant="contained" color="primary" sx={{ width: '48%' }}>Chuyển tour</Button>
                         </Box>
+                    )}
+
+                    {booking.tourPolicies && booking.tourPolicies.length > 0 && (
+                        <>
+                            <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>
+                                Chính sách hủy tour
+                            </Typography>
+                            {booking.tourPolicies.map((policy, index) => (
+                                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                    <Typography variant="body2">
+                                        Hủy trước {formatDateTime(policy.cancelBefore)} ngày:
+                                    </Typography>
+                                    <Typography variant="body2" color="primary">
+                                        Hoàn {policy.refundPercent}% tổng tiền
+                                    </Typography>
+                                </Box>
+                            ))}
+                        </>
                     )}
                 </Paper>
             </Grid>
