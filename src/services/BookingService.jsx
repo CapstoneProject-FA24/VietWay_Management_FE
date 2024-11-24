@@ -39,7 +39,8 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
             currentPage
         };
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Failed to fetch bookings');
+        console.error('Error fetching bookings:', error.response);
+        throw error;
     }
 };
 
@@ -61,6 +62,7 @@ export const createRefundTransaction = async (bookingId, refundData) => {
         );
         return response.data;
     } catch (error) {
-        throw new Error(error.response?.data?.message || 'Failed to create refund transaction');
+        console.error('Error creating refund transaction:', error.response);
+        throw error;
     }
 };

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardActions, Typography, Button, Chip, Box, Grid } from '@mui/material';
+import { Card, CardContent, CardActions, Typography, Button, Chip, Box, Grid, FormControl, InputLabel } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -7,9 +7,24 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useState } from 'react';
 import { getBookingStatusInfo } from '@services/StatusService';
 import { BookingStatus } from '@hooks/Statuses';
+import { bankData } from '@hooks/Bank';
+import { TextField, Select, MenuItem } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import { createRefundTransaction } from '@services/BookingService';
 
-const BookingCard = ({ booking, onDelete, onViewDetails }) => {
+const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
   const [openDialog, setOpenDialog] = useState(false);
+  const [openRefundDialog, setOpenRefundDialog] = useState(false);
+  const [refundData, setRefundData] = useState({
+    note: '',
+    bankCode: '',
+    bankTransactionNumber: '',
+    payTime: dayjs()
+  });
   const statusInfo = getBookingStatusInfo(booking.status);
 
   const handleClickDelete = () => {
@@ -21,18 +36,41 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
     setOpenDialog(false);
   };
 
+  const handleRefund = () => {
+    setOpenRefundDialog(true);
+  };
+
+  const handleRefundDataChange = (field, value) => {
+    setRefundData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleConfirmRefund = () => {
+    if (!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime) {
+      return;
+    }
+
+    onRefund(booking.bookingId, {
+      note: refundData.note.trim(),
+      bankCode: refundData.bankCode,
+      bankTransactionNumber: refundData.bankTransactionNumber.trim(),
+      payTime: refundData.payTime // dayjs object
+    });
+
+    setOpenRefundDialog(false);
+    // Reset form
+    setRefundData({
+      note: '',
+      bankCode: '',
+      bankTransactionNumber: '',
+      payTime: dayjs()
+    });
+  };
+
   const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    const formattedDate = date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    const formattedTime = date.toLocaleString('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    return `${formattedDate} ${formattedTime}`;
+    return dayjs(dateString).format('DD/MM/YYYY HH:mm');
   };
 
   return (
@@ -80,6 +118,15 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
+                    {booking.status === BookingStatus.PendingRefund && (
+                      <Button
+                        variant="contained"
+                        color="warning"
+                        onClick={handleRefund}
+                      >
+                        Hoàn tiền
+                      </Button>
+                    )}
                   </CardActions>
                 </Box>
               </Grid>
@@ -120,6 +167,84 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
           <Button onClick={handleConfirmDelete} color="error" autoFocus>Xác nhận</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openRefundDialog}
+        onClose={() => setOpenRefundDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Xác nhận hoàn tiền</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: 'red' }}>
+            Lưu ý: Nhân viên vui lòng thực hiện hoàn tiền thành công trước khi thực hiện thêm thông tin xác nhận tại đây
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Ghi chú"
+              multiline
+              rows={3}
+              value={refundData.note}
+              onChange={(e) => handleRefundDataChange('note', e.target.value)}
+            />
+
+            <FormControl fullWidth>
+              <InputLabel id="bank-select-label">Ngân hàng *</InputLabel>
+              <Select
+                labelId="bank-select-label"
+                id="bank-select"
+                value={refundData.bankCode}
+                onChange={(e) => handleRefundDataChange('bankCode', e.target.value)}
+                label="Ngân hàng"
+              >
+                <MenuItem value="" disabled>Chọn ngân hàng *</MenuItem>
+                {bankData.map((bank) => (
+                  <MenuItem key={bank.code} value={bank.code}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img
+                        src={bank.imageUrl}
+                        alt={bank.name}
+                        style={{ width: 24, height: 24 }}
+                      />
+                      {bank.name}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Mã giao dịch"
+              required
+              value={refundData.bankTransactionNumber}
+              onChange={(e) => handleRefundDataChange('bankTransactionNumber', e.target.value)}
+            />
+
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+              <DateTimePicker
+                label="Thời gian hoàn tiền *"
+                required
+                value={refundData.payTime}
+                onChange={(newValue) => handleRefundDataChange('payTime', newValue)}
+                format="DD/MM/YYYY HH:mm"
+              />
+            </LocalizationProvider>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenRefundDialog(false)}>Hủy</Button>
+          <Button
+            onClick={handleConfirmRefund}
+            color="warning"
+            variant="contained"
+            disabled={!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime}
+          >
+            Xác nhận
+          </Button>
         </DialogActions>
       </Dialog>
     </Card>

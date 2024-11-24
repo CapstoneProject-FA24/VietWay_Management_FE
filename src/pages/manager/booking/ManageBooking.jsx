@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Card, Typography, TextField, MenuItem, Grid, Button, Tabs, Tab, Select, Pagination, InputAdornment } from '@mui/material';
-import { getBookings } from '@services/BookingService';
+import { getBookings, createRefundTransaction } from '@services/BookingService';
 import { Search } from '@mui/icons-material';
 import BookingCard from '@components/manager/booking/BookingCard';
 import { Snackbar, Alert } from '@mui/material';
@@ -61,13 +61,6 @@ const ManageBooking = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      console.log('Fetching bookings with params:', {
-        pageSize,
-        page,
-        searchText,
-        status: statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
-      });
-      
       const response = await getBookings(
         pageSize,
         page,
@@ -77,7 +70,6 @@ const ManageBooking = () => {
         statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
       );
       
-      console.log('API Response:', response);
       setBookings(response.items || []);
       setTotalPages(Math.ceil(response.total / pageSize));
     } catch (error) {
@@ -90,13 +82,7 @@ const ManageBooking = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await deleteBooking(id);
-      showSnackbar('Xóa đặt tour thành công', 'success');
-      fetchBookings();
-    } catch (error) {
-      showSnackbar('Không thể xóa đặt tour', 'error');
-    }
+    showSnackbar('Chức năng đang được phát triển', 'info');
   };
 
   const handleViewDetails = (id) => {
@@ -128,6 +114,27 @@ const ManageBooking = () => {
   const handleStatusChange = (event, newValue) => {
     setStatusFilter(newValue);
     setPage(1);
+  };
+
+  const handleRefund = async (id, refundData) => {
+    try {
+      await createRefundTransaction(id, {
+        note: refundData.note,
+        bankCode: refundData.bankCode,
+        bankTransactionNumber: refundData.bankTransactionNumber,
+        payTime: refundData.payTime.format() // Convert dayjs to ISO string
+      });
+      showSnackbar('Hoàn tiền thành công', 'success');
+      fetchBookings(); // Refresh the booking list
+    } catch (error) {
+      console.error('Error creating refund transaction:', error);
+      if(error.response?.data?.error?.includes('Refund policy not found')){
+        showSnackbar('Không thể tìm thấy chính sách hoàn tiền.', 'error');
+      }
+      else{
+        showSnackbar('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'error');
+      }
+    }
   };
 
   const sortedBookings = bookings
@@ -250,6 +257,7 @@ const ManageBooking = () => {
                 booking={booking}
                 onDelete={handleDelete}
                 onViewDetails={handleViewDetails}
+                onRefund={handleRefund}
               />
             </Grid>
           ))}
