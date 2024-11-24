@@ -99,6 +99,11 @@ const BookingDetail = ({ booking }) => {
                             <Button variant="contained" color="primary" sx={{ width: '48%' }}>Chuyển tour</Button>
                         </Box>
                     )}
+                    {booking.status === BookingStatus.PendingRefund && (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                            <Button variant="contained" color="warning" sx={{ width: '48%' }}>Hoàn tiền</Button>
+                        </Box>
+                    )}
 
                     {booking.tourPolicies && booking.tourPolicies.length > 0 && (
                         <>
