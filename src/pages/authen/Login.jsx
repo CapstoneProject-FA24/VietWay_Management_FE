@@ -60,8 +60,8 @@ export default function Login() {
       if (role === 'nhan-vien') {
         navigate(`/${role}/diem-tham-quan`);
       } else {
-        //navigate(`/${role}/dashboard`);
-        navigate(`/${role}/diem-tham-quan`);
+        navigate(`/${role}/dashboard`);
+        //navigate(`/${role}/diem-tham-quan`);
       }
     }
   }, [location]);
@@ -103,8 +103,8 @@ export default function Login() {
         if (response.role === 'nhan-vien') {
           navigate(`/${response.role}/diem-tham-quan`);
         } else {
-          //navigate(`/${response.role}/dashboard`);
-          navigate(`/${response.role}/diem-tham-quan`);
+          navigate(`/${response.role}/dashboard`);
+          //navigate(`/${response.role}/diem-tham-quan`);
         }
       } else {
         setError('Đã xảy ra lỗi. Vui lòng thử lại.');
