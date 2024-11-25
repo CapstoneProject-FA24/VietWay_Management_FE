@@ -8,7 +8,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, changeTourTemplateStatus } from '@services/TourTemplateService';
+import { fetchTourTemplateById, changeTourTemplateStatus, deleteTourTemplate } from '@services/TourTemplateService';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -73,12 +73,27 @@ const ManagerTourTemplateDetails = () => {
     setIsDeletePopupOpen(true);
   };
 
-  const handleDeleteConfirm = async (templateId) => {
+  const handleDeleteConfirm = async () => {
     try {
-      await deleteTourTemplate(templateId);
-      navigate('/quan-ly/tour-mau');
+      await deleteTourTemplate(id);
+      setSnackbar({
+        open: true,
+        message: 'Xóa tour mẫu thành công',
+        severity: 'success'
+      });
+      // Close delete popup
+      setIsDeletePopupOpen(false);
+      // Navigate after a short delay to allow snackbar to be seen
+      setTimeout(() => {
+        navigate('/quan-ly/tour-mau');
+      }, 1500);
     } catch (error) {
-      console.error('Error deleting tour template:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour mẫu',
+        severity: 'error'
+      });
+      setIsDeletePopupOpen(false);
     }
   };
 

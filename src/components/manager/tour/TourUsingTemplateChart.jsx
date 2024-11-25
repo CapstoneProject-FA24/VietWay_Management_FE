@@ -127,7 +127,7 @@ const TourUsingTemplateChart = () => {
     const statusLabels = {
         [TourStatus.Pending]: getTourStatusInfo(TourStatus.Pending).text,
         [TourStatus.Rejected]: getTourStatusInfo(TourStatus.Rejected).text,
-        [TourStatus.Scheduled]: getTourStatusInfo(TourStatus.Scheduled).text,
+        [TourStatus.Accepted]: getTourStatusInfo(TourStatus.Accepted).text,
         [TourStatus.Closed]: getTourStatusInfo(TourStatus.Closed).text,
         [TourStatus.OnGoing]: getTourStatusInfo(TourStatus.OnGoing).text,
         [TourStatus.Completed]: getTourStatusInfo(TourStatus.Completed).text,
@@ -137,7 +137,7 @@ const TourUsingTemplateChart = () => {
     const statusColors = {
         [getTourStatusInfo(TourStatus.Pending).text]: getTourStatusInfo(TourStatus.Pending).color,
         [getTourStatusInfo(TourStatus.Rejected).text]: getTourStatusInfo(TourStatus.Rejected).color,
-        [getTourStatusInfo(TourStatus.Scheduled).text]: getTourStatusInfo(TourStatus.Scheduled).color,
+        [getTourStatusInfo(TourStatus.Accepted).text]: getTourStatusInfo(TourStatus.Accepted).color,
         [getTourStatusInfo(TourStatus.Closed).text]: getTourStatusInfo(TourStatus.Closed).color,
         [getTourStatusInfo(TourStatus.OnGoing).text]: getTourStatusInfo(TourStatus.OnGoing).color,
         [getTourStatusInfo(TourStatus.Completed).text]: getTourStatusInfo(TourStatus.Completed).color,

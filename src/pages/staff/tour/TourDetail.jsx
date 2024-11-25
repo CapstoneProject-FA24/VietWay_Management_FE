@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, TextField } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, TextField, Dialog, DialogTitle, DialogContent } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
@@ -17,6 +17,8 @@ import { TourStatus } from '@hooks/Statuses';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Helmet } from 'react-helmet';
+import BookingByTemplate from '@components/tourTemplate/BookingByTemplate';
+import TourUpdateForm from '@components/tour/TourUpdateForm';
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -29,6 +31,7 @@ const TourDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editTourData, setEditTourData] = useState(null);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,6 +121,7 @@ const TourDetail = () => {
   };
 
   const canModify = tour?.status === TourStatus.Rejected;
+  const canUpdate = tour?.status === 'Accepted' || tour?.status === 'Opened';
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
@@ -390,6 +394,8 @@ const TourDetail = () => {
                     </LocalizationProvider>
                   </Box>
 
+                  <BookingByTemplate tourId={tour.id} />
+
                   <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
                     <Button 
                       variant="contained" 
@@ -419,6 +425,34 @@ const TourDetail = () => {
           </Grid>
         </Grid>
       </Box>
+      {canUpdate && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setShowUpdateForm(true)}
+        >
+          Cập nhật Tour
+        </Button>
+      )}
+
+      {/* Update Form Dialog */}
+      <Dialog
+        open={showUpdateForm}
+        onClose={() => setShowUpdateForm(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Cập nhật Tour</DialogTitle>
+        <DialogContent>
+          <TourUpdateForm 
+            tour={tour}
+            onUpdateSuccess={() => {
+              setShowUpdateForm(false);
+              fetchTourDetails(); // Refresh tour data
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

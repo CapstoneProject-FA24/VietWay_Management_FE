@@ -134,7 +134,6 @@ export const fetchTourById = async (id) => {
                 ageTo: price.ageTo
             }))
         };
-        console.log(tour);
         return tour;
     } catch (error) {
         console.error('Error fetching tour:', error);
@@ -236,6 +235,44 @@ export const updateTourStatus = async (tourId, status, reason) => {
         return response.data;
     } catch (error) {
         console.error('Error updating tour status:', error);
+        throw error;
+    }
+};
+
+export const updateTour = async (tourId, tourData) => {
+    const token = getCookie('token');
+    try {
+        const startDateTime = dayjs(tourData.startDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
+
+        const formattedData = {
+            startLocation: tourData.startAddress,
+            startDate: startDateTime,
+            defaultTouristPrice: parseFloat(tourData.adultPrice),
+            registerOpenDate: dayjs(tourData.registerOpenDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+            registerCloseDate: dayjs(tourData.registerCloseDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+            maxParticipant: parseInt(tourData.maxParticipants),
+            minParticipant: parseInt(tourData.minParticipants),
+            tourPrice: tourData.tourPrices.map(price => ({
+                name: price.name,
+                price: parseFloat(price.price),
+                ageFrom: parseInt(price.ageFrom),
+                ageTo: parseInt(price.ageTo)
+            })),
+            refundPolicies: tourData.refundPolicies.map(policy => ({
+                cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+                refundPercent: Number(policy.refundRate)
+            }))
+        };
+
+        const response = await axios.put(`${baseURL}/api/tours/edit-tour/${tourId}`, formattedData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating tour:', error);
         throw error;
     }
 };

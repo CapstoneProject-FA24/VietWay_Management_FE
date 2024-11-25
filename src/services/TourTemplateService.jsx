@@ -263,3 +263,18 @@ export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
         throw error;
     }
 };
+
+export const deleteTourTemplate = async (tourTemplateId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.delete(`${baseURL}/api/TourTemplate/${tourTemplateId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting tour template:', error.response);
+        throw error;
+    }
+};

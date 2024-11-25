@@ -21,7 +21,6 @@ const BookingByTemplate = ({ tourId }) => {
         const response = await getBookings(
           rowsPerPage, page, null, null, null, null, tourId
         );
-        console.log(response);
         setBookings(response.items);
         setTotalCount(response.total);
       } catch (error) {
