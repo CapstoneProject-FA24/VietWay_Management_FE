@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  TablePagination, Chip, Typography, Box, CircularProgress
+  TablePagination, Chip, Typography, Box, CircularProgress, Button
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { getBookingStatusInfo } from '@services/StatusService';
 import { getBookings } from '@services/BookingService';
 
-const BookingTable = ({ tourId }) => {
+const BookingByTemplate = ({ tourId }) => {
   const [bookings, setBookings] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -19,14 +19,9 @@ const BookingTable = ({ tourId }) => {
       try {
         setIsLoading(true);
         const response = await getBookings(
-          rowsPerPage,
-          page,
-          '', // bookingIdSearch
-          '', // contactNameSearch
-          '', // contactPhoneSearch
-          null, // bookingStatus
-          tourId
+          rowsPerPage, page, null, null, null, null, tourId
         );
+        console.log(response);
         setBookings(response.items);
         setTotalCount(response.total);
       } catch (error) {
@@ -62,14 +57,15 @@ const BookingTable = ({ tourId }) => {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableCell>Mã booking</TableCell>
-              <TableCell>Ngày tạo</TableCell>
-              <TableCell>Người liên hệ</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Số điện thoại</TableCell>
-              <TableCell>Số người</TableCell>
-              <TableCell>Tổng tiền</TableCell>
-              <TableCell>Trạng thái</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Mã booking</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Ngày tạo</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Người liên hệ</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Email</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Số điện thoại</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Số người</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Tổng tiền</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Trạng thái</TableCell>
+              <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -85,7 +81,7 @@ const BookingTable = ({ tourId }) => {
               bookings.map((booking) => (
                 <TableRow hover key={booking.bookingId}>
                   <TableCell>
-                    <Link to={`/nhan-vien/booking/${booking.bookingId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link to={`/quan-ly/booking/chi-tiet/${booking.bookingId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                       {booking.bookingId}
                     </Link>
                   </TableCell>
@@ -110,11 +106,11 @@ const BookingTable = ({ tourId }) => {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                           <Box sx={{ 
                             width: 8, 
-                            height: 8, 
+                            height: 8,
                             borderRadius: '50%', 
                             backgroundColor: getBookingStatusInfo(booking.status).color 
                           }} />
-                          <Typography>
+                          <Typography sx={{ fontSize: '0.85rem', }}>
                             {getBookingStatusInfo(booking.status).text}
                           </Typography>
                         </Box>
@@ -125,6 +121,15 @@ const BookingTable = ({ tourId }) => {
                         '& .MuiChip-label': { px: 1 }
                       }}
                     />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="contained" size="small" component={Link}
+                      sx={{ backgroundColor: '#7e8593', fontSize: '0.75rem' }}
+                      to={`/quan-ly/booking/chi-tiet/${booking.bookingId}`}
+                    >
+                      Chi tiết
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
@@ -147,4 +152,4 @@ const BookingTable = ({ tourId }) => {
   );
 };
 
-export default BookingTable;
+export default BookingByTemplate;
