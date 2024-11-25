@@ -14,6 +14,11 @@ import AddIcon from '@mui/icons-material/Add';
 import TourCalendar from '@components/tour/TourCalendar';
 import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { Helmet } from 'react-helmet';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const DATE_FORMAT = "DD/MM/YYYY";
 
@@ -118,12 +123,6 @@ const CreateTour = () => {
       return false;
     }
 
-    // Check if registration open date exists
-    if (!newTourData.registerOpenDate) {
-      setSnackbar({ open: true, message: 'Vui lòng chọn ngày mở đăng ký trước khi thêm chính sách hoàn tiền', severity: 'error' });
-      return false;
-    }
-
     const sortedPolicies = [...refundPolicies].sort((a, b) => 
       dayjs(b.cancelBefore).valueOf() - dayjs(a.cancelBefore).valueOf()
     );
@@ -142,8 +141,8 @@ const CreateTour = () => {
 
     // Validate date range (between registration open date and tour start date)
     const isValidDates = sortedPolicies.every(policy => 
-      dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.registerOpenDate)) && 
-      dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.startDate))
+      dayjs(policy.cancelBefore).isSameOrAfter(dayjs(newTourData.registerOpenDate)) && 
+      dayjs(policy.cancelBefore).isSameOrBefore(dayjs(newTourData.startDate))
     );
     if (!isValidDates) {
       setSnackbar({ 

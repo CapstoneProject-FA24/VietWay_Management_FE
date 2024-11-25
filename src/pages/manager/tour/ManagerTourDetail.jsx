@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, fetchTourById, calculateEndDate } from '@services/TourService';
+import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -23,6 +23,13 @@ const ManagerTourDetail = () => {
   const [tours, setTours] = useState([]);
   const [tour, setTour] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [openRejectDialog, setOpenRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,16 +66,63 @@ const ManagerTourDetail = () => {
   };
 
   const handleApproveTour = async () => {
-    // Implement approve tour logic here
+    try {
+      await updateTourStatus(id, TourStatus.Scheduled);
+      const updatedTour = await fetchTourById(id);
+      setTour(updatedTour);
+      setSnackbar({
+        open: true,
+        message: 'Đã duyệt tour thành công',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error approving tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi duyệt tour',
+        severity: 'error'
+      });
+    }
   };
 
   const handleRejectTour = async () => {
-    // Implement reject tour logic here
+    try {
+      await updateTourStatus(id, TourStatus.Rejected, rejectReason);
+      const updatedTour = await fetchTourById(id);
+      setTour(updatedTour);
+      setOpenRejectDialog(false);
+      setRejectReason('');
+      setSnackbar({
+        open: true,
+        message: 'Đã từ chối tour thành công',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error rejecting tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi từ chối tour',
+        severity: 'error'
+      });
+    }
   };
 
   const handleDeleteTour = async () => {
     // Add your logic to delete the tour
     console.log('Tour deleted');
+  };
+
+  const handleOpenRejectDialog = () => {
+    setOpenRejectDialog(true);
+  };
+
+  const handleCloseRejectDialog = () => {
+    setOpenRejectDialog(false);
+    setRejectReason('');
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -162,7 +216,7 @@ const ManagerTourDetail = () => {
                           variant="contained"
                           color="error"
                           size="medium"
-                          onClick={() => handleRejectTour()}
+                          onClick={handleOpenRejectDialog}
                         >
                           Từ chối
                         </Button>
@@ -187,6 +241,51 @@ const ManagerTourDetail = () => {
           </Grid>
         </Grid>
       </Box>
+      
+      <Dialog open={openRejectDialog} onClose={handleCloseRejectDialog}>
+        <DialogTitle>Lý do từ chối</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            sx={{ width: '30rem' }}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseRejectDialog}>Hủy</Button>
+          <Button 
+            onClick={handleRejectTour} 
+            variant="contained" 
+            color="error"
+            disabled={!rejectReason.trim()}
+          >
+            Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

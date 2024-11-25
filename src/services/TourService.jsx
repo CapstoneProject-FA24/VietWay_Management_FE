@@ -1,6 +1,7 @@
 import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
 import dayjs from 'dayjs';
+import { getCookie } from '@services/AuthenService';
 
 export const fetchToursByTemplateId = async (id) => {
     try {
@@ -17,6 +18,7 @@ export const fetchToursByTemplateId = async (id) => {
             currentParticipant: item.currentParticipant,
             status: item.status
         }));
+        console.log(tours);
         return tours;
     } catch (error) {
         console.error('Error fetching tour:', error);
@@ -24,7 +26,7 @@ export const fetchToursByTemplateId = async (id) => {
     }
 };
 
-export const fetchTours = async ({params}) => {
+export const fetchTours = async ({ params }) => {
     try {
         const queryParams = new URLSearchParams();
         queryParams.append('pageSize', params.pageSize);
@@ -55,7 +57,7 @@ export const fetchTours = async ({params}) => {
             currentParticipant: item.currentParticipant,
             status: item.status
         }));
-        
+
         return {
             data: tours,
             pageIndex: response.data.data.pageIndex,
@@ -158,6 +160,25 @@ export const createTour = async (tourData) => {
         return response.data;
     } catch (error) {
         console.error('Error creating tour:', error);
+        throw error;
+    }
+};
+
+export const updateTourStatus = async (tourId, status, reason) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(`${baseURL}/api/tours/change-tour-status/${tourId}`, {
+            status,
+            reason
+        },
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating tour status:', error);
         throw error;
     }
 };
