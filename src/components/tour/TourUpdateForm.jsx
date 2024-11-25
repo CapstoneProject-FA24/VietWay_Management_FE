@@ -19,16 +19,16 @@ const TourUpdateForm = ({ tour, onUpdateSuccess }) => {
     registerCloseDate: dayjs(tour.registerCloseDate),
     minParticipant: tour.minParticipant || '',
     maxParticipant: tour.maxParticipant || '',
-    tourPrices: tour.tourPrices || [
+    tourPrices: [
       {
         name: "Trẻ em",
-        price: 0,
+        price: tour.tourPrices?.find(p => p.name === "Trẻ em")?.price || 0,
         ageFrom: 5,
         ageTo: 12
       },
       {
         name: "Em bé",
-        price: 0,
+        price: tour.tourPrices?.find(p => p.name === "Em bé")?.price || 0,
         ageFrom: 0,
         ageTo: 4
       }
@@ -69,6 +69,10 @@ const TourUpdateForm = ({ tour, onUpdateSuccess }) => {
       newErrors.maxParticipant = "Số khách tối đa phải lớn hơn số khách tối thiểu";
     }
 
+    if (!tourData.defaultTouristPrice || Number(tourData.defaultTouristPrice) <= 0) {
+      newErrors.defaultTouristPrice = "Vui lòng nhập giá tour cho người lớn";
+    }
+
     // Add more validations as needed
 
     setErrors(newErrors);
@@ -93,6 +97,13 @@ const TourUpdateForm = ({ tour, onUpdateSuccess }) => {
         startDate: dayjs(tourData.startDate).format(),
         registerOpenDate: dayjs(tourData.registerOpenDate).format(),
         registerCloseDate: dayjs(tourData.registerCloseDate).format(),
+        defaultTouristPrice: Number(tourData.defaultTouristPrice),
+        tourPrices: [
+          ...tourData.tourPrices.map(price => ({
+            ...price,
+            price: Number(price.price)
+          }))
+        ],
         refundPolicies: tourData.refundPolicies.map(policy => ({
           cancelBefore: dayjs(policy.cancelBefore).format(),
           refundPercent: Number(policy.refundPercent)
@@ -229,6 +240,9 @@ const TourUpdateForm = ({ tour, onUpdateSuccess }) => {
           helperText={errors.defaultTouristPrice}
           sx={{ mb: 2, mt: 1.5 }}
           inputProps={{ min: 0, style: { height: '15px' } }}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">VND</InputAdornment>
+          }}
         />
         {tourData.tourPrices.map((price, index) => (
           <TextField
@@ -245,6 +259,9 @@ const TourUpdateForm = ({ tour, onUpdateSuccess }) => {
             }}
             sx={{ mb: 2 }}
             inputProps={{ min: 0, style: { height: '15px' } }}
+            InputProps={{
+              endAdornment: <InputAdornment position="end">VND</InputAdornment>
+            }}
           />
         ))}
       </Box>
