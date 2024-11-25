@@ -171,7 +171,7 @@ const ManagerTourDetail = () => {
                         if (!tour.startDate || !tour.startTime || !tourTemplate) {
                           return '';
                         }
-                        const result = calculateEndDate(dayjs(tour.startDate), dayjs(tour.startDate), tourTemplate.duration);
+                        const result = calculateEndDate(tour.startDate, tour.startTime, tourTemplate.duration);
                         return result ? result.endDate.format('DD/MM/YYYY') : '';
                       })()}
                     </Typography>
@@ -182,6 +182,22 @@ const ManagerTourDetail = () => {
                     <Typography>Số khách tối đa: {tour.maxParticipant}</Typography>
                     <Typography>Số khách tối thiểu: {tour.minParticipant}</Typography>
                     <Typography>Số khách hiện tại: {tour.currentParticipant}</Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
+                    <Typography>Người lớn: {tour.price?.toLocaleString()} đ</Typography>
+                    {tour.tourPrices?.map((price, index) => (
+                      <Typography key={index}>
+                        {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} đ
+                      </Typography>
+                    ))}
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
+                    <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
+                    <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
                   </Box>
 
                   <Box sx={{ mb: 2 }}>
@@ -235,6 +251,20 @@ const ManagerTourDetail = () => {
                       </Box>
                     )}
                   </Box>
+
+                  {tour.tourPolicies && tour.tourPolicies.length > 0 && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                      {tour.tourPolicies.map((policy, index) => (
+                        <Box key={index} sx={{ mt: 1 }}>
+                          <Typography>
+                            Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}: 
+                            Hoàn {policy.refundPercent}% tổng tiền
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
                 </>
               )}
             </Paper>

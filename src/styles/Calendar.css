@@ -10,6 +10,14 @@
     padding: 5px;
   }
 
+  .react-calendar__navigation__label{
+    color: black;
+  }
+
+  .react-calendar__navigation__arrow{
+    color: black;
+  }
+
   .react-calendar__month-view__days__day abbr{
     color: black;
   }

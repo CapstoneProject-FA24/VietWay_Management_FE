@@ -4,21 +4,41 @@ import dayjs from 'dayjs';
 import { getCookie } from '@services/AuthenService';
 
 export const fetchToursByTemplateId = async (id) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/tours/get-by-template-id/${id}`);
+        const response = await axios.get(`${baseURL}/api/tours/get-by-template-id/${id}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
         const tours = response.data.data.map(item => ({
             id: item.tourId,
             tourTemplateId: item.tourTemplateId,
             startLocation: item.startLocation,
             startTime: new Date(item.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
             startDate: new Date(item.startDate),
-            price: item.price,
+            price: item.defaultTouristPrice,
             maxParticipant: item.maxParticipant,
             minParticipant: item.minParticipant,
             currentParticipant: item.currentParticipant,
-            status: item.status
+            status: item.status,
+            registerOpenDate: new Date(item.registerOpenDate),
+            registerCloseDate: new Date(item.registerCloseDate),
+            createdAt: new Date(item.createdAt),
+            totalBookings: item.totalBookings,
+            tourPolicies: item.tourPolicies.map(policy => ({
+                cancelBefore: new Date(policy.cancelBefore),
+                refundPercent: policy.refundPercent
+            })),
+            tourPrices: item.tourPrices.map(price => ({
+                priceId: price.priceId,
+                name: price.name,
+                price: price.price,
+                ageFrom: price.ageFrom,
+                ageTo: price.ageTo
+            }))
         }));
-        console.log(tours);
         return tours;
     } catch (error) {
         console.error('Error fetching tour:', error);
@@ -27,6 +47,7 @@ export const fetchToursByTemplateId = async (id) => {
 };
 
 export const fetchTours = async ({ params }) => {
+    const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
         queryParams.append('pageSize', params.pageSize);
@@ -40,7 +61,12 @@ export const fetchTours = async ({ params }) => {
         if (params.startDateFrom) queryParams.append('startDateFrom', params.startDateFrom);
         if (params.startDateTo) queryParams.append('startDateTo', params.startDateTo);
 
-        const response = await axios.get(`${baseURL}/api/tours?${queryParams}`);
+        const response = await axios.get(`${baseURL}/api/tours?${queryParams}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
         const tours = response.data.data.items.map(item => ({
             id: item.tourId,
             tourTemplateId: item.tourTemplateId,
@@ -71,8 +97,15 @@ export const fetchTours = async ({ params }) => {
 };
 
 export const fetchTourById = async (id) => {
+    const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/tours/${id}`);
+        const response = await axios.get(`${baseURL}/api/tours/${id}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
         const item = response.data.data;
         const tour = {
             id: item.tourId,
@@ -80,12 +113,28 @@ export const fetchTourById = async (id) => {
             startLocation: item.startLocation,
             startTime: new Date(item.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
             startDate: new Date(item.startDate),
-            price: item.price,
+            price: item.defaultTouristPrice,
             maxParticipant: item.maxParticipant,
             minParticipant: item.minParticipant,
             currentParticipant: item.currentParticipant,
-            status: item.status
+            status: item.status,
+            registerOpenDate: new Date(item.registerOpenDate),
+            registerCloseDate: new Date(item.registerCloseDate),
+            createdAt: new Date(item.createdAt),
+            totalBookings: item.totalBookings,
+            tourPolicies: item.tourPolicies.map(policy => ({
+                cancelBefore: new Date(policy.cancelBefore),
+                refundPercent: policy.refundPercent
+            })),
+            tourPrices: item.tourPrices.map(price => ({
+                priceId: price.priceId,
+                name: price.name,
+                price: price.price,
+                ageFrom: price.ageFrom,
+                ageTo: price.ageTo
+            }))
         };
+        console.log(tour);
         return tour;
     } catch (error) {
         console.error('Error fetching tour:', error);
@@ -95,7 +144,6 @@ export const fetchTourById = async (id) => {
 
 export const calculateEndDate = (startDate, startTime, duration) => {
     if (!startDate || !startTime || !duration || !duration.durationName) return null;
-
     try {
         const durationStr = duration.durationName;
         const nights = parseInt(durationStr.match(/\d+(?=\s*đêm)/)?.[0] || 0);
@@ -116,10 +164,13 @@ export const calculateEndDate = (startDate, startTime, duration) => {
         } else {
             totalDuration = days;
         }
-
+        
+        // Parse startTime string into hours and minutes
+        const [hours, minutes] = startTime.split(':').map(Number);
+        
         const startDateTime = dayjs(startDate)
-            .hour(startTime.hour())
-            .minute(startTime.minute());
+            .hour(hours)
+            .minute(minutes);
 
         return {
             endDate: startDateTime.add(totalDuration, 'day'),
@@ -132,6 +183,7 @@ export const calculateEndDate = (startDate, startTime, duration) => {
 };
 
 export const createTour = async (tourData) => {
+    const token = getCookie('token');
     try {
         const startDateTime = dayjs(tourData.startDate)
             .hour(tourData.startTime.hour())
@@ -156,7 +208,12 @@ export const createTour = async (tourData) => {
             }))
         };
 
-        const response = await axios.post(`${baseURL}/api/tours`, formattedData);
+        const response = await axios.post(`${baseURL}/api/tours`, formattedData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
         return response.data;
     } catch (error) {
         console.error('Error creating tour:', error);

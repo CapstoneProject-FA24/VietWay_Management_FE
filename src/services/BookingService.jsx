@@ -2,7 +2,7 @@ import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
 import { getCookie } from '@services/AuthenService';
 
-export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contactNameSearch, contactPhoneSearch, bookingStatus) => {
+export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contactNameSearch, contactPhoneSearch, bookingStatus, tourId) => {
     try {
         const response = await axios.get(`${baseURL}/api/booking`, {
             params: {
@@ -11,7 +11,8 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
                 bookingIdSearch,
                 contactNameSearch,
                 contactPhoneSearch,
-                bookingStatus
+                bookingStatus,
+                tourId
             },
             headers: {
                 'Authorization': `Bearer ${getCookie('token')}`
