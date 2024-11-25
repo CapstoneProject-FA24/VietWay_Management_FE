@@ -8,6 +8,11 @@ import { Snackbar, Alert } from '@mui/material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { BookingStatus } from '@hooks/Statuses';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 const ManageBooking = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -21,6 +26,11 @@ const ManageBooking = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [sortOrder, setSortOrder] = useState('newest');
+  const [cancelDialog, setCancelDialog] = useState({
+    open: false,
+    bookingId: null,
+    reason: ''
+  });
   const navigate = useNavigate();
 
   const statusDisplay = {
@@ -82,7 +92,11 @@ const ManageBooking = () => {
   };
 
   const handleDelete = async (id) => {
-    showSnackbar('Chức năng đang được phát triển', 'info');
+    setCancelDialog({
+      open: true,
+      bookingId: id,
+      reason: ''
+    });
   };
 
   const handleViewDetails = (id) => {
@@ -134,6 +148,23 @@ const ManageBooking = () => {
       else{
         showSnackbar('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'error');
       }
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    try {
+      await cancelBooking(cancelDialog.bookingId, cancelDialog.reason);
+      showSnackbar('Hủy booking thành công', 'success');
+      fetchBookings(); // Refresh the list
+    } catch (error) {
+      console.error('Error canceling booking:', error);
+      showSnackbar(error.response?.data?.message || 'Có lỗi xảy ra khi hủy booking', 'error');
+    } finally {
+      setCancelDialog({
+        open: false,
+        bookingId: null,
+        reason: ''
+      });
     }
   };
 
@@ -258,6 +289,7 @@ const ManageBooking = () => {
                 onDelete={handleDelete}
                 onViewDetails={handleViewDetails}
                 onRefund={handleRefund}
+                onRefresh={fetchBookings}
               />
             </Grid>
           ))}

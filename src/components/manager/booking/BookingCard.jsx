@@ -14,9 +14,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
-import { createRefundTransaction } from '@services/BookingService';
+import { createRefundTransaction, cancelBooking } from '@services/BookingService';
 
-const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
+const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openRefundDialog, setOpenRefundDialog] = useState(false);
   const [refundData, setRefundData] = useState({
@@ -25,15 +25,31 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
     bankTransactionNumber: '',
     payTime: dayjs()
   });
+  const [cancelDialog, setCancelDialog] = useState({
+    reason: ''
+  });
   const statusInfo = getBookingStatusInfo(booking.status);
 
   const handleClickDelete = () => {
     setOpenDialog(true);
   };
 
-  const handleConfirmDelete = () => {
-    onDelete(booking.bookingId);
-    setOpenDialog(false);
+  const handleConfirmDelete = async () => {
+    try {
+      await cancelBooking(booking.bookingId, cancelDialog.reason);
+      setOpenDialog(false);
+      // Reset form
+      setCancelDialog({ reason: '' });
+      // Call onRefresh instead of onDelete
+      onRefresh();
+    } catch (error) {
+      console.error('Error canceling booking:', error);
+      if (error.response?.data?.message) {
+        onDelete(booking.bookingId, error.response.data.message);
+      } else {
+        onDelete(booking.bookingId, 'Có lỗi xảy ra khi hủy booking');
+      }
+    }
   };
 
   const handleRefund = () => {
@@ -47,26 +63,32 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
     }));
   };
 
-  const handleConfirmRefund = () => {
+  const handleConfirmRefund = async () => {
     if (!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime) {
       return;
     }
 
-    onRefund(booking.bookingId, {
-      note: refundData.note.trim(),
-      bankCode: refundData.bankCode,
-      bankTransactionNumber: refundData.bankTransactionNumber.trim(),
-      payTime: refundData.payTime // dayjs object
-    });
-
-    setOpenRefundDialog(false);
-    // Reset form
-    setRefundData({
-      note: '',
-      bankCode: '',
-      bankTransactionNumber: '',
-      payTime: dayjs()
-    });
+    try {
+      await onRefund(booking.bookingId, {
+        note: refundData.note.trim(),
+        bankCode: refundData.bankCode,
+        bankTransactionNumber: refundData.bankTransactionNumber.trim(),
+        payTime: refundData.payTime // dayjs object
+      });
+      
+      setOpenRefundDialog(false);
+      // Reset form
+      setRefundData({
+        note: '',
+        bankCode: '',
+        bankTransactionNumber: '',
+        payTime: dayjs()
+      });
+      // Refresh data after successful refund
+      onRefresh();
+    } catch (error) {
+      console.error('Error during refund:', error);
+    }
   };
 
   const formatDateTime = (dateString) => {
@@ -118,7 +140,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
-                    {booking.status === BookingStatus.PendingRefund && (
+                    {/* {booking.status === BookingStatus.PendingRefund && (
                       <Button
                         variant="contained"
                         color="warning"
@@ -126,7 +148,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
                       >
                         Hoàn tiền
                       </Button>
-                    )}
+                    )} */}
                   </CardActions>
                 </Box>
               </Grid>
@@ -157,16 +179,33 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund }) => {
         </Grid>
       </CardContent>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Xác nhận hủy booking</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Bạn có chắc chắn muốn hủy booking này?
+            Bạn có chắc chắn muốn hủy booking này? Vui lòng nhập lý do hủy booking.
           </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do hủy"
+            fullWidth
+            multiline
+            rows={3}
+            value={cancelDialog.reason}
+            onChange={(e) => setCancelDialog(prev => ({ ...prev, reason: e.target.value }))}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
-          <Button onClick={handleConfirmDelete} color="error" autoFocus>Xác nhận</Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            autoFocus
+            disabled={!cancelDialog.reason.trim()}
+          >
+            Xác nhận
+          </Button>
         </DialogActions>
       </Dialog>
 

@@ -128,3 +128,21 @@ export const fetchBookingById = async (bookingId) => {
         throw error;
     }
 };
+
+export const cancelBooking = async (bookingId, reason) => {
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/booking/${bookingId}`, 
+            { reason },
+            {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error canceling booking:', error.response);
+        throw error;
+    }
+};
