@@ -30,7 +30,69 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedDateObj, setSelectedDateObj] = useState(null);
     const [isConfirmChangeOpen, setIsConfirmChangeOpen] = useState(false);
-    const [availableDates] = useState(tour.availableDates || []);
+    const [availableDates] = useState(tour.tours?.map(t => ({
+        id: t.tourId,
+        startDate: t.startDate,
+        startLocation: t.startLocation,
+        prices: [
+            {
+                priceId: 'adult',
+                name: 'Người lớn',
+                price: t.defaultTouristPrice,
+                description: 'Giá người lớn'
+            },
+            ...(t.tourPrices?.map(price => ({
+                priceId: price.priceId,
+                name: price.name,
+                price: price.price,
+                description: `Độ tuổi: ${price.ageFrom || 0} - ${price.ageTo || 'không giới hạn'}`
+            })) || [])
+        ]
+    })) || []);
+
+    const [calculatedTotal, setCalculatedTotal] = useState(0);
+
+    const calculatePriceForTourist = (tourist, prices) => {
+        const birthDate = new Date(tourist.dateOfBirth);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+
+        // Find matching price category based on age
+        const matchingPrice = prices.find(price => {
+            const meetsMinAge = price.ageFrom === null || age >= price.ageFrom;
+            const meetsMaxAge = price.ageTo === null || age <= price.ageTo;
+            return meetsMinAge && meetsMaxAge;
+        });
+
+        // If no matching price found, use default adult price
+        return matchingPrice?.price || selectedDateObj?.prices.find(p => p.priceId === 'adult')?.price || 0;
+    };
+
+    const calculateTouristGroups = () => {
+        if (!booking?.tourists || !selectedDateObj?.prices) return {};
+        
+        const groups = {};
+        
+        booking.tourists.forEach(tourist => {
+            const price = calculatePriceForTourist(tourist, selectedDateObj.prices);
+            const matchingPriceCategory = selectedDateObj.prices.find(p => p.price === price);
+            
+            const categoryName = matchingPriceCategory?.name || 'Người lớn';
+            
+            if (!groups[categoryName]) {
+                groups[categoryName] = {
+                    count: 0,
+                    pricePerPerson: price,
+                    total: 0
+                };
+            }
+            
+            groups[categoryName].count++;
+            groups[categoryName].total += price;
+        });
+
+        return groups;
+    };
 
     // Handle expand click
     const handleExpandClick = () => {
@@ -49,14 +111,14 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
         setSelectedTab(newValue);
     };
 
-    // Tính tổng tiền cho từng loại khách
+    // Calculate total price for each type of participant
     const calculatePriceDetails = () => {
         if (!selectedDateObj?.prices || !booking) return null;
-        
+
         const priceDetails = {};
-        Object.entries(selectedDateObj.prices).forEach(([key, priceInfo]) => {
+        selectedDateObj.prices.forEach(priceInfo => {
             if (priceInfo.price) {
-                priceDetails[key] = {
+                priceDetails[priceInfo.name] = {
                     ...priceInfo,
                     quantity: booking.numberOfParticipants || 0,
                     total: (booking.numberOfParticipants || 0) * priceInfo.price
@@ -84,9 +146,9 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 borderRadius: 2,
                 transition: 'all 0.3s ease',
                 bgcolor: 'background.paper',
-                '&:hover': { 
-                    transform: 'translateY(-4px)', 
-                    boxShadow: theme.shadows[4] 
+                '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme.shadows[4]
                 }
             }}>
                 {/* Main Card Content */}
@@ -144,11 +206,11 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                             </Box>
 
                             {/* Booking Section */}
-                            <Box sx={{ 
-                                display: 'flex', 
-                                alignItems: 'flex-start', 
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
                                 gap: 2,
-                                mt: 'auto' 
+                                mt: 'auto'
                             }}>
                                 {/* Date Selection Dropdown */}
                                 <Select
@@ -163,8 +225,8 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                                         Chọn ngày khởi hành
                                     </MenuItem>
                                     {availableDates?.map((date) => (
-                                        <MenuItem 
-                                            key={date.id} 
+                                        <MenuItem
+                                            key={date.id}
                                             value={date.id}
                                             sx={{
                                                 display: 'flex',
@@ -173,7 +235,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                                                 py: 1
                                             }}
                                         >
-                                            <Box sx={{ 
+                                            <Box sx={{
                                                 width: '100%',
                                                 display: 'flex',
                                                 justifyContent: 'space-between',
@@ -182,25 +244,28 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                                                 <Typography variant="subtitle2">
                                                     {date.startDate}
                                                 </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {date.startLocation}
+                                                </Typography>
                                             </Box>
                                             <Box sx={{ width: '100%' }}>
-                                                {date.prices && Object.entries(date.prices).map(([key, priceInfo]) => (
-                                                    <Box 
-                                                        key={key}
-                                                        sx={{ 
-                                                            display: 'flex', 
+                                                {date.prices?.map((priceInfo) => (
+                                                    <Box
+                                                        key={priceInfo.priceId}
+                                                        sx={{
+                                                            display: 'flex',
                                                             justifyContent: 'space-between',
                                                             alignItems: 'center',
                                                             mb: 0.5
                                                         }}
                                                     >
-                                                        <Tooltip title={priceInfo.description}>
+                                                        <Tooltip title={priceInfo.description || ''}>
                                                             <Typography variant="body2" color="text.secondary">
                                                                 {priceInfo.name}
                                                             </Typography>
                                                         </Tooltip>
-                                                        <Typography 
-                                                            variant="body2" 
+                                                        <Typography
+                                                            variant="body2"
                                                             color="primary.main"
                                                             sx={{ fontWeight: 500 }}
                                                         >
@@ -215,20 +280,21 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
 
                                 {/* Booking Calculation Box */}
                                 {selectedDate && booking && selectedDateObj && (
-                                    <BookingCalBox 
+                                    <BookingCalBox
                                         booking={booking}
                                         selectedDateObj={selectedDateObj}
                                         calculatePriceDetails={calculatePriceDetails}
                                         getTotalAmount={getTotalAmount}
+                                        onTotalCalculated={setCalculatedTotal}
                                     />
                                 )}
 
                                 {/* Book Button */}
-                                <Button 
+                                <Button
                                     variant="contained"
                                     disabled={!selectedDate}
                                     onClick={handleBookClick}
-                                    sx={{ 
+                                    sx={{
                                         textTransform: 'none',
                                         minWidth: 120
                                     }}
@@ -268,7 +334,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         >
                             <Tab icon={<Description sx={{ mr: 1 }} />} label="Tổng quan" iconPosition="start" />
                             <Tab icon={<Schedule sx={{ mr: 1 }} />} label="Lịch trình" iconPosition="start" />
-                            <Tab icon={<Policy sx={{ mr: 1 }} />} label="Chính sách" iconPosition="start" />
+                            <Tab icon={<Policy sx={{ mr: 1 }} />} label="Chính sách hoàn tiền" iconPosition="start" />
                             <Tab icon={<InfoOutlined sx={{ mr: 1 }} />} label="Lưu ý" iconPosition="start" />
                         </Tabs>
 
@@ -296,15 +362,15 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         {selectedTab === 1 && (
                             <Box sx={{ p: 3 }}>
                                 <Timeline>
-                                    {tour.schedule?.map((day, index) => (
+                                    {tour.schedules?.map((day, index) => (
                                         <TimelineItem key={index}>
-                                            <TimelineSeparator>
+                                            <TimelineSeparator sx={{ ml: '-100%' }}>
                                                 <TimelineDot color="primary" />
-                                                {index < tour.schedule.length - 1 && <TimelineConnector />}
+                                                {index < tour.schedules.length - 1 && <TimelineConnector />}
                                             </TimelineSeparator>
                                             <TimelineContent>
                                                 <Typography variant="h6" component="span">
-                                                    Ngày {index + 1}
+                                                    Ngày {day.dayNumber} - {day.title}
                                                 </Typography>
                                                 <Typography>{day.description}</Typography>
                                             </TimelineContent>
@@ -317,13 +383,12 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         {/* Chính sách */}
                         {selectedTab === 2 && (
                             <Box sx={{ p: 3 }}>
-                                <Typography variant="h6" gutterBottom>Chính sách tour:</Typography>
-                                {tour.policies?.map((policy, index) => (
-                                    <Box key={index} sx={{ mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-                                            {policy.title}
+                                <Typography variant="h6" gutterBottom>Chính sách hoàn tiền:</Typography>
+                                {tour.tours?.[0]?.tourPolicies?.map((policy, index) => (
+                                    <Box key={index} sx={{ mb: 2, display: 'flex' }}>
+                                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                                            Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN')} - Hoàn tiền {policy.refundPercent}%
                                         </Typography>
-                                        <Typography>{policy.content}</Typography>
                                     </Box>
                                 ))}
                             </Box>
@@ -333,12 +398,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         {selectedTab === 3 && (
                             <Box sx={{ p: 3 }}>
                                 <Typography variant="h6" gutterBottom>Lưu ý quan trọng:</Typography>
-                                {tour.notes?.map((note, index) => (
-                                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                        <Circle sx={{ fontSize: 8, color: 'primary.main' }} />
-                                        <Typography>{note}</Typography>
-                                    </Box>
-                                ))}
+                                <Typography>{tour.note}</Typography>
                             </Box>
                         )}
                     </Box>
@@ -350,18 +410,20 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 onClose={() => setIsConfirmChangeOpen(false)}
                 currentBooking={booking}
                 newTour={{
-                    name: tour.name,
-                    code: tour.code,
+                    duration: tour.duration,
+                    tourName: tour.tourName,
+                    provinces: tour.provinces,
                     startDate: selectedDateObj?.startDate,
-                    departureLocation: tour.departureLocation,
-                    totalPrice: selectedDateObj ? getTotalAmount(calculatePriceDetails()) : 0
+                    startLocation: selectedDateObj?.startLocation,
+                    totalPrice: calculatedTotal
                 }}
                 onConfirm={() => {
                     if (!selectedDate || !selectedDateObj) return;
-                    onSelect({ 
-                        ...tour, 
+                    onSelect({
+                        ...tour,
                         selectedDate: selectedDateObj.startDate,
-                        prices: selectedDateObj.prices 
+                        startLocation: selectedDateObj.startLocation,
+                        prices: selectedDateObj.prices
                     });
                     setIsConfirmChangeOpen(false);
                 }}

@@ -329,6 +329,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
         open={isChangeBookingOpen}
         onClose={() => setIsChangeBookingOpen(false)}
         onTourSelect={handleTourSelect}
+        booking={booking}
       />
     </Card>
   );

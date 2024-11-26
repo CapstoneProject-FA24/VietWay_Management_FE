@@ -1,4 +1,4 @@
-import { Card, CardContent, CardActions, Typography, Button, Chip, Box, Grid } from '@mui/material';
+import { Card, CardContent, CardActions, Typography, Button, Chip, Box, Grid, FormControl, InputLabel, FormHelperText } from '@mui/material';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -7,34 +7,117 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useState } from 'react';
 import { getBookingStatusInfo } from '@services/StatusService';
 import { BookingStatus } from '@hooks/Statuses';
+import { bankData } from '@hooks/Bank';
+import { TextField, Select, MenuItem } from '@mui/material';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+import { createRefundTransaction, cancelBooking } from '@services/BookingService';
 import ChangeBooking from '@components/booking/ChangeBooking';
 
-const BookingCard = ({ booking, onDelete, onViewDetails }) => {
+const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) => {
   const [openDialog, setOpenDialog] = useState(false);
-  const [isChangeBookingOpen, setIsChangeBookingOpen] = useState(false);
+  const [openRefundDialog, setOpenRefundDialog] = useState(false);
+  const [refundData, setRefundData] = useState({
+    note: '',
+    bankCode: '',
+    bankTransactionNumber: '',
+    payTime: dayjs()
+  });
+  const [cancelDialog, setCancelDialog] = useState({
+    reason: ''
+  });
+  const [refundErrors, setRefundErrors] = useState({});
   const statusInfo = getBookingStatusInfo(booking.status);
+  const [isChangeBookingOpen, setIsChangeBookingOpen] = useState(false);
 
   const handleClickDelete = () => {
     setOpenDialog(true);
   };
 
-  const handleConfirmDelete = () => {
-    onDelete(booking.bookingId);
-    setOpenDialog(false);
+  const handleConfirmDelete = async () => {
+    try {
+      await cancelBooking(booking.bookingId, cancelDialog.reason);
+      setOpenDialog(false);
+      // Reset form
+      setCancelDialog({ reason: '' });
+      // Call onRefresh instead of onDelete
+      onRefresh();
+    } catch (error) {
+      console.error('Error canceling booking:', error);
+      if (error.response?.data?.message) {
+        onDelete(booking.bookingId, error.response.data.message);
+      } else {
+        onDelete(booking.bookingId, 'Có lỗi xảy ra khi hủy booking');
+      }
+    }
+  };
+
+  const handleRefund = () => {
+    setOpenRefundDialog(true);
+  };
+
+  const handleRefundDataChange = (field, value) => {
+    setRefundData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const validateRefundData = () => {
+    const errors = {};
+    
+    if (!refundData.bankCode) {
+      errors.bankCode = 'Vui lòng chọn ngân hàng';
+    }
+    
+    if (!refundData.bankTransactionNumber) {
+      errors.bankTransactionNumber = 'Vui lòng nhập mã giao dịch';
+    }
+    
+    if (!refundData.payTime) {
+      errors.payTime = 'Vui lòng chọn thời gian hoàn tiền';
+    } else if (dayjs(refundData.payTime).isAfter(dayjs())) {
+      errors.payTime = 'Thời gian hoàn tiền không thể sau thời điểm hiện tại';
+    }
+
+    return errors;
+  };
+
+  const handleConfirmRefund = async () => {
+    const errors = validateRefundData();
+    if (Object.keys(errors).length > 0) {
+      // Set errors to state to display them
+      setRefundErrors(errors);
+      return;
+    }
+
+    try {
+      await onRefund(booking.bookingId, {
+        note: refundData.note.trim(),
+        bankCode: refundData.bankCode,
+        bankTransactionNumber: refundData.bankTransactionNumber.trim(),
+        payTime: refundData.payTime
+      });
+      
+      setOpenRefundDialog(false);
+      setRefundErrors({}); // Clear any errors
+      setRefundData({
+        note: '',
+        bankCode: '',
+        bankTransactionNumber: '',
+        payTime: dayjs()
+      });
+      onRefresh();
+    } catch (error) {
+      console.error('Error during refund:', error);
+    }
   };
 
   const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    const formattedDate = date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    const formattedTime = date.toLocaleString('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    return `${formattedDate} ${formattedTime}`;
+    return dayjs(dateString).format('DD/MM/YYYY HH:mm');
   };
 
   const handleChangeTour = () => {
@@ -43,6 +126,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
 
   const handleTourSelect = (selectedTour) => {
     console.log('Selected new tour:', selectedTour);
+    // Here you would implement the logic to change the tour
     setIsChangeBookingOpen(false);
   };
 
@@ -97,6 +181,15 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
+                    {/* {booking.status === BookingStatus.PendingRefund && (
+                      <Button
+                        variant="contained"
+                        color="warning"
+                        onClick={handleRefund}
+                      >
+                        Hoàn tiền
+                      </Button>
+                    )} */}
                   </CardActions>
                 </Box>
               </Grid>
@@ -109,15 +202,15 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
             <Typography sx={{ fontWeight: 'bold', fontSize: '1.3rem', mb: 1 }}> Thông tin tour:</Typography>
             <Box sx={{ display: 'flex' }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Tour:</Typography>
-              <Typography>{booking.tour?.name}</Typography>
+              <Typography>{booking.tourName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', mt: 1 }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Mã tour:</Typography>
-              <Typography>{booking.code}</Typography>
+              <Typography>{booking.tourCode}</Typography>
             </Box>
             <Box sx={{ display: 'flex', mt: 1 }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Khởi hành lúc:</Typography>
-              <Typography>{formatDateTime(booking.tour?.startDate)}</Typography>
+              <Typography>{formatDateTime(booking.startDate)}</Typography>
             </Box>
             <Box sx={{ display: 'flex', mt: 1 }}>
               <Typography color="text.secondary" sx={{ fontWeight: 'bold', mr: 1 }}>Khởi hành từ:</Typography>
@@ -127,16 +220,108 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
         </Grid>
       </CardContent>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Xác nhận hủy booking</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Bạn có chắc chắn muốn hủy booking này?
+            Bạn có chắc chắn muốn hủy booking này? Vui lòng nhập lý do hủy booking.
           </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do hủy"
+            fullWidth
+            multiline
+            rows={3}
+            value={cancelDialog.reason}
+            onChange={(e) => setCancelDialog(prev => ({ ...prev, reason: e.target.value }))}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
-          <Button onClick={handleConfirmDelete} color="error" autoFocus>Xác nhận</Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            autoFocus
+            disabled={!cancelDialog.reason.trim()}
+          >
+            Xác nhận
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openRefundDialog} onClose={() => setOpenRefundDialog(false)}>
+        <DialogTitle>Hoàn tiền booking</DialogTitle>
+        <DialogContent>
+          <FormControl fullWidth sx={{ mt: 2 }} error={!!refundErrors.bankCode}>
+            <InputLabel>Ngân hàng</InputLabel>
+            <Select
+              value={refundData.bankCode}
+              onChange={(e) => setRefundData(prev => ({ ...prev, bankCode: e.target.value }))}
+              label="Ngân hàng"
+            >
+              <MenuItem value="VCB">Vietcombank</MenuItem>
+              <MenuItem value="TCB">Techcombank</MenuItem>
+              {/* Add other banks as needed */}
+            </Select>
+            {refundErrors.bankCode && (
+              <FormHelperText>{refundErrors.bankCode}</FormHelperText>
+            )}
+          </FormControl>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Mã giao dịch"
+            value={refundData.bankTransactionNumber}
+            onChange={(e) => setRefundData(prev => ({ ...prev, bankTransactionNumber: e.target.value }))}
+            error={!!refundErrors.bankTransactionNumber}
+            helperText={refundErrors.bankTransactionNumber}
+          />
+
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateTimePicker
+              label="Thời gian hoàn tiền"
+              value={refundData.payTime}
+              onChange={(newValue) => setRefundData(prev => ({ ...prev, payTime: newValue }))}
+              maxDateTime={dayjs()}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  margin: "dense",
+                  error: !!refundErrors.payTime,
+                  helperText: refundErrors.payTime
+                }
+              }}
+            />
+          </LocalizationProvider>
+
+          <TextField
+            fullWidth
+            margin="dense"
+            label="Ghi chú"
+            multiline
+            rows={3}
+            value={refundData.note}
+            onChange={(e) => setRefundData(prev => ({ ...prev, note: e.target.value }))}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {
+            setOpenRefundDialog(false);
+            setRefundErrors({});
+            setRefundData({
+              note: '',
+              bankCode: '',
+              bankTransactionNumber: '',
+              payTime: dayjs()
+            });
+          }}>
+            Hủy
+          </Button>
+          <Button onClick={handleConfirmRefund} variant="contained">
+            Xác nhận
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -144,6 +329,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
         open={isChangeBookingOpen}
         onClose={() => setIsChangeBookingOpen(false)}
         onTourSelect={handleTourSelect}
+        booking={booking}
       />
     </Card>
   );
