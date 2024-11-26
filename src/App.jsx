@@ -31,6 +31,8 @@ import ManagerManagePost from '@pages/manager/post/ManagerManagePost.jsx';
 import ManagerPostDetail from '@pages/manager/post/ManagerPostDetail.jsx';
 import ManageBooking from '@pages/manager/booking/ManageBooking.jsx';
 import ManageBookingDetail from '@pages/manager/booking/ManageBookingDetail.jsx';
+import ManageBookingStaff from '@pages/staff/booking/ManageBookingStaff.jsx';
+import ManageBookingDetailStaff from '@pages/staff/booking/ManageBookingDetailStaff.jsx';
 
 const App = () => {
   return (
@@ -72,6 +74,8 @@ const App = () => {
         <Route path="/nhan-vien/bai-viet/chi-tiet/:id" element={<PostDetail />} />
         <Route path="/nhan-vien/thong-tin-tai-khoan" element={<StaffProfile />} />
         <Route path="/nhan-vien/bai-viet/them" element={<CreatePost />} />
+        <Route path="/nhan-vien/booking" element={<ManageBookingStaff />} />
+        <Route path="/nhan-vien/booking/chi-tiet/:id" element={<ManageBookingDetailStaff />} />
       </Routes>
     </Router>
   );
