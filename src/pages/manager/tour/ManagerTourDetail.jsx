@@ -4,7 +4,7 @@ import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, Dialog
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus } from '@services/TourService';
+import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus, cancelTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -40,6 +40,8 @@ const ManagerTourDetail = () => {
   });
   const [view, setView] = useState('details'); // 'details' or 'edit'
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,9 +119,35 @@ const ManagerTourDetail = () => {
     }
   };
 
-  const handleDeleteTour = async () => {
-    // Add your logic to delete the tour
-    console.log('Tour deleted');
+  const handleDeleteTour = () => {
+    setOpenCancelDialog(true);
+  };
+
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
+    setCancelReason('');
+  };
+
+  const handleConfirmCancel = async () => {
+    try {
+      await cancelTour(id, cancelReason);
+      const updatedTour = await fetchTourById(id);
+      setTour(updatedTour);
+      setOpenCancelDialog(false);
+      setCancelReason('');
+      setSnackbar({
+        open: true,
+        message: 'Đã hủy tour thành công',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error canceling tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi hủy tour',
+        severity: 'error'
+      });
+    }
   };
 
   const handleOpenRejectDialog = () => {
@@ -244,7 +272,7 @@ const ManagerTourDetail = () => {
               {( tour?.status == TourStatus.Accepted || tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed ) && (
                 <Button
                   variant="contained"
-                  onClick={() => handleDeleteTour()}
+                  onClick={handleDeleteTour}
                   color="warning"
                   sx={{ height: '45px' }}
                 >
@@ -398,7 +426,7 @@ const ManagerTourDetail = () => {
             fullWidth
             multiline
             rows={4}
-            sx={{ width: '30rem' }}
+            sx={{ minWidth: '30rem' }}
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
           />
@@ -412,6 +440,46 @@ const ManagerTourDetail = () => {
             disabled={!rejectReason.trim()}
           >
             Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openCancelDialog} onClose={handleCloseCancelDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>Xác nhận hủy tour</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ mb: 2 }}>
+            Bạn có chắc chắn muốn hủy tour này? Hành động này không thể hoàn tác.
+          </Typography>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Lý do hủy"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            sx={{ minWidth: '30rem' }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button 
+            onClick={handleCloseCancelDialog}
+            sx={{ color: '#666666' }}
+          >
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmCancel}
+            variant="contained"
+            disabled={!cancelReason.trim()}
+            sx={{ 
+              backgroundColor: '#DC2626', 
+              '&:hover': { backgroundColor: '#B91C1C' }
+            }}
+          >
+            Xác nhận hủy
           </Button>
         </DialogActions>
       </Dialog>

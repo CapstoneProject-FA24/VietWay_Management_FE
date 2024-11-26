@@ -276,3 +276,22 @@ export const updateTour = async (tourId, tourData) => {
         throw error;
     }
 };
+
+
+export const cancelTour = async (tourId, reason) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(`${baseURL}/api/tours/cancel-tour/${tourId}`, 
+            { reason },
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error canceling tour:', error);
+        throw error;
+    }
+};
