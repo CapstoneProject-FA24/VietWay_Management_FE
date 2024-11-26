@@ -7,9 +7,11 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useState } from 'react';
 import { getBookingStatusInfo } from '@services/StatusService';
 import { BookingStatus } from '@hooks/Statuses';
+import ChangeBooking from '@components/booking/ChangeBooking';
 
 const BookingCard = ({ booking, onDelete, onViewDetails }) => {
   const [openDialog, setOpenDialog] = useState(false);
+  const [isChangeBookingOpen, setIsChangeBookingOpen] = useState(false);
   const statusInfo = getBookingStatusInfo(booking.status);
 
   const handleClickDelete = () => {
@@ -33,6 +35,15 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
       minute: '2-digit'
     });
     return `${formattedDate} ${formattedTime}`;
+  };
+
+  const handleChangeTour = () => {
+    setIsChangeBookingOpen(true);
+  };
+
+  const handleTourSelect = (selectedTour) => {
+    console.log('Selected new tour:', selectedTour);
+    setIsChangeBookingOpen(false);
   };
 
   return (
@@ -76,7 +87,13 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
                     <Button variant="outlined" onClick={() => onViewDetails(booking.bookingId)}>Chi tiết</Button>
                     {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
                       <>
-                        <Button variant="contained" color="primary" >Đổi tour</Button>
+                        <Button 
+                          variant="contained" 
+                          color="primary" 
+                          onClick={handleChangeTour}
+                        >
+                          Đổi tour
+                        </Button>
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
@@ -122,6 +139,12 @@ const BookingCard = ({ booking, onDelete, onViewDetails }) => {
           <Button onClick={handleConfirmDelete} color="error" autoFocus>Xác nhận</Button>
         </DialogActions>
       </Dialog>
+
+      <ChangeBooking 
+        open={isChangeBookingOpen}
+        onClose={() => setIsChangeBookingOpen(false)}
+        onTourSelect={handleTourSelect}
+      />
     </Card>
   );
 };

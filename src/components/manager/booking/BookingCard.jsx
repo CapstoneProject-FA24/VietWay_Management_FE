@@ -15,6 +15,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { createRefundTransaction, cancelBooking } from '@services/BookingService';
+import ChangeBooking from '@components/booking/ChangeBooking';
 
 const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -30,6 +31,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
   });
   const [refundErrors, setRefundErrors] = useState({});
   const statusInfo = getBookingStatusInfo(booking.status);
+  const [isChangeBookingOpen, setIsChangeBookingOpen] = useState(false);
 
   const handleClickDelete = () => {
     setOpenDialog(true);
@@ -118,6 +120,16 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
     return dayjs(dateString).format('DD/MM/YYYY HH:mm');
   };
 
+  const handleChangeTour = () => {
+    setIsChangeBookingOpen(true);
+  };
+
+  const handleTourSelect = (selectedTour) => {
+    console.log('Selected new tour:', selectedTour);
+    // Here you would implement the logic to change the tour
+    setIsChangeBookingOpen(false);
+  };
+
   return (
     <Card sx={{ pt: 1, pl: 1, pr: 1 }}>
       <CardContent>
@@ -159,7 +171,13 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
                     <Button variant="outlined" onClick={() => onViewDetails(booking.bookingId)}>Chi tiết</Button>
                     {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
                       <>
-                        <Button variant="contained" color="primary" >Đổi tour</Button>
+                        <Button 
+                          variant="contained" 
+                          color="primary" 
+                          onClick={handleChangeTour}
+                        >
+                          Đổi tour
+                        </Button>
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
@@ -306,6 +324,12 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ChangeBooking 
+        open={isChangeBookingOpen}
+        onClose={() => setIsChangeBookingOpen(false)}
+        onTourSelect={handleTourSelect}
+      />
     </Card>
   );
 };
