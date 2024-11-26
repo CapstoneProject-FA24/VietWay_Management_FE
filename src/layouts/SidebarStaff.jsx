@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import HomeIcon from '@mui/icons-material/Home';
-import PeopleIcon from '@mui/icons-material/People';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AttractionsIcon from '@mui/icons-material/Attractions';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArticleIcon from '@mui/icons-material/Article';
-import EventIcon from '@mui/icons-material/Event';
 import SettingsIcon from '@mui/icons-material/Settings';
+import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
@@ -133,6 +131,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
             { text: 'Điểm Tham Quan', url: '/nhan-vien/diem-tham-quan', icon: <AttractionsIcon /> },
             { text: 'Tour Mẫu', url: '/nhan-vien/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour Du Lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
+            { text: 'Booking', url: '/nhan-vien/booking', icon: <AirplaneTicketIcon /> },
             { text: 'Bài viết', url: '/nhan-vien/bai-viet', icon: <ArticleIcon /> },
           ].map(({ text, url, icon }) => (
             <ListItem
