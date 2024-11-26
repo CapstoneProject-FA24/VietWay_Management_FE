@@ -82,23 +82,49 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
     return { childPrice, infantPrice };
   };
 
-  // Add price change handler
+  // Update handlePriceChange to ensure positive values
   const handlePriceChange = (e) => {
     const newAdultPrice = e.target.value;
-    if (newAdultPrice === '') {
-      setTourData(prev => ({
-        ...prev, defaultTouristPrice: '', tourPrices: [{ ...prev.tourPrices[0], price: '' }, { ...prev.tourPrices[1], price: '' }]
-      }));
-      return;
+    
+    // Allow empty or positive numbers only
+    if (newAdultPrice === '' || Number(newAdultPrice) >= 0) {
+      if (newAdultPrice === '') {
+        setTourData(prev => ({
+          ...prev,
+          defaultTouristPrice: '',
+          tourPrices: [
+            { ...prev.tourPrices[0], price: '' },
+            { ...prev.tourPrices[1], price: '' }
+          ]
+        }));
+        return;
+      }
+
+      // Always update the adult price
+      setTourData(prev => ({ ...prev, defaultTouristPrice: newAdultPrice }));
+
+      // Only calculate child/infant prices if the adult price is valid
+      if (validatePrice(Number(newAdultPrice), minPrice, maxPrice)) {
+        const roundedPrice = roundToThousand(Number(newAdultPrice));
+        const { childPrice, infantPrice } = calculatePrices(roundedPrice);
+        setTourData(prev => ({
+          ...prev,
+          tourPrices: [
+            { ...prev.tourPrices[0], price: childPrice.toString() },
+            { ...prev.tourPrices[1], price: infantPrice.toString() }
+          ]
+        }));
+      }
     }
+  };
 
-    setTourData(prev => ({ ...prev, defaultTouristPrice: newAdultPrice }));
-
-    if (validatePrice(newAdultPrice, tour.tourTemplate?.minPrice, tour.tourTemplate?.maxPrice)) {
-      const { childPrice, infantPrice } = calculatePrices(Number(newAdultPrice));
-      setTourData(prev => ({
-        ...prev, tourPrices: [{ ...prev.tourPrices[0], price: childPrice.toString() }, { ...prev.tourPrices[1], price: infantPrice.toString() }]
-      }));
+  // Update handlePriceTypeChange to ensure positive values
+  const handlePriceTypeChange = (index, value) => {
+    // Allow empty or positive numbers only
+    if (value === '' || Number(value) >= 0) {
+      const newPrices = [...tourData.tourPrices];
+      newPrices[index] = { ...newPrices[index], price: value };
+      setTourData(prev => ({ ...prev, tourPrices: newPrices }));
     }
   };
 
@@ -130,18 +156,18 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
 
     if (!tourData.tourPrices[0].price) {
       newErrors.childPrice = "Vui lòng nhập giá trẻ em";
+    } else if (childPrice <= 0) {
+      newErrors.childPrice = "Giá trẻ em phải lớn hơn 0";
     } else if (childPrice >= adultPrice) {
       newErrors.childPrice = "Giá trẻ em phải thấp hơn giá người lớn";
-    } else if (childPrice < 0) {
-      newErrors.childPrice = "Giá trẻ em không được âm";
-    }
+    } 
 
     if (!tourData.tourPrices[1].price) {
       newErrors.infantPrice = "Vui lòng nhập giá em bé";
+    } else if (infantPrice <= 0) {
+      newErrors.infantPrice = "Giá em bé phải lớn hơn 0";
     } else if (infantPrice >= childPrice) {
       newErrors.infantPrice = "Giá em bé phải thấp hơn giá trẻ em";
-    } else if (infantPrice < 0) {
-      newErrors.infantPrice = "Giá em bé không được âm";
     }
 
     if (!tourData.registerOpenDate) {
@@ -309,7 +335,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
             if (e.target.value) {
               const roundedPrice = roundToThousand(Number(e.target.value));
               setTourData(prev => ({ ...prev, defaultTouristPrice: roundedPrice.toString() }));
-              if (validatePrice(roundedPrice, tour.tourTemplate?.minPrice, tour.tourTemplate?.maxPrice)) {
+              if (validatePrice(roundedPrice, minPrice, maxPrice)) {
                 const { childPrice, infantPrice } = calculatePrices(roundedPrice);
                 setTourData(prev => ({
                   ...prev, tourPrices: [
@@ -321,7 +347,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
             }
           }}
           error={!!errors.defaultTouristPrice}
-          helperText={errors.defaultTouristPrice || `Giá phải từ ${tour.tourTemplate?.minPrice?.toLocaleString()} đến ${tour.tourTemplate?.maxPrice?.toLocaleString()} VND`}
+          helperText={errors.defaultTouristPrice || `Giá phải từ ${minPrice?.toLocaleString()} đến ${maxPrice?.toLocaleString()} VND`}
           sx={{ mb: 2, mt: 1.5 }}
           inputProps={{ min: 0, style: { height: '15px' } }}
           InputProps={{ endAdornment: <InputAdornment position="end">VND</InputAdornment> }}
@@ -330,11 +356,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
           <TextField
             key={index} fullWidth type="number" label={`${price.name} (${price.ageFrom}-${price.ageTo} tuổi)`}
             variant="outlined" value={price.price} sx={{ mb: 2 }}
-            onChange={(e) => {
-              const newPrices = [...tourData.tourPrices];
-              newPrices[index] = { ...price, price: Number(e.target.value) };
-              setTourData(prev => ({ ...prev, tourPrices: newPrices }));
-            }}
+            onChange={(e) => handlePriceTypeChange(index, e.target.value)}
             inputProps={{ min: 0, style: { height: '15px' } }}
             InputProps={{ endAdornment: <InputAdornment position="end">VND</InputAdornment> }}
             error={!!errors[index === 0 ? 'childPrice' : 'infantPrice']}
