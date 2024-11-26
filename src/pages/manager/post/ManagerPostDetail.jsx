@@ -409,7 +409,7 @@ const ManagerPostDetail = () => {
   const statusInfo = getPostStatusInfo(post.status);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Helmet>
         <title>Chi tiết bài viết</title>
       </Helmet>

@@ -48,7 +48,6 @@ export const fetchTourTemplates = async (params) => {
             provinces: item.provinces,
             imageUrl: item.imageUrl
         }));
-        console.log(templates);
         return ({
             data: templates,
             pageIndex: response.data?.data?.pageIndex,
@@ -152,7 +151,6 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
             })),
             isDraft: tourTemplateData.isDraft
         };
-        console.log(requestData);
         const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -228,7 +226,6 @@ export const getTourTemplateReviews = async (tourTemplateId, options) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        console.log(response.data.data);
         return {
             total: response.data.data.total,
             pageSize: response.data.data.pageSize,
@@ -263,6 +260,21 @@ export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
         return response.data;
     } catch (error) {
         console.error('Error toggling review visibility:', error.response);
+        throw error;
+    }
+};
+
+export const deleteTourTemplate = async (tourTemplateId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.delete(`${baseURL}/api/TourTemplate/${tourTemplateId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting tour template:', error.response);
         throw error;
     }
 };

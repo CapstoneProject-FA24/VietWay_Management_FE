@@ -70,7 +70,7 @@ const TourCard = ({ tour, onViewDetails }) => {
           variant="h6" color="primary"
           sx={{ mt: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: 0.5, mb: -2 }}
         >
-          {tour.price.toLocaleString()} đ
+          {tour.defaultTouristPrice.toLocaleString()} đ
           <Typography variant="caption" color="text.secondary">/người</Typography>
         </Typography>
       </CardContent>

@@ -8,12 +8,16 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, changeTourTemplateStatus } from '@services/TourTemplateService';
+import { fetchTourTemplateById, changeTourTemplateStatus, deleteTourTemplate } from '@services/TourTemplateService';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import { getTourTemplateStatusInfo } from '@services/StatusService';
 import ReviewListTour from '@components/review/ReviewListTour';
+import TourTemplateCalendar from '@components/tourTemplate/TourTemplateCalendar';
+import { fetchToursByTemplateId } from '@services/TourService';
+import dayjs from 'dayjs';
+import TourTable from '@components/tourTemplate/TourTable';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -32,12 +36,16 @@ const ManagerTourTemplateDetails = () => {
     message: '',
     severity: 'success'
   });
+  const [tours, setTours] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(dayjs());
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const fetchedTourTemplate = await fetchTourTemplateById(id);
         setTourTemplate(fetchedTourTemplate);
+        const fetchedTours = await fetchToursByTemplateId(id);
+        setTours(fetchedTours);
       } catch (error) {
         console.error('Error fetching tour template:', error);
       } finally {
@@ -65,12 +73,27 @@ const ManagerTourTemplateDetails = () => {
     setIsDeletePopupOpen(true);
   };
 
-  const handleDeleteConfirm = async (templateId) => {
+  const handleDeleteConfirm = async () => {
     try {
-      await deleteTourTemplate(templateId);
-      navigate('/quan-ly/tour-mau');
+      await deleteTourTemplate(id);
+      setSnackbar({
+        open: true,
+        message: 'Xóa tour mẫu thành công',
+        severity: 'success'
+      });
+      // Close delete popup
+      setIsDeletePopupOpen(false);
+      // Navigate after a short delay to allow snackbar to be seen
+      setTimeout(() => {
+        navigate('/quan-ly/tour-mau');
+      }, 1500);
     } catch (error) {
-      console.error('Error deleting tour template:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour mẫu',
+        severity: 'error'
+      });
+      setIsDeletePopupOpen(false);
     }
   };
 
@@ -126,6 +149,10 @@ const ManagerTourTemplateDetails = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  const handleMonthChange = (newMonth) => {
+    setSelectedMonth(newMonth);
+  };
+
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
   }
@@ -156,15 +183,15 @@ const ManagerTourTemplateDetails = () => {
         </Typography>
         {tourTemplate?.status === TourTemplateStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
               onClick={() => setIsApprovePopupOpen(true)}
             >
               Duyệt
             </Button>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
               onClick={() => setIsRejectPopupOpen(true)}
             >
@@ -174,8 +201,8 @@ const ManagerTourTemplateDetails = () => {
         )}
         {tourTemplate?.status === TourTemplateStatus.Approved && (
           <>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
               onClick={handleDelete}
             >
@@ -329,17 +356,17 @@ const ManagerTourTemplateDetails = () => {
                 <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.creatorName}</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
-              <Typography sx={{ color: '#05073C' }}>
-                Giá từ: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.minPrice)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
-              <Typography sx={{ color: '#05073C' }}>
-                Đến: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.maxPrice)}
-              </Typography>
-            </Box>
+                <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C' }}>
+                  Giá từ: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.minPrice)}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C' }}>
+                  Đến: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.maxPrice)}
+                </Typography>
+              </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
@@ -350,7 +377,28 @@ const ManagerTourTemplateDetails = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={12}>
-          {tourTemplate.status === TourTemplateStatus.Approved && (
+            <Box sx={{ mb: 5 }}>
+              <Typography variant="h5" gutterBottom sx={{ 
+                textAlign: 'left', 
+                fontWeight: '700', 
+                fontSize: '1.6rem', 
+                color: '#05073C',
+                mb: 3 
+              }}>
+                Lịch tour
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {/* <TourTemplateCalendar 
+                  tours={tours} 
+                  selectedMonth={selectedMonth} 
+                  handleMonthChange={handleMonthChange}
+                /> */}
+                <TourTable tours={tours} />
+              </Box>
+            </Box>
+          </Grid>
+          <Grid item xs={12} md={12}>
+            {tourTemplate.status === TourTemplateStatus.Approved && (
               <Box sx={{ mb: 5 }}>
                 <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
                   Đánh giá từ khách hàng
@@ -402,9 +450,9 @@ const ManagerTourTemplateDetails = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
-          <Button 
-            onClick={handleReject} 
-            variant="contained" 
+          <Button
+            onClick={handleReject}
+            variant="contained"
             color="error"
             disabled={!rejectReason.trim()}
           >
