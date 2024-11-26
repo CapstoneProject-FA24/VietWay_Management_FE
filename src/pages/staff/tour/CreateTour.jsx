@@ -6,7 +6,7 @@ import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-picker
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, calculateEndDate, createTour } from '@services/TourService';
+import { fetchToursByTemplateId, createTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -136,7 +136,6 @@ const CreateTour = () => {
       dayjs(b.cancelBefore).valueOf() - dayjs(a.cancelBefore).valueOf()
     );
 
-    // Validate data completion and percentage range
     const isValidData = sortedPolicies.every(policy =>
       policy.cancelBefore &&
       policy.refundRate !== '' &&
@@ -148,7 +147,6 @@ const CreateTour = () => {
       return false;
     }
 
-    // Validate date range (between registration open date and tour start date)
     const isValidDates = sortedPolicies.every(policy =>
       dayjs(policy.cancelBefore).isSameOrAfter(dayjs(newTourData.registerOpenDate)) &&
       dayjs(policy.cancelBefore).isSameOrBefore(dayjs(newTourData.startDate))
@@ -165,11 +163,9 @@ const CreateTour = () => {
     return true;
   };
 
-  // Validation functions
   const validateForm = () => {
     const newErrors = {};
 
-    // Required fields validation
     if (!newTourData.startAddress?.trim()) {
       newErrors.startAddress = "Vui lòng nhập địa điểm khởi hành";
     }
@@ -202,7 +198,6 @@ const CreateTour = () => {
       newErrors.minParticipants = "Số khách tối thiểu phải nhỏ hơn số khách tối đa";
     }
 
-    // Price validation
     if (!newTourData.adultPrice) {
       newErrors.adultPrice = "Vui lòng nhập giá người lớn";
     } else if (!validatePrice(newTourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
@@ -242,7 +237,6 @@ const CreateTour = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate all fields
     if (!validateForm()) {
       setSnackbar({
         open: true,
@@ -252,7 +246,6 @@ const CreateTour = () => {
       return;
     }
 
-    // Validate refund policies
     if (!validateRefundPolicies()) {
       return;
     }
@@ -380,32 +373,32 @@ const CreateTour = () => {
                   label="Khởi hành từ"
                   fullWidth
                   variant="outlined"
-                  sx={{ mb: 1, mt: 1.5 }}
                   value={newTourData.startAddress}
-                  inputProps={{ style: { height: '15px' } }}
                   onChange={(e) => handleNewTourChange('startAddress', e.target.value)}
                   error={!!errors.startAddress}
                   helperText={errors.startAddress}
+                  sx={{ mb: 2, mt: 1.5 }}
+                  inputProps={{ style: { height: '15px' } }}
                 />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Box sx={{ mb: 2, mt: 1.5 }}>
+                  <Box sx={{ mb: 2 }}>
                     <DatePicker
                       label="Ngày khởi hành"
                       value={newTourData.startDate}
+                      onChange={(value) => handleNewTourChange('startDate', value)}
                       format={DATE_FORMAT}
                       minDate={dayjs()}
-                      onChange={(value) => handleNewTourChange('startDate', value)}
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          inputProps: { style: { height: '15px' } },
                           error: !!errors.startDate,
-                          helperText: errors.startDate
+                          helperText: errors.startDate,
+                          inputProps: { style: { height: '15px' } }
                         }
                       }}
                     />
                   </Box>
-                  <Box sx={{ mb: 1 }}>
+                  <Box sx={{ mb: 2 }}>
                     <TimePicker
                       label="Giờ khởi hành"
                       value={newTourData.startTime}
@@ -413,12 +406,52 @@ const CreateTour = () => {
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          inputProps: { style: { height: '15px' } },
                           error: !!errors.startTime,
-                          helperText: errors.startTime
+                          helperText: errors.startTime,
+                          inputProps: { style: { height: '15px' } }
                         }
                       }}
                     />
+                  </Box>
+
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, mt: 2 }}>Thời gian đăng ký</Typography>
+                    <Box sx={{ mb: 2, mt: 1.5 }}>
+                      <DatePicker
+                        label="Ngày mở đăng ký"
+                        value={newTourData.registerOpenDate}
+                        format={DATE_FORMAT}
+                        onChange={(value) => handleNewTourChange('registerOpenDate', value)}
+                        minDate={dayjs()}
+                        maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            inputProps: { style: { height: '15px' } },
+                            error: !!errors.registerOpenDate,
+                            helperText: errors.registerOpenDate
+                          }
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ mb: 1 }}>
+                      <DatePicker
+                        label="Ngày đóng đăng ký"
+                        value={newTourData.registerCloseDate}
+                        format={DATE_FORMAT}
+                        onChange={(value) => handleNewTourChange('registerCloseDate', value)}
+                        minDate={newTourData.registerOpenDate || dayjs()}
+                        maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            inputProps: { style: { height: '15px' } },
+                            error: !!errors.registerCloseDate,
+                            helperText: errors.registerCloseDate
+                          }
+                        }}
+                      />
+                    </Box>
                   </Box>
                 </LocalizationProvider>
               </Box>
@@ -519,47 +552,6 @@ const CreateTour = () => {
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
                   }}
                 />
-              </Box>
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <Box sx={{ mb: 2, mt: 1.5 }}>
-                    <DatePicker
-                      label="Ngày mở đăng ký"
-                      value={newTourData.registerOpenDate}
-                      format={DATE_FORMAT}
-                      onChange={(value) => handleNewTourChange('registerOpenDate', value)}
-                      minDate={dayjs()}
-                      maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          inputProps: { style: { height: '15px' } },
-                          error: !!errors.registerOpenDate,
-                          helperText: errors.registerOpenDate
-                        }
-                      }}
-                    />
-                  </Box>
-                  <Box sx={{ mb: 1 }}>
-                    <DatePicker
-                      label="Ngày đóng đăng ký"
-                      value={newTourData.registerCloseDate}
-                      format={DATE_FORMAT}
-                      onChange={(value) => handleNewTourChange('registerCloseDate', value)}
-                      minDate={newTourData.registerOpenDate || dayjs()}
-                      maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          inputProps: { style: { height: '15px' } },
-                          error: !!errors.registerCloseDate,
-                          helperText: errors.registerCloseDate
-                        }
-                      }}
-                    />
-                  </Box>
-                </LocalizationProvider>
               </Box>
               <Box sx={{ mt: 3 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>

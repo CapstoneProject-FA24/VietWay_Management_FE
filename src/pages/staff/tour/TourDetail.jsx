@@ -267,7 +267,7 @@ const TourDetail = () => {
                       <Typography>Khởi hành từ: {tour.startLocation}</Typography>
                       <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
                       <Typography>Giờ khởi hành: {tour.startTime}</Typography>
-                      <Typography>
+                      {/* <Typography>
                         Ngày kết thúc: {(() => {
                           if (!tour.startDate || !tour.startTime || !tourTemplate) return '';
                           const result = calculateEndDate(
@@ -277,7 +277,13 @@ const TourDetail = () => {
                           );
                           return result ? result.endDate.format('DD/MM/YYYY') : '';
                         })()}
-                      </Typography>
+                      </Typography> */}
+                      
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
+                        <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
+                        <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
+                      </Box>
                     </Box>
 
                     <Box sx={{ mb: 2 }}>
@@ -295,12 +301,6 @@ const TourDetail = () => {
                           {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} đ
                         </Typography>
                       ))}
-                    </Box>
-
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
-                      <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
-                      <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
                     </Box>
 
                     {tour.tourPolicies && tour.tourPolicies.length > 0 && (
