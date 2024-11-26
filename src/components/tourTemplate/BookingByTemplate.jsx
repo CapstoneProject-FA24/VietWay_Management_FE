@@ -51,7 +51,7 @@ const BookingByTemplate = ({ tourId }) => {
   }
 
   return (
-    <>
+    <Box>
       <TableContainer>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
@@ -147,7 +147,7 @@ const BookingByTemplate = ({ tourId }) => {
         labelRowsPerPage="Số hàng mỗi trang:"
         labelDisplayedRows={({ from, to, count }) => `${from}-${to} trong ${count}`}
       />
-    </>
+    </Box>
   );
 };
 

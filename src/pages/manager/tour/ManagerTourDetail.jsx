@@ -269,7 +269,7 @@ const ManagerTourDetail = () => {
                   )}
                 </>
               )}
-              {( tour?.status == TourStatus.Accepted || tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed ) && (
+              {(tour?.status == TourStatus.Accepted || tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed) && (
                 <Button
                   variant="contained"
                   onClick={handleDeleteTour}
@@ -356,7 +356,7 @@ const ManagerTourDetail = () => {
                       </Box>
                     )}
 
-<Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
                       <Chip
                         label={
@@ -464,7 +464,7 @@ const ManagerTourDetail = () => {
           />
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button 
+          <Button
             onClick={handleCloseCancelDialog}
             sx={{ color: '#666666' }}
           >
@@ -474,8 +474,8 @@ const ManagerTourDetail = () => {
             onClick={handleConfirmCancel}
             variant="contained"
             disabled={!cancelReason.trim()}
-            sx={{ 
-              backgroundColor: '#DC2626', 
+            sx={{
+              backgroundColor: '#DC2626',
               '&:hover': { backgroundColor: '#B91C1C' }
             }}
           >

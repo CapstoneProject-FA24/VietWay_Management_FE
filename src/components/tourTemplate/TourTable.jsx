@@ -37,7 +37,7 @@ const TourRow = ({ tour }) => {
           {new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND'
-          }).format(tour.defaultTouristPrice)}
+          }).format(tour.price)}
         </TableCell>
         <TableCell>
           {`${tour.currentParticipant}/${tour.maxParticipant}`}
@@ -78,8 +78,7 @@ const TourRow = ({ tour }) => {
       <TableRow>
         <TableCell
           style={{
-            paddingBottom: 0,
-            paddingTop: 0,
+            padding: 0,
             backgroundColor: '#fff',
             borderLeft: '2px solid #5a6b89',
             borderRight: '2px solid #5a6b89',
@@ -89,14 +88,14 @@ const TourRow = ({ tour }) => {
         >
           {tour.totalBookings > 0 && (
             <Collapse in={open} timeout="auto" unmountOnExit sx={{ borderTop: '1px solid #8a98b0' }}>
-              <Box sx={{ margin: 2 }}>
+              <Box>
                 <Typography
                   variant="h6"
                   gutterBottom
                   component="div"
                   sx={{
                     backgroundColor: '#f8f9fa',
-                    padding: '8px',
+                    pl: 3, pt: 2,
                     borderRadius: '4px',
                     color: '#5a6b89'
                   }}

@@ -377,7 +377,7 @@ const ManagerTourTemplateDetails = () => {
             </Paper>
           </Grid>
           <Grid item xs={12} md={12}>
-            <Box sx={{ mb: 5 }}>
+            <Box sx={{ mb: 5, maxWidth: '100%' }}>
               <Typography variant="h5" gutterBottom sx={{ 
                 textAlign: 'left', 
                 fontWeight: '700', 
@@ -385,7 +385,7 @@ const ManagerTourTemplateDetails = () => {
                 color: '#05073C',
                 mb: 3 
               }}>
-                Lịch tour
+                Danh sách tour
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {/* <TourTemplateCalendar 
