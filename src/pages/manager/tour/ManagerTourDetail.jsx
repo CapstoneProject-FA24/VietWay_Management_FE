@@ -156,7 +156,7 @@ const ManagerTourDetail = () => {
     }
   };
 
-  const canUpdate = tour?.status === TourStatus.Accepted || tour?.status === TourStatus.Opened;
+  const canUpdate = (tour?.status === TourStatus.Accepted || tour?.status === TourStatus.Opened) && tour?.totalBookings == 0;
 
   const handleCancelClick = () => {
     setIsCancelPopupOpen(true);
@@ -217,7 +217,6 @@ const ManagerTourDetail = () => {
                 Chi tiết tour
               </Typography>
             </Box>
-
             {canUpdate && (
               <Box sx={{ display: 'flex', gap: 2 }}>
                 {view === 'edit' ? (

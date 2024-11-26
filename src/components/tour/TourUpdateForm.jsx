@@ -13,28 +13,37 @@ const validateRefundPolicies = (tourPolicies, registerOpenDate, startDate) => {
     return { isValid: false, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền' };
   }
 
-  const sortedPolicies = [...tourPolicies].sort((a, b) =>
-    dayjs(b.cancelBefore).valueOf() - dayjs(a.cancelBefore).valueOf()
-  );
+  const sortedPolicies = [...tourPolicies];
+  
+  // Check each policy individually and return index-specific errors
+  for (let i = 0; i < sortedPolicies.length; i++) {
+    const policy = sortedPolicies[i];
+    if (!policy.cancelBefore || policy.refundPercent === '') {
+      return { 
+        isValid: false, 
+        index: i,
+        message: 'Vui lòng điền đầy đủ thông tin cho chính sách hoàn tiền' 
+      };
+    }
+    
+    if (Number(policy.refundPercent) < 0 || Number(policy.refundPercent) > 100) {
+      return { 
+        isValid: false, 
+        index: i,
+        message: 'Tỷ lệ hoàn tiền phải từ 0 đến 100%' 
+      };
+    }
 
-  const isValidData = sortedPolicies.every(policy =>
-    policy.cancelBefore && policy.refundPercent !== '' &&
-    Number(policy.refundPercent) >= 0 && Number(policy.refundPercent) <= 100
-  );
-  if (!isValidData) {
-    return { isValid: false, message: 'Vui lòng điền đầy đủ thông tin cho tất cả các chính sách hoàn tiền' };
+    if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
+        !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
+      return {
+        isValid: false,
+        index: i,
+        message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành'
+      };
+    }
   }
-
-  const isValidDates = sortedPolicies.every(policy =>
-    dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) &&
-    dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))
-  );
-  if (!isValidDates) {
-    return {
-      isValid: false,
-      message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành'
-    };
-  }
+  
   return { isValid: true };
 };
 
@@ -67,6 +76,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
 
   const [errors, setErrors] = useState({});
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [policyErrors, setPolicyErrors] = useState({});
 
   const validatePrice = (price, minPrice, maxPrice) => {
     const numPrice = Number(price);
@@ -219,9 +229,17 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
       return;
     }
 
-    const policyValidation = validateRefundPolicies(tourData.tourPolicies, tourData.registerOpenDate, tourData.startDate);
+    const policyValidation = validateRefundPolicies(
+      tourData.tourPolicies,
+      tourData.registerOpenDate,
+      tourData.startDate
+    );
 
     if (!policyValidation.isValid) {
+      if (policyValidation.index !== undefined) {
+        // Set error for specific policy
+        setPolicyErrors({ [policyValidation.index]: policyValidation.message });
+      }
       setSnackbar({
         open: true,
         message: policyValidation.message,
@@ -229,6 +247,9 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
       });
       return;
     }
+
+    // Clear policy errors if validation passes
+    setPolicyErrors({});
 
     try {
       const startDateTime = dayjs(tourData.startDate)
@@ -399,20 +420,33 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
       <Box sx={{ mt: 3 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Chính sách hoàn tiền</Typography>
         {tourData.tourPolicies.map((policy, index) => (
-          <Box key={index} sx={{ display: 'flex', gap: 1, mb: 3, alignItems: 'center', backgroundColor: 'background.paper' }}>
+          <Box key={index} sx={{ display: 'flex', gap: 1, mb: 3, alignItems: 'flex-start', backgroundColor: 'background.paper' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
-                label="Hủy trước ngày" value={policy.cancelBefore} format="DD/MM/YYYY"
+                label="Hủy trước ngày"
+                value={policy.cancelBefore}
+                format="DD/MM/YYYY"
                 onChange={(newValue) => {
                   const newPolicies = [...tourData.tourPolicies];
                   newPolicies[index] = { ...policy, cancelBefore: newValue };
                   setTourData(prev => ({ ...prev, tourPolicies: newPolicies }));
+                  setPolicyErrors(prev => ({ ...prev, [index]: undefined }));
                 }}
-                slotProps={{ textField: { fullWidth: true, sx: { width: '50%' } } }}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    sx: { width: '50%' },
+                    error: !!policyErrors[index],
+                    helperText: policyErrors[index]
+                  }
+                }}
               />
             </LocalizationProvider>
             <TextField
-              label="Tỷ lệ hoàn" type="number" sx={{ width: '30%' }} value={policy.refundPercent}
+              label="Tỷ lệ hoàn"
+              type="number"
+              sx={{ width: '30%' }}
+              value={policy.refundPercent}
               onChange={(e) => {
                 const newPolicies = [...tourData.tourPolicies];
                 newPolicies[index] = { ...policy, refundPercent: Math.min(Math.max(0, Number(e.target.value)), 100) };
@@ -421,13 +455,15 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
               InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
             />
             <Button
-              variant="outlined" color="error" sx={{ fontSize: '0.75rem', minWidth: 'auto' }} size="small"
-              onClick={() => {
-                const newPolicies = tourData.tourPolicies.filter((_, i) => i !== index);
-                setTourData(prev => ({ ...prev, tourPolicies: newPolicies }));
-              }}
+              variant="outlined"
+              color="error"
+              sx={{ fontSize: '0.75rem', minWidth: 'auto' }}
+              size="small"
+              onClick={() => handleRemovePolicy(index)}
               disabled={tourData.tourPolicies.length === 1}
-            > Xóa </Button>
+            >
+              Xóa
+            </Button>
           </Box>
         ))}
         <Box sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
