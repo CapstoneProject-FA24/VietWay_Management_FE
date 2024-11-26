@@ -372,7 +372,7 @@ const CreateTour = () => {
           <Grid item xs={12} md={3.5}>
             <Paper elevation={2} sx={{ p: 2 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main'}}>
-                Thông tin tour mới
+                Thông tin tour
               </Typography>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
@@ -420,24 +420,6 @@ const CreateTour = () => {
                       }}
                     />
                   </Box>
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body1">
-                      Ngày kết thúc: {(() => {
-                        if (!newTourData.startDate || !newTourData.startTime || !tourTemplate.duration) {
-                          return '';
-                        }
-                        const result = calculateEndDate(newTourData.startDate, newTourData.startTime, tourTemplate.duration);
-                        return result ? result.endDate.format(DATE_FORMAT) : '';
-                      })()}
-                    </Typography>
-                    {(() => {
-                      if (!newTourData.startDate || !newTourData.startTime || !tourTemplate.duration) return null;
-                      const result = calculateEndDate(newTourData.startDate, newTourData.startTime, tourTemplate.duration);
-                      return result?.recommendationMessage ? (
-                        <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}> {result.recommendationMessage}</Typography>
-                      ) : null;
-                    })()}
-                  </Box>
                 </LocalizationProvider>
               </Box>
               <Box sx={{ mb: 2 }}>
@@ -478,7 +460,6 @@ const CreateTour = () => {
                   onChange={handlePriceChange}
                   onBlur={(e) => {
                     if (e.target.value) {
-                      // Round the price when the field loses focus
                       const roundedPrice = roundToThousand(Number(e.target.value));
                       handleNewTourChange('adultPrice', roundedPrice.toString());
                       if (validatePrice(roundedPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
@@ -492,6 +473,9 @@ const CreateTour = () => {
                   helperText={errors.adultPrice || `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`}
                   sx={{ mb: 2, mt: 1.5 }} 
                   inputProps={{ min: 0, style: { height: '15px' } }}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">VND</InputAdornment>
+                  }}
                 />
                 <TextField 
                   fullWidth 
@@ -499,10 +483,7 @@ const CreateTour = () => {
                   label="Trẻ em (5-12 tuổi)" 
                   variant="outlined" 
                   value={newTourData.childPrice}
-                  onChange={(e) => {
-                    const newChildPrice = e.target.value;
-                    handleNewTourChange('childPrice', newChildPrice);
-                  }}
+                  onChange={(e) => handleNewTourChange('childPrice', e.target.value)}
                   onBlur={(e) => {
                     if (e.target.value) {
                       const roundedPrice = roundToThousand(Number(e.target.value));
@@ -513,6 +494,9 @@ const CreateTour = () => {
                   helperText={errors.childPrice}
                   sx={{ mb: 2 }} 
                   inputProps={{ min: 0, style: { height: '15px' } }}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">VND</InputAdornment>
+                  }}
                 />
                 <TextField 
                   fullWidth 
@@ -520,10 +504,7 @@ const CreateTour = () => {
                   label="Em bé (dưới 5 tuổi)" 
                   variant="outlined" 
                   value={newTourData.infantPrice}
-                  onChange={(e) => {
-                    const newInfantPrice = e.target.value;
-                    handleNewTourChange('infantPrice', newInfantPrice);
-                  }}
+                  onChange={(e) => handleNewTourChange('infantPrice', e.target.value)}
                   onBlur={(e) => {
                     if (e.target.value) {
                       const roundedPrice = roundToThousand(Number(e.target.value));
@@ -534,6 +515,9 @@ const CreateTour = () => {
                   helperText={errors.infantPrice}
                   sx={{ mb: 1.5 }} 
                   inputProps={{ min: 0, style: { height: '15px' } }}
+                  InputProps={{
+                    endAdornment: <InputAdornment position="end">VND</InputAdornment>
+                  }}
                 />
               </Box>
               <Box>
@@ -541,36 +525,36 @@ const CreateTour = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Box sx={{ mb: 2, mt: 1.5 }}>
                     <DatePicker
-                      label="Ngày mở đăng ký" format={DATE_FORMAT} value={newTourData.registerOpenDate}
+                      label="Ngày mở đăng ký"
+                      value={newTourData.registerOpenDate}
+                      format={DATE_FORMAT}
                       onChange={(value) => handleNewTourChange('registerOpenDate', value)}
                       minDate={dayjs()}
                       maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
                       slotProps={{
-                        textField: { fullWidth: true, inputProps: { style: { height: '15px' }},
-                          error: newTourData.registerOpenDate && newTourData.startDate &&
-                            dayjs(newTourData.registerOpenDate).isAfter(newTourData.startDate),
-                          helperText: newTourData.registerOpenDate && newTourData.startDate &&
-                            dayjs(newTourData.registerOpenDate).isAfter(newTourData.startDate) ?
-                            "Ngày mở đăng ký phải trước ngày khởi hành" : ""
+                        textField: {
+                          fullWidth: true,
+                          inputProps: { style: { height: '15px' }},
+                          error: !!errors.registerOpenDate,
+                          helperText: errors.registerOpenDate
                         }
                       }}
                     />
                   </Box>
                   <Box sx={{ mb: 1 }}>
                     <DatePicker
-                      label="Ngày đóng đăng ký" value={newTourData.registerCloseDate} format={DATE_FORMAT}
+                      label="Ngày đóng đăng ký"
+                      value={newTourData.registerCloseDate}
+                      format={DATE_FORMAT}
                       onChange={(value) => handleNewTourChange('registerCloseDate', value)}
                       minDate={newTourData.registerOpenDate || dayjs()}
                       maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
                       slotProps={{
-                        textField: { fullWidth: true, inputProps: { style: { height: '15px' }},
-                          error: newTourData.registerCloseDate &&
-                            (dayjs(newTourData.registerCloseDate).isAfter(newTourData.startDate) || 
-                            dayjs(newTourData.registerOpenDate).isAfter(newTourData.registerCloseDate)),
-                          helperText: newTourData.registerCloseDate &&
-                            (dayjs(newTourData.registerCloseDate).isAfter(newTourData.startDate) ||
-                            dayjs(newTourData.registerOpenDate).isAfter(newTourData.registerCloseDate)) ?
-                            "Ngày đóng đăng ký phải sau ngày mở đăng ký và trước ngày khởi hành" : ""
+                        textField: {
+                          fullWidth: true,
+                          inputProps: { style: { height: '15px' }},
+                          error: !!errors.registerCloseDate,
+                          helperText: errors.registerCloseDate
                         }
                       }}
                     />

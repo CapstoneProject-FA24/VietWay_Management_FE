@@ -19,6 +19,8 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -37,6 +39,7 @@ const ManagerTourDetail = () => {
     severity: 'success'
   });
   const [view, setView] = useState('details'); // 'details' or 'edit'
+  const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -155,6 +158,44 @@ const ManagerTourDetail = () => {
 
   const canUpdate = tour?.status === TourStatus.Accepted || tour?.status === TourStatus.Opened;
 
+  const handleCancelClick = () => {
+    setIsCancelPopupOpen(true);
+  };
+
+  const handleCloseCancelPopup = () => {
+    setIsCancelPopupOpen(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setView('details');
+    setIsCancelPopupOpen(false);
+  };
+
+  const CancelConfirmationDialog = () => (
+    <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        Xác nhận hủy
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button onClick={handleCloseCancelPopup} sx={{ color: '#666666' }}>
+          Không
+        </Button>
+        <Button
+          onClick={handleCancelConfirm}
+          variant="contained"
+          sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+        >
+          Có
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
       <Helmet>
@@ -176,42 +217,54 @@ const ManagerTourDetail = () => {
                 Chi tiết tour
               </Typography>
             </Box>
-            
+
             {canUpdate && (
-              <ToggleButtonGroup
-                value={view}
-                exclusive
-                onChange={handleViewChange}
-                aria-label="view mode"
-                size="small"
-                sx={{ mb: 2 }}
-              >
-                <ToggleButton value="details" aria-label="details view">
-                  <InfoIcon sx={{ mr: 1 }} /> Thông tin
-                </ToggleButton>
-                <ToggleButton value="edit" aria-label="edit view">
-                  <EditIcon sx={{ mr: 1 }} /> Chỉnh sửa
-                </ToggleButton>
-              </ToggleButtonGroup>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                {view === 'edit' ? (
+                  <Button
+                    variant="contained"
+                    startIcon={<CancelIcon />}
+                    onClick={handleCancelClick}
+                    sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                  >
+                    Hủy sửa
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    startIcon={<EditIcon />}
+                    onClick={() => setView('edit')}
+                    sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                  >
+                    Sửa
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDeleteTour}
+                  sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                >
+                  Xóa
+                </Button>
+              </Box>
             )}
           </Grid>
 
-          <Grid item xs={12} md={8.5}>
+          <Grid item xs={12} md={8.2}>
             <TourTemplateInfo
               tourTemplate={tourTemplate}
               isLoading={isLoading}
             />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TourCalendar 
-                tourId={id} 
-                tours={tours} 
-                selectedMonth={selectedMonth} 
-                handleMonthChange={handleMonthChange} 
-              />
-            </Box>
+            <TourCalendar
+              tourId={id}
+              tours={tours}
+              selectedMonth={selectedMonth}
+              handleMonthChange={handleMonthChange}
+            />
           </Grid>
 
-          <Grid item xs={12} md={3.5}>
+          <Grid item xs={12} md={3.8}>
             {view === 'details' ? (
               <Paper elevation={2} sx={{ p: 2 }}>
                 <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
@@ -244,7 +297,7 @@ const ManagerTourDetail = () => {
 
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                      <Typography>Người lớn: {tour.price?.toLocaleString()} đ</Typography>
+                      <Typography>Người lớn: {tour.defaultTouristPrice?.toLocaleString()} đ</Typography>
                       {tour.tourPrices?.map((price, index) => (
                         <Typography key={index}>
                           {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} đ
@@ -327,8 +380,8 @@ const ManagerTourDetail = () => {
                 )}
               </Paper>
             ) : (
-              <TourUpdateForm 
-                tour={tour}
+              <TourUpdateForm
+                tour={tour} maxPrice={tourTemplate.maxPrice} minPrice={tourTemplate.minPrice}
                 onUpdateSuccess={handleUpdateSuccess}
               />
             )}
@@ -387,6 +440,8 @@ const ManagerTourDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <CancelConfirmationDialog />
     </Box>
   );
 };
