@@ -393,10 +393,14 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
             <DatePicker
               label="Ngày mở đăng ký" value={tourData.registerOpenDate} format="DD/MM/YYYY"
               onChange={(value) => setTourData(prev => ({ ...prev, registerOpenDate: value }))}
+              minDate={dayjs()}
+              maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
               slotProps={{
                 textField: {
-                  fullWidth: true, inputProps: { style: { height: '15px' } },
-                  error: !!errors.registerOpenDate, helperText: errors.registerOpenDate
+                  fullWidth: true,
+                  inputProps: { style: { height: '15px' }},
+                  error: !!errors.registerOpenDate,
+                  helperText: errors.registerOpenDate
                 }
               }}
             />
@@ -405,9 +409,11 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
             <DatePicker
               label="Ngày đóng đăng ký" value={tourData.registerCloseDate} format="DD/MM/YYYY"
               onChange={(value) => setTourData(prev => ({ ...prev, registerCloseDate: value }))}
+              minDate={tourData.registerOpenDate || dayjs()}
+              maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
               slotProps={{
                 textField: {
-                  fullWidth: true, inputProps: { style: { height: '15px' } },
+                  fullWidth: true, inputProps: { style: { height: '15px' }},
                   error: !!errors.registerCloseDate, helperText: errors.registerCloseDate
                 }
               }}
@@ -423,30 +429,24 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
           <Box key={index} sx={{ display: 'flex', gap: 1, mb: 3, alignItems: 'flex-start', backgroundColor: 'background.paper' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
-                label="Hủy trước ngày"
-                value={policy.cancelBefore}
-                format="DD/MM/YYYY"
+                label="Hủy trước ngày" value={policy.cancelBefore} format="DD/MM/YYYY"
                 onChange={(newValue) => {
                   const newPolicies = [...tourData.tourPolicies];
                   newPolicies[index] = { ...policy, cancelBefore: newValue };
                   setTourData(prev => ({ ...prev, tourPolicies: newPolicies }));
                   setPolicyErrors(prev => ({ ...prev, [index]: undefined }));
                 }}
+                minDate={dayjs(tourData.registerOpenDate)}
+                maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                 slotProps={{
                   textField: {
-                    fullWidth: true,
-                    sx: { width: '50%' },
-                    error: !!policyErrors[index],
-                    helperText: policyErrors[index]
+                    fullWidth: true, sx: { width: '50%' }, error: !!policyErrors[index], helperText: policyErrors[index]
                   }
                 }}
               />
             </LocalizationProvider>
             <TextField
-              label="Tỷ lệ hoàn"
-              type="number"
-              sx={{ width: '30%' }}
-              value={policy.refundPercent}
+              label="Tỷ lệ hoàn" type="number" sx={{ width: '30%' }} value={policy.refundPercent}
               onChange={(e) => {
                 const newPolicies = [...tourData.tourPolicies];
                 newPolicies[index] = { ...policy, refundPercent: Math.min(Math.max(0, Number(e.target.value)), 100) };

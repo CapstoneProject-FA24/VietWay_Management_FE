@@ -217,37 +217,41 @@ const ManagerTourDetail = () => {
                 Chi tiết tour
               </Typography>
             </Box>
-            {canUpdate && (
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                {view === 'edit' ? (
-                  <Button
-                    variant="contained"
-                    startIcon={<CancelIcon />}
-                    onClick={handleCancelClick}
-                    sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
-                  >
-                    Hủy sửa
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    startIcon={<EditIcon />}
-                    onClick={() => setView('edit')}
-                    sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                  >
-                    Sửa
-                  </Button>
-                )}
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {canUpdate && (
+                <>
+                  {view === 'edit' ? (
+                    <Button
+                      variant="contained"
+                      startIcon={<CancelIcon />}
+                      onClick={handleCancelClick}
+                      sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                    >
+                      Hủy sửa
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      startIcon={<EditIcon />}
+                      onClick={() => setView('edit')}
+                      sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                    >
+                      Sửa
+                    </Button>
+                  )}
+                </>
+              )}
+              {( tour?.status == TourStatus.Accepted || tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed ) && (
                 <Button
                   variant="contained"
-                  startIcon={<DeleteIcon />}
-                  onClick={handleDeleteTour}
-                  sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
+                  onClick={() => handleDeleteTour()}
+                  color="warning"
+                  sx={{ height: '45px' }}
                 >
-                  Xóa
+                  Hủy tour
                 </Button>
-              </Box>
-            )}
+              )}
+            </Box>
           </Grid>
 
           <Grid item xs={12} md={8.2}>
@@ -310,7 +314,21 @@ const ManagerTourDetail = () => {
                       <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
                     </Box>
 
-                    <Box sx={{ mb: 2 }}>
+                    {tour.tourPolicies && tour.tourPolicies.length > 0 && (
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                        {tour.tourPolicies.map((policy, index) => (
+                          <Box key={index} sx={{ mt: 1 }}>
+                            <Typography>
+                              Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
+                              Hoàn {policy.refundPercent}% tổng tiền
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+
+<Box sx={{ mb: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
                       <Chip
                         label={
@@ -348,33 +366,7 @@ const ManagerTourDetail = () => {
                           </Button>
                         </Box>
                       )}
-                      {tour.status === TourStatus.Accepted && (
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="medium"
-                            onClick={() => handleDeleteTour()}
-                          >
-                            Xóa
-                          </Button>
-                        </Box>
-                      )}
                     </Box>
-
-                    {tour.tourPolicies && tour.tourPolicies.length > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
-                        {tour.tourPolicies.map((policy, index) => (
-                          <Box key={index} sx={{ mt: 1 }}>
-                            <Typography>
-                              Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
-                              Hoàn {policy.refundPercent}% tổng tiền
-                            </Typography>
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
                   </>
                 )}
               </Paper>
