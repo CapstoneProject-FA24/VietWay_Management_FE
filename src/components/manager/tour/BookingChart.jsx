@@ -111,10 +111,10 @@ const BookingChart = () => {
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: 550 }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-                    Thống kê số lượng booking
-                </Typography>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2 }}>
+                Thống kê số lượng booking
+            </Typography>
+            {/*<LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, mt: 2 }}>
                     <DatePicker
                         views={['month', 'year']}
@@ -145,8 +145,8 @@ const BookingChart = () => {
                         Áp dụng
                     </Button>
                 </Box>
-            </LocalizationProvider>
-            <ResponsiveContainer width="100%" height="79%">
+            </LocalizationProvider>*/}
+            <ResponsiveContainer width="100%" height="90%">
                 <BarChart
                     data={filteredData}
                     margin={{ top: 20, right: 5, left: -10, bottom: 5 }}
