@@ -10,6 +10,7 @@ import { TourTemplateStatus } from '@hooks/Statuses';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 import { Helmet } from 'react-helmet';
 import SidebarStaff from '@layouts/SidebarStaff';
+import { fetchToursByTemplateId } from '@services/TourService';
 
 const TourTemplateDetails = () => {
   const [state, setState] = useState({
@@ -25,6 +26,7 @@ const TourTemplateDetails = () => {
   const pageTopRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [tours, setTours] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +37,8 @@ const TourTemplateDetails = () => {
           tourTemplate: fetchedTourTemplate,
           loading: false
         }));
+        const fetchedTours = await fetchToursByTemplateId(id);
+        setTours(fetchedTours);
       } catch (error) {
         console.error('Error fetching tour template:', error);
         setState(prev => ({ ...prev, loading: false }));
@@ -227,6 +231,7 @@ const TourTemplateDetails = () => {
                 />
               ) : (
                 <TourTemplateInfo
+                  tours={tours}
                   tourTemplate={state.tourTemplate}
                   expandedDay={state.expandedDay}
                   handleDayClick={handleDayClick}

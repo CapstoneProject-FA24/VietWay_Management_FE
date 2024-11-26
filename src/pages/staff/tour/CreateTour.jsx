@@ -132,15 +132,15 @@ const CreateTour = () => {
       return false;
     }
 
-    const sortedPolicies = [...refundPolicies].sort((a, b) => 
+    const sortedPolicies = [...refundPolicies].sort((a, b) =>
       dayjs(b.cancelBefore).valueOf() - dayjs(a.cancelBefore).valueOf()
     );
 
     // Validate data completion and percentage range
-    const isValidData = sortedPolicies.every(policy => 
-      policy.cancelBefore && 
-      policy.refundRate !== '' && 
-      Number(policy.refundRate) >= 0 && 
+    const isValidData = sortedPolicies.every(policy =>
+      policy.cancelBefore &&
+      policy.refundRate !== '' &&
+      Number(policy.refundRate) >= 0 &&
       Number(policy.refundRate) <= 100
     );
     if (!isValidData) {
@@ -149,15 +149,15 @@ const CreateTour = () => {
     }
 
     // Validate date range (between registration open date and tour start date)
-    const isValidDates = sortedPolicies.every(policy => 
-      dayjs(policy.cancelBefore).isSameOrAfter(dayjs(newTourData.registerOpenDate)) && 
+    const isValidDates = sortedPolicies.every(policy =>
+      dayjs(policy.cancelBefore).isSameOrAfter(dayjs(newTourData.registerOpenDate)) &&
       dayjs(policy.cancelBefore).isSameOrBefore(dayjs(newTourData.startDate))
     );
     if (!isValidDates) {
-      setSnackbar({ 
-        open: true, 
-        message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành', 
-        severity: 'error' 
+      setSnackbar({
+        open: true,
+        message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành',
+        severity: 'error'
       });
       return false;
     }
@@ -230,8 +230,8 @@ const CreateTour = () => {
 
     if (!newTourData.registerCloseDate) {
       newErrors.registerCloseDate = "Vui lòng chọn ngày đóng đăng ký";
-    } else if (dayjs(newTourData.registerCloseDate).isAfter(newTourData.startDate) || 
-               dayjs(newTourData.registerOpenDate).isAfter(newTourData.registerCloseDate)) {
+    } else if (dayjs(newTourData.registerCloseDate).isAfter(newTourData.startDate) ||
+      dayjs(newTourData.registerOpenDate).isAfter(newTourData.registerCloseDate)) {
       newErrors.registerCloseDate = "Ngày đóng đăng ký phải sau ngày mở đăng ký và trước ngày khởi hành";
     }
 
@@ -241,7 +241,7 @@ const CreateTour = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate all fields
     if (!validateForm()) {
       setSnackbar({
@@ -312,7 +312,7 @@ const CreateTour = () => {
   const getMaxParticipantsError = () => {
     const max = Number(newTourData.maxParticipants);
     const min = Number(newTourData.minParticipants);
-    
+
     if (!newTourData.maxParticipants) return "Vui lòng nhập số khách tối đa";
     if (max <= 0) return "Số khách tối đa phải lớn hơn 0";
     if (max <= min) return "Số khách tối đa phải lớn hơn số khách tối thiểu";
@@ -322,7 +322,7 @@ const CreateTour = () => {
   const getMinParticipantsError = () => {
     const max = Number(newTourData.maxParticipants);
     const min = Number(newTourData.minParticipants);
-    
+
     if (!newTourData.minParticipants) return "Vui lòng nhập số khách tối thiểu";
     if (min <= 0) return "Số khách tối thiểu phải lớn hơn 0";
     if (min >= max && max > 0) return "Số khách tối thiểu phải nhỏ hơn số khách tối đa";
@@ -341,7 +341,7 @@ const CreateTour = () => {
 
     // Allow typing but don't calculate child/infant prices until it's a valid price
     handleNewTourChange('adultPrice', newAdultPrice);
-    
+
     if (validatePrice(newAdultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
       const { childPrice, infantPrice } = calculatePrices(Number(newAdultPrice));
       handleNewTourChange('childPrice', childPrice.toString());
@@ -371,7 +371,7 @@ const CreateTour = () => {
           </Grid>
           <Grid item xs={12} md={3.5}>
             <Paper elevation={2} sx={{ p: 2 }}>
-              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main'}}>
+              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
                 Thông tin tour
               </Typography>
               <Box sx={{ mb: 3 }}>
@@ -398,7 +398,7 @@ const CreateTour = () => {
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          inputProps: { style: { height: '15px' }},
+                          inputProps: { style: { height: '15px' } },
                           error: !!errors.startDate,
                           helperText: errors.startDate
                         }
@@ -413,7 +413,7 @@ const CreateTour = () => {
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          inputProps: { style: { height: '15px' }},
+                          inputProps: { style: { height: '15px' } },
                           error: !!errors.startTime,
                           helperText: errors.startTime
                         }
@@ -451,11 +451,11 @@ const CreateTour = () => {
               </Box>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                <TextField 
-                  fullWidth 
-                  type="number" 
-                  label="Người lớn (trên 12 tuổi)" 
-                  variant="outlined" 
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Người lớn (trên 12 tuổi)"
+                  variant="outlined"
                   value={newTourData.adultPrice}
                   onChange={handlePriceChange}
                   onBlur={(e) => {
@@ -471,17 +471,17 @@ const CreateTour = () => {
                   }}
                   error={!!errors.adultPrice}
                   helperText={errors.adultPrice || `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`}
-                  sx={{ mb: 2, mt: 1.5 }} 
+                  sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
                   InputProps={{
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
                   }}
                 />
-                <TextField 
-                  fullWidth 
-                  type="number" 
-                  label="Trẻ em (5-12 tuổi)" 
-                  variant="outlined" 
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Trẻ em (5-12 tuổi)"
+                  variant="outlined"
                   value={newTourData.childPrice}
                   onChange={(e) => handleNewTourChange('childPrice', e.target.value)}
                   onBlur={(e) => {
@@ -492,17 +492,17 @@ const CreateTour = () => {
                   }}
                   error={!!errors.childPrice}
                   helperText={errors.childPrice}
-                  sx={{ mb: 2 }} 
+                  sx={{ mb: 2 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
                   InputProps={{
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
                   }}
                 />
-                <TextField 
-                  fullWidth 
-                  type="number" 
-                  label="Em bé (dưới 5 tuổi)" 
-                  variant="outlined" 
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Em bé (dưới 5 tuổi)"
+                  variant="outlined"
                   value={newTourData.infantPrice}
                   onChange={(e) => handleNewTourChange('infantPrice', e.target.value)}
                   onBlur={(e) => {
@@ -513,7 +513,7 @@ const CreateTour = () => {
                   }}
                   error={!!errors.infantPrice}
                   helperText={errors.infantPrice}
-                  sx={{ mb: 1.5 }} 
+                  sx={{ mb: 1.5 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
                   InputProps={{
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
@@ -534,7 +534,7 @@ const CreateTour = () => {
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          inputProps: { style: { height: '15px' }},
+                          inputProps: { style: { height: '15px' } },
                           error: !!errors.registerOpenDate,
                           helperText: errors.registerOpenDate
                         }
@@ -552,7 +552,7 @@ const CreateTour = () => {
                       slotProps={{
                         textField: {
                           fullWidth: true,
-                          inputProps: { style: { height: '15px' }},
+                          inputProps: { style: { height: '15px' } },
                           error: !!errors.registerCloseDate,
                           helperText: errors.registerCloseDate
                         }
@@ -561,54 +561,54 @@ const CreateTour = () => {
                   </Box>
                 </LocalizationProvider>
               </Box>
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                {refundPolicies.map((policy, index) => (
+                  <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }} >
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Hủy trước ngày"
+                        value={policy.cancelBefore}
+                        format={DATE_FORMAT}
+                        onChange={(newValue) => handlePolicyChange(index, 'cancelBefore', newValue)}
+                        minDate={dayjs(newTourData.registerOpenDate)}
+                        maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            inputProps: { style: { height: '15px' } },
+                            error: policy.cancelBefore && (
+                              dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
+                              dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
+                            ),
+                            helperText: policy.cancelBefore && (
+                              dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
+                              dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
+                            ) ?
+                              "Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành" :
+                              ""
+                          }
+                        }}
+                      />
+                    </LocalizationProvider>
+                    <TextField
+                      label="Tỷ lệ hoàn tiền (%)" type="number" sx={{ width: '30%' }} value={policy.refundRate}
+                      onChange={(e) => {
+                        const value = Math.min(Math.max(0, Number(e.target.value)), 100);
+                        handlePolicyChange(index, 'refundRate', value);
+                      }}
+                      InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
+                    />
+                    <Button variant="outlined" color="error" onClick={() => handleRemovePolicy(index)} disabled={refundPolicies.length === 1}>Xóa</Button>
+                  </Box>
+                ))}
+                <Box sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
+                  <Button variant="outlined" onClick={handleAddPolicy} startIcon={<AddIcon />} >Thêm chính sách</Button>
+                </Box>
+              </Box>
             </Paper>
           </Grid>
         </Grid>
-        <Box sx={{ mt: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Chính sách hoàn tiền</Typography>
-          {refundPolicies.map((policy, index) => (
-            <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', backgroundColor: 'background.paper', p: 2, borderRadius: 1, boxShadow: 1 }} >
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Hủy trước ngày" 
-                  value={policy.cancelBefore} 
-                  format={DATE_FORMAT}
-                  onChange={(newValue) => handlePolicyChange(index, 'cancelBefore', newValue)}
-                  minDate={dayjs(newTourData.registerOpenDate)}
-                  maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
-                  slotProps={{
-                    textField: { 
-                      fullWidth: true, 
-                      inputProps: { style: { height: '15px' }},
-                      error: policy.cancelBefore && (
-                        dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
-                        dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
-                      ),
-                      helperText: policy.cancelBefore && (
-                        dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
-                        dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
-                      ) ? 
-                        "Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành" : 
-                        ""
-                    }
-                  }}
-                />
-              </LocalizationProvider>
-              <TextField
-                label="Tỷ lệ hoàn tiền (%)" type="number" sx={{ width: '30%' }} value={policy.refundRate}
-                onChange={(e) => {
-                  const value = Math.min(Math.max(0, Number(e.target.value)), 100);
-                  handlePolicyChange(index, 'refundRate', value);
-                }}
-                InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
-              />
-              <Button variant="outlined" color="error" onClick={() => handleRemovePolicy(index)} disabled={refundPolicies.length === 1}>Xóa</Button>
-            </Box>
-          ))}
-          <Box sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
-            <Button variant="outlined" onClick={handleAddPolicy} startIcon={<AddIcon />} >Thêm chính sách</Button>
-          </Box>
-        </Box>
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
           <Button variant="contained" color="primary" onClick={handleSubmit}> Gửi </Button>
         </Box>
