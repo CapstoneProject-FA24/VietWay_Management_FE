@@ -294,41 +294,91 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}> Thông tin tour </Typography>
-
       <Box sx={{ mb: 3 }}>
         <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
         <TextField
-          label="Khởi hành từ" fullWidth variant="outlined" sx={{ mb: 1, mt: 1.5 }}
-          value={tourData.startLocation} inputProps={{ style: { height: '15px' } }}
+          label="Khởi hành từ"
+          fullWidth
+          variant="outlined"
+          value={tourData.startLocation}
           onChange={(e) => setTourData(prev => ({ ...prev, startLocation: e.target.value }))}
-          error={!!errors.startLocation} helperText={errors.startLocation}
+          error={!!errors.startLocation}
+          helperText={errors.startLocation}
+          sx={{ mb: 2, mt: 1.5 }}
+          inputProps={{ style: { height: '15px' } }}
         />
-
+        
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Box sx={{ mb: 2, mt: 1.5 }}>
+          <Box sx={{ mb: 2 }}>
             <DatePicker
-              label="Ngày khởi hành" value={tourData.startDate} format="DD/MM/YYYY"
+              label="Ngày khởi hành"
+              value={tourData.startDate}
               onChange={(value) => setTourData(prev => ({ ...prev, startDate: value }))}
+              format="DD/MM/YYYY"
               slotProps={{
                 textField: {
-                  fullWidth: true, inputProps: { style: { height: '15px' } },
-                  error: !!errors.startDate, helperText: errors.startDate
+                  fullWidth: true,
+                  error: !!errors.startDate,
+                  helperText: errors.startDate,
+                  inputProps: { style: { height: '15px' } }
                 }
               }}
             />
           </Box>
-          <Box sx={{ mb: 1 }}>
+          <Box sx={{ mb: 2 }}>
             <TimePicker
-              label="Giờ khởi hành" value={tourData.startTime}
+              label="Giờ khởi hành"
+              value={tourData.startTime}
               onChange={(value) => setTourData(prev => ({ ...prev, startTime: value }))}
               slotProps={{
                 textField: {
-                  fullWidth: true, inputProps: { style: { height: '15px' } },
-                  error: !!errors.startTime, helperText: errors.startTime
+                  fullWidth: true,
+                  error: !!errors.startTime,
+                  helperText: errors.startTime,
+                  inputProps: { style: { height: '15px' } }
                 }
               }}
             />
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, mt: 2 }}>Thời gian đăng ký</Typography>
+            <Box sx={{ mb: 2, mt: 1.5 }}>
+              <DatePicker
+                label="Ngày mở đăng ký"
+                value={tourData.registerOpenDate}
+                format="DD/MM/YYYY"
+                onChange={(value) => setTourData(prev => ({ ...prev, registerOpenDate: value }))}
+                minDate={dayjs()}
+                maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    inputProps: { style: { height: '15px' } },
+                    error: !!errors.registerOpenDate,
+                    helperText: errors.registerOpenDate
+                  }
+                }}
+              />
+            </Box>
+            <Box sx={{ mb: 1 }}>
+              <DatePicker
+                label="Ngày đóng đăng ký"
+                value={tourData.registerCloseDate}
+                format="DD/MM/YYYY"
+                onChange={(value) => setTourData(prev => ({ ...prev, registerCloseDate: value }))}
+                minDate={tourData.registerOpenDate || dayjs()}
+                maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    inputProps: { style: { height: '15px' } },
+                    error: !!errors.registerCloseDate,
+                    helperText: errors.registerCloseDate
+                  }
+                }}
+              />
+            </Box>
           </Box>
         </LocalizationProvider>
       </Box>
@@ -384,98 +434,6 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
             helperText={errors[index === 0 ? 'childPrice' : 'infantPrice']}
           />
         ))}
-      </Box>
-
-      <Box>
-        <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Box sx={{ mb: 2, mt: 1.5 }}>
-            <DatePicker
-              label="Ngày mở đăng ký" value={tourData.registerOpenDate} format="DD/MM/YYYY"
-              onChange={(value) => setTourData(prev => ({ ...prev, registerOpenDate: value }))}
-              minDate={dayjs()}
-              maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  inputProps: { style: { height: '15px' }},
-                  error: !!errors.registerOpenDate,
-                  helperText: errors.registerOpenDate
-                }
-              }}
-            />
-          </Box>
-          <Box sx={{ mb: 1 }}>
-            <DatePicker
-              label="Ngày đóng đăng ký" value={tourData.registerCloseDate} format="DD/MM/YYYY"
-              onChange={(value) => setTourData(prev => ({ ...prev, registerCloseDate: value }))}
-              minDate={tourData.registerOpenDate || dayjs()}
-              maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
-              slotProps={{
-                textField: {
-                  fullWidth: true, inputProps: { style: { height: '15px' }},
-                  error: !!errors.registerCloseDate, helperText: errors.registerCloseDate
-                }
-              }}
-            />
-          </Box>
-        </LocalizationProvider>
-      </Box>
-
-      {/* Refund Policies Section */}
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Chính sách hoàn tiền</Typography>
-        {tourData.tourPolicies.map((policy, index) => (
-          <Box key={index} sx={{ display: 'flex', gap: 1, mb: 3, alignItems: 'flex-start', backgroundColor: 'background.paper' }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                label="Hủy trước ngày" value={policy.cancelBefore} format="DD/MM/YYYY"
-                onChange={(newValue) => {
-                  const newPolicies = [...tourData.tourPolicies];
-                  newPolicies[index] = { ...policy, cancelBefore: newValue };
-                  setTourData(prev => ({ ...prev, tourPolicies: newPolicies }));
-                  setPolicyErrors(prev => ({ ...prev, [index]: undefined }));
-                }}
-                minDate={dayjs(tourData.registerOpenDate)}
-                maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
-                slotProps={{
-                  textField: {
-                    fullWidth: true, sx: { width: '50%' }, error: !!policyErrors[index], helperText: policyErrors[index]
-                  }
-                }}
-              />
-            </LocalizationProvider>
-            <TextField
-              label="Tỷ lệ hoàn" type="number" sx={{ width: '30%' }} value={policy.refundPercent}
-              onChange={(e) => {
-                const newPolicies = [...tourData.tourPolicies];
-                newPolicies[index] = { ...policy, refundPercent: Math.min(Math.max(0, Number(e.target.value)), 100) };
-                setTourData(prev => ({ ...prev, tourPolicies: newPolicies }));
-              }}
-              InputProps={{ endAdornment: <InputAdornment position="end">%</InputAdornment> }}
-            />
-            <Button
-              variant="outlined"
-              color="error"
-              sx={{ fontSize: '0.75rem', minWidth: 'auto' }}
-              size="small"
-              onClick={() => handleRemovePolicy(index)}
-              disabled={tourData.tourPolicies.length === 1}
-            >
-              Xóa
-            </Button>
-          </Box>
-        ))}
-        <Box sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
-          <Button
-            variant="outlined"
-            onClick={() => setTourData(prev => ({
-              ...prev,
-              tourPolicies: [...prev.tourPolicies, { cancelBefore: null, refundPercent: '' }]
-            }))}
-            startIcon={<AddIcon />}
-          > Thêm chính sách </Button>
-        </Box>
       </Box>
 
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
