@@ -101,7 +101,7 @@ export const getTourTemplateStatusInfo = (statusCode) => {
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
     case BookingStatus.Pending:
-      return { text: "Đang chờ thanh toán", color: "#fff746" };
+      return { text: "Đang chờ thanh toán", color: "#eeb422" };
     case BookingStatus.Confirmed:
       return { text: "Đã thanh toán", color: "#66e3ff" };
     case BookingStatus.Completed:

@@ -1,9 +1,5 @@
 import React from 'react';
-import { Box, Paper, Typography, Button } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import { Box, Paper, Typography } from '@mui/material';
 import {
     BarChart,
     Bar,
@@ -14,6 +10,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import dayjs from 'dayjs';
 
 // Mock data - replace with actual API data later
 const mockCustomerData = [
@@ -60,81 +57,21 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const CustomerStatisticsChart = () => {
-    const [dateRange, setDateRange] = React.useState({
-        startDate: dayjs().subtract(6, 'month'),
-        endDate: dayjs()
-    });
-
-    const [appliedDateRange, setAppliedDateRange] = React.useState({
-        startDate: dayjs().subtract(6, 'month'),
-        endDate: dayjs()
-    });
-
-    const handleStartDateChange = (newValue) => {
-        setDateRange(prev => ({
-            ...prev,
-            startDate: newValue,
-            endDate: newValue.isAfter(prev.endDate) ? newValue : prev.endDate
-        }));
-    };
-
-    const handleEndDateChange = (newValue) => {
-        setDateRange(prev => ({
-            ...prev,
-            endDate: newValue
-        }));
-    };
-
-    const handleApply = () => {
-        setAppliedDateRange(dateRange);
-    };
-
+const CustomerStatisticsChart = ({ dateRange }) => {
     const filteredData = mockCustomerData.filter(item => {
         const itemDate = dayjs(item.period, 'MM/YYYY');
-        return (itemDate.isAfter(appliedDateRange.startDate, 'month') || itemDate.isSame(appliedDateRange.startDate, 'month')) &&
-            (itemDate.isBefore(appliedDateRange.endDate, 'month') || itemDate.isSame(appliedDateRange.endDate, 'month'));
+        return (itemDate.isAfter(dateRange.startDate, 'month') || 
+                itemDate.isSame(dateRange.startDate, 'month')) &&
+               (itemDate.isBefore(dateRange.endDate, 'month') || 
+                itemDate.isSame(dateRange.endDate, 'month'));
     });
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: 550 }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-                    Thống kê khách hàng đặt, tham gia và đánh giá tour
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, mt: 2 }}>
-
-                    <DatePicker
-                        views={['month', 'year']}
-                        value={dateRange.startDate}
-                        onChange={handleStartDateChange}
-                        maxDate={dateRange.endDate}
-                        slotProps={{ textField: { size: 'small' } }}
-                        label="Từ tháng"
-                        format="MM/YYYY"
-                        sx={{ width: 150 }}
-                    />
-                    <DatePicker
-                        views={['month', 'year']}
-                        value={dateRange.endDate}
-                        onChange={handleEndDateChange}
-                        minDate={dateRange.startDate}
-                        maxDate={dayjs()}
-                        slotProps={{ textField: { size: 'small' } }}
-                        label="Đến tháng"
-                        format="MM/YYYY"
-                        sx={{ width: 150 }}
-                    />
-                    <Button
-                        variant="contained"
-                        onClick={handleApply}
-                        sx={{ height: 40 }}
-                    >
-                        Áp dụng
-                    </Button>
-                </Box>
-            </LocalizationProvider>
-            <ResponsiveContainer width="100%" height="72%">
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2 }}>
+                Thống kê khách hàng
+            </Typography>
+            <ResponsiveContainer width="100%" height="90%">
                 <BarChart
                     data={filteredData}
                     margin={{ top: 20, right: 5, left: -10, bottom: 5 }}

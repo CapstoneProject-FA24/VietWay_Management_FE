@@ -170,7 +170,7 @@ const TourTemplateRevenue = () => {
             </Box>
 
             {/* Date picker section */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/*<LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                     <DatePicker
                         views={['month', 'year']}
@@ -201,7 +201,7 @@ const TourTemplateRevenue = () => {
                         Áp dụng
                     </Button>
                 </Box>
-            </LocalizationProvider>
+            </LocalizationProvider>*/}
 
             {/* Chart section */}
             <Box sx={{

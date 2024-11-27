@@ -102,7 +102,7 @@ const TourTemplateChart = ({ fixedHeight }) => {
                 </Typography>
             </Box>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/*<LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                     <DatePicker
                         views={['month', 'year']}
@@ -133,7 +133,7 @@ const TourTemplateChart = ({ fixedHeight }) => {
                         Áp dụng
                     </Button>
                 </Box>
-            </LocalizationProvider>
+            </LocalizationProvider>*/}
 
             <Box sx={{ height: 'calc(100% - 140px)' }}>
                 <ResponsiveContainer width="100%" height="100%">
