@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import StaffUpdatePopup from '@components/manager/staff/StaffUpdatePopup';
 import StaffCreatePopup from '@components/manager/staff/StaffCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
-import { fetchStaff } from '@services/StaffService';
+import { fetchStaff, changeStaffStatus } from '@services/StaffService';
 
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +21,14 @@ const ManageStaff = () => {
   const [pageSize, setPageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(1);
   const [total, setTotal] = useState(0);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    staffId: null,
+    isDeleted: false,
+    title: '',
+    message: ''
+  });
+  const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
     const loadStaff = async () => {
@@ -66,6 +74,42 @@ const ManageStaff = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleStatusChange = (staff) => {
+    setConfirmDialog({
+      open: true,
+      staffId: staff.staffId,
+      isDeleted: !staff.isDeleted,
+      title: staff.isDeleted ? 'Kích hoạt nhân viên' : 'Ngưng hoạt động nhân viên',
+      message: staff.isDeleted 
+        ? `Bạn có chắc chắn muốn kích hoạt nhân viên ${staff.fullName}?`
+        : `Bạn có chắc chắn muốn ngưng hoạt động nhân viên ${staff.fullName}?`
+    });
+  };
+
+  const handleConfirmStatusChange = async () => {
+    try {
+      await changeStaffStatus(confirmDialog.staffId, confirmDialog.isDeleted);
+      // Refresh the staff list
+      const result = await fetchStaff({
+        pageSize,
+        pageIndex,
+        nameSearch: searchTerm,
+      });
+      setStaff(result.data);
+      setTotal(result.total);
+    } catch (error) {
+      console.error('Error changing staff status:', error);
+      // Consider adding error handling UI here
+    } finally {
+      setConfirmDialog(prev => ({ ...prev, open: false }));
+    }
+  };
+
+  const handleSearch = () => {
+    setSearchTerm(searchInput);
+    setPageIndex(1);
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
@@ -85,8 +129,8 @@ const ManageStaff = () => {
             placeholder="Tìm kiếm nhân viên..."
             size="small"
             sx={{ width: '300px' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -95,6 +139,9 @@ const ManageStaff = () => {
               ),
             }}
           />
+          <Button variant="contained" color="primary" onClick={handleSearch}>
+            Tìm kiếm
+          </Button>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography>
               Sắp xếp theo
@@ -124,27 +171,75 @@ const ManageStaff = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedStaff.map((staff) => (
-                <TableRow key={staff.staffId}>
-                  <TableCell sx={{ padding: '10px', textAlign: 'left' }}>{staff.staffId}</TableCell>
-                  <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullName}</TableCell>
-                  <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{staff.phone}</TableCell>
-                  <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{staff.email}</TableCell>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
-                      <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: !staff.isDeleted ? '#4caf50' : '#ea4747' }} />
-                      <Typography sx={{ fontSize: '0.9rem' }}>{!staff.isDeleted ? 'Hoạt động' : 'Đã xóa'}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(staff.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                    <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(staff)} sx={{ width: '4rem' }}>Sửa</Button>
-                  </TableCell>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">Loading...</TableCell>
                 </TableRow>
-              ))}
+              ) : staff.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">No staff found</TableCell>
+                </TableRow>
+              ) : (
+                staff.map((staff) => (
+                  <TableRow key={staff.staffId}>
+                    <TableCell sx={{ padding: '10px', textAlign: 'left' }}>{staff.staffId}</TableCell>
+                    <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullName}</TableCell>
+                    <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{staff.phone}</TableCell>
+                    <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{staff.email}</TableCell>
+                    <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+                        <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: !staff.isDeleted ? '#4caf50' : '#ea4747' }} />
+                        <Typography sx={{ fontSize: '0.9rem' }}>{!staff.isDeleted ? 'Hoạt động' : 'Đã xóa'}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(staff.createdAt).toLocaleDateString()}</TableCell>
+                    <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
+                      {staff.isDeleted ? (
+                        <Button 
+                          variant="contained" 
+                          color="primary" 
+                          onClick={() => handleStatusChange(staff)} 
+                          sx={{ width: '8rem' }}
+                        >
+                          Kích hoạt
+                        </Button>
+                      ) : (
+                        <Button 
+                          variant="contained" 
+                          color="error" 
+                          onClick={() => handleStatusChange(staff)} 
+                          sx={{ width: '9rem', fontSize: '0.75rem' }}
+                        >
+                          Khóa tài khoản
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
+        {/* Add pagination controls */}
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography>
+            Showing {(pageIndex - 1) * pageSize + 1} - {Math.min(pageIndex * pageSize, total)} of {total}
+          </Typography>
+          <Box>
+            <Button
+              disabled={pageIndex === 1}
+              onClick={() => setPageIndex(prev => Math.max(1, prev - 1))}
+            >
+              Previous
+            </Button>
+            <Button
+              disabled={pageIndex * pageSize >= total}
+              onClick={() => setPageIndex(prev => prev + 1)}
+            >
+              Next
+            </Button>
+          </Box>
+        </Box>
         {/* Popup components */}
         <StaffCreatePopup
           open={openCreatePopup}
@@ -152,6 +247,17 @@ const ManageStaff = () => {
           onCreate={(newStaff) => {
             console.log('Created Staff:', newStaff);
             setOpenCreatePopup(false);
+          }}
+          onRefresh={() => {
+            // Reload the staff list
+            fetchStaff({
+              pageSize,
+              pageIndex,
+              nameSearch: searchTerm,
+            }).then(result => {
+              setStaff(result.data);
+              setTotal(result.total);
+            });
           }}
         />
         <StaffUpdatePopup
@@ -163,6 +269,30 @@ const ManageStaff = () => {
             setOpenUpdatePopup(false);
           }}
         />
+        <Dialog
+          open={confirmDialog.open}
+          onClose={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        >
+          <DialogTitle>{confirmDialog.title}</DialogTitle>
+          <DialogContent>
+            {confirmDialog.message}
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+              color="inherit"
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleConfirmStatusChange} 
+              color={confirmDialog.isDeleted ? "error" : "primary"}
+              variant="contained"
+            >
+              Xác nhận
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );

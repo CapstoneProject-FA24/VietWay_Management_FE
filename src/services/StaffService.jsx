@@ -28,7 +28,8 @@ export const fetchStaff = async (params) => {
             fullName: item.fullName,
             email: item.email,
             phone: item.phoneNumber,
-            createdAt: item.createdAt
+            createdAt: item.createdAt,
+            isDeleted: item.isDeleted,
         }));
 
         return {
@@ -47,7 +48,12 @@ export const fetchStaff = async (params) => {
 export const createStaff = async (staffData) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/account/create-staff-account`, staffData, {
+        const payload = {
+            email: staffData.email,
+            phoneNumber: staffData.phoneNumber,
+            fullName: staffData.fullName
+        };
+        const response = await axios.post(`${baseURL}/api/account/create-staff-account`, payload, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -55,6 +61,44 @@ export const createStaff = async (staffData) => {
         return response.data;
     } catch (error) {
         console.error('Error creating staff:', error);
+        throw error;
+    }
+};
+
+export const changeStaffStatus = async (staffId, isDeleted) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/staff/change-staff-status/${staffId}?isDeleted=${isDeleted}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error changing staff status:', error);
+        throw error;
+    }
+};
+
+export const updateStaff = async (staffData) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.put(
+            `${baseURL}/api/staff/${staffData.staffId}`,
+            staffData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating staff:', error);
         throw error;
     }
 };
