@@ -181,7 +181,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
-                    {/* {booking.status === BookingStatus.PendingRefund && (
+                    {booking.status === BookingStatus.PendingRefund && (
                       <Button
                         variant="contained"
                         color="warning"
@@ -189,7 +189,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
                       >
                         Hoàn tiền
                       </Button>
-                    )} */}
+                    )}
                   </CardActions>
                 </Box>
               </Grid>
