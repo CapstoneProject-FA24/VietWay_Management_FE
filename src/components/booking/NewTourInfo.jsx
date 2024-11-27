@@ -17,26 +17,26 @@ const NewTourInfo = ({ newTour, formatDateTime, formatPrice }) => {
         <Grid item xs={6}>
           <Box sx={{ '& > *': { mb: 1.5 } }}>
             <Typography>
-              <strong>Tên tour:</strong> {newTour?.name}
+              <strong>Tên tour:</strong> {newTour?.tourName}
             </Typography>
             <Typography>
-              <strong>Thời gian khởi hành:</strong> {formatDateTime(newTour?.startDateTime)}
+              <strong>Thời gian khởi hành:</strong> {formatDateTime(newTour?.startDate)}
             </Typography>
             <Typography>
-              <strong>Điểm khởi hành:</strong> {newTour?.departurePoint}
+              <strong>Điểm khởi hành:</strong> {newTour?.startLocation}
             </Typography>
           </Box>
         </Grid>
         <Grid item xs={6}>
           <Box sx={{ '& > *': { mb: 1.5 } }}>
             <Typography>
-              <strong>Thời gian kết thúc:</strong> {formatDateTime(newTour?.endDateTime)}
+              <strong>Thời lượng:</strong> {newTour?.duration}
             </Typography>
             <Typography>
-              <strong>Điểm đến:</strong> {newTour?.destination}
+              <strong>Điểm đến:</strong> {newTour?.provinces?.join(' - ')}
             </Typography>
             <Typography>
-              <strong>Tổng tiền:</strong> {formatPrice(newTour?.totalPrice)}
+              <strong>Tổng tiền:</strong> {newTour?.totalAmount?.toLocaleString('vi-VN')}đ
             </Typography>
           </Box>
         </Grid>

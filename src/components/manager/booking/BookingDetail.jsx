@@ -1,10 +1,18 @@
 import { useState } from 'react';
-import { Box, Grid, Typography, Button, Paper, Dialog, DialogTitle, DialogContent, 
-         DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import {
+    Box, Grid, Typography, Button, Paper, Dialog, DialogTitle, DialogContent,
+    DialogContentText, DialogActions, TextField, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText
+} from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
 import { getBookingStatusInfo, getRoleName } from '@services/StatusService';
 import { BookingStatus } from '@hooks/Statuses';
-import { cancelBooking } from '@services/BookingService';
+import { cancelBooking, createRefundTransaction } from '@services/BookingService';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs from 'dayjs';
+import { bankData } from '@hooks/Bank';
+import 'dayjs/locale/vi';
 
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -28,6 +36,14 @@ const BookingDetail = ({ booking }) => {
         message: '',
         severity: 'success'
     });
+    const [openRefundDialog, setOpenRefundDialog] = useState(false);
+    const [refundData, setRefundData] = useState({
+        note: '',
+        bankCode: '',
+        bankTransactionNumber: '',
+        payTime: dayjs()
+    });
+    const [refundErrors, setRefundErrors] = useState({});
 
     const handleCancelClick = () => {
         setOpenCancelDialog(true);
@@ -48,6 +64,72 @@ const BookingDetail = ({ booking }) => {
             setSnackbar({
                 open: true,
                 message: error.response?.data?.message || 'Có lỗi xảy ra khi hủy booking',
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleRefund = () => {
+        setOpenRefundDialog(true);
+    };
+
+    const handleRefundDataChange = (field, value) => {
+        setRefundData(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const validateRefundData = () => {
+        const errors = {};
+
+        if (!refundData.bankCode) {
+            errors.bankCode = 'Vui lòng chọn ngân hàng';
+        }
+
+        if (!refundData.bankTransactionNumber) {
+            errors.bankTransactionNumber = 'Vui lòng nhập mã giao dịch';
+        }
+
+        if (!refundData.payTime) {
+            errors.payTime = 'Vui lòng chọn thời gian hoàn tiền';
+        } else if (dayjs(refundData.payTime).isAfter(dayjs())) {
+            errors.payTime = 'Thời gian hoàn tiền không thể sau thời điểm hiện tại';
+        }
+
+        return errors;
+    };
+
+    const handleConfirmRefund = async () => {
+        if (!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime) {
+            return;
+        }
+
+        try {
+            await createRefundTransaction(booking.bookingId, {
+                note: refundData.note.trim(),
+                bankCode: refundData.bankCode,
+                bankTransactionNumber: refundData.bankTransactionNumber.trim(),
+                payTime: refundData.payTime
+            });
+            
+            setOpenRefundDialog(false);
+            setRefundData({
+                note: '',
+                bankCode: '',
+                bankTransactionNumber: '',
+                payTime: dayjs()
+            });
+            setSnackbar({
+                open: true,
+                message: 'Hoàn tiền thành công',
+                severity: 'success'
+            });
+            window.location.reload();
+        } catch (error) {
+            setSnackbar({
+                open: true,
+                message: error.response?.data?.message || 'Có lỗi xảy ra khi hoàn tiền',
                 severity: 'error'
             });
         }
@@ -108,7 +190,7 @@ const BookingDetail = ({ booking }) => {
                                     <Typography variant="body1">
                                         {booking.status === BookingStatus.PendingRefund ? 'Tổng tiền cần hoàn:' : 'Tổng tiền đã hoàn:'}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'red'}}>{booking.refundAmount.toLocaleString()} đ</Typography>
+                                    <Typography variant="body1" sx={{ color: 'red' }}>{booking.refundAmount.toLocaleString()} đ</Typography>
                                 </Box>
                             </>
                         )}
@@ -131,9 +213,9 @@ const BookingDetail = ({ booking }) => {
                         </Typography>
                         {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                                <Button 
-                                    variant="contained" 
-                                    color="error" 
+                                <Button
+                                    variant="contained"
+                                    color="error"
                                     sx={{ width: '48%' }}
                                     onClick={handleCancelClick}
                                 >
@@ -146,7 +228,14 @@ const BookingDetail = ({ booking }) => {
                         )}
                         {booking.status === BookingStatus.PendingRefund && (
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                                <Button variant="contained" color="warning" sx={{ width: '48%' }}>Hoàn tiền</Button>
+                                <Button
+                                    variant="contained"
+                                    color="warning"
+                                    sx={{ width: '48%' }}
+                                    onClick={handleRefund}
+                                >
+                                    Hoàn tiền
+                                </Button>
                             </Box>
                         )}
 
@@ -196,11 +285,90 @@ const BookingDetail = ({ booking }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenCancelDialog(false)}>Hủy</Button>
-                    <Button 
-                        onClick={handleConfirmCancel} 
-                        color="error" 
+                    <Button
+                        onClick={handleConfirmCancel}
+                        color="error"
                         variant="contained"
                         disabled={!cancelReason.trim()}
+                    >
+                        Xác nhận
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Refund Dialog */}
+            <Dialog
+                open={openRefundDialog}
+                onClose={() => setOpenRefundDialog(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Xác nhận hoàn tiền</DialogTitle>
+                <DialogContent>
+                    <Typography sx={{ color: 'red' }}>
+                        Lưu ý: Nhân viên vui lòng thực hiện hoàn tiền thành công trước khi thực hiện thêm thông tin xác nhận tại đây
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                        <TextField
+                            fullWidth
+                            label="Ghi chú"
+                            multiline
+                            rows={3}
+                            value={refundData.note}
+                            onChange={(e) => handleRefundDataChange('note', e.target.value)}
+                        />
+
+                        <FormControl fullWidth>
+                            <InputLabel id="bank-select-label">Ngân hàng *</InputLabel>
+                            <Select
+                                labelId="bank-select-label"
+                                id="bank-select"
+                                value={refundData.bankCode}
+                                onChange={(e) => handleRefundDataChange('bankCode', e.target.value)}
+                                label="Ngân hàng"
+                            >
+                                <MenuItem value="" disabled>Chọn ngân hàng *</MenuItem>
+                                {bankData.map((bank) => (
+                                    <MenuItem key={bank.code} value={bank.code}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <img
+                                                src={bank.imageUrl}
+                                                alt={bank.name}
+                                                style={{ width: 24, height: 24 }}
+                                            />
+                                            {bank.name}
+                                        </Box>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <TextField
+                            fullWidth
+                            label="Mã giao dịch"
+                            required
+                            value={refundData.bankTransactionNumber}
+                            onChange={(e) => handleRefundDataChange('bankTransactionNumber', e.target.value)}
+                        />
+
+                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+                            <DateTimePicker
+                                label="Thời gian hoàn tiền *"
+                                required
+                                value={refundData.payTime}
+                                onChange={(newValue) => handleRefundDataChange('payTime', newValue)}
+                                format="DD/MM/YYYY HH:mm"
+                            />
+                        </LocalizationProvider>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenRefundDialog(false)}>Hủy</Button>
+                    <Button
+                        onClick={handleConfirmRefund}
+                        color="warning"
+                        variant="contained"
+                        disabled={!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime}
                     >
                         Xác nhận
                     </Button>
@@ -214,8 +382,8 @@ const BookingDetail = ({ booking }) => {
                 onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert 
-                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+                <Alert
+                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
                     severity={snackbar.severity}
                     sx={{ width: '100%' }}
                     variant='filled'

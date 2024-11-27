@@ -17,23 +17,23 @@ const OldTourInfo = ({ currentBooking, formatDateTime, formatPrice }) => {
         <Grid item xs={6}>
           <Box sx={{ '& > *': { mb: 1.5 } }}>
             <Typography>
-              <strong>Tên tour:</strong> {currentBooking?.tour?.name}
+              <strong>Tên tour:</strong> {currentBooking?.tourName}
             </Typography>
             <Typography>
-              <strong>Thời gian khởi hành:</strong> {formatDateTime(currentBooking?.tour?.startDateTime)}
+              <strong>Thời gian khởi hành:</strong> {formatDateTime(currentBooking?.startDate)}
             </Typography>
             <Typography>
-              <strong>Điểm khởi hành:</strong> {currentBooking?.tour?.departurePoint}
+              <strong>Điểm khởi hành:</strong> {currentBooking?.startLocation}
             </Typography>
           </Box>
         </Grid>
         <Grid item xs={6}>
           <Box sx={{ '& > *': { mb: 1.5 } }}>
             <Typography>
-              <strong>Thời gian kết thúc:</strong> {formatDateTime(currentBooking?.tour?.endDateTime)}
+              <strong>Thời lượng:</strong> {currentBooking?.duration}
             </Typography>
             <Typography>
-              <strong>Điểm đến:</strong> {currentBooking?.tour?.destination}
+              <strong>Điểm đến:</strong> {currentBooking?.provinces?.join(' - ')}
             </Typography>
             <Typography>
               <strong>Tổng tiền:</strong> {formatPrice(currentBooking?.totalPrice)}

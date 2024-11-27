@@ -8,11 +8,11 @@ import { Close as CloseIcon, Search as SearchIcon } from '@mui/icons-material';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
+import { fetchTourTemplatesWithTourInfo } from '@services/TourTemplateService';
 import CBTemplateCard from './CB-TemplateCard';
 import Pagination from '@mui/material/Pagination';
-import { mockTours } from '@hooks/MockCBTourTemplate';
 
-const ChangeBooking = ({ open, onClose, onTourSelect }) => {
+const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
     const [tours, setTours] = useState([]);
     const [filters, setFilters] = useState({ tourType: [], duration: [], location: [] });
     const [searchTerm, setSearchTerm] = useState("");
@@ -29,6 +29,22 @@ const ChangeBooking = ({ open, onClose, onTourSelect }) => {
         pageSize: 9,
         total: 0
     });
+
+    const fetchTours = async () => {
+        try {
+            const response = await fetchTourTemplatesWithTourInfo({
+                pageSize: pagination.pageSize,
+                pageIndex: pagination.pageIndex,
+            });
+            setTours(response.data);
+            setPagination(prev => ({
+                ...prev,
+                total: response.total
+            }));
+        } catch (error) {
+            console.error('Error fetching tours:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchInitialData = async () => {
@@ -53,43 +69,20 @@ const ChangeBooking = ({ open, onClose, onTourSelect }) => {
 
         if (open) {
             fetchInitialData();
+            fetchTours();
         }
-    }, [open]);
-
-    useEffect(() => {
-        if (open) {
-            setTours(mockTours);
-            setPagination(prev => ({
-                ...prev,
-                total: mockTours.length
-            }));
-        }
-    }, [open]);
+    }, [open, pagination.pageIndex, pagination.pageSize]);
 
     const handleSearchByName = () => {
-        const filteredTours = mockTours.filter(tour => 
-            tour.tourName.toLowerCase().includes(tempSearchTerm.toLowerCase())
-        );
-        setTours(filteredTours);
-        setPagination(prev => ({
-            ...prev,
-            pageIndex: 1,
-            total: filteredTours.length
-        }));
         setSearchTerm(tempSearchTerm);
+        setPagination(prev => ({ ...prev, pageIndex: 1 }));
+        fetchTours();
     };
 
     const handleSearchByCode = () => {
-        const filteredTours = mockTours.filter(tour => 
-            tour.code.toLowerCase().includes(tempSearchCode.toLowerCase())
-        );
-        setTours(filteredTours);
-        setPagination(prev => ({
-            ...prev,
-            pageIndex: 1,
-            total: filteredTours.length
-        }));
         setSearchCode(tempSearchCode);
+        setPagination(prev => ({ ...prev, pageIndex: 1 }));
+        fetchTours();
     };
 
     const handleKeyPress = (event, searchType) => {
@@ -101,10 +94,6 @@ const ChangeBooking = ({ open, onClose, onTourSelect }) => {
             }
         }
     };
-
-    const startIndex = (pagination.pageIndex - 1) * pagination.pageSize;
-    const endIndex = startIndex + pagination.pageSize;
-    const displayedTours = tours.slice(startIndex, endIndex);
 
     return (
         <Dialog 
@@ -181,15 +170,15 @@ const ChangeBooking = ({ open, onClose, onTourSelect }) => {
                 </Grid>
 
                 {/* Tour Cards */}
-                {displayedTours.length > 0 ? (
+                {tours.length > 0 ? (
                     <>
                         <Grid container spacing={2}>
-                            {displayedTours.map((tour) => (
-                                <Grid item xs={12} key={tour.tourId}>
+                            {tours.map((tour) => (
+                                <Grid item xs={12} key={tour.tourTemplateId}>
                                     <CBTemplateCard 
                                         tour={tour}
-                                        availableDates={tour.availableDates}
-                                        onSelect={() => onTourSelect(tour)}
+                                        onSelect={onTourSelect}
+                                        booking={booking}
                                     />
                                 </Grid>
                             ))}

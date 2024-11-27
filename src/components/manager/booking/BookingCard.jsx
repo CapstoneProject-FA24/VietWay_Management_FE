@@ -250,76 +250,79 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openRefundDialog} onClose={() => setOpenRefundDialog(false)}>
-        <DialogTitle>Hoàn tiền booking</DialogTitle>
+      <Dialog
+        open={openRefundDialog}
+        onClose={() => setOpenRefundDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Xác nhận hoàn tiền</DialogTitle>
         <DialogContent>
-          <FormControl fullWidth sx={{ mt: 2 }} error={!!refundErrors.bankCode}>
-            <InputLabel>Ngân hàng</InputLabel>
-            <Select
-              value={refundData.bankCode}
-              onChange={(e) => setRefundData(prev => ({ ...prev, bankCode: e.target.value }))}
-              label="Ngân hàng"
-            >
-              <MenuItem value="VCB">Vietcombank</MenuItem>
-              <MenuItem value="TCB">Techcombank</MenuItem>
-              {/* Add other banks as needed */}
-            </Select>
-            {refundErrors.bankCode && (
-              <FormHelperText>{refundErrors.bankCode}</FormHelperText>
-            )}
-          </FormControl>
-
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Mã giao dịch"
-            value={refundData.bankTransactionNumber}
-            onChange={(e) => setRefundData(prev => ({ ...prev, bankTransactionNumber: e.target.value }))}
-            error={!!refundErrors.bankTransactionNumber}
-            helperText={refundErrors.bankTransactionNumber}
-          />
-
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
-              label="Thời gian hoàn tiền"
-              value={refundData.payTime}
-              onChange={(newValue) => setRefundData(prev => ({ ...prev, payTime: newValue }))}
-              maxDateTime={dayjs()}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  margin: "dense",
-                  error: !!refundErrors.payTime,
-                  helperText: refundErrors.payTime
-                }
-              }}
+          <Typography sx={{ color: 'red' }}>
+            Lưu ý: Nhân viên vui lòng thực hiện hoàn tiền thành công trước khi thực hiện thêm thông tin xác nhận tại đây
+          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Ghi chú"
+              multiline
+              rows={3}
+              value={refundData.note}
+              onChange={(e) => handleRefundDataChange('note', e.target.value)}
             />
-          </LocalizationProvider>
 
-          <TextField
-            fullWidth
-            margin="dense"
-            label="Ghi chú"
-            multiline
-            rows={3}
-            value={refundData.note}
-            onChange={(e) => setRefundData(prev => ({ ...prev, note: e.target.value }))}
-          />
+            <FormControl fullWidth>
+              <InputLabel id="bank-select-label">Ngân hàng *</InputLabel>
+              <Select
+                labelId="bank-select-label"
+                id="bank-select"
+                value={refundData.bankCode}
+                onChange={(e) => handleRefundDataChange('bankCode', e.target.value)}
+                label="Ngân hàng"
+              >
+                <MenuItem value="" disabled>Chọn ngân hàng *</MenuItem>
+                {bankData.map((bank) => (
+                  <MenuItem key={bank.code} value={bank.code}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <img
+                        src={bank.imageUrl}
+                        alt={bank.name}
+                        style={{ width: 24, height: 24 }}
+                      />
+                      {bank.name}
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Mã giao dịch"
+              required
+              value={refundData.bankTransactionNumber}
+              onChange={(e) => handleRefundDataChange('bankTransactionNumber', e.target.value)}
+            />
+
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+              <DateTimePicker
+                label="Thời gian hoàn tiền *"
+                required
+                value={refundData.payTime}
+                onChange={(newValue) => handleRefundDataChange('payTime', newValue)}
+                format="DD/MM/YYYY HH:mm"
+              />
+            </LocalizationProvider>
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => {
-            setOpenRefundDialog(false);
-            setRefundErrors({});
-            setRefundData({
-              note: '',
-              bankCode: '',
-              bankTransactionNumber: '',
-              payTime: dayjs()
-            });
-          }}>
-            Hủy
-          </Button>
-          <Button onClick={handleConfirmRefund} variant="contained">
+          <Button onClick={() => setOpenRefundDialog(false)}>Hủy</Button>
+          <Button
+            onClick={handleConfirmRefund}
+            color="warning"
+            variant="contained"
+            disabled={!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime}
+          >
             Xác nhận
           </Button>
         </DialogActions>
@@ -329,6 +332,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
         open={isChangeBookingOpen}
         onClose={() => setIsChangeBookingOpen(false)}
         onTourSelect={handleTourSelect}
+        booking={booking}
       />
     </Card>
   );

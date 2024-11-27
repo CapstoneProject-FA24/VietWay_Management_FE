@@ -567,7 +567,8 @@ const CreateTour = () => {
                         maxDate={dayjs(newTourData.startDate).subtract(1, 'day')}
                         slotProps={{
                           textField: {
-                            fullWidth: true,
+                            fullWidth: false,
+                            sx: { width: '50%' },
                             inputProps: { style: { height: '15px' } },
                             error: policy.cancelBefore && (
                               dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
