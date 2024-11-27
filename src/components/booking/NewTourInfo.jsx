@@ -2,7 +2,6 @@ import React from 'react';
 import { Paper, Typography, Grid, Box } from '@mui/material';
 
 const NewTourInfo = ({ newTour, formatDateTime, formatPrice }) => {
-  console.log(newTour);
   return (
     <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
       <Typography sx={{ 
@@ -37,7 +36,7 @@ const NewTourInfo = ({ newTour, formatDateTime, formatPrice }) => {
               <strong>Điểm đến:</strong> {newTour?.provinces?.join(' - ')}
             </Typography>
             <Typography>
-              <strong>Tổng tiền:</strong> {formatPrice(newTour?.totalPrice)}
+              <strong>Tổng tiền:</strong> {newTour?.totalAmount?.toLocaleString('vi-VN')}đ
             </Typography>
           </Box>
         </Grid>

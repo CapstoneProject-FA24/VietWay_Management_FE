@@ -48,9 +48,11 @@ const BookingCalBox = ({ booking, selectedDateObj, calculatePriceDetails, getTot
     const touristGroups = calculateTouristGroups();
     const totalAmount = Object.values(touristGroups).reduce((sum, group) => sum + group.total, 0);
 
-    // Call onTotalCalculated whenever the total changes
+    // Update parent component whenever total changes
     React.useEffect(() => {
-        onTotalCalculated(totalAmount);
+        if (onTotalCalculated && typeof totalAmount === 'number') {
+            onTotalCalculated(totalAmount);
+        }
     }, [totalAmount, onTotalCalculated]);
 
     return (

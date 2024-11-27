@@ -410,12 +410,13 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 onClose={() => setIsConfirmChangeOpen(false)}
                 currentBooking={booking}
                 newTour={{
+                    tourId: selectedDate,
                     duration: tour.duration,
                     tourName: tour.tourName,
                     provinces: tour.provinces,
                     startDate: selectedDateObj?.startDate,
                     startLocation: selectedDateObj?.startLocation,
-                    totalPrice: calculatedTotal
+                    totalAmount: calculatedTotal
                 }}
                 onConfirm={() => {
                     if (!selectedDate || !selectedDateObj) return;

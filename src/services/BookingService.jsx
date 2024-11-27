@@ -157,3 +157,22 @@ export const cancelBooking = async (bookingId, reason) => {
         throw error;
     }
 };
+
+
+export const changeBookingTour = async (bookingId, newTourId, reason) => {
+    try {
+        const response = await axios.put(
+            `${baseURL}/api/booking/${bookingId}/change-booking-tour`,
+            { newTourId, reason },
+            {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error changing booking tour:', error.response);
+        throw error;
+    }
+};

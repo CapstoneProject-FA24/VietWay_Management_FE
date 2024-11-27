@@ -2,7 +2,6 @@ import React from 'react';
 import { Paper, Typography, Grid, Box } from '@mui/material';
 
 const OldTourInfo = ({ currentBooking, formatDateTime, formatPrice }) => {
-  console.log(currentBooking);
   return (
     <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
       <Typography sx={{ 
