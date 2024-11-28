@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Button, Typography, Tabs, Tab, CircularProgress, Alert } from '@mui/material';
-import { getBookingById } from '@hooks/MockBooking';
+import { fetchBookingById } from '@services/BookingService';
 import { ArrowBack, Person, Payment, Info } from '@mui/icons-material';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
-import BookingDetail from '@components/staff/booking/BookingDetail';
-import Participant from '@components/staff/booking/Participant';
-import PaymentDetail from '@components/staff/booking/PaymentDetail';
+import BookingDetail from '@components/manager/booking/BookingDetail';
+import Participant from '@components/manager/booking/Participant';
+import PaymentDetail from '@components/manager/booking/PaymentDetail';
 
 const ManageBookingDetail = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -27,7 +27,8 @@ const ManageBookingDetail = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await getBookingById(id);
+      const data = await fetchBookingById(id);
+      console.log(data);
       setBooking(data);
     } catch (error) {
       setError('Không thể tải thông tin đặt tour');
@@ -45,7 +46,7 @@ const ManageBookingDetail = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }} ref={pageTopRef}>
       <Helmet><title>Chi tiết đặt tour</title></Helmet>
-      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}/>
+      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}/>
       <Box sx={{
         flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0,
         width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw'
@@ -85,8 +86,8 @@ const ManageBookingDetail = () => {
               <Tab icon={<Payment />} label="Lịch sử thanh toán" iconPosition="start" />
             </Tabs>
             {activeTab === 0 && <BookingDetail booking={booking} />}
-            {activeTab === 1 && <Participant participants={booking.bookingTourists} />}
-            {activeTab === 2 && <PaymentDetail payments={booking.bookingPayments} />}
+            {activeTab === 1 && <Participant participants={booking.tourists} />}
+            {activeTab === 2 && <PaymentDetail payments={booking.payments} />}
           </Box>
         )}
       </Box>

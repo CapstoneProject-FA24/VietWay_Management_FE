@@ -33,6 +33,7 @@ import ManageBooking from '@pages/manager/booking/ManageBooking.jsx';
 import ManageBookingDetail from '@pages/manager/booking/ManageBookingDetail.jsx';
 import ManageBookingStaff from '@pages/staff/booking/ManageBookingStaff.jsx';
 import ManageBookingDetailStaff from '@pages/staff/booking/ManageBookingDetailStaff.jsx';
+import AdminDashboard from '@pages/admin/AdminDashboard.jsx';
 
 const App = () => {
   return (
@@ -42,6 +43,7 @@ const App = () => {
         <Route path="/" element={<Navigate to="/dang-nhap" />} />
         <Route path="*" element={<Navigate to="/dang-nhap" />} />
         <Route path="/admin/quan-ly" element={<ManageManager />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
         <Route path="/quan-ly/nhan-vien" element={<ManageStaff />} />
         <Route path="/quan-ly/khach-hang" element={<ManageCustomer />} />
