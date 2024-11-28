@@ -20,6 +20,18 @@ const ManageCategory = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [lastCreatedType, setLastCreatedType] = useState(null);
+  const [searchTerms, setSearchTerms] = useState({
+    'tour-categories': '',
+    'attraction-types': '',
+    'post-categories': '',
+    'tour-durations': ''
+  });
+  const [appliedSearches, setAppliedSearches] = useState({
+    'tour-categories': '',
+    'attraction-types': '',
+    'post-categories': '',
+    'tour-durations': ''
+  });
 
   const tabs = [
     { label: 'Loại Tour', endpoint: 'tour-categories' },
@@ -59,13 +71,12 @@ const ManageCategory = () => {
   };
 
   const handleSearch = () => {
-    setAppliedSearch(searchTerm);
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      handleSearch();
-    }
+    const currentEndpoint = tabs[activeTab].endpoint;
+    console.log(`Searching in ${currentEndpoint} with term: ${searchTerm}`);
+    setAppliedSearches(prev => ({
+      ...prev,
+      [currentEndpoint]: searchTerm
+    }));
   };
 
   const handleCreateSuccess = () => {
@@ -77,27 +88,29 @@ const ManageCategory = () => {
   };
 
   const renderContent = () => {
+    const currentEndpoint = tabs[activeTab].endpoint;
+    
     if (activeTab === 0) {
       return <TourCategory 
-        searchTerm={appliedSearch} 
+        searchTerm={appliedSearches['tour-categories']} 
         refreshTrigger={lastCreatedType === 'tour-categories' ? refreshTrigger : 0} 
       />;
     }
     if (activeTab === 1) {
       return <AttractionCategory 
-        searchTerm={appliedSearch} 
+        searchTerm={appliedSearches['attraction-types']} 
         refreshTrigger={lastCreatedType === 'attraction-types' ? refreshTrigger : 0} 
       />;
     }
     if (activeTab === 2) {
       return <PostCategory 
-        searchTerm={appliedSearch} 
+        searchTerm={appliedSearches['post-categories']} 
         refreshTrigger={lastCreatedType === 'post-categories' ? refreshTrigger : 0}
       />;
     }
     if (activeTab === 3) {
       return <TourDuration 
-        searchTerm={appliedSearch} 
+        searchTerm={appliedSearches['tour-durations']} 
         refreshTrigger={lastCreatedType === 'tour-durations' ? refreshTrigger : 0} 
       />;
     }
@@ -134,6 +147,20 @@ const ManageCategory = () => {
     );
   };
 
+  useEffect(() => {
+    const currentEndpoint = tabs[activeTab].endpoint;
+    setSearchTerm(searchTerms[currentEndpoint] || '');
+  }, [activeTab]);
+
+  const handleSearchChange = (e) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setSearchTerms(prev => ({
+      ...prev,
+      [tabs[activeTab].endpoint]: newSearchTerm
+    }));
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
@@ -159,8 +186,7 @@ const ManageCategory = () => {
             <TextField
               placeholder="Tìm kiếm..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onChange={handleSearchChange}
               size="small"
               sx={{ minWidth: '500px' }}
               InputProps={{
