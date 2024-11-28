@@ -6,7 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import { Helmet } from 'react-helmet';
 import CreateCategory from '@components/manager/category/CreateCategory';
-import DeleteCategory from '@components/manager/category/DeleteCategory';
 import TourDuration from '@components/manager/category/TourDuration';
 import TourCategory from '@components/manager/category/TourCategory';
 import PostCategory from '@components/manager/category/PostCategory';
@@ -19,9 +18,20 @@ const ManageCategory = () => {
   const [appliedSearch, setAppliedSearch] = useState('');
   const [categories, setCategories] = useState([]);
   const [openCreate, setOpenCreate] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [lastCreatedType, setLastCreatedType] = useState(null);
+  const [searchTerms, setSearchTerms] = useState({
+    'tour-categories': '',
+    'attraction-types': '',
+    'post-categories': '',
+    'tour-durations': ''
+  });
+  const [appliedSearches, setAppliedSearches] = useState({
+    'tour-categories': '',
+    'attraction-types': '',
+    'post-categories': '',
+    'tour-durations': ''
+  });
 
   const tabs = [
     { label: 'Loại Tour', endpoint: 'tour-categories' },
@@ -48,6 +58,7 @@ const ManageCategory = () => {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setSearchTerm('');
+    setLastCreatedType(null);
   };
 
   const handleOpenCreate = () => {
@@ -60,36 +71,49 @@ const ManageCategory = () => {
   };
 
   const handleSearch = () => {
-    setAppliedSearch(searchTerm);
-  };
-
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
-      handleSearch();
-    }
+    const currentEndpoint = tabs[activeTab].endpoint;
+    console.log(`Searching in ${currentEndpoint} with term: ${searchTerm}`);
+    setAppliedSearches(prev => ({
+      ...prev,
+      [currentEndpoint]: searchTerm
+    }));
   };
 
   const handleCreateSuccess = () => {
     setOpenCreate(false);
     setSearchTerm('');
     setAppliedSearch('');
+    setLastCreatedType(tabs[activeTab].endpoint);
     setRefreshTrigger(prev => prev + 1);
   };
 
   const renderContent = () => {
+    const currentEndpoint = tabs[activeTab].endpoint;
+    
     if (activeTab === 0) {
-      return <TourCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} refreshTrigger={refreshTrigger} />;
+      return <TourCategory 
+        searchTerm={appliedSearches['tour-categories']} 
+        refreshTrigger={lastCreatedType === 'tour-categories' ? refreshTrigger : 0} 
+      />;
     }
-    if (activeTab === 1) { // Attraction Type tab
-      return <AttractionCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
+    if (activeTab === 1) {
+      return <AttractionCategory 
+        searchTerm={appliedSearches['attraction-types']} 
+        refreshTrigger={lastCreatedType === 'attraction-types' ? refreshTrigger : 0} 
+      />;
     }
-    if (activeTab === 2) { // Post Category tab
-      return <PostCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
+    if (activeTab === 2) {
+      return <PostCategory 
+        searchTerm={appliedSearches['post-categories']} 
+        refreshTrigger={lastCreatedType === 'post-categories' ? refreshTrigger : 0}
+      />;
     }
-    if (activeTab === 3) { // Tour Duration tab
-      return <TourDuration onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
+    if (activeTab === 3) {
+      return <TourDuration 
+        searchTerm={appliedSearches['tour-durations']} 
+        refreshTrigger={lastCreatedType === 'tour-durations' ? refreshTrigger : 0} 
+      />;
     }
-
 
     return (
       <Grid container spacing={2}>
@@ -123,6 +147,20 @@ const ManageCategory = () => {
     );
   };
 
+  useEffect(() => {
+    const currentEndpoint = tabs[activeTab].endpoint;
+    setSearchTerm(searchTerms[currentEndpoint] || '');
+  }, [activeTab]);
+
+  const handleSearchChange = (e) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setSearchTerms(prev => ({
+      ...prev,
+      [tabs[activeTab].endpoint]: newSearchTerm
+    }));
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
@@ -148,8 +186,7 @@ const ManageCategory = () => {
             <TextField
               placeholder="Tìm kiếm..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onChange={handleSearchChange}
               size="small"
               sx={{ minWidth: '500px' }}
               InputProps={{
@@ -181,17 +218,6 @@ const ManageCategory = () => {
         onSuccess={handleCreateSuccess}
         categoryType={tabs[activeTab].endpoint}
         isTourDuration={activeTab === 3}
-      />
-
-      <DeleteCategory
-        open={openDelete}
-        onClose={() => setOpenDelete(false)}
-        onSuccess={() => {
-          setOpenDelete(false);
-          fetchCategories();
-        }}
-        category={selectedCategory}
-        categoryType={tabs[activeTab].endpoint}
       />
     </Box>
   );

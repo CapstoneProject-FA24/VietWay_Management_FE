@@ -43,3 +43,18 @@ export const createTourCategory = async (categoryData) => {
         throw error;
     }
 };
+
+export const deleteTourCategory = async (tourCategoryId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.delete(`${baseURL}/api/tour-categories/${tourCategoryId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting tour category:', error);
+        throw error;
+    }
+};
