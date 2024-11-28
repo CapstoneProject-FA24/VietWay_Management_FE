@@ -6,13 +6,12 @@ import TourTemplateCard from '@components/tourTemplate/TourTemplateCard';
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { fetchTourTemplates } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import { fetchTourDuration } from '@services/DurationService';
-import FilterListIcon from '@mui/icons-material/FilterList';
 
 const ManagerManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -164,7 +163,6 @@ const ManagerManageTourTemplate = () => {
                                     options={provinceOptions}
                                     onChange={setTempProvinces}
                                     value={tempProvinces}
-                                    styles={selectStyles}
                                 />
                             </Box>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>

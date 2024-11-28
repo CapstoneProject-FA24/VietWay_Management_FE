@@ -207,10 +207,10 @@ const ManageAttraction = () => {
                             variant="outlined"
                             sx={{ width: '200px', ml: 2, height: '40px' }}
                         >
-                            <MenuItem value="nameA-Z">Tên A-Z</MenuItem>
-                            <MenuItem value="nameZ-A">Tên Z-A</MenuItem>
                             <MenuItem value="createdDate">Mới nhất</MenuItem>
                             <MenuItem value="createdDateReverse">Cũ nhất</MenuItem>
+                            <MenuItem value="nameA-Z">Tên A-Z</MenuItem>
+                            <MenuItem value="nameZ-A">Tên Z-A</MenuItem>
                         </Select>
                     </Grid>
                     <Grid item xs={12}>
