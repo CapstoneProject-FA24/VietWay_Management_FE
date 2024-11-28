@@ -21,7 +21,7 @@ const ManageTourTemplate = () => {
     const [provinces, setProvinces] = useState([]);
     const [tourCategories, setTourCategories] = useState([]);
     const [tourDurations, setTourDurations] = useState([]);
-    const [sortOrder, setSortOrder] = useState('tourNameA-Z');
+    const [sortOrder, setSortOrder] = useState('createdDate');
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedDuration, setSelectedDuration] = useState([]);

@@ -20,7 +20,7 @@ const ManageAttraction = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [attractions, setAttractions] = useState([]);
-    const [sortOrder, setSortOrder] = useState('nameA-Z');
+    const [sortOrder, setSortOrder] = useState('createdDate');
     const [statusTab, setStatusTab] = useState('all');
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedAttraction, setSelectedAttraction] = useState(null);
