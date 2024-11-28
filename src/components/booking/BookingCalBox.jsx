@@ -56,16 +56,16 @@ const BookingCalBox = ({ booking, selectedDateObj, calculatePriceDetails, getTot
     return (
         <Box 
             sx={{ 
-                width: '100%', height: '100%',
+                width: '100%', height: '70%',
                 border: 1,
                 borderColor: 'divider',
                 borderRadius: 1,
-                p: 2,
+                pl: 1, pr: 1,
                 minWidth: 250,
                 bgcolor: 'background.paper'
             }}
         >
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
                 Tạm tính cho booking {booking?.bookingCode}
             </Typography>
             <Divider sx={{ my: 1 }} />

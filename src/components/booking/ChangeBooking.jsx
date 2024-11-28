@@ -11,6 +11,12 @@ import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourTemplatesWithTourInfo } from '@services/TourTemplateService';
 import CBTemplateCard from './CB-TemplateCard';
 import Pagination from '@mui/material/Pagination';
+import ReactSelect from 'react-select';
+import makeAnimated from 'react-select/animated';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
     const [tours, setTours] = useState([]);
@@ -29,6 +35,26 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
         pageSize: 9,
         total: 0
     });
+
+    const [tempFilters, setTempFilters] = useState({
+        tourType: [],
+        duration: [],
+        location: [],
+    });
+    const [dateRange, setDateRange] = useState({ from: null, to: null });
+    const [tempDateRange, setTempDateRange] = useState({ from: null, to: null });
+
+    const customSelectStyles = {
+        menu: (provided) => ({
+            ...provided,
+            backgroundColor: 'white',
+            zIndex: 9999
+        }),
+        control: (provided) => ({
+            ...provided,
+            backgroundColor: 'white'
+        }),
+    };
 
     const fetchTours = async () => {
         try {
@@ -95,26 +121,32 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
         }
     };
 
+    const handleTempFilterChange = (selectedOptions, filterType) => {
+        setTempFilters(prev => ({
+            ...prev,
+            [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
+        }));
+    };
+
     return (
         <Dialog 
             open={open} 
             onClose={onClose}
-            maxWidth="xl"
+            maxWidth="lg"
             fullWidth
         >
             <Box sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="h5">Chọn tour thay đổi</Typography>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', fontSize: '1.8rem' }}>Chọn tour thay đổi</Typography>
                     <IconButton onClick={onClose}>
                         <CloseIcon />
                     </IconButton>
                 </Box>
 
-                {/* Search Section */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid container spacing={3}>
                     <Grid item xs={12}>
                         <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Box sx={{ display: 'flex', width: '50%' }}>
+                            <Box sx={{ display: 'flex', width: '100%' }}>
                                 <TextField
                                     variant="outlined"
                                     placeholder="Tìm kiếm tour theo tên..."
@@ -140,7 +172,7 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                                 </Button>
                             </Box>
 
-                            <Box sx={{ display: 'flex', width: '50%' }}>
+                            <Box sx={{ display: 'flex', width: '100%' }}>
                                 <TextField
                                     variant="outlined"
                                     placeholder="Tìm kiếm tour theo mã..."
@@ -167,58 +199,126 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                             </Box>
                         </Box>
                     </Grid>
-                </Grid>
 
-                {/* Tour Cards */}
-                {tours.length > 0 ? (
-                    <>
-                        <Grid container spacing={2}>
-                            {tours.map((tour) => (
-                                <Grid item xs={12} key={tour.tourTemplateId}>
-                                    <CBTemplateCard 
-                                        tour={tour}
-                                        onSelect={onTourSelect}
-                                        booking={booking}
+                    <Grid item xs={12}>
+                        <Box sx={{ borderRadius: 1, mb: 3 }}>
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Loại tour</Typography>
+                                    <ReactSelect
+                                        closeMenuOnSelect={false}
+                                        components={makeAnimated()}
+                                        isMulti
+                                        options={tourCategories.map(cat => ({
+                                            value: cat.tourCategoryId,
+                                            label: cat.name
+                                        }))}
+                                        value={tourCategories
+                                            .filter(cat => tempFilters.tourType.includes(cat.tourCategoryId))
+                                            .map(cat => ({
+                                                value: cat.tourCategoryId,
+                                                label: cat.name
+                                            }))}
+                                        onChange={(selected) => handleTempFilterChange(selected, 'tourType')}
+                                        styles={customSelectStyles}
                                     />
                                 </Grid>
-                            ))}
-                        </Grid>
 
-                        {/* Pagination */}
-                        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
-                            <Box sx={{ width: '10%' }}/>
-                            <Pagination
-                                count={Math.ceil(pagination.total / pagination.pageSize)}
-                                page={pagination.pageIndex}
-                                onChange={(e, newPage) => setPagination(prev => ({ ...prev, pageIndex: newPage }))}
-                                color="primary"
-                            />
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Select
-                                    value={pagination.pageSize}
-                                    size="small"
-                                    sx={{ minWidth: 80 }}
-                                    onChange={(e) => {
-                                        setPagination(prev => ({
-                                            ...prev,
-                                            pageSize: parseInt(e.target.value, 10),
-                                            pageIndex: 1
-                                        }));
-                                    }}
-                                >
-                                    <MenuItem value={9}>9</MenuItem>
-                                    <MenuItem value={18}>18</MenuItem>
-                                    <MenuItem value={27}>27</MenuItem>
-                                </Select>
-                                <Typography>/trang</Typography>
-                            </Box>
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Địa điểm</Typography>
+                                    <ReactSelect
+                                        closeMenuOnSelect={false}
+                                        components={makeAnimated()}
+                                        isMulti
+                                        options={provinces.map(prov => ({
+                                            value: prov.provinceId,
+                                            label: prov.name
+                                        }))}
+                                        value={provinces
+                                            .filter(prov => tempFilters.location.includes(prov.provinceId))
+                                            .map(prov => ({
+                                                value: prov.provinceId,
+                                                label: prov.name
+                                            }))}
+                                        onChange={(selected) => handleTempFilterChange(selected, 'location')}
+                                        styles={customSelectStyles}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={12} md={4}>
+                                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>Ngày khởi hành</Typography>
+                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            <DatePicker
+                                                value={tempDateRange.from}
+                                                onChange={(newValue) => setTempDateRange(prev => ({ ...prev, from: newValue }))}
+                                                slotProps={{ textField: { size: 'small' } }}
+                                                format="DD/MM/YYYY"
+                                            />
+                                            <DatePicker
+                                                value={tempDateRange.to}
+                                                onChange={(newValue) => setTempDateRange(prev => ({ ...prev, to: newValue }))}
+                                                slotProps={{ textField: { size: 'small' } }}
+                                                format="DD/MM/YYYY"
+                                            />
+                                        </Box>
+                                    </LocalizationProvider>
+                                </Grid>
+                            </Grid>
                         </Box>
-                    </>
-                ) : (
-                    <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
-                        Không có kết quả nào
-                    </Typography>
-                )}
+                    </Grid>
+
+                    <Grid item xs={12}>
+                        {tours.length > 0 ? (
+                            <>
+                                <Grid container spacing={2}>
+                                    {tours.map((tour) => (
+                                        <Grid item xs={12} key={tour.tourTemplateId}>
+                                            <CBTemplateCard 
+                                                tour={tour}
+                                                onSelect={onTourSelect}
+                                                booking={booking}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+
+                                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
+                                    <Box sx={{ width: '10%' }}/>
+                                    <Pagination
+                                        count={Math.ceil(pagination.total / pagination.pageSize)}
+                                        page={pagination.pageIndex}
+                                        onChange={(e, newPage) => setPagination(prev => ({ ...prev, pageIndex: newPage }))}
+                                        color="primary"
+                                    />
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Select
+                                            value={pagination.pageSize}
+                                            size="small"
+                                            sx={{ minWidth: 80 }}
+                                            onChange={(e) => {
+                                                setPagination(prev => ({
+                                                    ...prev,
+                                                    pageSize: parseInt(e.target.value, 10),
+                                                    pageIndex: 1
+                                                }));
+                                            }}
+                                        >
+                                            <MenuItem value={9}>9</MenuItem>
+                                            <MenuItem value={18}>18</MenuItem>
+                                            <MenuItem value={27}>27</MenuItem>
+                                        </Select>
+                                        <Typography>/trang</Typography>
+                                    </Box>
+                                </Box>
+                            </>
+                        ) : (
+                            <Typography variant="h6" sx={{ textAlign: "center", mt: 4 }}>
+                                Không có kết quả nào
+                            </Typography>
+                        )}
+                    </Grid>
+                </Grid>
             </Box>
         </Dialog>
     );

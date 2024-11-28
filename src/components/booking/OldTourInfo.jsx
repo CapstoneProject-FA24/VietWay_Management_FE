@@ -6,9 +6,10 @@ const OldTourInfo = ({ currentBooking, formatDateTime, formatPrice }) => {
     <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
       <Typography sx={{ 
         fontWeight: 'bold', 
-        fontSize: '1.1rem',
+        fontSize: '1.4rem',
         mb: 2,
-        color: 'text.secondary'
+        color: 'text.secondary',
+        textAlign: 'center'
       }}>
         Thông tin tour hiện tại
       </Typography>

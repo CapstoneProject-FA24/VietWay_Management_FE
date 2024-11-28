@@ -164,6 +164,7 @@ const ManagerManageTourTemplate = () => {
                                     options={provinceOptions}
                                     onChange={setTempProvinces}
                                     value={tempProvinces}
+                                    styles={selectStyles}
                                 />
                             </Box>
                             <Box sx={{ width: { xs: '100%', md: '50%' }, ml: 1.5 }}>
