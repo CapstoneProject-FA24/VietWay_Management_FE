@@ -20,7 +20,6 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
         });
         
         const { items, total, pageSize, pageIndex: currentPage } = response.data.data;
-        console.log(response.data.data);
         return {
             items: items.map(booking => ({
                 bookingId: booking.bookingId,
@@ -38,13 +37,11 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
                 totalPrice: booking.totalPrice,
                 numberOfParticipants: booking.numberOfParticipants,
                 status: booking.status,
-                tourists: [
-                    {
-                        touristId: "string",
-                        fullName: "string", 
-                        dateOfBirth: "2024-11-26T19:01:12.297Z"
-                    }
-                ]
+                tourists: booking.tourists.map(tourist => ({
+                    touristId: tourist.touristId,
+                    fullName: tourist.fullName,
+                    dateOfBirth: tourist.dateOfBirth
+                }))
             })),
             total,
             pageSize,

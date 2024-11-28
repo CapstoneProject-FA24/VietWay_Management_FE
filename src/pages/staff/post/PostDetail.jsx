@@ -83,6 +83,7 @@ const PostDetail = () => {
   });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -172,6 +173,15 @@ const PostDetail = () => {
     }
   }, [post]);
 
+  useEffect(() => {
+    return () => {
+      // Cleanup object URLs when component unmounts
+      if (editablePost?.image && editablePost.image.startsWith('blob:')) {
+        URL.revokeObjectURL(editablePost.image);
+      }
+    };
+  }, [editablePost?.image]);
+
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -192,6 +202,7 @@ const PostDetail = () => {
   };
 
   const handleSaveChanges = async () => {
+    setIsUpdating(true);
     try {
       const updatedPost = {
         title: editablePost.title,
@@ -229,10 +240,13 @@ const PostDetail = () => {
         message: 'Lỗi khi lưu nháp: ' + (error.response?.data?.message || error.message),
         severity: 'error'
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   const handleSendForApproval = async () => {
+    setIsUpdating(true);
     try {
       const updatedPost = {
         title: editablePost.title,
@@ -270,6 +284,8 @@ const PostDetail = () => {
         message: 'Lỗi khi gửi bài viết: ' + (error.response?.data?.message || error.message),
         severity: 'error'
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -378,15 +394,9 @@ const PostDetail = () => {
         // Store the file for later upload
         setEditablePost(prev => ({
             ...prev,
-            imageFile: file  // Store the actual file
+            imageFile: file,  // Store the actual file
+            image: URL.createObjectURL(file)  // Create local preview URL
         }));
-        
-        // Create preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            handleFieldChange('image', reader.result);
-        };
-        reader.readAsDataURL(file);
     }
   };
 
@@ -525,7 +535,7 @@ const PostDetail = () => {
                     }}>
                       {editablePost.image ? (
                         <img 
-                          src={editablePost.imageUrl} 
+                          src={editablePost.image} 
                           alt={editablePost.title}
                           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
@@ -619,11 +629,23 @@ const PostDetail = () => {
                   )}
 
                   <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                    <Button variant="contained" sx={{ backgroundColor: 'grey', mr: 1 }} startIcon={<Save />} onClick={handleSaveChanges}>
-                      Lưu nháp
+                    <Button 
+                      variant="contained" 
+                      sx={{ backgroundColor: 'grey', mr: 1 }} 
+                      startIcon={<Save />} 
+                      onClick={handleSaveChanges}
+                      disabled={isUpdating}
+                    >
+                      {isUpdating ? 'Đang lưu...' : 'Lưu nháp'}
                     </Button>
-                    <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
-                      Gửi duyệt
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      startIcon={<Send />} 
+                      onClick={handleSendForApproval}
+                      disabled={isUpdating}
+                    >
+                      {isUpdating ? 'Đang gửi...' : 'Gửi duyệt'}
                     </Button>
                   </Box>
                 </Box>

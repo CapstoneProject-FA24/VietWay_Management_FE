@@ -3,19 +3,17 @@ import { Box, Typography, Divider } from '@mui/material';
 
 const BookingCalBox = ({ booking, selectedDateObj, calculatePriceDetails, getTotalAmount, onTotalCalculated }) => {
     if (!booking || !selectedDateObj) return null;
-
+    console.log(selectedDateObj);
     const calculatePriceForTourist = (tourist, prices) => {
         const birthDate = new Date(tourist.dateOfBirth);
         const today = new Date();
         const age = today.getFullYear() - birthDate.getFullYear();
-
         // Find matching price category based on age
         const matchingPrice = prices.find(price => {
             const meetsMinAge = price.ageFrom === null || age >= price.ageFrom;
             const meetsMaxAge = price.ageTo === null || age <= price.ageTo;
             return meetsMinAge && meetsMaxAge;
         });
-
         // If no matching price found, use default adult price
         return matchingPrice?.price || selectedDateObj.prices.find(p => p.priceId === 'adult')?.price || 0;
     };
@@ -58,6 +56,7 @@ const BookingCalBox = ({ booking, selectedDateObj, calculatePriceDetails, getTot
     return (
         <Box 
             sx={{ 
+                width: '100%', height: '100%',
                 border: 1,
                 borderColor: 'divider',
                 borderRadius: 1,

@@ -190,7 +190,7 @@ const BookingDetail = ({ booking }) => {
                                     <Typography variant="body1">
                                         {booking.status === BookingStatus.PendingRefund ? 'Tổng tiền cần hoàn:' : 'Tổng tiền đã hoàn:'}
                                     </Typography>
-                                    <Typography variant="body1" sx={{ color: 'red' }}>{booking.refundAmount.toLocaleString()} đ</Typography>
+                                    <Typography variant="body1" sx={{ color: 'red' }}>{booking.refundAmount?.toLocaleString()} đ</Typography>
                                 </Box>
                             </>
                         )}

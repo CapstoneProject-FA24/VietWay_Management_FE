@@ -18,6 +18,10 @@ const ExpandButton = styled((props) => {
 })(({ theme, expand }) => ({
     transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
     marginLeft: 'auto',
+    marginRight: 'auto', // Add right margin auto
+    display: 'flex',     // Add flex display
+    alignItems: 'center', // Center vertically
+    justifyContent: 'center', // Center horizontally
     transition: theme.transitions.create('transform', {
         duration: theme.transitions.duration.shortest,
     }),
@@ -39,13 +43,15 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 priceId: 'adult',
                 name: 'Người lớn',
                 price: t.defaultTouristPrice,
-                description: 'Giá người lớn'
+                description: 'Giá người lớn',
             },
             ...(t.tourPrices?.map(price => ({
                 priceId: price.priceId,
                 name: price.name,
                 price: price.price,
-                description: `Độ tuổi: ${price.ageFrom || 0} - ${price.ageTo || 'không giới hạn'}`
+                description: `Độ tuổi: ${price.ageFrom || 0} - ${price.ageTo || 'không giới hạn'}`,
+                ageFrom: price.ageFrom,
+                ageTo: price.ageTo
             })) || [])
         ]
     })) || []);
@@ -70,15 +76,15 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
 
     const calculateTouristGroups = () => {
         if (!booking?.tourists || !selectedDateObj?.prices) return {};
-        
+
         const groups = {};
-        
+
         booking.tourists.forEach(tourist => {
             const price = calculatePriceForTourist(tourist, selectedDateObj.prices);
             const matchingPriceCategory = selectedDateObj.prices.find(p => p.price === price);
-            
+
             const categoryName = matchingPriceCategory?.name || 'Người lớn';
-            
+
             if (!groups[categoryName]) {
                 groups[categoryName] = {
                     count: 0,
@@ -86,7 +92,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                     total: 0
                 };
             }
-            
+
             groups[categoryName].count++;
             groups[categoryName].total += price;
         });
@@ -101,9 +107,11 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
 
     // Handle date selection
     const handleDateChange = (event) => {
+        console.log("A");
         const dateId = event.target.value;
         setSelectedDate(dateId);
         const dateObj = availableDates.find(d => d.id === dateId);
+        console.log(dateObj);
         setSelectedDateObj(dateObj || null);
     };
 
@@ -152,12 +160,12 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 }
             }}>
                 {/* Main Card Content */}
-                <Box sx={{ display: 'flex', height: '320px' }}>
+                <Box sx={{ display: 'flex', height: '310px' }}>
                     {/* Left side - Image */}
                     <CardMedia
                         component="img"
                         sx={{
-                            width: '35%',
+                            width: '33%',
                             objectFit: 'cover'
                         }}
                         image={tour.imageUrl}
@@ -166,150 +174,114 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
 
                     {/* Right side - Content */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', width: '65%' }}>
-                        <CardContent sx={{ flex: '1 0 auto', p: 3 }}>
+                        <CardContent sx={{ flex: '1 0 auto', p: 2 }}>
                             {/* Tour Category & Duration */}
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                                 <Chip
                                     icon={<Category sx={{ fontSize: '1rem' }} />}
-                                    label={tour.tourCategory}
-                                    size="small"
-                                    color="primary"
-                                    variant="outlined"
+                                    label={tour.tourCategory} size="small" color="primary" variant="outlined"
                                 />
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <AccessTime sx={{ fontSize: '1rem' }} />
-                                    <Typography variant="body2">
-                                        {tour.duration}
-                                    </Typography>
+                                    <Typography variant="body2"> {tour.duration} </Typography>
                                 </Box>
                             </Box>
 
                             {/* Tour Name */}
-                            <Typography variant="h5" component="div" sx={{ mb: 2 }}>
+                            <Typography variant="h5" component="div" sx={{ mb: 1, fontSize: '1.35rem' }}>
                                 {tour.tourName}
                             </Typography>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Box>
+                                    {/* Code */}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.7 }}>
+                                        <LocalActivity color="action" />
+                                        <Typography variant="body2" color="text.secondary"> {tour.code} </Typography>
+                                    </Box>
 
-                            {/* Code */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                <LocalActivity color="action" />
-                                <Typography variant="body2" color="text.secondary">
-                                    {tour.code}
-                                </Typography>
-                            </Box>
-
-                            {/* Location */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                <LocationOn color="action" />
-                                <Typography variant="body2" color="text.secondary">
-                                    {tour.provinces.join(' - ')}
-                                </Typography>
-                            </Box>
-
-                            {/* Booking Section */}
-                            <Box sx={{
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: 2,
-                                mt: 'auto'
-                            }}>
-                                {/* Date Selection Dropdown */}
-                                <Select
-                                    value={selectedDate}
-                                    onChange={handleDateChange}
-                                    displayEmpty
-                                    size="small"
-                                    sx={{ minWidth: 250 }}
-                                    startAdornment={<CalendarToday sx={{ mr: 1 }} />}
-                                >
-                                    <MenuItem value="" disabled>
-                                        Chọn ngày khởi hành
-                                    </MenuItem>
-                                    {availableDates?.map((date) => (
-                                        <MenuItem
-                                            key={date.id}
-                                            value={date.id}
-                                            sx={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: 'flex-start',
-                                                py: 1
-                                            }}
-                                        >
-                                            <Box sx={{
-                                                width: '100%',
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                mb: 1
-                                            }}>
-                                                <Typography variant="subtitle2">
-                                                    {date.startDate}
-                                                </Typography>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    {date.startLocation}
-                                                </Typography>
-                                            </Box>
-                                            <Box sx={{ width: '100%' }}>
-                                                {date.prices?.map((priceInfo) => (
-                                                    <Box
-                                                        key={priceInfo.priceId}
-                                                        sx={{
-                                                            display: 'flex',
-                                                            justifyContent: 'space-between',
-                                                            alignItems: 'center',
-                                                            mb: 0.5
-                                                        }}
-                                                    >
-                                                        <Tooltip title={priceInfo.description || ''}>
-                                                            <Typography variant="body2" color="text.secondary">
-                                                                {priceInfo.name}
-                                                            </Typography>
-                                                        </Tooltip>
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="primary.main"
-                                                            sx={{ fontWeight: 500 }}
-                                                        >
-                                                            {priceInfo.price?.toLocaleString('vi-VN')}đ
+                                    {/* Location */}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                                        <LocationOn color="action" />
+                                        <Typography variant="body2" color="text.secondary"> {tour.provinces.join(' - ')} </Typography>
+                                    </Box>
+                                    {/* Booking Section */}
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mt: 'auto' }}>
+                                        {/* Date Selection Dropdown */}
+                                        <Select value={selectedDate} onChange={handleDateChange} displayEmpty size="small" sx={{ width: '23rem' }}>
+                                            <MenuItem value="" disabled>
+                                                Chọn ngày khởi hành
+                                            </MenuItem>
+                                            {availableDates?.map((date) => (
+                                                <MenuItem
+                                                    key={date.id} value={date.id}
+                                                    sx={{
+                                                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', py: 1
+                                                    }}
+                                                >
+                                                    <Box sx={{
+                                                        width: '100%', display: 'flex', flexDirection: 'column',
+                                                        justifyContent: 'space-between', mb: 1
+                                                    }}>
+                                                        <Typography variant="subtitle2">
+                                                            {new Date(date.startDate).toLocaleDateString('vi-VN')} - {new Date(date.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary" noWrap>
+                                                            {date.startLocation.length > 47
+                                                                ? `${date.startLocation.substring(0, 47)}...`
+                                                                : date.startLocation}
                                                         </Typography>
                                                     </Box>
-                                                ))}
-                                            </Box>
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-
+                                                    <Box sx={{ width: '100%' }}>
+                                                        {date.prices?.map((priceInfo) => (
+                                                            <Box
+                                                                key={priceInfo.priceId}
+                                                                sx={{
+                                                                    display: 'flex', justifyContent: 'space-between',
+                                                                    alignItems: 'center', mb: 0.5
+                                                                }}
+                                                            >
+                                                                <Tooltip title={priceInfo.description || ''}>
+                                                                    <Typography variant="body2" color="text.secondary"> {priceInfo.name} </Typography>
+                                                                </Tooltip>
+                                                                <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }} >
+                                                                    {priceInfo.price?.toLocaleString('vi-VN')}đ
+                                                                </Typography>
+                                                            </Box>
+                                                        ))}
+                                                    </Box>
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </Box>
+                                </Box>
                                 {/* Booking Calculation Box */}
                                 {selectedDate && booking && selectedDateObj && (
-                                    <BookingCalBox
-                                        booking={booking}
-                                        selectedDateObj={selectedDateObj}
-                                        calculatePriceDetails={calculatePriceDetails}
-                                        getTotalAmount={getTotalAmount}
-                                        onTotalCalculated={setCalculatedTotal}
-                                    />
+                                    <Box sx={{ width: '75%', display: 'flex', overflow: 'auto' }}>
+                                        <BookingCalBox
+                                            booking={booking}
+                                            selectedDateObj={selectedDateObj}
+                                            calculatePriceDetails={calculatePriceDetails}
+                                            getTotalAmount={getTotalAmount}
+                                            onTotalCalculated={setCalculatedTotal}
+                                        />
+                                    </Box>
                                 )}
+                                <Box sx={{ width: '25%', display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+                                    <Button
+                                        variant="contained" disabled={!selectedDate} onClick={handleBookClick}
+                                        sx={{ textTransform: 'none', width: 'fit-content', height: 'fit-content' }}
+                                    >
+                                        Chọn tour
+                                    </Button>
 
-                                {/* Book Button */}
-                                <Button
-                                    variant="contained"
-                                    disabled={!selectedDate}
-                                    onClick={handleBookClick}
-                                    sx={{
-                                        textTransform: 'none',
-                                        minWidth: 120
-                                    }}
-                                >
-                                    Chọn tour
-                                </Button>
-
-                                <ExpandButton
-                                    expand={expanded}
-                                    onClick={handleExpandClick}
-                                    aria-expanded={expanded}
-                                    aria-label="show more"
-                                >
-                                    <ExpandMore />
-                                </ExpandButton>
+                                    <ExpandButton
+                                        onClick={handleExpandClick} aria-expanded={expanded}
+                                        aria-label="show more" sx={{ width: 'fit-content', height: 'fit-content', fontSize: '0.9rem' }}
+                                    >
+                                        <ExpandMore sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s' }} />
+                                        {expanded ? 'Thu gọn' : 'Xem thêm'}
+                                    </ExpandButton>
+                                </Box>
                             </Box>
                         </CardContent>
                     </Box>
