@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Snackbar, Alert } from '@mui/material';
 import { createTourCategory } from '@services/TourCategoryService';
+import { createPostCategory } from '@services/PostCategoryService';
+import { createAttractionType } from '@services/AttractionTypeService';
+import { createTourDuration } from '@services/DurationService';
 
 const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration }) => {
   const [formData, setFormData] = useState({
@@ -28,14 +31,44 @@ const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration
           message: 'Thêm loại tour thành công!',
           severity: 'success'
         });
-
-        // Reset form
-        setFormData({ name: '', description: '', days: '' });
+      } else if (categoryType === 'post-categories') {
+        await createPostCategory({
+          name: formData.name,
+          description: formData.description
+        });
         
-        // Close modal and reload list
-        onSuccess();
+        setSnackbar({
+          open: true,
+          message: 'Thêm loại bài viết thành công!',
+          severity: 'success'
+        });
+      } else if (categoryType === 'attraction-types') {
+        await createAttractionType({
+          name: formData.name,
+          description: formData.description
+        });
+        setSnackbar({
+          open: true,
+          message: 'Thêm loại điểm đến thành công!',
+          severity: 'success'
+        });
+      } else if (categoryType === 'tour-durations') {
+        await createTourDuration({
+          name: formData.name,
+          days: formData.days
+        });
+        setSnackbar({
+          open: true,
+          message: 'Thêm thời lượng tour thành công!',
+          severity: 'success'
+        });
       }
-      // Add other category types here when their services are ready
+      
+      // Reset form
+      setFormData({ name: '', description: '', days: '' });
+      
+      // Close modal and reload list
+      onSuccess();
       
     } catch (error) {
       console.error('Error creating category:', error);
@@ -69,6 +102,8 @@ const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration
     }
   };
 
+  const showDescriptionField = categoryType !== 'tour-durations';
+
   return (
     <>
       <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -77,23 +112,25 @@ const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration
           <DialogContent>
             <TextField
               fullWidth
-              label="Tên"
+              label={categoryType === 'tour-durations' ? 'Tên thời lượng' : 'Tên'}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               sx={{ mb: 2 }}
             />
-            <TextField
-              fullWidth
-              label="Mô tả"
-              multiline
-              rows={4}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              required
-              sx={{ mb: 2 }}
-            />
-            {isTourDuration && (
+            {showDescriptionField && (
+              <TextField
+                fullWidth
+                label="Mô tả"
+                multiline
+                rows={4}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                required
+                sx={{ mb: 2 }}
+              />
+            )}
+            {categoryType === 'tour-durations' && (
               <TextField
                 fullWidth
                 type="number"

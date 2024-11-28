@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert, Pagination, Stack } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ManagerUpdatePopup from '@components/admin/ManagerUpdatePopup';
 import ManagerCreatePopup from '@components/admin/ManagerCreatePopup';
@@ -137,6 +137,10 @@ const ManageManager = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  const handlePageChange = (event, newPage) => {
+    setPageIndex(newPage);
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Helmet>
@@ -243,6 +247,19 @@ const ManageManager = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography>
+            Hiển thị {managers.length} trên tổng số {total} kết quả
+          </Typography>
+          <Stack spacing={2}>
+            <Pagination 
+              count={Math.ceil(total / pageSize)} 
+              page={pageIndex}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </Stack>
+        </Box>
         <ManagerCreatePopup
           open={openCreatePopup}
           onClose={() => setOpenCreatePopup(false)}

@@ -6,7 +6,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import { Helmet } from 'react-helmet';
 import CreateCategory from '@components/manager/category/CreateCategory';
-import DeleteCategory from '@components/manager/category/DeleteCategory';
 import TourDuration from '@components/manager/category/TourDuration';
 import TourCategory from '@components/manager/category/TourCategory';
 import PostCategory from '@components/manager/category/PostCategory';
@@ -19,9 +18,8 @@ const ManageCategory = () => {
   const [appliedSearch, setAppliedSearch] = useState('');
   const [categories, setCategories] = useState([]);
   const [openCreate, setOpenCreate] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [lastCreatedType, setLastCreatedType] = useState(null);
 
   const tabs = [
     { label: 'Loại Tour', endpoint: 'tour-categories' },
@@ -48,6 +46,7 @@ const ManageCategory = () => {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setSearchTerm('');
+    setLastCreatedType(null);
   };
 
   const handleOpenCreate = () => {
@@ -73,23 +72,35 @@ const ManageCategory = () => {
     setOpenCreate(false);
     setSearchTerm('');
     setAppliedSearch('');
+    setLastCreatedType(tabs[activeTab].endpoint);
     setRefreshTrigger(prev => prev + 1);
   };
 
   const renderContent = () => {
     if (activeTab === 0) {
-      return <TourCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} refreshTrigger={refreshTrigger} />;
+      return <TourCategory 
+        searchTerm={appliedSearch} 
+        refreshTrigger={lastCreatedType === 'tour-categories' ? refreshTrigger : 0} 
+      />;
     }
-    if (activeTab === 1) { // Attraction Type tab
-      return <AttractionCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
+    if (activeTab === 1) {
+      return <AttractionCategory 
+        searchTerm={appliedSearch} 
+        refreshTrigger={lastCreatedType === 'attraction-types' ? refreshTrigger : 0} 
+      />;
     }
-    if (activeTab === 2) { // Post Category tab
-      return <PostCategory onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
+    if (activeTab === 2) {
+      return <PostCategory 
+        searchTerm={appliedSearch} 
+        refreshTrigger={lastCreatedType === 'post-categories' ? refreshTrigger : 0}
+      />;
     }
-    if (activeTab === 3) { // Tour Duration tab
-      return <TourDuration onDelete={handleOpenDelete} searchTerm={appliedSearch} />;
+    if (activeTab === 3) {
+      return <TourDuration 
+        searchTerm={appliedSearch} 
+        refreshTrigger={lastCreatedType === 'tour-durations' ? refreshTrigger : 0} 
+      />;
     }
-
 
     return (
       <Grid container spacing={2}>
@@ -181,17 +192,6 @@ const ManageCategory = () => {
         onSuccess={handleCreateSuccess}
         categoryType={tabs[activeTab].endpoint}
         isTourDuration={activeTab === 3}
-      />
-
-      <DeleteCategory
-        open={openDelete}
-        onClose={() => setOpenDelete(false)}
-        onSuccess={() => {
-          setOpenDelete(false);
-          fetchCategories();
-        }}
-        category={selectedCategory}
-        categoryType={tabs[activeTab].endpoint}
       />
     </Box>
   );
