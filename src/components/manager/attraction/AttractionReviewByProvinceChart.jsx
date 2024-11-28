@@ -39,7 +39,7 @@ const AttractionReviewByProvinceChart = ({ data }) => {
     const ratingColors = {
         '1 sao': '#ff4d4d',
         '2 sao': '#ffa64d',
-        '3 sao': '#ffff4d',
+        '3 sao': '#FF69B4',
         '4 sao': '#80ff80',
         '5 sao': '#2eb82e',
     };
@@ -139,7 +139,7 @@ const AttractionReviewByProvinceChart = ({ data }) => {
                 </ButtonGroup>
             </Box>
 
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/*<LocalizationProvider dateAdapter={AdapterDayjs}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                     <DatePicker
                         views={['month', 'year']}
@@ -170,7 +170,7 @@ const AttractionReviewByProvinceChart = ({ data }) => {
                         Áp dụng
                     </Button>
                 </Box>
-            </LocalizationProvider>
+            </LocalizationProvider>*/}
 
             <Box sx={{
                 height: displayCount <= 5 ? '300px' :

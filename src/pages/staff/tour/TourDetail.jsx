@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, TextField } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
@@ -17,6 +17,11 @@ import { TourStatus } from '@hooks/Statuses';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Helmet } from 'react-helmet';
+import BookingByTemplate from '@components/tourTemplate/BookingByTemplate';
+import TourUpdateForm from '@components/tour/TourUpdateForm';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import ToggleButton from '@mui/material/ToggleButton';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -29,6 +34,9 @@ const TourDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editTourData, setEditTourData] = useState(null);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+  const [view, setView] = useState('details'); // 'details' or 'edit'
+  const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -117,7 +125,71 @@ const TourDetail = () => {
     console.log('Delete tour:', id);
   };
 
-  const canModify = tour?.status === TourStatus.Rejected;
+  const handleViewChange = (event, newView) => {
+    if (newView !== null) {
+      setView(newView);
+    }
+  };
+
+  const handleCancelClick = () => {
+    setIsCancelPopupOpen(true);
+  };
+
+  const handleCloseCancelPopup = () => {
+    setIsCancelPopupOpen(false);
+  };
+
+  const handleCancelConfirm = () => {
+    setView('details');
+    setIsCancelPopupOpen(false);
+  };
+
+  const handleUpdateSuccess = async () => {
+    try {
+      const updatedTour = await fetchTourById(id);
+      setTour(updatedTour);
+      setView('details');
+      setSnackbar({
+        open: true,
+        message: 'Cập nhật tour thành công',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error fetching updated tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi cập nhật tour',
+        severity: 'error'
+      });
+    }
+  };
+
+  const CancelConfirmationDialog = () => (
+    <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        Xác nhận hủy
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button onClick={handleCloseCancelPopup} sx={{ color: '#666666' }}>
+          Không
+        </Button>
+        <Button
+          onClick={handleCancelConfirm}
+          variant="contained"
+          sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+        >
+          Có
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+  const canUpdate = tour?.status === TourStatus.Rejected || tour?.status === TourStatus.Pending;
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
@@ -127,298 +199,164 @@ const TourDetail = () => {
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={12} sx={{ ml: 3 }}>
-            <Button
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(-1)}
-              sx={{ color: 'grey' }}
-            >
-              Quay lại
-            </Button>
-            <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 2 }}>
-              Chi tiết tour
-            </Typography>
+          <Grid item xs={12} md={12} sx={{ ml: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Button
+                startIcon={<ArrowBackIcon />}
+                onClick={() => navigate(-1)}
+                sx={{ color: 'grey' }}
+              >
+                Quay lại
+              </Button>
+              <Typography variant="h4" sx={{ color: 'primary.main', fontWeight: 'bold', mb: 2 }}>
+                Chi tiết tour
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              {canUpdate && (
+                <>
+                  {view === 'edit' ? (
+                    <Button
+                      variant="contained"
+                      startIcon={<CancelIcon />}
+                      onClick={handleCancelClick}
+                      sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                    >
+                      Hủy sửa
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      startIcon={<EditIcon />}
+                      onClick={() => setView('edit')}
+                      sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                    >
+                      Sửa
+                    </Button>
+                  )}
+                </>
+              )}
+            </Box>
           </Grid>
+
           <Grid item xs={12} md={8.5}>
             <TourTemplateInfo
               tourTemplate={tourTemplate}
               isLoading={isLoading}
             />
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TourCalendar 
-                tourId={id} 
-                tours={tours} 
-                selectedMonth={selectedMonth} 
-                handleMonthChange={handleMonthChange} 
+              <TourCalendar
+                tourId={id}
+                tours={tours}
+                selectedMonth={selectedMonth}
+                handleMonthChange={handleMonthChange}
               />
             </Box>
           </Grid>
+
           <Grid item xs={12} md={3.5}>
-            <Paper elevation={2} sx={{ p: 2 }}>
-              <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
-                {isEditing ? 'Chỉnh sửa tour' : 'Thông tin tour'}
-              </Typography>
-              {tour && !isEditing && (
-                <>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
-                    <Typography>Khởi hành từ: {tour.startLocation}</Typography>
-                    <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
-                    <Typography>Giờ khởi hành: {tour.startTime}</Typography>
-                    <Typography>
-                      Ngày kết thúc: {(() => {
-                        if (!tour.startDate || !tour.startTime || !tourTemplate) return '';
-                        const result = calculateEndDate(
-                          dayjs(tour.startDate), 
-                          dayjs(tour.startDate), 
-                          tourTemplate.duration
-                        );
-                        return result ? result.endDate.format('DD/MM/YYYY') : '';
-                      })()}
-                    </Typography>
-                  </Box>
+            {view === 'details' ? (
+              <Paper elevation={2} sx={{ p: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
+                  Thông tin tour
+                </Typography>
+                {tour && (
+                  <>
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
+                      <Typography>Khởi hành từ: {tour.startLocation}</Typography>
+                      <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
+                      <Typography>Giờ khởi hành: {tour.startTime}</Typography>
+                      {/* <Typography>
+                        Ngày kết thúc: {(() => {
+                          if (!tour.startDate || !tour.startTime || !tourTemplate) return '';
+                          const result = calculateEndDate(
+                            dayjs(tour.startDate),
+                            dayjs(tour.startDate),
+                            tourTemplate.duration
+                          );
+                          return result ? result.endDate.format('DD/MM/YYYY') : '';
+                        })()}
+                      </Typography> */}
+                      
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
+                        <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
+                        <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
+                      </Box>
+                    </Box>
 
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
-                    <Typography>Số khách tối đa: {tour.maxParticipant}</Typography>
-                    <Typography>Số khách tối thiểu: {tour.minParticipant}</Typography>
-                    <Typography>Số khách hiện tại: {tour.currentParticipant}</Typography>
-                  </Box>
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
+                      <Typography>Số khách tối đa: {tour.maxParticipant}</Typography>
+                      <Typography>Số khách tối thiểu: {tour.minParticipant}</Typography>
+                      <Typography>Số khách hiện tại: {tour.currentParticipant}</Typography>
+                    </Box>
 
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
-                    <Chip
-                      label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <Box sx={{ width: 13, height: 13, borderRadius: '50%', backgroundColor: getTourStatusInfo(tour.status).color }} />
-                          <Typography sx={{ color: getTourStatusInfo(tour.status).textColor, fontWeight: 600, fontSize: 13 }}>
-                            {getTourStatusInfo(tour.status).text}
-                          </Typography>
-                        </Box>
-                      }
-                      size="small"
-                      sx={{
-                        pt: 1.7, pb: 1.7, pr: 0.3,
-                        backgroundColor: getTourStatusInfo(tour.status).backgroundColor,
-                        fontWeight: 600, '& .MuiChip-label': { px: 1 }
-                      }}
-                    />
-                    
-                    {canModify && (
-                      <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="medium"
-                          startIcon={<EditIcon />}
-                          onClick={handleEditTour}
-                        >
-                          Chỉnh sửa
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="error"
-                          size="medium"
-                          startIcon={<DeleteIcon />}
-                          onClick={handleDeleteTour}
-                        >
-                          Xóa
-                        </Button>
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
+                      <Typography>Người lớn: {tour.defaultTouristPrice?.toLocaleString()} đ</Typography>
+                      {tour.tourPrices?.map((price, index) => (
+                        <Typography key={index}>
+                          {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} đ
+                        </Typography>
+                      ))}
+                    </Box>
+
+                    {tour.tourPolicies && tour.tourPolicies.length > 0 && (
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                        {tour.tourPolicies.map((policy, index) => (
+                          <Box key={index} sx={{ mt: 1 }}>
+                            <Typography>
+                              Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
+                              Hoàn {policy.refundPercent}% tổng tiền
+                            </Typography>
+                          </Box>
+                        ))}
                       </Box>
                     )}
-                  </Box>
-                </>
-              )}
-              {tour && isEditing && editTourData && (
-                <>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
-                    <TextField
-                      label="Khởi hành từ" fullWidth variant="outlined" sx={{ mb: 1, mt: 1.5 }}
-                      value={editTourData.startAddress} inputProps={{ style: { height: '15px' } }}
-                      onChange={(e) => handleEditTourChange('startAddress', e.target.value)}
-                    />
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <Box sx={{ mb: 2, mt: 1.5 }}>
-                        <DatePicker
-                          onChange={(value) => handleEditTourChange('startDate', value)}
-                          format="DD/MM/YYYY" minDate={dayjs()} label="Ngày khởi hành" 
-                          value={editTourData.startDate}
-                          slotProps={{ textField: { fullWidth: true, inputProps: { style: { height: '15px' } } } }}
-                        />
-                      </Box>
-                      <Box sx={{ mb: 1 }}>
-                        <TimePicker
-                          label="Giờ khởi hành" value={editTourData.startTime} 
-                          onChange={(value) => handleEditTourChange('startTime', value)}
-                          slotProps={{ textField: { fullWidth: true, inputProps: { style: { height: '15px' } } } }}
-                        />
-                      </Box>
-                    </LocalizationProvider>
-                  </Box>
-
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
-                    <TextField
-                      label="Số khách tối đa" fullWidth type="number" variant="outlined" 
-                      sx={{ mb: 2, mt: 1.5 }} value={editTourData.maxParticipants}
-                      onChange={(e) => {
-                        const newMaxParticipants = Number(e.target.value);
-                        if (newMaxParticipants > 0) {
-                          handleEditTourChange('maxParticipants', e.target.value);
+                    
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
+                      <Chip
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 13, height: 13, borderRadius: '50%', backgroundColor: getTourStatusInfo(tour.status).color }} />
+                            <Typography sx={{ color: getTourStatusInfo(tour.status).textColor, fontWeight: 600, fontSize: 13 }}>
+                              {getTourStatusInfo(tour.status).text}
+                            </Typography>
+                          </Box>
                         }
-                      }}
-                      error={Number(editTourData.maxParticipants) <= Number(editTourData.minParticipants) || Number(editTourData.maxParticipants) <= 0}
-                      helperText={Number(editTourData.maxParticipants) <= Number(editTourData.minParticipants)
-                        ? "Số khách tối đa phải lớn hơn số khách tối thiểu" : ""}
-                      inputProps={{ min: 1, style: { height: '15px' } }}
-                    />
-                    <TextField
-                      label="Số khách tối thiểu" fullWidth type="number" variant="outlined" 
-                      sx={{ mb: 1 }} value={editTourData.minParticipants}
-                      onChange={(e) => {
-                        const newMinParticipants = Number(e.target.value);
-                        if (newMinParticipants > 0 && (!editTourData.maxParticipants || newMinParticipants < Number(editTourData.maxParticipants))) {
-                          handleEditTourChange('minParticipants', e.target.value);
-                        }
-                      }}
-                      error={Number(editTourData.minParticipants) >= Number(editTourData.maxParticipants) || Number(editTourData.minParticipants) <= 0}
-                      helperText={Number(editTourData.minParticipants) >= Number(editTourData.maxParticipants)
-                        ? "Số khách tối thiểu phải nhỏ hơn số khách tối đa" : ""}
-                      inputProps={{ min: 1, style: { height: '15px' } }}
-                    />
-                  </Box>
-
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                    <TextField 
-                      fullWidth type="number" label="Người lớn (trên 12 tuổi)" variant="outlined" 
-                      value={editTourData.adultPrice}
-                      onChange={(e) => {
-                        const newAdultPrice = e.target.value;
-                        if (Number(newAdultPrice) >= 0) {
-                          handleEditTourChange('adultPrice', newAdultPrice);
-                          if (validatePrice(newAdultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
-                            const { childPrice, infantPrice } = calculatePrices(Number(newAdultPrice));
-                            handleEditTourChange('childPrice', childPrice.toString());
-                            handleEditTourChange('infantPrice', infantPrice.toString());
-                          }
-                        }
-                      }}
-                      error={editTourData.adultPrice && (!validatePrice(editTourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice) || Number(editTourData.adultPrice) < 0)}
-                      helperText={`Giá phải từ ${tourTemplate?.minPrice?.toLocaleString() || 0} đến ${tourTemplate?.maxPrice?.toLocaleString() || 0} VND`}
-                      sx={{ mb: 2, mt: 1.5 }}
-                      inputProps={{ min: 0, style: { height: '15px' } }}
-                    />
-                    <TextField 
-                      fullWidth type="number" label="Trẻ em (5-12 tuổi)" variant="outlined" 
-                      value={editTourData.childPrice}
-                      onChange={(e) => {
-                        const newChildPrice = Number(e.target.value);
-                        const adultPrice = Number(editTourData.adultPrice);
-                        if (newChildPrice >= 0 && (!adultPrice || newChildPrice <= adultPrice)) {
-                          handleEditTourChange('childPrice', e.target.value);
-                        }
-                      }}
-                      sx={{ mb: 2 }}
-                      inputProps={{ min: 0, style: { height: '15px' } }}
-                      error={Number(editTourData.childPrice) > Number(editTourData.adultPrice) || Number(editTourData.childPrice) < 0}
-                      helperText={Number(editTourData.childPrice) > Number(editTourData.adultPrice) ? "Giá trẻ em phải thấp hơn giá người lớn" : ""}
-                    />
-                    <TextField
-                      fullWidth type="number" label="Em bé (dưới 5 tuổi)" variant="outlined" 
-                      value={editTourData.infantPrice}
-                      onChange={(e) => {
-                        const newInfantPrice = Number(e.target.value);
-                        const childPrice = Number(editTourData.childPrice);
-                        if (newInfantPrice >= 0 && (!childPrice || newInfantPrice <= childPrice)) {
-                          handleEditTourChange('infantPrice', e.target.value);
-                        }
-                      }}
-                      sx={{ mb: 1.5 }}
-                      inputProps={{ min: 0, style: { height: '15px' } }}
-                      error={Number(editTourData.infantPrice) > Number(editTourData.childPrice) || Number(editTourData.infantPrice) < 0}
-                      helperText={Number(editTourData.infantPrice) > Number(editTourData.childPrice)
-                        ? "Giá em bé phải thấp hơn giá trẻ em" : ""}
-                    />
-                  </Box>
-
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <Box sx={{ mb: 2, mt: 1.5 }}>
-                        <DatePicker
-                          label="Ngày mở đăng ký"
-                          value={editTourData.registerOpenDate}
-                          onChange={(value) => handleEditTourChange('registerOpenDate', value)}
-                          format="DD/MM/YYYY"
-                          minDate={dayjs()}
-                          slotProps={{
-                            textField: {
-                              fullWidth: true,
-                              inputProps: { style: { height: '15px' } },
-                              error: editTourData.registerOpenDate && editTourData.registerCloseDate &&
-                                dayjs(editTourData.registerOpenDate).isAfter(editTourData.registerCloseDate),
-                              helperText: editTourData.registerOpenDate && editTourData.registerCloseDate &&
-                                dayjs(editTourData.registerOpenDate).isAfter(editTourData.registerCloseDate) ?
-                                "Ngày mở đăng ký phải trước ngày đóng đăng ký" : ""
-                            }
-                          }}
-                        />
-                      </Box>
-                      <Box sx={{ mb: 1 }}>
-                        <DatePicker
-                          label="Ngày đóng đăng ký"
-                          value={editTourData.registerCloseDate}
-                          onChange={(value) => handleEditTourChange('registerCloseDate', value)}
-                          format="DD/MM/YYYY"
-                          minDate={editTourData.registerOpenDate || dayjs()}
-                          maxDate={editTourData.startDate}
-                          slotProps={{
-                            textField: {
-                              fullWidth: true,
-                              inputProps: { style: { height: '15px' } },
-                              error: editTourData.registerCloseDate &&
-                                dayjs(editTourData.registerCloseDate).isAfter(editTourData.startDate),
-                              helperText: editTourData.registerCloseDate &&
-                                dayjs(editTourData.registerCloseDate).isAfter(editTourData.startDate) ?
-                                "Ngày đóng đăng ký phải trước ngày khởi hành" : ""
-                            }
-                          }}
-                        />
-                      </Box>
-                    </LocalizationProvider>
-                  </Box>
-
-                  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
-                    <Button 
-                      variant="contained" 
-                      sx={{ backgroundColor: 'grey' }}
-                      onClick={handleSaveDraft}
-                    >
-                      Lưu nháp
-                    </Button>
-                    <Button 
-                      variant="contained" 
-                      color="primary"
-                      onClick={handleSubmitEdit}
-                    >
-                      Gửi
-                    </Button>
-                    <Button 
-                      variant="contained" 
-                      color="error"
-                      onClick={() => setIsEditing(false)}
-                    >
-                      Hủy
-                    </Button>
-                  </Box>
-                </>
-              )}
-            </Paper>
+                        size="small"
+                        sx={{
+                          pt: 1.7, pb: 1.7, pr: 0.3,
+                          backgroundColor: getTourStatusInfo(tour.status).backgroundColor,
+                          fontWeight: 600, '& .MuiChip-label': { px: 1 }
+                        }}
+                      />
+                    </Box>
+                  </>
+                )}
+              </Paper>
+            ) : (
+              <TourUpdateForm
+                tour={tour} maxPrice={tourTemplate.maxPrice} minPrice={tourTemplate.minPrice}
+                onUpdateSuccess={handleUpdateSuccess}
+              />
+            )}
           </Grid>
+
+          {tour?.totalBookings > 0 && view === 'details' && (
+            <Grid item xs={12} md={12} sx={{ ml: 3, mt: 5, mr: 1 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>Thông tin các booking</Typography>
+              <BookingByTemplate tourId={id} />
+            </Grid>
+          )}
         </Grid>
       </Box>
+
+      <CancelConfirmationDialog />
     </Box>
   );
 };

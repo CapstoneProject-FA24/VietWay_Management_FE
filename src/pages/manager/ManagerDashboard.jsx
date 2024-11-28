@@ -17,6 +17,8 @@ import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateCh
 import BookingAndReviewFromTourTemplate from '@components/manager/tour/BookingAndReviewFromTourTemplate';
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
 import TourTemplateChart from '@components/manager/tour/TourTemplateChart';
+import DateRangeSelector from '@components/common/DateRangeSelector';
+import dayjs from 'dayjs';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -25,6 +27,16 @@ const ManagerDashboard = () => {
     totalPosts: 0,
     totalAttractions: 0,
     totalStaff: 0
+  });
+
+  const [globalDateRange, setGlobalDateRange] = useState({
+    startDate: dayjs().subtract(6, 'month'),
+    endDate: dayjs()
+  });
+
+  const [appliedGlobalDateRange, setAppliedGlobalDateRange] = useState({
+    startDate: dayjs().subtract(6, 'month'),
+    endDate: dayjs()
   });
 
   useEffect(() => {
@@ -40,6 +52,25 @@ const ManagerDashboard = () => {
       totalStaff: 12
     });
   }, []);
+
+  const handleGlobalStartDateChange = (newValue) => {
+    setGlobalDateRange(prev => ({
+      ...prev,
+      startDate: newValue,
+      endDate: newValue.isAfter(prev.endDate) ? newValue : prev.endDate
+    }));
+  };
+
+  const handleGlobalEndDateChange = (newValue) => {
+    setGlobalDateRange(prev => ({
+      ...prev,
+      endDate: newValue
+    }));
+  };
+
+  const handleGlobalApply = () => {
+    setAppliedGlobalDateRange(globalDateRange);
+  };
 
   const statCards = [
     { title: 'Khách hàng', value: stats.totalCustomers, icon: <PersonOutlineOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
@@ -71,7 +102,8 @@ const ManagerDashboard = () => {
         transition: 'margin-left 0.3s',
         marginLeft: isSidebarOpen ? '260px' : '20px'
       }}>
-        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', mb: 2 }}> Dashboard </Typography>
+        <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', mb: 2, textAlign: 'center' }}> Dashboard - Thống kê </Typography>
+
         <Grid container spacing={2}>
           {statCards.map((stat, index) => (
             <Grid item xs={12} sm={3} md={3} key={index}>
@@ -100,12 +132,22 @@ const ManagerDashboard = () => {
           ))}
         </Grid>
 
+        <Box sx={{ mb: 1, mt: 5, display: 'flex', justifyContent: 'center' }}>
+          <DateRangeSelector
+            startDate={globalDateRange.startDate}
+            endDate={globalDateRange.endDate}
+            onStartDateChange={handleGlobalStartDateChange}
+            onEndDateChange={handleGlobalEndDateChange}
+            onApply={handleGlobalApply}
+          />
+        </Box>
+
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={6}>
-            <BookingChart />
+            <BookingChart dateRange={appliedGlobalDateRange} />
           </Grid>
           <Grid item xs={6}>
-            <CustomerStatisticsChart />
+            <CustomerStatisticsChart dateRange={appliedGlobalDateRange} />
           </Grid>
         </Grid>
 

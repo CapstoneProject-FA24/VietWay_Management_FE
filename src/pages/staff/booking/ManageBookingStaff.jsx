@@ -3,16 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, Typography, TextField, MenuItem, Grid, Button, Tabs, Tab, Select, Pagination, InputAdornment } from '@mui/material';
 import { getBookings, createRefundTransaction } from '@services/BookingService';
 import { Search } from '@mui/icons-material';
-import BookingCard from '@components/manager/booking/BookingCard';
+import BookingCard from '@components/staff/booking/BookingCard';
 import { Snackbar, Alert } from '@mui/material';
-import SidebarManager from '@layouts/SidebarManager';
+import SidebarStaff from '@layouts/SidebarStaff'; 
 import { Helmet } from 'react-helmet';
 import { BookingStatus } from '@hooks/Statuses';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 
 const ManageBooking = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -26,11 +21,6 @@ const ManageBooking = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [sortOrder, setSortOrder] = useState('newest');
-  const [cancelDialog, setCancelDialog] = useState({
-    open: false,
-    bookingId: null,
-    reason: ''
-  });
   const navigate = useNavigate();
 
   const statusDisplay = {
@@ -75,7 +65,7 @@ const ManageBooking = () => {
         pageSize,
         page,
         searchText,
-        searchText,
+        searchText, 
         searchText,
         statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
       );
@@ -92,15 +82,17 @@ const ManageBooking = () => {
   };
 
   const handleDelete = async (id) => {
-    setCancelDialog({
-      open: true,
-      bookingId: id,
-      reason: ''
-    });
+    /* try {
+      await deleteBooking(id);
+      showSnackbar('Xóa đặt tour thành công', 'success');
+      fetchBookings();
+    } catch (error) {
+      showSnackbar('Không thể xóa đặt tour', 'error');
+    } */
   };
 
   const handleViewDetails = (id) => {
-    navigate(`/quan-ly/booking/chi-tiet/${id}`);
+    navigate(`/nhan-vien/booking/chi-tiet/${id}`);
   };
 
   const showSnackbar = (message, severity) => {
@@ -136,39 +128,27 @@ const ManageBooking = () => {
         note: refundData.note,
         bankCode: refundData.bankCode,
         bankTransactionNumber: refundData.bankTransactionNumber,
-        payTime: refundData.payTime.format() // Convert dayjs to ISO string
+        payTime: refundData.payTime.format()
       });
       showSnackbar('Hoàn tiền thành công', 'success');
-      fetchBookings(); // Refresh the booking list
+      fetchBookings();
     } catch (error) {
       console.error('Error creating refund transaction:', error);
       if(error.response?.data?.error?.includes('Refund policy not found')){
         showSnackbar('Không thể tìm thấy chính sách hoàn tiền.', 'error');
-      }
-      else{
+      } else {
         showSnackbar('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'error');
       }
     }
   };
 
-  const handleConfirmCancel = async () => {
-    try {
-      await cancelBooking(cancelDialog.bookingId, cancelDialog.reason);
-      showSnackbar('Hủy booking thành công', 'success');
-      fetchBookings(); // Refresh the list
-    } catch (error) {
-      console.error('Error canceling booking:', error);
-      showSnackbar(error.response?.data?.message || 'Có lỗi xảy ra khi hủy booking', 'error');
-    } finally {
-      setCancelDialog({
-        open: false,
-        bookingId: null,
-        reason: ''
-      });
-    }
-  };
-
-  const sortedBookings = bookings
+  const sortedAndFilteredBookings = bookings
+    .filter(booking => 
+      (statusFilter === 'ALL' || booking.status === parseInt(statusFilter)) &&
+      (booking.bookingId.toLowerCase().includes(searchText.toLowerCase()) ||
+       booking.contactFullName.toLowerCase().includes(searchText.toLowerCase()) ||
+       booking.contactPhoneNumber.includes(searchText))
+    )
     .sort((a, b) => {
       switch (sortOrder) {
         case 'newest':
@@ -182,12 +162,13 @@ const ManageBooking = () => {
         default:
           return 0;
       }
-    });
+    })
+    .slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet> <title>Quản lý đặt tour</title> </Helmet>
-      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       
       <Box sx={{ 
         flexGrow: 1, 
@@ -282,7 +263,7 @@ const ManageBooking = () => {
         </Grid>
 
         <Grid container spacing={2}>
-          {sortedBookings.map((booking) => (
+          {sortedAndFilteredBookings.map((booking) => (
             <Grid item xs={12} md={12} key={booking.bookingId}>
               <BookingCard
                 booking={booking}
@@ -293,7 +274,7 @@ const ManageBooking = () => {
               />
             </Grid>
           ))}
-          {sortedBookings.length === 0 && (
+          {sortedAndFilteredBookings.length === 0 && (
             <Grid item xs={12}>
               <Typography variant="body1" align="center" color="error">
                 Không tìm thấy đặt tour phù hợp.

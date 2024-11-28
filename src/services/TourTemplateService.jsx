@@ -48,7 +48,6 @@ export const fetchTourTemplates = async (params) => {
             provinces: item.provinces,
             imageUrl: item.imageUrl
         }));
-        console.log(templates);
         return ({
             data: templates,
             pageIndex: response.data?.data?.pageIndex,
@@ -152,7 +151,6 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
             })),
             isDraft: tourTemplateData.isDraft
         };
-        console.log(requestData);
         const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData, {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -228,7 +226,6 @@ export const getTourTemplateReviews = async (tourTemplateId, options) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        console.log(response.data.data);
         return {
             total: response.data.data.total,
             pageSize: response.data.data.pageSize,
@@ -263,6 +260,108 @@ export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
         return response.data;
     } catch (error) {
         console.error('Error toggling review visibility:', error.response);
+        throw error;
+    }
+};
+
+export const deleteTourTemplate = async (tourTemplateId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.delete(`${baseURL}/api/TourTemplate/${tourTemplateId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting tour template:', error.response);
+        throw error;
+    }
+};
+
+export const fetchTourTemplatesWithTourInfo = async (params) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        queryParams.append('pageSize', params.pageSize);
+        queryParams.append('pageIndex', params.pageIndex);
+        if (params.searchTerm) queryParams.append('nameSearch', params.searchTerm);
+        if (params.templateCategoryIds) params.templateCategoryIds.forEach(id => queryParams.append('templateCategoryIds', id));
+        if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
+        if (params.numberOfDay) queryParams.append('numberOfDay', params.numberOfDay);
+        if (params.startDateFrom) queryParams.append('startDateFrom', params.startDateFrom);
+        if (params.startDateTo) queryParams.append('startDateTo', params.startDateTo);
+        if (params.minPrice) queryParams.append('minPrice', params.minPrice);
+        if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice);
+
+        const response = await axios.get(`${baseURL}/api/TourTemplate/with-tour-info?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const items = response.data?.data?.items;
+
+        if (!items || !Array.isArray(items)) {
+            throw new Error('Invalid response structure: items not found or not an array');
+        }
+
+        const templates = items.map(item => ({
+            tourTemplateId: item.tourTemplateId,
+            code: item.code,
+            tourName: item.tourName,
+            duration: item.duration,
+            tourCategory: item.tourCategory,
+            description: item.description,
+            note: item.note,
+            provinces: item.provinces,
+            imageUrl: item.imageUrl,
+            schedules: item.schedules.map(schedule => ({
+                dayNumber: schedule.dayNumber,
+                title: schedule.title,
+                description: schedule.description,
+                attractions: schedule.attractions.map(attraction => ({
+                    attractionId: attraction.attractionId,
+                    name: attraction.name,
+                    address: attraction.address,
+                    province: attraction.province,
+                    attractionType: attraction.attractionType,
+                    status: attraction.status,
+                    imageUrl: attraction.imageUrl,
+                    createdAt: attraction.createdAt
+                }))
+            })),
+            tours: item.tours.map(tour => ({
+                tourId: tour.tourId,
+                startLocation: tour.startLocation,
+                startDate: tour.startDate,
+                defaultTouristPrice: tour.defaultTouristPrice,
+                maxParticipant: tour.maxParticipant,
+                minParticipant: tour.minParticipant,
+                currentParticipant: tour.currentParticipant,
+                tourPrices: tour.tourPrices.map(price => ({
+                    priceId: price.priceId,
+                    name: price.name,
+                    price: price.price,
+                    ageFrom: price.ageFrom,
+                    ageTo: price.ageTo
+                })),
+                tourPolicies: tour.tourPolicies.map(policy => ({
+                    cancelBefore: policy.cancelBefore,
+                    refundPercent: policy.refundPercent,
+                }))
+            }))
+        }));
+
+        return ({
+            data: templates,
+            pageIndex: response.data?.data?.pageIndex,
+            pageSize: response.data?.data?.pageSize,
+            total: response.data?.data?.total
+        });
+
+    } catch (error) {
+        console.error('Error fetching tour templates with tour info:', error);
         throw error;
     }
 };

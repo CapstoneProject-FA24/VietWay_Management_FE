@@ -2,7 +2,7 @@ import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
 import { getCookie } from '@services/AuthenService';
 
-export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contactNameSearch, contactPhoneSearch, bookingStatus) => {
+export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contactNameSearch, contactPhoneSearch, bookingStatus, tourIdSearch) => {
     try {
         const response = await axios.get(`${baseURL}/api/booking`, {
             params: {
@@ -11,7 +11,8 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
                 bookingIdSearch,
                 contactNameSearch,
                 contactPhoneSearch,
-                bookingStatus
+                bookingStatus,
+                tourIdSearch
             },
             headers: {
                 'Authorization': `Bearer ${getCookie('token')}`
@@ -22,8 +23,11 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
         return {
             items: items.map(booking => ({
                 bookingId: booking.bookingId,
+                tourId: booking.tourId,
                 tourName: booking.tourName,
                 tourCode: booking.tourCode,
+                duration: booking.duration,
+                provinces: booking.provinces,
                 startDate: booking.startDate,
                 startLocation: booking.startLocation,
                 createdAt: booking.createdAt,
@@ -32,7 +36,12 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
                 contactPhoneNumber: booking.contactPhoneNumber,
                 totalPrice: booking.totalPrice,
                 numberOfParticipants: booking.numberOfParticipants,
-                status: booking.status
+                status: booking.status,
+                tourists: booking.tourists.map(tourist => ({
+                    touristId: tourist.touristId,
+                    fullName: tourist.fullName,
+                    dateOfBirth: tourist.dateOfBirth
+                }))
             })),
             total,
             pageSize,
@@ -124,6 +133,43 @@ export const fetchBookingById = async (bookingId) => {
         };
     } catch (error) {
         console.error('Error fetching booking:', error.response);
+        throw error;
+    }
+};
+
+export const cancelBooking = async (bookingId, reason) => {
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/booking/${bookingId}`, 
+            { reason },
+            {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error canceling booking:', error.response);
+        throw error;
+    }
+};
+
+
+export const changeBookingTour = async (bookingId, newTourId, reason) => {
+    try {
+        const response = await axios.put(
+            `${baseURL}/api/booking/${bookingId}/change-booking-tour`,
+            { newTourId, reason },
+            {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error changing booking tour:', error.response);
         throw error;
     }
 };

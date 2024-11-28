@@ -1,13 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Button, Typography, Tabs, Tab, CircularProgress, Alert } from '@mui/material';
-import { fetchBookingById } from '@services/BookingService';
+import { getBookingById } from '@hooks/MockBooking';
 import { ArrowBack, Person, Payment, Info } from '@mui/icons-material';
-import SidebarManager from '@layouts/SidebarManager';
+import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
-import BookingDetail from '@components/manager/booking/BookingDetail';
-import Participant from '@components/manager/booking/Participant';
-import PaymentDetail from '@components/manager/booking/PaymentDetail';
+import BookingDetail from '@components/staff/booking/BookingDetail';
+import Participant from '@components/staff/booking/Participant';
+import PaymentDetail from '@components/staff/booking/PaymentDetail';
 
 const ManageBookingDetail = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -27,8 +27,7 @@ const ManageBookingDetail = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await fetchBookingById(id);
-      console.log(data);
+      const data = await getBookingById(id);
       setBooking(data);
     } catch (error) {
       setError('Không thể tải thông tin đặt tour');
@@ -86,8 +85,8 @@ const ManageBookingDetail = () => {
               <Tab icon={<Payment />} label="Lịch sử thanh toán" iconPosition="start" />
             </Tabs>
             {activeTab === 0 && <BookingDetail booking={booking} />}
-            {activeTab === 1 && <Participant participants={booking.tourists} />}
-            {activeTab === 2 && <PaymentDetail payments={booking.payments} />}
+            {activeTab === 1 && <Participant participants={booking.bookingTourists} />}
+            {activeTab === 2 && <PaymentDetail payments={booking.bookingPayments} />}
           </Box>
         )}
       </Box>

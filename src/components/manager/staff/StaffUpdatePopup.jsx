@@ -4,27 +4,49 @@ import Grid from '@mui/material/Grid';
 import CloseIcon from '@mui/icons-material/Close';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import StatusPopup from '@components/StatusPopup';
+import { updateStaff } from '@services/StaffService';
 
 const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
     const [updatedStaff, setUpdatedStaff] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [openPopup, setOpenPopup] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (staff) {
-            setUpdatedStaff(staff);
+            setUpdatedStaff({
+                staffId: staff.staffId,
+                fullName: staff.fullName,
+                email: staff.email,
+                phone: staff.phone
+            });
         }
     }, [staff]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setUpdatedStaff({ ...updatedStaff, [name]: value });
+        setUpdatedStaff(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onUpdate(updatedStaff);
-        onClose();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await updateStaff(updatedStaff);
+            onUpdate(response.data);
+            onClose();
+        } catch (error) {
+            console.error('Error updating staff:', error);
+            setError(error.response?.data?.message || 'Failed to update staff');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const togglePasswordVisibility = () => {
@@ -46,44 +68,66 @@ const StaffUpdatePopup = ({ open, onClose, staff, onUpdate }) => {
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
-                                <TextField label="Họ tên" name="fullname" value={updatedStaff.fullname || ''} onChange={handleChange} fullWidth margin="normal" />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField label="Số điện thoại" name="phone" value={updatedStaff.phone || ''} onChange={handleChange} fullWidth margin="normal" />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField label="Email" name="email" value={updatedStaff.email || ''} onChange={handleChange} fullWidth margin="normal" />
-                            </Grid>
-                            {/*<Grid item xs={12}>
-                                <TextField
-                                    label="Mật khẩu"
-                                    name="pass"
-                                    type={showPassword ? 'text' : 'password'} // Kiểm soát loại hiển thị
-                                    value={updatedStaff.pass || ''}
-                                    onChange={handleChange}
-                                    fullWidth
+                                <TextField 
+                                    label="Họ tên" 
+                                    name="fullName"
+                                    value={updatedStaff.fullName || ''} 
+                                    onChange={handleChange} 
+                                    fullWidth 
                                     margin="normal"
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton onClick={togglePasswordVisibility}>
-                                                    {showPassword ? <Visibility /> : <VisibilityOff />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
+                                    required
                                 />
-                            </Grid>*/}
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField 
+                                    label="Số điện thoại" 
+                                    name="phone" 
+                                    value={updatedStaff.phone || ''} 
+                                    onChange={handleChange} 
+                                    fullWidth 
+                                    margin="normal"
+                                    required
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <TextField 
+                                    label="Email" 
+                                    name="email" 
+                                    value={updatedStaff.email || ''} 
+                                    onChange={handleChange} 
+                                    fullWidth 
+                                    margin="normal"
+                                    required
+                                    type="email"
+                                />
+                            </Grid>
                         </Grid>
+
+                        {error && (
+                            <Typography color="error" sx={{ mt: 2 }}>
+                                {error}
+                            </Typography>
+                        )}
+
                         <Grid>
-                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
-                                <Button variant="contained" color="secondary" onClick={handleOpenPopup} sx={{ backgroundColor: staff && staff.status === 1 ? 'red' : 'green', mr: 1, color: 'white' }}>
-                                    {staff && staff.status === 1 ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
+                                <Button 
+                                    onClick={onClose} 
+                                    variant="outlined" 
+                                    color="primary" 
+                                    sx={{ mr: 1 }}
+                                    disabled={loading}
+                                >
+                                    Hủy
                                 </Button>
-                                <Box sx={{ display: 'flex' }}>
-                                    <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>Hủy</Button>
-                                    <Button type="submit" variant="contained" color="primary">Sửa</Button>
-                                </Box>
+                                <Button 
+                                    type="submit" 
+                                    variant="contained" 
+                                    color="primary"
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Đang cập nhật...' : 'Cập nhật'}
+                                </Button>
                             </Grid>
                         </Grid>
                     </form>

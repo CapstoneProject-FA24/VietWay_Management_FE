@@ -21,8 +21,10 @@ export const getTourStatusInfo = (statusCode) => {
       return { text: "Đang chờ duyệt", color: "#4900ff", textColor: "#24007c", backgroundColor: "#bfb0ff" }; // Orange
     case TourStatus.Rejected:
       return { text: "Đã từ chối", color: "#ff9300", textColor: "#9c5a00", backgroundColor: "#ffd9a6" }; // Red
-    case TourStatus.Scheduled:
+    case TourStatus.Accepted:
       return { text: "Đã duyệt", color: "#00c5e8", textColor: "#006f83", backgroundColor: "#c2f6ff" }; // Blue
+    case TourStatus.Opened:
+      return { text: "Đã mở", color: "#00c5e8", textColor: "#006f83", backgroundColor: "#c2f6ff" }; // Blue
     case TourStatus.Closed:
       return { text: "Đã đóng", color: "#5f5f5f", textColor: "#2b2b2b", backgroundColor: "#cbcbcb" }; // Grey
     case TourStatus.OnGoing:
@@ -99,7 +101,7 @@ export const getTourTemplateStatusInfo = (statusCode) => {
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
     case BookingStatus.Pending:
-      return { text: "Đang chờ thanh toán", color: "#fff746" };
+      return { text: "Đang chờ thanh toán", color: "#eeb422" };
     case BookingStatus.Confirmed:
       return { text: "Đã thanh toán", color: "#66e3ff" };
     case BookingStatus.Completed:

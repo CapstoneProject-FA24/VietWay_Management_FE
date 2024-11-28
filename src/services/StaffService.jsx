@@ -9,15 +9,15 @@ export const fetchStaff = async (params) => {
         queryParams.append('pageSize', params.pageSize);
         queryParams.append('pageIndex', params.pageIndex);
         if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
-        if (params.emailSearch) queryParams.append('emailSearch', params.emailSearch);
-        if (params.phoneSearch) queryParams.append('phoneSearch', params.phoneSearch);
 
         const response = await axios.get(`${baseURL}/api/staff?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        const items = response.data?.data?.items;
+
+        const { data } = response.data;
+        const { items } = data;
 
         if (!items || !Array.isArray(items)) {
             throw new Error('Invalid response structure: items not found or not an array');
@@ -29,17 +29,76 @@ export const fetchStaff = async (params) => {
             email: item.email,
             phone: item.phoneNumber,
             createdAt: item.createdAt,
-            isDeleted: item.isDeleted
+            isDeleted: item.isDeleted,
         }));
-        return ({
+
+        return {
             data: staff,
-            pageIndex: response.data?.data?.pageIndex,
-            pageSize: response.data?.data?.pageSize,
-            total: response.data?.data?.total
-        })
+            pageIndex: data.pageIndex,
+            pageSize: data.pageSize,
+            total: data.total
+        };
 
     } catch (error) {
         console.error('Error fetching staff:', error);
+        throw error;
+    }
+};
+
+export const createStaff = async (staffData) => {
+    const token = getCookie('token');
+    try {
+        const payload = {
+            email: staffData.email,
+            phoneNumber: staffData.phoneNumber,
+            fullName: staffData.fullName
+        };
+        const response = await axios.post(`${baseURL}/api/account/create-staff-account`, payload, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error creating staff:', error);
+        throw error;
+    }
+};
+
+export const changeStaffStatus = async (staffId, isDeleted) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/staff/change-staff-status/${staffId}?isDeleted=${isDeleted}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error changing staff status:', error);
+        throw error;
+    }
+};
+
+export const updateStaff = async (staffData) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.put(
+            `${baseURL}/api/staff/${staffData.staffId}`,
+            staffData,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating staff:', error);
         throw error;
     }
 };

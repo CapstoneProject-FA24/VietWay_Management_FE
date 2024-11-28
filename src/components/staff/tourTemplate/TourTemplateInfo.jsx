@@ -7,8 +7,9 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Collapse, Button } from '@mui/material';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import ReviewListTour from '@components/review/ReviewListTour';
+import TourTable from '@components/tourTemplate/TourTable';
 
-const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
+const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%' }}>
       <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
@@ -189,15 +190,27 @@ const TourTemplateInfo = ({ tourTemplate, expandedDay, handleDayClick }) => {
           </Paper>
         </Grid>
         <Grid item xs={12} md={12}>
+          <Box sx={{ mb: 5, maxWidth: '100%' }}>
+            <Typography variant="h5" gutterBottom sx={{
+              textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3
+            }}>
+              Danh sách
+            </Typography>
+            <TourTable tours={tours} />
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={12}>
           {tourTemplate.status === TourTemplateStatus.Approved && (
+            <>
               <Box sx={{ mb: 5 }}>
                 <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
                   Đánh giá từ khách hàng
                 </Typography>
                 <ReviewListTour tourTemplateId={tourTemplate.tourTemplateId} />
               </Box>
-            )}
-          </Grid>
+            </>
+          )}
+        </Grid>
       </Grid>
     </Box>
   );
