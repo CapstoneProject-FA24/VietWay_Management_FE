@@ -298,7 +298,7 @@ const PostDetail = () => {
                 variant="contained" 
                 startIcon={<CancelIcon />}
                 onClick={handleCancelClick}
-                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }}}
               >
                 Hủy sửa
               </Button>
@@ -520,16 +520,8 @@ const PostDetail = () => {
 
                   <Box sx={commonStyles.imageContainer}>
                     <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
-                    <Box sx={{
-                      position: 'relative',
-                      width: '100%',
-                      height: '300px',
-                      border: '2px dashed #ccc',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      overflow: 'hidden'
+                    <Box sx={{ position: 'relative', width: '100%', height: '300px', border: '2px dashed #ccc',
+                      borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
                     }}>
                       {editablePost.image ? (
                         <img 
@@ -677,7 +669,13 @@ const PostDetail = () => {
                       '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '90%', margin: '0 auto'
                     }}
                   />
-                </Box>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                    <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
+                      Gửi duyệt
+                    </Button>
+                  </Box>
+                </Box> 
               )}
             </Box>
           </Box>
