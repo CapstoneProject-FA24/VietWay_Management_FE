@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, Typography, TextField, MenuItem, Grid, Button, Tabs, Tab, Select, Pagination, InputAdornment } from '@mui/material';
 import { getBookings, createRefundTransaction } from '@services/BookingService';
 import { Search } from '@mui/icons-material';
-import BookingCard from '@components/staff/booking/BookingCard';
+import BookingCard from '@components/manager/booking/BookingCard';
 import { Snackbar, Alert } from '@mui/material';
 import SidebarStaff from '@layouts/SidebarStaff'; 
 import { Helmet } from 'react-helmet';
