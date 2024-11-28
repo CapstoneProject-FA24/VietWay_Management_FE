@@ -13,9 +13,13 @@ const TourDuration = ({ searchTerm, refreshTrigger }) => {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [durationToDelete, setDurationToDelete] = useState(null);
 
+    useEffect(() => {
+        loadDurations(searchTerm);
+    }, [searchTerm, refreshTrigger]);
+
     const loadDurations = async (search = '') => {
         try {
-            const response = await fetchTourDuration(search);
+            const response = await fetchTourDuration(search);  // Pass search term to service
             const data = response.map(item => ({
                 id: item.durationId,
                 name: item.durationName,

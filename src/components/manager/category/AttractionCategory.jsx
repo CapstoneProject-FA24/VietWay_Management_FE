@@ -11,9 +11,13 @@ const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
 
+    useEffect(() => {
+        loadCategories(searchTerm);
+    }, [searchTerm, refreshTrigger]);
+
     const loadCategories = async (search = '') => {
         try {
-            const response = await fetchAttractionType(search);
+            const response = await fetchAttractionType(search);  // Pass search term to service
             const data = response.map(item => ({
                 id: item.attractionTypeId,
                 name: item.attractionTypeName,
