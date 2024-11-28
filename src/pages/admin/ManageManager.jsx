@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { mockManager } from '@hooks/MockAccount';
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ManagerUpdatePopup from '@components/admin/ManagerUpdatePopup';
 import ManagerCreatePopup from '@components/admin/ManagerCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
 import Sidebar from '@layouts/Sidebar';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
+import { fetchManager, changeManagerStatus } from '@services/ManagerService';
 
 const ManageManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,23 +16,53 @@ const ManageManager = () => {
   const [openCreatePopup, setOpenCreatePopup] = useState(false);
   const [selectedManager, setSelectedManager] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const navigate = useNavigate();
+  const [managers, setManagers] = useState([]);
+  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    managerId: null,
+    isDeleted: false,
+    title: '',
+    message: ''
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
-    const role = localStorage.getItem('role');
-    const token = localStorage.getItem('token');
-    if (!role || !token || role !== 'admin') { navigate(`/dang-nhap`); }
-  }, []);
+    const loadManagers = async () => {
+      setIsLoading(true);
+      try {
+        const result = await fetchManager({
+          pageSize,
+          pageIndex,
+          nameSearch: searchTerm
+        });
+        setManagers(result.data);
+        setTotal(result.total);
+      } catch (error) {
+        console.error('Failed to fetch managers:', error);
+        // Consider adding error handling/notification here
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const searchTermWithoutAccents = searchTerm.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  const filteredManagers = mockManager.filter(manager =>
-    manager.fullname && manager.fullname.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(searchTermWithoutAccents.toLowerCase())
-  );
+    loadManagers();
+  }, [pageSize, pageIndex, searchTerm]);
 
-  const sortedManagers = [...filteredManagers].sort((a, b) => {
+  const sortedManagers = [...managers].sort((a, b) => {
     if (sortOrder === 'name-asc') {
-      return a.fullname.localeCompare(b.fullname);
+      return a.fullName.localeCompare(b.fullName);
     } else if (sortOrder === 'name-desc') {
-      return b.fullname.localeCompare(a.fullname);
+      return b.fullName.localeCompare(a.fullName);
     }
     return 0;
   });
@@ -43,6 +74,67 @@ const ManageManager = () => {
 
   const handleOpenCreatePopup = () => {
     setOpenCreatePopup(true);
+  };
+
+  const handleSearch = () => {
+    setSearchTerm(searchInput);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleStatusChange = (manager) => {
+    setConfirmDialog({
+      open: true,
+      managerId: manager.managerId,
+      isDeleted: !manager.isDeleted,
+      title: manager.isDeleted ? 'Kích hoạt quản lý' : 'Ngưng hoạt động quản lý',
+      message: manager.isDeleted
+        ? `Bạn có chắc chắn muốn kích hoạt quản lý ${manager.fullName}?`
+        : `Bạn có chắc chắn muốn ngưng hoạt động quản lý ${manager.fullName}?`
+    });
+  };
+
+  const handleConfirmStatusChange = async () => {
+    try {
+      await changeManagerStatus(confirmDialog.managerId, confirmDialog.isDeleted);
+      // Refresh the manager list
+      const result = await fetchManager({
+        pageSize,
+        pageIndex,
+        nameSearch: searchTerm,
+      });
+      setManagers(result.data);
+      setTotal(result.total);
+    } catch (error) {
+      console.error('Error changing manager status:', error);
+    } finally {
+      setConfirmDialog(prev => ({ ...prev, open: false }));
+    }
+  };
+
+  const refreshData = async () => {
+    try {
+      const result = await fetchManager({
+        pageSize,
+        pageIndex,
+        nameSearch: searchTerm
+      });
+      setManagers(result.data);
+      setTotal(result.total);
+    } catch (error) {
+      console.error('Failed to fetch managers:', error);
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -58,21 +150,31 @@ const ManageManager = () => {
           </Button>
         </Box>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TextField
-            variant="outlined"
-            placeholder="Tìm kiếm quản lý..."
-            size="small"
-            sx={{ width: '300px' }}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField
+              variant="outlined"
+              placeholder="Tìm kiếm quản lý..."
+              size="small"
+              sx={{ width: '300px' }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              sx={{ minWidth: '100px' }}
+            >
+              Tìm kiếm
+            </Button>
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography>
               Sắp xếp theo
@@ -103,17 +205,38 @@ const ManageManager = () => {
             </TableHead>
             <TableBody>
               {sortedManagers.map((manager) => (
-                <TableRow key={manager.id}>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{manager.id}</TableCell>
-                  <TableCell noWrap sx={{ padding: '10px' }}>{manager.fullname}</TableCell>
+                <TableRow key={manager.managerId}>
+                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{manager.managerId}</TableCell>
+                  <TableCell noWrap sx={{ padding: '10px' }}>{manager.fullName}</TableCell>
                   <TableCell noWrap sx={{ padding: '10px', textAlign: 'center' }}>{manager.phone}</TableCell>
                   <TableCell sx={{ wordWrap: 'break-word', maxWidth: '12ch', padding: '10px' }}>{manager.email}</TableCell>
-                  <TableCell noWrap sx={{ color: manager.status === 1 ? 'green' : 'red', padding: '10px', textAlign: 'center' }}>
-                    {manager.status === 1 ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                  </TableCell>
-                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(manager.createDate).toLocaleDateString()}</TableCell>
                   <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
-                    <Button variant="contained" color="primary" onClick={() => handleOpenUpdatePopup(manager)}>Sửa</Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'left', gap: 1 }}>
+                      <Box sx={{ width: 15, height: 15, borderRadius: '50%', backgroundColor: !manager.isDeleted ? '#4caf50' : '#ea4747' }} />
+                      <Typography sx={{ fontSize: '0.9rem' }}>{!manager.isDeleted ? 'Hoạt động' : 'Đã xóa'}</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(manager.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
+                    {manager.isDeleted ? (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleStatusChange(manager)}
+                        sx={{ width: '8rem' }}
+                      >
+                        Kích hoạt
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleStatusChange(manager)}
+                        sx={{ width: '9rem', fontSize: '0.75rem' }}
+                      >
+                        Khóa tài khoản
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -124,9 +247,14 @@ const ManageManager = () => {
           open={openCreatePopup}
           onClose={() => setOpenCreatePopup(false)}
           onCreate={(newManager) => {
-            console.log('Created Manager:', newManager);
+            setSnackbar({
+              open: true,
+              message: 'Tạo quản lý thành công',
+              severity: 'success'
+            });
             setOpenCreatePopup(false);
           }}
+          onRefresh={refreshData}
         />
         <ManagerUpdatePopup
           open={openUpdatePopup}
@@ -137,6 +265,44 @@ const ManageManager = () => {
             setOpenUpdatePopup(false);
           }}
         />
+        <Dialog
+          open={confirmDialog.open}
+          onClose={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+        >
+          <DialogTitle>{confirmDialog.title}</DialogTitle>
+          <DialogContent>
+            {confirmDialog.message}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+              color="inherit"
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleConfirmStatusChange}
+              color={confirmDialog.isDeleted ? "error" : "primary"}
+              variant="contained"
+            >
+              Xác nhận
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Snackbar 
+          open={snackbar.open} 
+          autoHideDuration={3000} 
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert 
+            onClose={handleSnackbarClose} 
+            severity={snackbar.severity}
+            variant="filled"
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );

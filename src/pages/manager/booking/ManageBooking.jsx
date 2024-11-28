@@ -8,11 +8,7 @@ import { Snackbar, Alert } from '@mui/material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import { BookingStatus } from '@hooks/Statuses';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import { getBookingStatusInfo } from '@services/StatusService';
 
 const ManageBooking = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -35,32 +31,32 @@ const ManageBooking = () => {
 
   const statusDisplay = {
     [BookingStatus.Pending]: {
-      label: 'Chờ xác nhận',
-      color: 'warning'
+      label: getBookingStatusInfo(BookingStatus.Pending).text,
+      color: getBookingStatusInfo(BookingStatus.Pending).color
     },
     [BookingStatus.Confirmed]: {
-      label: 'Đã xác nhận',
-      color: 'info'
+      label: getBookingStatusInfo(BookingStatus.Confirmed).text,
+      color: getBookingStatusInfo(BookingStatus.Confirmed).color
     },
     [BookingStatus.Completed]: {
-      label: 'Hoàn thành',
-      color: 'success'
+      label: getBookingStatusInfo(BookingStatus.Completed).text,
+      color: getBookingStatusInfo(BookingStatus.Completed).color
     },
     [BookingStatus.Expired]: {
-      label: 'Hết hạn',
-      color: 'error'
+      label: getBookingStatusInfo(BookingStatus.Expired).text,
+      color: getBookingStatusInfo(BookingStatus.Expired).color
     },
     [BookingStatus.Cancelled]: {
-      label: 'Đã hủy',
-      color: 'error'
+      label: getBookingStatusInfo(BookingStatus.Cancelled).text,
+      color: getBookingStatusInfo(BookingStatus.Cancelled).color
     },
     [BookingStatus.PendingRefund]: {
-      label: 'Chờ hoàn tiền',
-      color: 'warning'
+      label: getBookingStatusInfo(BookingStatus.PendingRefund).text,
+      color: getBookingStatusInfo(BookingStatus.PendingRefund).color
     },
     [BookingStatus.Refunded]: {
-      label: 'Đã hoàn tiền',
-      color: 'success'
+      label: getBookingStatusInfo(BookingStatus.Refunded).text,
+      color: getBookingStatusInfo(BookingStatus.Refunded).color
     }
   };
 

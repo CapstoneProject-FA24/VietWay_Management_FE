@@ -1,81 +1,130 @@
 import React, { useState } from 'react';
-import { Modal, Box, TextField, Button, Typography, IconButton, InputAdornment, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
-import Grid from '@mui/material/Grid';
-import CloseIcon from '@mui/icons-material/Close';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
+import { createManager } from '@services/ManagerService';
 
-const ManagerCreatePopup = ({ open, onClose, onCreate }) => {
-    const [newManager, setNewManager] = useState({});
-    const [showPassword, setShowPassword] = useState(false);
+const ManagerCreatePopup = ({ open, onClose, onCreate, onRefresh }) => {
+  const [managerData, setManagerData] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: ''
+  });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setNewManager({ ...newManager, [name]: value });
+  const [errors, setErrors] = useState({
+    fullName: '',
+    email: '',
+    phoneNumber: ''
+  });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      fullName: '',
+      email: '',
+      phoneNumber: ''
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onCreate(newManager);
-        onClose();
-    };
+    // Validate fullName
+    if (!managerData.fullName.trim()) {
+      newErrors.fullName = 'Họ tên không được để trống';
+      isValid = false;
+    }
 
-    const handleClose = () => {
-        setNewManager({});
-        onClose();
-    };
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!managerData.email.trim()) {
+      newErrors.email = 'Email không được để trống';
+      isValid = false;
+    } else if (!emailRegex.test(managerData.email)) {
+      newErrors.email = 'Email không hợp lệ';
+      isValid = false;
+    }
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
+    // Validate phone number
+    const phoneRegex = /^0\d{9}$/;
+    if (!managerData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Số điện thoại không được để trống';
+      isValid = false;
+    } else if (!phoneRegex.test(managerData.phoneNumber)) {
+      newErrors.phoneNumber = 'Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số';
+      isValid = false;
+    }
 
-    return (
-        <Modal open={open} onClose={handleClose} sx={{ mt: 5 }}>
-            <Box sx={{ padding: 4, backgroundColor: 'white', borderRadius: 2, maxWidth: 600, margin: 'auto', position: 'relative' }}>
-                <CloseIcon onClick={handleClose} sx={{ position: 'absolute', top: 16, right: 16, cursor: 'pointer' }} />
-                <Typography variant="h4" component="h2" gutterBottom align='center' color='primary'>
-                    Tạo quản lý mới
-                </Typography>
-                <form onSubmit={handleSubmit}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <TextField label="Họ tên" name="fullname" value={newManager.fullname || ''} onChange={handleChange} fullWidth margin="normal" />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField label="Số điện thoại" name="phone" value={newManager.phone || ''} onChange={handleChange} fullWidth margin="normal" />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField label="Email" name="email" value={newManager.email || ''} onChange={handleChange} fullWidth margin="normal" />
-                        </Grid>
-                        {/*<Grid item xs={12}>
-                            <TextField
-                                label="Mật khẩu"
-                                name="pass"
-                                type={showPassword ? 'text' : 'password'} // Điều khiển hiển thị hoặc ẩn mật khẩu
-                                value={newManager.pass || ''}
-                                onChange={handleChange}
-                                fullWidth
-                                margin="normal"
-                                InputProps={{
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton onClick={togglePasswordVisibility}>
-                                                {showPassword ? <Visibility /> : <VisibilityOff />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
-                        </Grid>*/}
-                        
-                    </Grid>
-                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-                        <Button onClick={handleClose} variant="outlined" color="primary" sx={{ mr: 1 }}>Hủy</Button>
-                        <Button type="submit" variant="contained" color="primary">Tạo</Button>
-                    </Grid>
-                </form>
-            </Box>
-        </Modal>
-    );
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setManagerData(prevData => ({ ...prevData, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const newManager = await createManager(managerData);
+      onCreate(newManager);
+      onRefresh(); // Refresh the manager list
+      setManagerData({ fullName: '', email: '', phoneNumber: '' }); // Reset form
+      onClose(); // Close the popup after successful creation
+    } catch (error) {
+      console.error('Error creating manager:', error);
+      // Consider adding error handling UI here
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Thêm nhân viên mới</DialogTitle>
+      <DialogContent>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Họ tên"
+          type="text"
+          fullWidth
+          name="fullName"
+          value={managerData.fullName}
+          onChange={handleChange}
+          error={!!errors.fullName}
+          helperText={errors.fullName}
+        />
+        <TextField
+          margin="dense"
+          label="Email"
+          type="email"
+          fullWidth
+          name="email"
+          value={managerData.email}
+          onChange={handleChange}
+          error={!!errors.email}
+          helperText={errors.email}
+        />
+        <TextField
+          margin="dense"
+          label="Số điện thoại"
+          type="text"
+          fullWidth
+          name="phoneNumber"
+          value={managerData.phoneNumber}
+          onChange={handleChange}
+          error={!!errors.phoneNumber}
+          helperText={errors.phoneNumber}
+          inputProps={{ maxLength: 10 }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit">
+          Hủy
+        </Button>
+        <Button onClick={handleSubmit} color="primary" variant="contained">
+          Tạo
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 };
 
 export default ManagerCreatePopup;

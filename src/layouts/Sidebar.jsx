@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import PeopleIcon from '@mui/icons-material/People';
@@ -8,6 +8,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled } from '@mui/material/styles';
+import { getCookie, removeCookie } from '@services/AuthenService';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -82,6 +83,15 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove all necessary cookies
+    removeCookie('token');
+    removeCookie('role');
+    removeCookie('username');
+    navigate('/dang-nhap');
+  };
 
   return (
     <>
@@ -118,7 +128,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <List sx={{ width: '100%' }}>
           {[
-            { text: 'Công ty', url: '/admin/cong-ty' },
+            //{ text: 'Công ty', url: '/admin/cong-ty' },
             { text: 'Quản lí', url: '/admin/quan-ly' }
           ].map(({ text, url }, index) => (
             <ListItem 
@@ -147,9 +157,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <Divider />
         <List sx={{ width: '100%', mt: 2 }}>
           <ListItem 
-            component={Link} 
-            to="/dang-xuat" 
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0 }}
+            onClick={handleLogout} 
+            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}
           >
             <MenuItemPaper elevation={1} isSelected={location.pathname === '/dang-xuat'}>
               <MenuItemBox>
