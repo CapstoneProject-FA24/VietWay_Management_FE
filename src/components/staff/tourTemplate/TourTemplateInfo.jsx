@@ -8,7 +8,6 @@ import { Collapse, Button } from '@mui/material';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import ReviewListTour from '@components/review/ReviewListTour';
 import TourTable from '@components/tourTemplate/TourTable';
-import parse from 'html-react-parser';
 
 const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
   return (
@@ -68,7 +67,10 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
               Tổng quan
             </Typography>
             <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
-              {parse(tourTemplate.description || '')}
+              <Box dangerouslySetInnerHTML={{ __html: tourTemplate.description }} sx={{
+                '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+              }} />
             </Box>
           </Box>
 
@@ -139,21 +141,11 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
                     ))}
                   </ul>
                   <Box sx={{ textAlign: 'justify' }}>
-                    {parse(s.description || '')}
+                    {s.description}
                   </Box>
                 </Collapse>
               </Box>
             ))}
-          </Box>
-
-          {/* Policy section */}
-          <Box sx={{ mb: 5 }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-              Chính sách
-            </Typography>
-            <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
-              {parse(tourTemplate.policy || '')}
-            </Box>
           </Box>
 
           {/* Note section */}
@@ -162,7 +154,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
               Lưu ý
             </Typography>
             <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
-              {parse(tourTemplate.note || '')}
+              {tourTemplate.note}
             </Box>
           </Box>
         </Grid>

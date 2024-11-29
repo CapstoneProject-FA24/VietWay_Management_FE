@@ -617,13 +617,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                         <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1 }}>
                                             Mô tả:
                                         </Typography>
-                                        <ReactQuill
-                                            value={s.description}
-                                            onChange={(value) => handleScheduleChange(s.dayNumber, 'description', value)}
-                                            modules={quillModules}
-                                            theme="snow"
-                                            style={{ height: '150px', marginBottom: '50px' }}
-                                        />
+                                        <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
                                     </Box>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
                                         <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>Điểm đến:</Typography>
@@ -660,13 +654,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         }}>
                             Lưu ý
                         </Typography>
-                        <ReactQuill
-                            value={editableFields.note.value}
-                            onChange={(value) => handleFieldChange('note', value)}
-                            modules={quillModules}
-                            theme="snow"
-                            style={{ height: '200px', marginBottom: '50px' }}
-                        />
+                        <TextField value={editableFields.note.value} onChange={(e) => handleFieldChange('note', e.target.value)} variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4} >
@@ -675,10 +663,6 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
                             <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px', color: '#3572EF' }} />
-                            <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.creatorName}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                             <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
