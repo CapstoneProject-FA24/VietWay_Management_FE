@@ -13,6 +13,25 @@ import { fetchTourCategory } from '@services/TourCategoryService';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faMoneyBill1, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    [{ 'font': [] }],
+    [{ 'size': ['small', false, 'large', 'huge'] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    [{ 'align': [] }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+    [{ 'direction': 'rtl' }],
+    ['blockquote', 'code-block'],
+    ['link', 'image', 'video', 'formula'],
+    ['clean']
+  ]
+};
 
 const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
@@ -450,14 +469,20 @@ const CreateTourTemplate = () => {
                   </Box>
                 </Box>
                 <Box sx={{ mb: 5 }}>
-                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-                  <TextField
+                  <Typography variant="h5" gutterBottom sx={{ 
+                    textAlign: 'left', 
+                    fontWeight: '700', 
+                    fontSize: '1.6rem', 
+                    color: '#05073C' 
+                  }}>
+                    Tổng quan
+                  </Typography>
+                  <ReactQuill
                     value={editableFields.description.value}
-                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    rows={4}
+                    onChange={(value) => handleFieldChange('description', value)}
+                    modules={quillModules}
+                    theme="snow"
+                    style={{ height: '200px', marginBottom: '50px' }}
                   />
                 </Box>
                 <Box sx={{ mb: 5 }}>
@@ -503,8 +528,16 @@ const CreateTourTemplate = () => {
                               <TextField value={s.title} onChange={(e) => handleScheduleChange(s.dayNumber, 'title', e.target.value)} variant="outlined" fullWidth />
                             </Box>
                             <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                              <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Mô tả:</Typography>
-                              <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
+                              <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
+                                Mô tả:
+                              </Typography>
+                              <ReactQuill
+                                value={s.description}
+                                onChange={(value) => handleScheduleChange(s.dayNumber, 'description', value)}
+                                modules={quillModules}
+                                theme="snow"
+                                style={{ height: '150px', marginBottom: '50px' }}
+                              />
                             </Box>
                             <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
                               <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
@@ -577,14 +610,20 @@ const CreateTourTemplate = () => {
                   </Button>
                 </Box>
                 <Box sx={{ mb: 5, mt: 10 }}>
-                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
-                  <TextField
+                  <Typography variant="h5" gutterBottom sx={{
+                    textAlign: 'left',
+                    fontWeight: '700',
+                    fontSize: '1.6rem',
+                    color: '#05073C'
+                  }}>
+                    Lưu ý
+                  </Typography>
+                  <ReactQuill
                     value={editableFields.note.value}
-                    onChange={(e) => handleFieldChange('note', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    rows={4}
+                    onChange={(value) => handleFieldChange('note', value)}
+                    modules={quillModules}
+                    theme="snow"
+                    style={{ height: '200px', marginBottom: '50px' }}
                   />
                 </Box>
               </Grid>
