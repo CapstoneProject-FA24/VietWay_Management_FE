@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
@@ -13,6 +13,8 @@ import { fetchAttractionType } from '@services/AttractionTypeService';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { AttractionStatus } from '@hooks/Statuses';
 import CancelIcon from '@mui/icons-material/Cancel';
+import HistoryIcon from '@mui/icons-material/History';
+import VersionHistory from '@components/common/VersionHistory';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -26,6 +28,7 @@ const AttractionDetail = () => {
   const [attractionTypes, setAttractionTypes] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,6 +114,10 @@ const AttractionDetail = () => {
     setIsCancelPopupOpen(false);
   };
 
+  const handleHistoryClick = () => {
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
   const CancelConfirmationDialog = () => (
     <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
       <DialogTitle sx={{ fontWeight: 600 }}>
@@ -183,7 +190,39 @@ const AttractionDetail = () => {
                   Quản lý điểm tham quan
                 </Typography>
                 {(attraction.status === AttractionStatus.Draft || attraction.status === AttractionStatus.Rejected) && (
-                  <Box sx={{ display: 'flex', gap: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
+                    <IconButton
+                      onClick={handleHistoryClick}
+                      sx={{
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        height: '45px',
+                        '&:hover': {
+                          backgroundColor: '#f5f5f5'
+                        }
+                      }}
+                    >
+                      <HistoryIcon color="primary" />
+                    </IconButton>
+
+                    {/* Version History Dropdown */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: '100%',
+                        right: 0,
+                        width: '400px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        borderRadius: '4px',
+                        display: isHistoryOpen ? 'block' : 'none',
+                        zIndex: 1000,
+                        marginTop: '8px'
+                      }}
+                    >
+                      <VersionHistory />
+                    </Box>
+
                     {isEditing ? (
                       <Button
                         variant="contained"

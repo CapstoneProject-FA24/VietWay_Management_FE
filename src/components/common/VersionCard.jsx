@@ -13,11 +13,6 @@ const VersionCard = ({ version }) => {
         borderBottom: 'none'
       }
     }}>
-      <Avatar
-        src={version.userAvatar}
-        alt={version.changedBy}
-        sx={{ width: 40, height: 40, mr: 2 }}
-      />
       <Box sx={{ flex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>

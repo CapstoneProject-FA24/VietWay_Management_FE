@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -17,6 +17,8 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ReviewList from '@components/review/ReviewList';
+import HistoryIcon from '@mui/icons-material/History';
+import VersionHistory from '@components/common/VersionHistory';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -35,6 +37,7 @@ const ManagerAttractionDetail = () => {
     message: '',
     severity: 'success'
   });
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const fetchAttraction = async () => {
@@ -138,6 +141,10 @@ const ManagerAttractionDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  const handleHistoryClick = () => {
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
   if (!attraction) {
     return <Typography>Loading...</Typography>;
   }
@@ -186,9 +193,45 @@ const ManagerAttractionDetail = () => {
           </Box>
         )}
         {attraction?.status === AttractionStatus.Approved && (
-          <>
-            <Button variant="contained" sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}>Xóa</Button>
-          </>
+          <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
+            <IconButton
+              onClick={handleHistoryClick}
+              sx={{
+                backgroundColor: 'white',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                height: '45px',
+                '&:hover': {
+                  backgroundColor: '#f5f5f5'
+                }
+              }}
+            >
+              <HistoryIcon color="primary" />
+            </IconButton>
+
+            <Box
+              sx={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                width: '400px',
+                backgroundColor: 'white',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                borderRadius: '4px',
+                display: isHistoryOpen ? 'block' : 'none',
+                zIndex: 1000,
+                marginTop: '8px'
+              }}
+            >
+              <VersionHistory />
+            </Box>
+            
+            <Button 
+              variant="contained" 
+              sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
+            >
+              Xóa
+            </Button>
+          </Box>
         )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>

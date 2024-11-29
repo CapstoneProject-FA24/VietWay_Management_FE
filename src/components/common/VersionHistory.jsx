@@ -1,57 +1,69 @@
-import React, { useState } from 'react';
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, Badge } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import HistoryIcon from '@mui/icons-material/History';
+import React from 'react';
+import { Box, Typography, Badge } from '@mui/material';
 import VersionCard from '@components/common/VersionCard';
 import { mockVersionHistory } from '@hooks/MockVersionHistory';
 
 const VersionHistory = () => {
-  const [expanded, setExpanded] = useState(false);
-
-  const handleChange = (event, isExpanded) => {
-    setExpanded(isExpanded);
-  };
-
   return (
-    <Accordion 
-      expanded={expanded} 
-      onChange={handleChange}
-      sx={{ 
-        boxShadow: 'none',
-        '&:before': {
-          display: 'none',
-        },
+    <Box
+      sx={{
+        width: '100%',
+        backgroundColor: 'white',
+        borderRadius: '20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       }}
     >
-      <AccordionSummary
-        expandIcon={<ExpandMoreIcon />}
+      {/* Header */}
+      <Box
         sx={{
           borderBottom: '1px solid #eee',
-          '&.Mui-expanded': {
-            minHeight: 48,
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          backgroundColor: 'white',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+        }}
+      >
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: '20px' }}>
+          Lịch sử thay đổi
+        </Typography>
+        <Badge sx={{ position: 'relative', right: '12px' }}
+          badgeContent={mockVersionHistory.length} 
+          color="primary" 
+        />
+      </Box>
+
+      {/* Scrollable Content */}
+      <Box
+        sx={{
+          maxHeight: '400px',
+          overflowY: 'auto',
+          backgroundColor: 'white',
+          borderBottomLeftRadius: '4px',
+          borderBottomRightRadius: '4px',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#f1f1f1',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#888',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: '#555',
           },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <HistoryIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-            Lịch sử thay đổi
-          </Typography>
-          <Badge 
-            badgeContent={mockVersionHistory.length} 
-            color="primary" 
-            sx={{ ml: 2 }}
-          />
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails sx={{ p: 0 }}>
-        <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
-          {mockVersionHistory.map((version) => (
-            <VersionCard key={version.id} version={version} />
-          ))}
-        </Box>
-      </AccordionDetails>
-    </Accordion>
+        {mockVersionHistory.map((version) => (
+          <VersionCard key={version.id} version={version} />
+        ))}
+      </Box>
+    </Box>
   );
 };
 

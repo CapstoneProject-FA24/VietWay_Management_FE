@@ -81,7 +81,7 @@ const PostDetail = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success' // 'success' | 'error' | 'warning' | 'info'
+    severity: 'success' | 'error' | 'warning' | 'info'
   });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
@@ -295,13 +295,7 @@ const PostDetail = () => {
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <IconButton 
           onClick={handleHistoryClick}
-          sx={{ 
-            backgroundColor: 'white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            '&:hover': {
-              backgroundColor: '#f5f5f5'
-            }
-          }}
+          sx={{ backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
         >
           <HistoryIcon color="primary" />
         </IconButton>
