@@ -13,6 +13,7 @@ import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchToursByTemplateId } from '@services/TourService';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import SendIcon from '@mui/icons-material/Send';
 
 const TourTemplateDetails = () => {
   const [state, setState] = useState({
@@ -184,6 +185,14 @@ const TourTemplateDetails = () => {
           sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
         >
           Xóa
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<SendIcon />}
+          onClick={handleSend}
+          sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+        >
+          Gửi duyệt
         </Button>
       </Box>
     );

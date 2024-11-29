@@ -119,7 +119,9 @@ const ManageTour = () => {
           provinceIds: filters.location,
           status: statusTab === 'all' ? null : parseInt(statusTab),
           startDateFrom: dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : null,
-          startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null
+          startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null,
+          sortBy: 'createdAt',
+          sortDirection: 'desc'
         };
 
         const response = await fetchTours({ params });
