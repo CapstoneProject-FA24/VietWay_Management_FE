@@ -200,7 +200,7 @@ export const createTour = async (tourData) => {
             maxParticipant: parseInt(tourData.maxParticipants),
             minParticipant: parseInt(tourData.minParticipants),
             currentParticipant: 0,
-            tourPrices: tourData.tourPrices,
+            tourPrice: tourData.tourPrices,
             depositPercent: tourData.depositPercent,
             refundPolicies: tourData.refundPolicies.map(policy => ({
                 cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),

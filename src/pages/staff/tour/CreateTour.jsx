@@ -222,10 +222,14 @@ const CreateTour = () => {
 
     if (!tourData.childPrice) {
       newErrors.childPrice = "Vui lòng nhập giá trẻ em";
+    } else if(tourData.childPrice === '0' || (tourData.childPrice > tourData.adultPrice && tourData.adultPrice)){
+      newErrors.childPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
     }
 
     if (!tourData.infantPrice) {
       newErrors.infantPrice = "Vui lòng nhập giá em bé";
+    } else if(tourData.infantPrice === '0' || (tourData.infantPrice > tourData.adultPrice && tourData.adultPrice)){
+      newErrors.infantPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
     }
 
     if (!tourData.registerOpenDate) {
@@ -352,24 +356,9 @@ const CreateTour = () => {
     handleNewTourChange('minParticipants', value);
   };
 
-  // Update price change handler
   const handlePriceChange = (e) => {
     const newAdultPrice = e.target.value;
-    if (newAdultPrice === '') {
-      handleNewTourChange('adultPrice', '');
-      handleNewTourChange('childPrice', '');
-      handleNewTourChange('infantPrice', '');
-      return;
-    }
-
-    // Allow typing but don't calculate child/infant prices until it's a valid price
     handleNewTourChange('adultPrice', newAdultPrice);
-
-    if (validatePrice(newAdultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
-      const { childPrice, infantPrice } = calculatePrices(Number(newAdultPrice));
-      handleNewTourChange('childPrice', childPrice.toString());
-      handleNewTourChange('infantPrice', infantPrice.toString());
-    }
   };
 
   const handleSelectLocation = (placeId, address) => {
@@ -569,11 +558,6 @@ const CreateTour = () => {
                     if (e.target.value) {
                       const roundedPrice = roundToThousand(Number(e.target.value));
                       handleNewTourChange('adultPrice', roundedPrice.toString());
-                      if (validatePrice(roundedPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
-                        const { childPrice, infantPrice } = calculatePrices(roundedPrice);
-                        handleNewTourChange('childPrice', childPrice.toString());
-                        handleNewTourChange('infantPrice', infantPrice.toString());
-                      }
                     }
                   }}
                   error={!!errors.adultPrice}
