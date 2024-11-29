@@ -209,6 +209,8 @@ export const createTour = async (tourData) => {
             paymentDeadline: tourData.paymentDeadline,
         };
 
+        console.log(formattedData);
+
         const response = await axios.post(`${baseURL}/api/tours`, formattedData,
             {
                 headers: {

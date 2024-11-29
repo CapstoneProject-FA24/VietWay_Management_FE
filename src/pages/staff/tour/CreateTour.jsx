@@ -38,7 +38,7 @@ const CreateTour = () => {
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const [tours, setTours] = useState([]);
   const [tourData, setTourData] = useState({
-    tourTemplateId: '',
+    tourTemplateId: id,
     startAddress: '',
     startLocationPlaceId: '',
     startDate: null,
@@ -216,6 +216,9 @@ const CreateTour = () => {
     if (!tourData.adultPrice) {
       newErrors.adultPrice = "Vui lòng nhập giá người lớn";
     }
+    else if(!validatePrice(tourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)){
+      newErrors.adultPrice = `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`;
+    }
 
     if (!tourData.childPrice) {
       newErrors.childPrice = "Vui lòng nhập giá trẻ em";
@@ -291,7 +294,7 @@ const CreateTour = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(id);
     if (!validateForm()) {
       return;
     }
@@ -325,6 +328,8 @@ const CreateTour = () => {
         refundPolicies: formattedPolicies,
         depositPercent: Number(tourData.depositPercent)
       };
+
+      console.log(formData);
 
       await createTour(formData);
       setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
