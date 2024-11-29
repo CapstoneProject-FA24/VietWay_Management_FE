@@ -8,6 +8,7 @@ import { Collapse, Button } from '@mui/material';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import ReviewListTour from '@components/review/ReviewListTour';
 import TourTable from '@components/tourTemplate/TourTable';
+import parse from 'html-react-parser';
 
 const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
   return (
@@ -63,8 +64,12 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
 
           {/* Overview section */}
           <Box sx={{ mb: 5 }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-            <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.description}</Typography>
+            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+              Tổng quan
+            </Typography>
+            <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
+              {parse(tourTemplate.description || '')}
+            </Box>
           </Box>
 
           {/* Schedule section */}
@@ -133,9 +138,9 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
                       </li>
                     ))}
                   </ul>
-                  <Typography paragraph sx={{ textAlign: 'justify' }}>
-                    {s.description}
-                  </Typography>
+                  <Box sx={{ textAlign: 'justify' }}>
+                    {parse(s.description || '')}
+                  </Box>
                 </Collapse>
               </Box>
             ))}
@@ -143,14 +148,22 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
 
           {/* Policy section */}
           <Box sx={{ mb: 5 }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Chính sách</Typography>
-            <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.policy}</Typography>
+            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+              Chính sách
+            </Typography>
+            <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
+              {parse(tourTemplate.policy || '')}
+            </Box>
           </Box>
 
           {/* Note section */}
           <Box sx={{ mb: 5 }}>
-            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
-            <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.note}</Typography>
+            <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+              Lưu ý
+            </Typography>
+            <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
+              {parse(tourTemplate.note || '')}
+            </Box>
           </Box>
         </Grid>
 

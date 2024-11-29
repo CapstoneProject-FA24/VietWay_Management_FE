@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
@@ -11,6 +11,8 @@ import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDelete
 import { Helmet } from 'react-helmet';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchToursByTemplateId } from '@services/TourService';
+import HistoryIcon from '@mui/icons-material/History';
+import VersionHistory from '@components/common/VersionHistory';
 
 const TourTemplateDetails = () => {
   const [state, setState] = useState({
@@ -27,6 +29,7 @@ const TourTemplateDetails = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [tours, setTours] = useState([]);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -107,6 +110,10 @@ const TourTemplateDetails = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const handleHistoryClick = () => {
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
   const ActionButtons = ({ status }) => {
     const showEditDelete = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
     const showDeleteOnly = status === TourTemplateStatus.Pending;
@@ -114,10 +121,39 @@ const TourTemplateDetails = () => {
     if (!showEditDelete && !showDeleteOnly) return null;
 
     return (
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Helmet>
-          <title>Chi tiết tour mẫu</title>
-        </Helmet>
+      <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
+        <IconButton
+          onClick={handleHistoryClick}
+          sx={{
+            backgroundColor: 'white',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            height: '45px',
+            '&:hover': {
+              backgroundColor: '#f5f5f5'
+            }
+          }}
+        >
+          <HistoryIcon color="primary" />
+        </IconButton>
+
+        {/* Version History Dropdown */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            width: '400px',
+            backgroundColor: 'white',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            borderRadius: '4px',
+            display: isHistoryOpen ? 'block' : 'none',
+            zIndex: 1000,
+            marginTop: '8px'
+          }}
+        >
+          <VersionHistory />
+        </Box>
+
         {showEditDelete && (
           <>
             {state.isEditing ? (
@@ -217,7 +253,7 @@ const TourTemplateDetails = () => {
                   sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
                   Quay lại
                 </Button>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1, ml: -15 }}>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1}}>
                   Chi tiết tour mẫu
                 </Typography>
                 <ActionButtons status={state.tourTemplate.status} />

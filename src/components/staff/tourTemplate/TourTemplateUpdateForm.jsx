@@ -16,6 +16,25 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import PropTypes from 'prop-types';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    [{ 'font': [] }],
+    [{ 'size': ['small', false, 'large', 'huge'] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    [{ 'align': [] }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+    [{ 'direction': 'rtl' }],
+    ['blockquote', 'code-block'],
+    ['link', 'image', 'video', 'formula'],
+    ['clean']
+  ]
+};
 
 const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onCancel }) => {
     const [tourTemplate, setTourTemplate] = useState({
@@ -540,15 +559,24 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <TextField value={editableFields.description.value}
-                                onChange={(e) => handleFieldChange('description', e.target.value)}
-                                variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
-                        </Box>
+                        <Typography variant="h5" gutterBottom sx={{ 
+                            textAlign: 'left', 
+                            fontWeight: '700', 
+                            fontSize: '1.6rem', 
+                            color: '#05073C' 
+                        }}>
+                            Tổng quan
+                        </Typography>
+                        <ReactQuill
+                            value={editableFields.description.value}
+                            onChange={(value) => handleFieldChange('description', value)}
+                            modules={quillModules}
+                            theme="snow"
+                            style={{ height: '200px', marginBottom: '50px' }}
+                        />
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3 }}>
+                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 2, mt: 12 }}>
                             Lịch trình
                         </Typography>
                         {tourTemplate.schedule.map((s, index) => (
@@ -573,7 +601,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                     }} />
                                 )}
                                 <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(s.dayNumber)}>
-                                    <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 600, mr: 1 }}>
                                         {`Ngày ${s.dayNumber}`}
                                     </Typography>
                                     <IconButton size="small">
@@ -582,21 +610,29 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 </Box>
                                 <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Tiêu đề:</Typography>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>Tiêu đề:</Typography>
                                         <TextField value={s.title} onChange={(e) => handleScheduleChange(s.dayNumber, 'title', e.target.value)} variant="outlined" fullWidth />
                                     </Box>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Mô tả:</Typography>
-                                        <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
+                                        <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1 }}>
+                                            Mô tả:
+                                        </Typography>
+                                        <ReactQuill
+                                            value={s.description}
+                                            onChange={(value) => handleScheduleChange(s.dayNumber, 'description', value)}
+                                            modules={quillModules}
+                                            theme="snow"
+                                            style={{ height: '150px', marginBottom: '50px' }}
+                                        />
                                     </Box>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                                        <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
+                                        <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>Điểm đến:</Typography>
                                         <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
                                             Chọn điểm đến
                                         </Button>
                                         {s.attractions.length > 0 && (
                                             <Box sx={{ mt: 1 }}>
-                                                <Typography variant="subtitle2">Đã chọn:</Typography>
+                                                <Typography variant="subtitle1" sx>Đã chọn:</Typography>
                                                 <ul style={{ listStyleType: 'none', padding: 0 }}>
                                                     {s.attractions.map((attraction) => (
                                                         <li key={attraction.AttractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
@@ -616,10 +652,21 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         ))}
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <TextField value={editableFields.note.value} onChange={(e) => handleFieldChange('note', e.target.value)} variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
-                        </Box>
+                        <Typography variant="h5" gutterBottom sx={{
+                            textAlign: 'left',
+                            fontWeight: '700',
+                            fontSize: '1.6rem',
+                            color: '#05073C'
+                        }}>
+                            Lưu ý
+                        </Typography>
+                        <ReactQuill
+                            value={editableFields.note.value}
+                            onChange={(value) => handleFieldChange('note', value)}
+                            modules={quillModules}
+                            theme="snow"
+                            style={{ height: '200px', marginBottom: '50px' }}
+                        />
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4} >

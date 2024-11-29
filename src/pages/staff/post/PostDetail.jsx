@@ -17,6 +17,8 @@ import { fetchPostCategory } from '@services/PostCategoryService';
 import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
 import { fetchPostById, updatePost, deletePost, updatePostImages } from '@services/PostService';
 import { Helmet } from 'react-helmet';
+import HistoryIcon from '@mui/icons-material/History';
+import VersionHistory from '@components/common/VersionHistory';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -79,11 +81,11 @@ const PostDetail = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success' // 'success' | 'error' | 'warning' | 'info'
+    severity: 'success' | 'error' | 'warning' | 'info'
   });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -173,15 +175,6 @@ const PostDetail = () => {
     }
   }, [post]);
 
-  useEffect(() => {
-    return () => {
-      // Cleanup object URLs when component unmounts
-      if (editablePost?.image && editablePost.image.startsWith('blob:')) {
-        URL.revokeObjectURL(editablePost.image);
-      }
-    };
-  }, [editablePost?.image]);
-
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -202,7 +195,6 @@ const PostDetail = () => {
   };
 
   const handleSaveChanges = async () => {
-    setIsUpdating(true);
     try {
       const updatedPost = {
         title: editablePost.title,
@@ -240,13 +232,10 @@ const PostDetail = () => {
         message: 'Lỗi khi lưu nháp: ' + (error.response?.data?.message || error.message),
         severity: 'error'
       });
-    } finally {
-      setIsUpdating(false);
     }
   };
 
   const handleSendForApproval = async () => {
-    setIsUpdating(true);
     try {
       const updatedPost = {
         title: editablePost.title,
@@ -284,8 +273,6 @@ const PostDetail = () => {
         message: 'Lỗi khi gửi bài viết: ' + (error.response?.data?.message || error.message),
         severity: 'error'
       });
-    } finally {
-      setIsUpdating(false);
     }
   };
 
@@ -304,11 +291,17 @@ const PostDetail = () => {
   };
 
   const renderActionButtons = () => {
-    switch (post.status) {
-      case PostStatus.Draft:
-      case PostStatus.Rejected:
-        return (
-          <Box sx={{ display: 'flex', gap: 2 }}>
+    return (
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <IconButton 
+          onClick={handleHistoryClick}
+          sx={{ backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
+        >
+          <HistoryIcon color="primary" />
+        </IconButton>
+
+        {post.status === PostStatus.Draft || post.status === PostStatus.Rejected ? (
+          <>
             {isEditMode ? (
               <Button 
                 variant="contained" 
@@ -326,19 +319,14 @@ const PostDetail = () => {
             <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
               Xóa
             </Button>
-          </Box>
-        );
-      case PostStatus.Pending:
-        return (
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
-              Xóa
-            </Button>
-          </Box>
-        );
-      default:
-        return null;
-    }
+          </>
+        ) : post.status === PostStatus.Pending ? (
+          <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
+            Xóa
+          </Button>
+        ) : null}
+      </Box>
+    );
   };
 
   const handleDeletePost = async () => {
@@ -394,9 +382,15 @@ const PostDetail = () => {
         // Store the file for later upload
         setEditablePost(prev => ({
             ...prev,
-            imageFile: file,  // Store the actual file
-            image: URL.createObjectURL(file)  // Create local preview URL
+            imageFile: file  // Store the actual file
         }));
+        
+        // Create preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            handleFieldChange('image', reader.result);
+        };
+        reader.readAsDataURL(file);
     }
   };
 
@@ -411,6 +405,10 @@ const PostDetail = () => {
   const handleCancelConfirm = () => {
     setIsEditMode(false);
     setIsCancelPopupOpen(false);
+  };
+
+  const handleHistoryClick = () => {
+    setIsHistoryOpen(!isHistoryOpen);
   };
 
   const CancelConfirmationDialog = () => (
@@ -455,250 +453,263 @@ const PostDetail = () => {
 
         <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', mt: 5 }}>
           <Box maxWidth="89vw">
-            <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Button
-                  startIcon={<ArrowBack />}
-                  onClick={() => navigate(-1)}
-                  sx={{ mb: 2 }}
-                >
-                  Quay lại
-                </Button>
-                {renderActionButtons()}
+            <Box sx={{ position: 'relative' }}>
+              <Box 
+                sx={{ 
+                  position: 'fixed',
+                  top: '120px',
+                  right: isSidebarOpen ? '280px' : '40px',
+                  width: '400px',
+                  backgroundColor: 'white',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  borderRadius: '4px',
+                  display: isHistoryOpen ? 'block' : 'none',
+                  zIndex: 1000
+                }}
+              >
+                <VersionHistory />
               </Box>
 
-              {isEditMode ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <TextField label="Tiêu đề" value={editablePost.title} onChange={(e) => handleFieldChange('title', e.target.value)} variant="outlined" fullWidth sx={{ mb: 2 }} />
+              <Box elevation={2} sx={{ p: 1, mb: 10, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Button
+                    startIcon={<ArrowBack />}
+                    onClick={() => navigate(-1)}
+                    sx={{ mb: 2 }}
+                  >
+                    Quay lại
+                  </Button>
+                  {renderActionButtons()}
+                </Box>
 
-                  <Box sx={commonStyles.boxContainer}>
-                    <Box sx={commonStyles.flexContainer}>
-                      <Typography sx={commonStyles.labelTypography}>
-                        Danh mục:
-                      </Typography>
-                      <Select 
-                        value={editablePost?.postCategoryId || ''} 
-                        onChange={(e) => {
-                          const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
-                          if (selectedCategory) {
-                            handleFieldChange('postCategoryId', selectedCategory.postCategoryId);
-                            handleFieldChange('postCategoryName', selectedCategory.name);
-                          }
-                        }} 
-                        variant="outlined" 
-                        fullWidth 
-                        sx={commonStyles.inputField}
-                        disabled={isLoadingCategories}
-                      >
-                        {categoryOptions.map(category => (
-                          <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
-                            {category.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Box>
+                {isEditMode ? (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <TextField label="Tiêu đề" value={editablePost.title} onChange={(e) => handleFieldChange('title', e.target.value)} variant="outlined" fullWidth sx={{ mb: 2 }} />
 
-                    <Box sx={commonStyles.flexContainer}>
-                      <Typography sx={commonStyles.labelTypography}>
-                        Tỉnh/Thành phố:
-                      </Typography>
-                      <Select 
-                        value={editablePost?.provinceId || ''} 
-                        onChange={(e) => {
-                          const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
-                          if (selectedProvince) {
-                            handleFieldChange('provinceId', selectedProvince.value);
-                            handleFieldChange('provinceName', selectedProvince.label);
-                          }
-                        }} 
-                        variant="outlined" 
-                        fullWidth 
-                        sx={commonStyles.inputField} 
-                        disabled={isLoadingProvinces}
-                      >
-                        {provinceOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </Box>
-                  </Box>
-
-                  <TextField sx={{ mb: 2, fontWeight: 600 }} label="Mô tả" value={editablePost.description}
-                    onChange={(e) => handleFieldChange('description', e.target.value)} />
-
-                  <Box sx={commonStyles.imageContainer}>
-                    <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
-                    <Box sx={{ position: 'relative', width: '100%', height: '300px', border: '2px dashed #ccc',
-                      borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
-                    }}>
-                      {editablePost.image ? (
-                        <img 
-                          src={editablePost.image} 
-                          alt={editablePost.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        />
-                      ) : (
-                        <img
-                          src="/add-image.png"
-                          alt="Add image"
-                          style={{
-                            width: '100px',
-                            height: '100px',
-                            opacity: 0.5
-                          }}
-                        />
-                      )}
-                      <Button 
-                        variant="outlined" 
-                        component="label"
-                        sx={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease',
-                          '&:hover': { opacity: 1 },
-                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                          color: '#000',
-                          border: '1px solid #ccc',
-                        }}
-                      >
-                        {editablePost.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
-                        <input 
-                          type="file" 
-                          hidden 
-                          accept="image/*"
-                          onChange={handleImageChange}
-                        />
-                      </Button>
-                    </Box>
-                  </Box>
-                  {editableFields.content.isEditing ? (
-                    <Box sx={commonStyles.editorContainer}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Box sx={commonStyles.boxContainer}>
+                      <Box sx={commonStyles.flexContainer}>
                         <Typography sx={commonStyles.labelTypography}>
-                          Nội dung
+                          Danh mục:
                         </Typography>
+                        <Select 
+                          value={editablePost?.postCategoryId || ''} 
+                          onChange={(e) => {
+                            const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
+                            if (selectedCategory) {
+                              handleFieldChange('postCategoryId', selectedCategory.postCategoryId);
+                              handleFieldChange('postCategoryName', selectedCategory.name);
+                            }
+                          }} 
+                          variant="outlined" 
+                          fullWidth 
+                          sx={commonStyles.inputField}
+                          disabled={isLoadingCategories}
+                        >
+                          {categoryOptions.map(category => (
+                            <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
+                              {category.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
                       </Box>
 
-                      <ReactQuill
-                        value={editableFields.content.value}
-                        onChange={(value) => setEditableFields(prev => ({
-                          ...prev,
-                          content: { ...prev.content, value }
-                        }))}
-                        modules={{
-                          toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                            ['link', 'image'],
-                            ['clean']
-                          ],
-                        }}
-                        theme="snow"
-                      />
+                      <Box sx={commonStyles.flexContainer}>
+                        <Typography sx={commonStyles.labelTypography}>
+                          Tỉnh/Thành phố:
+                        </Typography>
+                        <Select 
+                          value={editablePost?.provinceId || ''} 
+                          onChange={(e) => {
+                            const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
+                            if (selectedProvince) {
+                              handleFieldChange('provinceId', selectedProvince.value);
+                              handleFieldChange('provinceName', selectedProvince.label);
+                            }
+                          }} 
+                          variant="outlined" 
+                          fullWidth 
+                          sx={commonStyles.inputField} 
+                          disabled={isLoadingProvinces}
+                        >
+                          {provinceOptions.map(option => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </Box>
+                    </Box>
 
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
-                        <Button variant="contained" onClick={() => handleFieldSubmit('content')}
-                          disabled={!editableFields.content.value.trim()}
-                          sx={{ minWidth: '40px', padding: '8px' }}>
-                          <CheckIcon />
+                    <TextField sx={{ mb: 2, fontWeight: 600 }} label="Mô tả" value={editablePost.description}
+                      onChange={(e) => handleFieldChange('description', e.target.value)} />
+
+                    <Box sx={commonStyles.imageContainer}>
+                      <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
+                      <Box sx={{ position: 'relative', width: '100%', height: '300px', border: '2px dashed #ccc',
+                        borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
+                      }}>
+                        {editablePost.image ? (
+                          <img 
+                            src={editablePost.imageUrl} 
+                            alt={editablePost.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          />
+                        ) : (
+                          <img
+                            src="/add-image.png"
+                            alt="Add image"
+                            style={{
+                              width: '100px',
+                              height: '100px',
+                              opacity: 0.5
+                            }}
+                          />
+                        )}
+                        <Button 
+                          variant="outlined" 
+                          component="label"
+                          sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            opacity: 0,
+                            transition: 'opacity 0.3s ease',
+                            '&:hover': { opacity: 1 },
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            color: '#000',
+                            border: '1px solid #ccc',
+                          }}
+                        >
+                          {editablePost.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
+                          <input 
+                            type="file" 
+                            hidden 
+                            accept="image/*"
+                            onChange={handleImageChange}
+                          />
                         </Button>
                       </Box>
                     </Box>
-                  ) : (
-                    <Box sx={commonStyles.contentDisplay}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                        <Typography sx={commonStyles.labelTypography}>
-                          Nội dung
-                        </Typography>
-                        <IconButton onClick={() => handleFieldEdit('content')}>
-                          <EditIcon />
-                        </IconButton>
+                    {editableFields.content.isEditing ? (
+                      <Box sx={commonStyles.editorContainer}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                          <Typography sx={commonStyles.labelTypography}>
+                            Nội dung
+                          </Typography>
+                        </Box>
+
+                        <ReactQuill
+                          value={editableFields.content.value}
+                          onChange={(value) => setEditableFields(prev => ({
+                            ...prev,
+                            content: { ...prev.content, value }
+                          }))}
+                          modules={{
+                            toolbar: [
+                              [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                              [{ 'font': [] }],
+                              [{ 'size': ['small', false, 'large', 'huge'] }],
+                              ['bold', 'italic', 'underline', 'strike'],
+                              [{ 'color': [] }, { 'background': [] }],
+                              [{ 'script': 'sub'}, { 'script': 'super' }],
+                              [{ 'align': [] }],
+                              [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                              [{ 'direction': 'rtl' }],
+                              ['blockquote', 'code-block'],
+                              ['link', 'image', 'video', 'formula'],
+                              ['clean']
+                            ]
+                          }}
+                          theme="snow"
+                        />
+
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 2 }}>
+                          <Button variant="contained" onClick={() => handleFieldSubmit('content')}
+                            disabled={!editableFields.content.value.trim()}
+                            sx={{ minWidth: '40px', padding: '8px' }}>
+                            <CheckIcon />
+                          </Button>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={commonStyles.contentDisplay}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                          <Typography sx={commonStyles.labelTypography}>
+                            Nội dung
+                          </Typography>
+                          <IconButton onClick={() => handleFieldEdit('content')}>
+                            <EditIcon />
+                          </IconButton>
+                        </Box>
+
+                        <Box dangerouslySetInnerHTML={{ __html: editablePost.content }} sx={{
+                          '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                          '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '90%', margin: '0 auto'
+                        }} />
+                      </Box>
+                    )}
+
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                      <Button variant="contained" sx={{ backgroundColor: 'grey', mr: 1 }} startIcon={<Save />} onClick={handleSaveChanges}>
+                        Lưu nháp
+                      </Button>
+                      <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
+                        Gửi duyệt
+                      </Button>
+                    </Box>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />
+                    </Box>
+                    <img src={post.imageUrl} alt={post.title}
+                      style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />
+                    <Typography variant="h1" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, fontWeight: 700, color: '#1A1A1A', mb: 3, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: '"Tinos", serif', marginTop: 3 }}>
+                      {post.title}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <FontAwesomeIcon icon={faTag} style={{ color: '#666' }} />
+                        <Chip label={post.postCategoryName}
+                          sx={{
+                            bgcolor: '#f5f5f5', color: '#666', fontWeight: 500,
+                            '&:hover': { bgcolor: '#eeeeee' }
+                          }} />
                       </Box>
 
-                      <Box dangerouslySetInnerHTML={{ __html: editablePost.content }} sx={{
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <FontAwesomeIcon icon={faCalendarAlt} style={{ color: '#666' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {new Date(post.createdAt).toLocaleDateString('vi-VN')}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <FontAwesomeIcon icon={faMapLocation} style={{ color: '#666' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {post.provinceName}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box
+                      dangerouslySetInnerHTML={{ __html: post.content }}
+                      sx={{
                         '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
                         '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '90%', margin: '0 auto'
-                      }} />
+                      }}
+                    />
+
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                      <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
+                        Gửi duyệt
+                      </Button>
                     </Box>
-                  )}
-
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                    <Button 
-                      variant="contained" 
-                      sx={{ backgroundColor: 'grey', mr: 1 }} 
-                      startIcon={<Save />} 
-                      onClick={handleSaveChanges}
-                      disabled={isUpdating}
-                    >
-                      {isUpdating ? 'Đang lưu...' : 'Lưu nháp'}
-                    </Button>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      startIcon={<Send />} 
-                      onClick={handleSendForApproval}
-                      disabled={isUpdating}
-                    >
-                      {isUpdating ? 'Đang gửi...' : 'Gửi duyệt'}
-                    </Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />
-                  </Box>
-                  <img src={post.imageUrl} alt={post.title}
-                    style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />
-                  <Typography variant="h1" sx={{ fontSize: { xs: '2.5rem', md: '3.5rem' }, fontWeight: 700, color: '#1A1A1A', mb: 3, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: '"Tinos", serif', marginTop: 3 }}>
-                    {post.title}
-                  </Typography>
-
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <FontAwesomeIcon icon={faTag} style={{ color: '#666' }} />
-                      <Chip label={post.postCategoryName}
-                        sx={{
-                          bgcolor: '#f5f5f5', color: '#666', fontWeight: 500,
-                          '&:hover': { bgcolor: '#eeeeee' }
-                        }} />
-                    </Box>
-
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <FontAwesomeIcon icon={faCalendarAlt} style={{ color: '#666' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <FontAwesomeIcon icon={faMapLocation} style={{ color: '#666' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {post.provinceName}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  <Box
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                    sx={{
-                      '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                      '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '90%', margin: '0 auto'
-                    }}
-                  />
-
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                    <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
-                      Gửi duyệt
-                    </Button>
-                  </Box>
-                </Box> 
-              )}
+                  </Box> 
+                )}
+              </Box>
             </Box>
           </Box>
         </Box>
