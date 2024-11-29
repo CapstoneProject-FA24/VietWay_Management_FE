@@ -160,7 +160,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 }
             }}>
                 {/* Main Card Content */}
-                <Box sx={{ display: 'flex', height: '310px' }}>
+                <Box sx={{ display: 'flex', height: '340px' }}>
                     {/* Left side - Image */}
                     <CardMedia
                         component="img"
@@ -188,7 +188,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                             </Box>
 
                             {/* Tour Name */}
-                            <Typography variant="h5" component="div" sx={{ mb: 1, fontSize: '1.35rem' }}>
+                            <Typography variant="h5" component="div" sx={{ mb: 1, mt: 2, fontSize: '1.5rem', fontWeight: 'bold' }}>
                                 {tour.tourName}
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -205,9 +205,9 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                                         <Typography variant="body2" color="text.secondary"> {tour.provinces.join(' - ')} </Typography>
                                     </Box>
                                     {/* Booking Section */}
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mt: 'auto' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mt: 'auto', width: '70%' }}>
                                         {/* Date Selection Dropdown */}
-                                        <Select value={selectedDate} onChange={handleDateChange} displayEmpty size="small" sx={{ width: '23rem' }}>
+                                        <Select value={selectedDate} onChange={handleDateChange} displayEmpty size="small" sx={{ width: '28rem' }}>
                                             <MenuItem value="" disabled>
                                                 Chọn ngày khởi hành
                                             </MenuItem>
@@ -252,35 +252,31 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                                                 </MenuItem>
                                             ))}
                                         </Select>
-                                    </Box>
-                                </Box>
-                                {/* Booking Calculation Box */}
-                                {selectedDate && booking && selectedDateObj && (
-                                    <Box sx={{ width: '75%', display: 'flex', overflow: 'auto' }}>
-                                        <BookingCalBox
-                                            booking={booking}
-                                            selectedDateObj={selectedDateObj}
-                                            calculatePriceDetails={calculatePriceDetails}
-                                            getTotalAmount={getTotalAmount}
-                                            onTotalCalculated={setCalculatedTotal}
-                                        />
-                                    </Box>
-                                )}
-                                <Box sx={{ width: '25%', display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
-                                    <Button
-                                        variant="contained" disabled={!selectedDate} onClick={handleBookClick}
-                                        sx={{ textTransform: 'none', width: 'fit-content', height: 'fit-content' }}
-                                    >
-                                        Chọn tour
-                                    </Button>
 
-                                    <ExpandButton
-                                        onClick={handleExpandClick} aria-expanded={expanded}
-                                        aria-label="show more" sx={{ width: 'fit-content', height: 'fit-content', fontSize: '0.9rem' }}
-                                    >
-                                        <ExpandMore sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s' }} />
-                                        {expanded ? 'Thu gọn' : 'Xem thêm'}
-                                    </ExpandButton>
+                                        {/* Booking Calculation Box */}
+                                        {selectedDate && booking && selectedDateObj && (
+                                            <Box sx={{ width: '80%', display: 'flex', height: '70%'}}>
+                                                <BookingCalBox
+                                                    booking={booking}
+                                                    selectedDateObj={selectedDateObj}
+                                                    calculatePriceDetails={calculatePriceDetails}
+                                                    getTotalAmount={getTotalAmount}
+                                                    onTotalCalculated={setCalculatedTotal}
+                                                />
+                                            </Box>
+                                        )}
+
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, width: '100%', mt: 12, alignItems: 'center', ml: 1 }}>
+                                            <Button variant="contained" disabled={!selectedDate} onClick={handleBookClick} sx={{ textTransform: 'none', minWidth: 120 }}>
+                                                Chọn tour
+                                            </Button>
+
+                                            <ExpandButton onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more" sx={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
+                                                <ExpandMore sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s' }} />
+                                                {expanded ? 'Thu gọn' : 'Xem thêm'}
+                                            </ExpandButton>
+                                        </Box>
+                                    </Box>
                                 </Box>
                             </Box>
                         </CardContent>

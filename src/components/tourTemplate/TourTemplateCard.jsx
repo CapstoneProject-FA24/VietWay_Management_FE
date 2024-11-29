@@ -60,7 +60,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                 <Typography color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
                     {tour.provinces.join(' - ')}
                 </Typography>
-                <Typography component="div" variant="h6" sx={{ fontSize: '1.4rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: -1, lineHeight: 1.2 }}>
+                <Typography component="div" variant="h6" sx={{ fontWeight: 600, fontSize: '1.4rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: -1, lineHeight: 1.2 }}>
                     {tour.tourName ? tour.tourName : 'Không có tên'}
                 </Typography>
                 <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis', mb: -1 }}>

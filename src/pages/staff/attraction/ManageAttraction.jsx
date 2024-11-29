@@ -20,7 +20,7 @@ const ManageAttraction = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [attractions, setAttractions] = useState([]);
-    const [sortOrder, setSortOrder] = useState('nameA-Z');
+    const [sortOrder, setSortOrder] = useState('createdDate');
     const [statusTab, setStatusTab] = useState('all');
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedAttraction, setSelectedAttraction] = useState(null);
@@ -207,10 +207,10 @@ const ManageAttraction = () => {
                             variant="outlined"
                             sx={{ width: '200px', ml: 2, height: '40px' }}
                         >
-                            <MenuItem value="nameA-Z">Tên A-Z</MenuItem>
-                            <MenuItem value="nameZ-A">Tên Z-A</MenuItem>
                             <MenuItem value="createdDate">Mới nhất</MenuItem>
                             <MenuItem value="createdDateReverse">Cũ nhất</MenuItem>
+                            <MenuItem value="nameA-Z">Tên A-Z</MenuItem>
+                            <MenuItem value="nameZ-A">Tên Z-A</MenuItem>
                         </Select>
                     </Grid>
                     <Grid item xs={12}>

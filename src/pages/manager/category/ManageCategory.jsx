@@ -35,7 +35,7 @@ const ManageCategory = () => {
 
   const tabs = [
     { label: 'Loại Tour', endpoint: 'tour-categories' },
-    { label: 'Loại Điểm Du Lịch', endpoint: 'attraction-types' },
+    { label: 'Loại Điểm Tham Quan', endpoint: 'attraction-types' },
     { label: 'Loại Bài Viết', endpoint: 'post-categories' },
     { label: 'Thời Lượng Tour', endpoint: 'tour-durations' }
   ];

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton } from '@mui/material';
 import { ArrowBack, Delete } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -13,6 +13,8 @@ import PostDeleteConfirm from '@components/post/PostDeleteConfirm';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import { Helmet } from 'react-helmet';
+import HistoryIcon from '@mui/icons-material/History';
+import VersionHistory from '@components/common/VersionHistory';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -36,6 +38,7 @@ const ManagerPostDetail = () => {
     facebook: false,
     twitter: false
   });
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -404,6 +407,10 @@ const ManagerPostDetail = () => {
     </Box>
   );
 
+  const handleHistoryClick = () => {
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
   if (!post) return null;
 
   const statusInfo = getPostStatusInfo(post.status);
@@ -431,8 +438,50 @@ const ManagerPostDetail = () => {
               </Box>
               {(post.xTweetId || post.facebookPostId) && renderSocialMetricsTable()}
               <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Chip label={statusInfo.text} size="small" sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
+                  <Chip 
+                    label={statusInfo.text} 
+                    size="small" 
+                    sx={{ 
+                      mb: 1, 
+                      color: `${statusInfo.color}`, 
+                      bgcolor: `${statusInfo.backgroundColor}`, 
+                      fontWeight: 600 
+                    }} 
+                  />
+                  <IconButton
+                    onClick={handleHistoryClick}
+                    sx={{
+                      mb: 1,
+                      position: 'absolute',
+                      right: 0,
+                      mb: 3,
+                      backgroundColor: 'white',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      '&:hover': {
+                        backgroundColor: '#f5f5f5'
+                      }
+                    }}
+                  >
+                    <HistoryIcon color="primary" />
+                  </IconButton>
+                  
+                  {/* Version History Dropdown */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      width: '400px',
+                      backgroundColor: 'white',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                      borderRadius: '4px',
+                      display: isHistoryOpen ? 'block' : 'none',
+                      zIndex: 1000
+                    }}
+                  >
+                    <VersionHistory />
+                  </Box>
                 </Box>
                 <img src={post.imageUrl} alt={post.title}
                   style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />

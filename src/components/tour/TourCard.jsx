@@ -38,7 +38,7 @@ const TourCard = ({ tour, onViewDetails }) => {
         <Typography
           variant="h6" component="h2"
           sx={{
-            mb: 1.5, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis',
+            fontWeight: 600, mb: 1.5, overflow: 'hidden', textOverflow: 'ellipsis',
             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical'
           }}
         >

@@ -104,9 +104,9 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
               <Grid item xs={12}>
                 <Typography sx={{ 
                   fontWeight: 'bold', 
-                  fontSize: '1.1rem',
-                  mb: 2,
-                  color: 'text.secondary'
+                  fontSize: '1.4rem',
+                  color: 'text.secondary',
+                  textAlign: 'center'
                 }}>
                   Thông tin khách hàng
                 </Typography>

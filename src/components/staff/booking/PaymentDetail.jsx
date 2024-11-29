@@ -24,7 +24,7 @@ const PaymentDetail = ({ payments }) => {
     <TableContainer component={Paper} sx={{ mt: 2 }}>
       <Table>
         <TableHead>
-          <TableRow sx={{ fontWeight: 'bold', fontSize: '1rem' }}>
+          <TableRow >
             {paymentColumns.map((column) => (
               <TableCell key={column.id}>{column.label}</TableCell>
             ))}

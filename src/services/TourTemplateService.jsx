@@ -85,6 +85,8 @@ export const fetchTourTemplateById = async (id) => {
             statusName: getStatusText(response.data.data.status),
             createdDate: response.data.data.createdAt,
             creatorName: response.data.data.creatorName,
+            startingProvince: response.data.data.startingProvince,
+            transportation: response.data.data.transportation,
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,
             imageUrls: response.data.data.images
@@ -109,6 +111,8 @@ export const createTourTemplate = async (tourTemplateData) => {
             minPrice: tourTemplateData.minPrice,
             maxPrice: tourTemplateData.maxPrice,
             provinceIds: tourTemplateData.provinceIds,
+            startingProvinceId: tourTemplateData.startingProvinceId,
+            transportation: tourTemplateData.transportation,
             schedules: tourTemplateData.schedules.map(s => ({
                 dayNumber: s.dayNumber,
                 title: s.title,
@@ -142,6 +146,8 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
             note: tourTemplateData.note,
             minPrice: tourTemplateData.minPrice,
             maxPrice: tourTemplateData.maxPrice,
+            startingProvinceId: tourTemplateData.startingProvinceId,
+            transportation: tourTemplateData.transportation,
             provinceIds: tourTemplateData.provinceIds,
             schedules: tourTemplateData.schedules.map(s => ({
                 dayNumber: s.dayNumber,

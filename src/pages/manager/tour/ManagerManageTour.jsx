@@ -190,6 +190,53 @@ const ManagerManageTour = () => {
     setStatusTab(newValue);
   };
 
+  // Add custom styles for ReactSelect
+  const customSelectStyles = {
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: 'white',
+      zIndex: 2
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+      color: state.isSelected ? 'white' : 'black',
+      '&:hover': {
+        backgroundColor: '#f5f5f5'
+      }
+    }),
+    control: (provided) => ({
+      ...provided,
+      backgroundColor: 'white'
+    }),
+    menuPortal: (provided) => ({
+      ...provided,
+      zIndex: 9999
+    })
+  };
+
+  // Add MenuProps for Material-UI Select
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        bgcolor: 'white',
+        '& .MuiMenuItem-root': {
+          bgcolor: 'white',
+          '&:hover': {
+            bgcolor: '#f5f5f5'
+          },
+          '&.Mui-selected': {
+            bgcolor: '#1976d2',
+            color: 'white',
+            '&:hover': {
+              bgcolor: '#1565c0'
+            }
+          }
+        }
+      }
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
@@ -210,8 +257,10 @@ const ManagerManageTour = () => {
                 components={animatedComponents}
                 isMulti
                 options={tourTypeOptions}
-                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "tourType")}
                 value={tourTypeOptions.filter(option => tempFilters.tourType.includes(option.value))}
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, 'tourType')}
+                styles={customSelectStyles}
+                menuPortalTarget={document.body}
               />
             </FormControl>
           </Grid>
@@ -224,8 +273,10 @@ const ManagerManageTour = () => {
                 components={animatedComponents}
                 isMulti
                 options={durationOptions}
-                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")}
                 value={durationOptions.filter(option => tempFilters.duration.includes(option.value))}
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, 'duration')}
+                styles={customSelectStyles}
+                menuPortalTarget={document.body}
               />
             </FormControl>
           </Grid>
@@ -238,8 +289,10 @@ const ManagerManageTour = () => {
                 components={animatedComponents}
                 isMulti
                 options={provinceOptions}
-                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "location")}
                 value={provinceOptions.filter(option => tempFilters.location.includes(option.value))}
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, 'location')}
+                styles={customSelectStyles}
+                menuPortalTarget={document.body}
               />
             </FormControl>
           </Grid>
@@ -402,6 +455,7 @@ const ManagerManageTour = () => {
                       pageIndex: 1
                     }));
                   }}
+                  MenuProps={menuProps}
                 >
                   <MenuItem value={9}>9</MenuItem>
                   <MenuItem value={18}>18</MenuItem>
