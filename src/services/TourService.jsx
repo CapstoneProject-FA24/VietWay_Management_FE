@@ -132,7 +132,9 @@ export const fetchTourById = async (id) => {
                 price: price.price,
                 ageFrom: price.ageFrom,
                 ageTo: price.ageTo
-            }))
+            })),
+            depositPercent: item.depositPercent,
+            paymentDeadline: new Date(item.paymentDeadline),
         };
         return tour;
     } catch (error) {
@@ -265,7 +267,9 @@ export const updateTour = async (tourId, tourData) => {
             refundPolicies: tourData.refundPolicies.map(policy => ({
                 cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
                 refundPercent: Number(policy.refundRate)
-            }))
+            })),
+            depositPercent: tourData.depositPercent,
+            paymentDeadline: tourData.paymentDeadline,
         };
 
         const response = await axios.put(`${baseURL}/api/tours/edit-tour/${tourId}`, formattedData,

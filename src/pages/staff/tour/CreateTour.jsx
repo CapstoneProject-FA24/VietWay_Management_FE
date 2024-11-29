@@ -197,59 +197,29 @@ const CreateTour = () => {
       newErrors.startAddress = "Vui lòng nhập địa điểm khởi hành";
     }
 
+    // Start Date and Time validation
     if (!tourData.startDate) {
       newErrors.startDate = "Vui lòng chọn ngày khởi hành";
+    } else if (dayjs(tourData.startDate).isBefore(dayjs(), 'day')) {
+      newErrors.startDate = "Ngày khởi hành phải sau ngày hiện tại";
     }
 
     if (!tourData.startTime) {
       newErrors.startTime = "Vui lòng chọn giờ khởi hành";
     }
 
-    if (!tourData.maxParticipants) {
-      newErrors.maxParticipants = "Vui lòng nhập số khách tối đa";
-    }
-
-    if (!tourData.minParticipants) {
-      newErrors.minParticipants = "Vui lòng nhập số khách tối thiểu";
-    }
-
-    if (!tourData.adultPrice) {
-      newErrors.adultPrice = "Vui lòng nhập giá người lớn";
-    }
-    else if(!validatePrice(tourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)){
-      newErrors.adultPrice = `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`;
-    }
-
-    if (!tourData.childPrice) {
-      newErrors.childPrice = "Vui lòng nhập giá trẻ em";
-    } else if(tourData.childPrice === '0' || (tourData.childPrice > tourData.adultPrice && tourData.adultPrice)){
-      newErrors.childPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
-    }
-
-    if (!tourData.infantPrice) {
-      newErrors.infantPrice = "Vui lòng nhập giá em bé";
-    } else if(tourData.infantPrice === '0' || (tourData.infantPrice > tourData.adultPrice && tourData.adultPrice)){
-      newErrors.infantPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
-    }
-
+    // Registration Date validation
     if (!tourData.registerOpenDate) {
       newErrors.registerOpenDate = "Vui lòng chọn ngày mở đăng ký";
+    } else if (dayjs(tourData.registerOpenDate).isBefore(dayjs(), 'day')) {
+      newErrors.registerOpenDate = "Ngày mở đăng ký phải sau ngày hiện tại";
     }
 
     if (!tourData.registerCloseDate) {
       newErrors.registerCloseDate = "Vui lòng chọn ngày đóng đăng ký";
     }
 
-    if (!tourData.depositPercent) {
-      newErrors.depositPercent = "Vui lòng nhập phần trăm đặt cọc";
-    } else {
-      const depositPercent = Number(tourData.depositPercent);
-      if (isNaN(depositPercent)) {
-        newErrors.depositPercent = "Phần trăm đặt cọc phải từ 0 đến 100";
-      }
-    }
-
-    // Additional validations
+    // Date sequence validation
     if (tourData.registerOpenDate && tourData.startDate) {
       if (dayjs(tourData.registerOpenDate).isAfter(tourData.startDate)) {
         newErrors.registerOpenDate = "Ngày mở đăng ký phải trước ngày khởi hành";
@@ -268,6 +238,7 @@ const CreateTour = () => {
       }
     }
 
+    // Payment deadline validation
     if (!tourData.paymentDeadline) {
       newErrors.paymentDeadline = "Vui lòng chọn thời hạn thanh toán";
     } else if (tourData.paymentDeadline) {
@@ -278,20 +249,54 @@ const CreateTour = () => {
       }
     }
 
-    // Add refund policy validation
-    tourData.refundPolicies.forEach((policy, index) => {
-      if (!policy.cancelBefore) {
-        newErrors[`policy${index}CancelBefore`] = "Vui lòng chọn ngày hủy";
+    // Participant validation
+    if (!tourData.maxParticipants) {
+      newErrors.maxParticipants = "Vui lòng nhập số khách tối đa";
+    } else if (Number(tourData.maxParticipants) <= 0) {
+      newErrors.maxParticipants = "Số khách tối đa phải lớn hơn 0";
+    }
+
+    if (!tourData.minParticipants) {
+      newErrors.minParticipants = "Vui lòng nhập số khách tối thiểu";
+    } else if (Number(tourData.minParticipants) <= 0) {
+      newErrors.minParticipants = "Số khách tối thiểu phải lớn hơn 0";
+    }
+
+    if (tourData.minParticipants && tourData.maxParticipants) {
+      if (Number(tourData.minParticipants) > Number(tourData.maxParticipants)) {
+        newErrors.minParticipants = "Số khách tối thiểu không được lớn hơn số khách tối đa";
       }
-      if (!policy.refundRate) {
-        newErrors[`policy${index}RefundRate`] = "Vui lòng nhập tỷ lệ hoàn tiền";
-      } else {
-        const rate = Number(policy.refundRate);
-        if (isNaN(rate)) {
-          newErrors[`policy${index}RefundRate`] = "Tỷ lệ hoàn tiền phải từ 0 đến 100";
-        }
+    }
+
+    // Price validation
+    if (!tourData.adultPrice) {
+      newErrors.adultPrice = "Vui lòng nhập giá người lớn";
+    } else if (!validatePrice(tourData.adultPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
+      newErrors.adultPrice = `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`;
+    }
+
+    if (!tourData.childPrice) {
+      newErrors.childPrice = "Vui lòng nhập giá trẻ em";
+    } else if (tourData.childPrice === '0' || (tourData.childPrice > tourData.adultPrice && tourData.adultPrice)) {
+      newErrors.childPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
+    }
+
+    if (!tourData.infantPrice) {
+      newErrors.infantPrice = "Vui lòng nhập giá em bé";
+    } else if (tourData.infantPrice === '0' || (tourData.infantPrice > tourData.adultPrice && tourData.adultPrice)) {
+      newErrors.infantPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
+    }
+
+    // Deposit validation
+    if (!tourData.depositPercent) {
+      newErrors.depositPercent = "Vui lòng nhập phần trăm đặt cọc";
+    } else {
+      const depositPercent = Number(tourData.depositPercent);
+      if (isNaN(depositPercent) || depositPercent < 0 || depositPercent > 100) {
+        newErrors.depositPercent = "Phần trăm đặt cọc phải từ 0 đến 100";
       }
-    });
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -649,7 +654,7 @@ const CreateTour = () => {
                 </LocalizationProvider>
               </Box>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn ti��n</Typography>
                 {tourData.refundPolicies.map((policy, index) => (
                   <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
