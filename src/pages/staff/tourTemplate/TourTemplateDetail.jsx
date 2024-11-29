@@ -3,7 +3,7 @@ import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActi
 import { Edit as EditIcon, Delete as DeleteIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, updateTourTemplate } from '@services/TourTemplateService';
+import { fetchTourTemplateById, updateTourTemplate, deleteTourTemplate } from '@services/TourTemplateService';
 import TourTemplateInfo from '@components/staff/tourTemplate/TourTemplateInfo';
 import TourTemplateUpdateForm from '@components/staff/tourTemplate/TourTemplateUpdateForm';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -94,12 +94,22 @@ const TourTemplateDetails = () => {
   };
 
   const handleDeleteConfirm = async (templateId) => {
-    /* try {
-      await deleteTourTemplate(templateId);
-      navigate('/nhan-vien/tour-mau');
+    try {
+      const response = await deleteTourTemplate(templateId);
+      if (response.statusCode === 200) {
+        alert('Xóa tour mẫu thành công');
+        navigate('/nhan-vien/tour-mau');
+      } else {
+        alert('Có lỗi xảy ra khi xóa tour mẫu');
+      }
     } catch (error) {
       console.error('Error deleting tour template:', error);
-    } */
+      if (error.response?.status === 400) {
+        alert('Không thể xóa tour mẫu này vì đã có tour được tạo từ mẫu');
+      } else {
+        alert('Có lỗi xảy ra khi xóa tour mẫu');
+      }
+    }
   };
 
   const handleCloseDeletePopup = () => {

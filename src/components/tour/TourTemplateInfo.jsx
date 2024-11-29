@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Paper, IconButton, Collapse, CircularProgress} from '@mui/material';
+import { Box, Typography, Paper, IconButton, Collapse, CircularProgress } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
@@ -28,8 +28,8 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
     }
 
     return (
-        <Paper elevation={2} sx={{ p: 2, mb: 2, ml: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main', textAlign: 'center', mb: 2 }}>
+        <Paper elevation={2} sx={{ pl: 5, pr: 5, pt: 2, pb: 3, mb: 2, ml: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.secondary', textAlign: 'center', mb: 2 }}>
                 Thông tin tour mẫu
             </Typography>
 
@@ -47,6 +47,9 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
                     <strong>Điểm đến:</strong> {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
                 </Typography>
                 <Typography gutterBottom>
+                    <strong>Khởi hành:</strong> {tourTemplate.startingProvince?.provinceName}
+                </Typography>
+                <Typography gutterBottom>
                     <strong>Thời lượng:</strong> {tourTemplate.duration.durationName}
                 </Typography>
             </Box>
@@ -55,7 +58,10 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
                 <Box sx={{ mt: 2 }}>
                     <Typography sx={{ fontWeight: 700, mb: 1 }}>Tổng quan:</Typography>
                     <Typography paragraph sx={{ textAlign: 'justify' }}>
-                        {tourTemplate.description}
+                        <Box dangerouslySetInnerHTML={{ __html: tourTemplate.description }} sx={{
+                            '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                            '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                        }} />
                     </Typography>
 
                     <Typography sx={{ fontWeight: 700, mt: 2, mb: 1 }}>Lịch trình:</Typography>
