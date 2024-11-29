@@ -132,7 +132,9 @@ export const fetchTourById = async (id) => {
                 price: price.price,
                 ageFrom: price.ageFrom,
                 ageTo: price.ageTo
-            }))
+            })),
+            depositPercent: item.depositPercent,
+            paymentDeadline: new Date(item.paymentDeadline),
         };
         return tour;
     } catch (error) {
@@ -192,6 +194,7 @@ export const createTour = async (tourData) => {
         const formattedData = {
             tourTemplateId: tourData.tourTemplateId,
             startLocation: tourData.startAddress,
+            startLocationPlaceId: tourData.startLocationPlaceId,
             startDate: startDateTime,
             defaultTouristPrice: parseFloat(tourData.adultPrice),
             registerOpenDate: dayjs(tourData.registerOpenDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
@@ -199,13 +202,16 @@ export const createTour = async (tourData) => {
             maxParticipant: parseInt(tourData.maxParticipants),
             minParticipant: parseInt(tourData.minParticipants),
             currentParticipant: 0,
-            createdAt: dayjs().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-            tourPrices: tourData.tourPrices,
+            tourPrice: tourData.tourPrices,
+            depositPercent: tourData.depositPercent,
             refundPolicies: tourData.refundPolicies.map(policy => ({
                 cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
                 refundPercent: Number(policy.refundRate)
-            }))
+            })),
+            paymentDeadline: tourData.paymentDeadline,
         };
+
+        console.log(formattedData);
 
         const response = await axios.post(`${baseURL}/api/tours`, formattedData,
             {
@@ -261,7 +267,9 @@ export const updateTour = async (tourId, tourData) => {
             refundPolicies: tourData.refundPolicies.map(policy => ({
                 cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
                 refundPercent: Number(policy.refundRate)
-            }))
+            })),
+            depositPercent: tourData.depositPercent,
+            paymentDeadline: tourData.paymentDeadline,
         };
 
         const response = await axios.put(`${baseURL}/api/tours/edit-tour/${tourId}`, formattedData,
