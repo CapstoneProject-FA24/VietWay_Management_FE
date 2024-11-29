@@ -37,7 +37,7 @@ const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
   const [tourTemplate, setTourTemplate] = useState({
     tourName: '', provinces: [], duration: '', departurePoint: '', tourCategory: '',
-    description: '', note: '', imageUrls: [null, null, null, null],
+    description: '', note: '', imageUrls: Array(4).fill(null),
     schedule: [{ dayNumber: 1, title: '', description: '', attractions: [], isEditing: true }], code: '',
     minPrice: '', maxPrice: '', startingProvinceId: '', transportation: ''
   });
@@ -50,11 +50,11 @@ const CreateTourTemplate = () => {
     note: { value: '' },
     provinces: { value: [] },
     duration: { value: '' },
-    departurePoint: { value: '' },
     tourCategory: { value: '' },
     code: { value: '' },
     minPrice: { value: '' },
     maxPrice: { value: '' },
+    startingProvinceId: { value: '' },
     transportation: { value: '' }
   });
 
@@ -101,24 +101,52 @@ const CreateTourTemplate = () => {
     return Math.ceil(price / 1000) * 1000;
   };
 
+  useEffect(() => {
+    if (editableFields.duration.value) {
+      const selectedDuration = tourDurations.find(d => d.durationId === editableFields.duration.value);
+      if (selectedDuration) {
+        const numberOfDays = selectedDuration.dayNumber;
+        const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
+          const existingDay = tourTemplate.schedule.find(s => s.dayNumber === (index + 1));
+          if (existingDay) {
+            return existingDay;
+          }
+          return {
+            dayNumber: index + 1,
+            title: '',
+            description: '',
+            attractions: [],
+            isEditing: true
+          };
+        });
+        setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
+      }
+    }
+  }, [editableFields.duration.value, tourDurations]);
+
   const handleFieldChange = (field, value) => {
     setEditableFields(prev => ({
       ...prev,
       [field]: { value }
     }));
-    setTourTemplate(prev => ({ ...prev, [field]: value }));
 
     if (field === 'duration') {
       const selectedDuration = tourDurations.find(d => d.durationId === value);
       if (selectedDuration) {
-        const numberOfDays = selectedDuration.numberOfDays;
-        const newSchedule = Array.from({ length: numberOfDays }, (_, index) => ({
-          dayNumber: index + 1,
-          title: '',
-          description: '',
-          attractions: [],
-          isEditing: true
-        }));
+        const numberOfDays = selectedDuration.dayNumber;
+        const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
+          const existingDay = tourTemplate.schedule.find(s => s.dayNumber === (index + 1));
+          if (existingDay) {
+            return existingDay;
+          }
+          return {
+            dayNumber: index + 1,
+            title: '',
+            description: '',
+            attractions: [],
+            isEditing: true
+          };
+        });
         setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
       }
     }
@@ -145,19 +173,6 @@ const CreateTourTemplate = () => {
 
   const handleDayClick = (day) => {
     setExpandedDay(expandedDay === day ? null : day);
-  };
-
-  const handleAddDay = () => {
-    const newDay = tourTemplate.schedule.length + 1;
-    setTourTemplate(prev => ({ ...prev, schedule: [...prev.schedule, { dayNumber: newDay, title: '', description: '', attractions: [], isEditing: true }] }));
-    setExpandedDay(newDay);
-  };
-
-  const handleRemoveDay = (day) => {
-    if (tourTemplate.schedule.length > 1) {
-      setTourTemplate(prev => ({ ...prev, schedule: prev.schedule.filter(s => s.dayNumber !== day).map((s, index) => ({ ...s, Day: index + 1 })) }));
-      setExpandedDay(null);
-    }
   };
 
   const handleScheduleChange = (day, field, value) => {
@@ -231,29 +246,29 @@ const CreateTourTemplate = () => {
 
   const handleSubmit = async (isDraft) => {
     try {
-      if (!validatePrice(editableFields.minPrice.value, editableFields.maxPrice.value)) {
+      if (!validatePrice(editableFields.minPrice?.value || '', editableFields.maxPrice?.value || '')) {
         return;
       }
 
       const tourTemplateData = {
-        code: editableFields.code.value,
-        tourName: editableFields.tourName.value,
-        description: editableFields.description.value,
-        durationId: editableFields.duration.value,
-        tourCategoryId: editableFields.tourCategory.value,
-        transportation: editableFields.transportation.value,
-        note: editableFields.note.value,
-        provinceIds: editableFields.provinces.value.map(province => province.value),
-        startingProvinceId: editableFields.startingProvinceId.value,
-        schedules: tourTemplate.schedule.map(s => ({
+        code: editableFields.code?.value || '',
+        tourName: editableFields.tourName?.value || '',
+        description: editableFields.description?.value || '',
+        durationId: editableFields.duration?.value || null,
+        tourCategoryId: editableFields.tourCategory?.value || null,
+        transportation: editableFields.transportation?.value || '',
+        note: editableFields.note?.value || '',
+        provinceIds: editableFields.provinces?.value?.map(province => province.value) || [],
+        startingProvinceId: editableFields.startingProvinceId?.value || null,
+        schedules: tourTemplate.schedule?.map(s => ({
           dayNumber: s.dayNumber,
-          title: s.title,
-          description: s.description,
-          attractionIds: s.attractions.map(attr => attr.attractionId)
-        })),
+          title: s.title || '',
+          description: s.description || '',
+          attractionIds: s.attractions?.map(attr => attr.attractionId) || []
+        })) || [],
         isDraft: isDraft,
-        minPrice: roundToThousand(parseFloat(editableFields.minPrice.value)) || null,
-        maxPrice: roundToThousand(parseFloat(editableFields.maxPrice.value)) || null
+        minPrice: roundToThousand(parseFloat(editableFields.minPrice?.value || '0')) || null,
+        maxPrice: roundToThousand(parseFloat(editableFields.maxPrice?.value || '0')) || null
       };
 
       if (!isDraft) {
@@ -272,7 +287,7 @@ const CreateTourTemplate = () => {
 
         // Check provinces
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
-          alert('Vui lòng chọn ít nhất một tỉnh thành.');
+          alert('Vui lòng chọn ít nhất một t��nh thành.');
           return;
         }
 
@@ -562,7 +577,7 @@ const CreateTourTemplate = () => {
                     onChange={(value) => handleFieldChange('description', value)}
                     modules={quillModules}
                     theme="snow"
-                    style={{ height: '200px', marginBottom: '50px' }} />
+                    style={{ height: '200px', marginBottom: '100px' }} />
                 </Box>
                 <Box sx={{ mb: 5 }}>
                   <Typography variant="h5" gutterBottom
