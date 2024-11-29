@@ -13,7 +13,10 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%' }}>
       <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
-        {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
+        Tour đi: <strong>{tourTemplate.provinces.map(province => province.provinceName).join(' - ')}</strong>
+      </Typography>
+      <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
+        Khởi hành từ: <strong>{tourTemplate.startingProvince.provinceName}</strong>
       </Typography>
       <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
         {tourTemplate.tourName}
@@ -42,14 +45,19 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
         <Grid item xs={12} md={8}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+              {/* <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
               <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+              {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
               <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+              {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
+              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
+              <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
             </Box>
           </Box>
 
@@ -160,10 +168,6 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
               <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px', color: '#3572EF' }} />
-              <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.creatorName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, TextField, InputAdornment, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, TextField, InputAdornment, Snackbar, Alert, Collapse } from '@mui/material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -16,6 +16,9 @@ import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { Helmet } from 'react-helmet';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import Map from '@components/staff/attraction/Map';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -45,6 +48,8 @@ const CreateTour = () => {
   ]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [errors, setErrors] = useState({});
+  const [isMapPopupOpen, setIsMapPopupOpen] = useState(false);
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -342,6 +347,11 @@ const CreateTour = () => {
     }
   };
 
+  const handleSelectLocation = (placeId, address) => {
+    handleNewTourChange('startAddress', address);
+    handleNewTourChange('placeId', placeId); // Assuming you have a placeId field
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
       <Helmet>
@@ -353,16 +363,37 @@ const CreateTour = () => {
           <Grid item xs={12} md={12} sx={{ ml: 3 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Button startIcon={<ArrowBackIcon />} sx={{ width: 'fit-content' }} onClick={() => navigate('/nhan-vien/tour-du-lich/tour-mau-duoc-duyet')}>Quay lại</Button>
-              <Typography variant="h4" sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', alignSelf: 'center', marginBottom: '1rem' }}>Tạo tour mới</Typography>
+              <Typography variant="h4" sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'text.secondary', alignSelf: 'center', marginBottom: '1rem' }}>Tạo tour mới</Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} md={8.5}>
+          <Grid item xs={12} md={12}>
             <TourTemplateInfo tourTemplate={tourTemplate} isLoading={isLoading} />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TourCalendar tourId={null} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
-            </Box>
           </Grid>
-          <Grid item xs={12} md={3.5}>
+          <Grid item xs={12} md={12}>
+            <Paper elevation={2} sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.secondary', textAlign: 'center', width: '90%', pl: 15 }}>
+                  Lịch tour
+                </Typography>
+                <Button
+                  onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                  endIcon={isCalendarExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                >
+                  {isCalendarExpanded ? 'Thu gọn' : 'Xem thêm'}
+                </Button>
+              </Box>
+
+              <Collapse in={isCalendarExpanded}>
+                <TourCalendar
+                  tourId={null}
+                  tours={tours}
+                  selectedMonth={selectedMonth}
+                  handleMonthChange={handleMonthChange}
+                />
+              </Collapse>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={12}>
             <Paper elevation={2} sx={{ p: 2 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
                 Thông tin tour
@@ -380,6 +411,23 @@ const CreateTour = () => {
                   sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ style: { height: '15px' } }}
                 />
+                {/* <TextField
+                  label="Place Id của điểm bắt đầu"
+                  fullWidth
+                  variant="outlined"
+                  value={newTourData.startAddress}
+                  onChange={(e) => handleNewTourChange('startAddress', e.target.value)}
+                  error={!!errors.startAddress}
+                  helperText={errors.startAddress}
+                  sx={{ mb: 2, mt: 1.5 }}
+                  inputProps={{ style: { height: '15px' } }}
+                />
+                <Box sx={{
+                  height: '500px', width: '100%', position: 'relative', mb: 3,
+                  overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
+                }}>
+                  <Map />
+                </Box> */}
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Box sx={{ mb: 2 }}>
                     <DatePicker
@@ -556,7 +604,7 @@ const CreateTour = () => {
               <Box sx={{ mt: 3 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
                 {refundPolicies.map((policy, index) => (
-                  <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }} >
+                  <Box key={index} sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }} >
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
                         label="Hủy trước ngày"
@@ -568,8 +616,8 @@ const CreateTour = () => {
                         slotProps={{
                           textField: {
                             fullWidth: false,
-                            sx: { width: '50%' },
-                            inputProps: { style: { height: '15px' } },
+                            sx: { width: '55%' },
+                            inputProps: { style: { height: '22px' } },
                             error: policy.cancelBefore && (
                               dayjs(policy.cancelBefore).isBefore(dayjs(newTourData.registerOpenDate)) ||
                               dayjs(policy.cancelBefore).isAfter(dayjs(newTourData.startDate))
@@ -585,7 +633,7 @@ const CreateTour = () => {
                       />
                     </LocalizationProvider>
                     <TextField
-                      label="Tỷ lệ hoàn tiền (%)" type="number" sx={{ width: '30%' }} value={policy.refundRate}
+                      label="Tỷ lệ hoàn" type="number" sx={{ width: '40%' }} value={policy.refundRate}
                       onChange={(e) => {
                         const value = Math.min(Math.max(0, Number(e.target.value)), 100);
                         handlePolicyChange(index, 'refundRate', value);
