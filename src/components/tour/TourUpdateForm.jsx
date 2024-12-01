@@ -471,8 +471,12 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
         <TextField
-          fullWidth type="number" label="Người lớn (trên 12 tuổi)" variant="outlined"
-          value={tourData.defaultTouristPrice} onChange={handlePriceChange}
+          fullWidth
+          type="number"
+          label="Người lớn (từ 12 tuổi trở lên)"
+          variant="outlined"
+          value={tourData.defaultTouristPrice}
+          onChange={handlePriceChange}
           onBlur={(e) => {
             if (e.target.value) {
               const roundedPrice = roundToThousand(Number(e.target.value));
@@ -496,8 +500,13 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
         />
         {tourData.tourPrices.map((price, index) => (
           <TextField
-            key={index} fullWidth type="number" label={`${price.name} (${price.ageFrom}-${price.ageTo} tuổi)`}
-            variant="outlined" value={price.price} sx={{ mb: 2 }}
+            key={index}
+            fullWidth
+            type="number"
+            label={index === 0 ? "Trẻ em (từ 5-11 tuổi)" : "Em bé (dưới 5 tuổi)"}
+            variant="outlined"
+            value={price.price}
+            sx={{ mb: 2 }}
             onChange={(e) => handlePriceTypeChange(index, e.target.value)}
             inputProps={{ min: 0, style: { height: '15px' } }}
             InputProps={{ endAdornment: <InputAdornment position="end">VND</InputAdornment> }}

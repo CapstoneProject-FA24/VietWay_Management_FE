@@ -342,7 +342,7 @@ const CreateTour = () => {
           name: "Trẻ em",
           price: Number(tourData.childPrice),
           ageFrom: 5,
-          ageTo: 12
+          ageTo: 11
         },
         {
           name: "Em bé",
@@ -578,7 +578,7 @@ const CreateTour = () => {
                 <TextField
                   fullWidth
                   type="number"
-                  label="Người lớn (trên 12 tuổi)"
+                  label="Người lớn (từ 12 tuổi trở lên)"
                   variant="outlined"
                   value={tourData.adultPrice}
                   onChange={handlePriceChange}
@@ -599,7 +599,7 @@ const CreateTour = () => {
                 <TextField
                   fullWidth
                   type="number"
-                  label="Trẻ em (5-12 tuổi)"
+                  label="Trẻ em (từ 5-11 tuổi)"
                   variant="outlined"
                   value={tourData.childPrice}
                   onChange={(e) => handleNewTourChange('childPrice', e.target.value)}
