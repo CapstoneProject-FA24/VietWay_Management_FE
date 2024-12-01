@@ -25,7 +25,6 @@ dayjs.extend(isSameOrBefore);
 
 const DATE_FORMAT = "DD/MM/YYYY";
 
-// Add this function to round price to nearest thousand
 const roundToThousand = (price) => {
   return Math.round(price / 1000) * 1000;
 };
@@ -654,7 +653,7 @@ const CreateTour = () => {
                 </LocalizationProvider>
               </Box>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn ti��n</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
                 {tourData.refundPolicies.map((policy, index) => (
                   <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>

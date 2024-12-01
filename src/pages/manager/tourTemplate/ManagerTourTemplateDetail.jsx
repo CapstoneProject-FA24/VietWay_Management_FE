@@ -294,7 +294,14 @@ const ManagerTourTemplateDetails = () => {
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-              <Typography paragraph sx={{ textAlign: 'justify', color: '#05073C' }}>{tourTemplate.description}</Typography>
+              <Box 
+                dangerouslySetInnerHTML={{ __html: tourTemplate.description }} 
+                sx={{
+                  '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                  '& p': { lineHeight: 1.7, mb: 2, color: '#05073C', textAlign: 'justify' },
+                  flexGrow: 1, width: '100%', margin: '0 auto'
+                }} 
+              />
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3 }}>Lịch trình</Typography>

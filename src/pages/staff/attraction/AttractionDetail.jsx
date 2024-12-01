@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Collapse } from '@mui/material';
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
@@ -206,22 +206,24 @@ const AttractionDetail = () => {
                     </IconButton>
 
                     {/* Version History Dropdown */}
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: '100%',
-                        right: 0,
-                        width: '400px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        borderRadius: '4px',
-                        display: isHistoryOpen ? 'block' : 'none',
-                        zIndex: 1000,
-                        marginTop: '8px'
-                      }}
-                    >
-                      <VersionHistory />
-                    </Box>
+                    <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit>
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          width: '400px',
+                          backgroundColor: 'white',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                          borderRadius: '4px',
+                          display: isHistoryOpen ? 'block' : 'none',
+                          zIndex: 1000,
+                          marginTop: '8px'
+                        }}
+                      >
+                        <VersionHistory />
+                      </Box>
+                    </Collapse>
 
                     {isEditing ? (
                       <Button
