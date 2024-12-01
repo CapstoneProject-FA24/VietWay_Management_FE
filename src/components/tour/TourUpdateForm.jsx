@@ -8,43 +8,49 @@ import { updateTour } from '@services/TourService';
 import { InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
-const validateRefundPolicies = (tourPolicies, registerOpenDate, startDate) => {
-  if (tourPolicies.length === 0) {
+const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
+  if (policies.length === 0) {
     return { isValid: false, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền' };
   }
 
-  const sortedPolicies = [...tourPolicies];
+  const errors = {};
   
-  // Check each policy individually and return index-specific errors
-  for (let i = 0; i < sortedPolicies.length; i++) {
-    const policy = sortedPolicies[i];
-    if (!policy.cancelBefore || policy.refundPercent === '') {
-      return { 
-        isValid: false, 
-        index: i,
-        message: 'Vui lòng điền đầy đủ thông tin cho chính sách hoàn tiền' 
-      };
-    }
+  for (let i = 0; i < policies.length; i++) {
+    const policy = policies[i];
     
-    if (Number(policy.refundPercent) < 0 || Number(policy.refundPercent) > 100) {
-      return { 
-        isValid: false, 
-        index: i,
-        message: 'Tỷ lệ hoàn tiền phải từ 0 đến 100%' 
-      };
+    // Separate validation for cancelBefore
+    if (!policy.cancelBefore) {
+      errors[`policy${i}Date`] = 'Vui lòng nhập ngày hủy tour';
+    } else if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
+               !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
+      errors[`policy${i}Date`] = 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành';
     }
 
-    if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
-        !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
-      return {
-        isValid: false,
-        index: i,
-        message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành'
-      };
+    // Separate validation for refundRate
+    if (policy.refundPercent === '') {
+      errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
+    } else if (Number(policy.refundPercent) < 0 || Number(policy.refundPercent) > 100) {
+      errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 100%';
+    } else if (paymentDeadline && Number(depositPercent) < 100) {
+      const refundPercent = Number(policy.refundPercent);
+      const deposit = Number(depositPercent);
+
+      if (dayjs(policy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
+        if (refundPercent > deposit) {
+          errors[`policy${i}Rate`] = `Trước hạn thanh toán, tỷ lệ hoàn tiền không được vượt quá tỷ lệ đặt cọc (${deposit}%)`;
+        }
+      } else {
+        if (refundPercent <= deposit) {
+          errors[`policy${i}Rate`] = `Sau hạn thanh toán, tỷ lệ hoàn tiền phải lớn hơn tỷ lệ đặt cọc (${deposit}%)`;
+        }
+      }
     }
   }
   
-  return { isValid: true };
+  return { 
+    isValid: Object.keys(errors).length === 0,
+    errors: errors
+  };
 };
 
 const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
@@ -141,7 +147,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
     }
   };
 
-  // Update validateForm to include comprehensive price validation
+  // Update validateForm function
   const validateForm = () => {
     const newErrors = {};
 
@@ -167,7 +173,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
     const childPrice = Number(tourData.tourPrices[0].price);
     const infantPrice = Number(tourData.tourPrices[1].price);
 
-    if (!tourData.tourPrices[0].price) {
+    if (!childPrice) {
       newErrors.childPrice = "Vui lòng nhập giá trẻ em";
     } else if (childPrice <= 0) {
       newErrors.childPrice = "Giá trẻ em phải lớn hơn 0";
@@ -175,11 +181,12 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
       newErrors.childPrice = "Giá trẻ em phải thấp hơn giá người lớn";
     } 
 
-    if (!tourData.tourPrices[1].price) {
+    if (!infantPrice) {
       newErrors.infantPrice = "Vui lòng nhập giá em bé";
     } else if (infantPrice <= 0) {
       newErrors.infantPrice = "Giá em bé phải lớn hơn 0";
     } else if (infantPrice >= childPrice) {
+      console.log(infantPrice);
       newErrors.infantPrice = "Giá em bé phải thấp hơn giá trẻ em";
     }
 
@@ -198,15 +205,37 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
 
     if (!tourData.depositPercent) {
       newErrors.depositPercent = "Vui lòng nhập phần trăm đặt cọc";
-    } else if (Number(tourData.depositPercent) < 0 || Number(tourData.depositPercent) > 100) {
-      newErrors.depositPercent = "Phần trăm đặt cọc phải từ 0 đến 100%";
+    } else {
+      const depositPercent = Number(tourData.depositPercent);
+      if (isNaN(depositPercent) || depositPercent < 30 || depositPercent > 100) {
+        newErrors.depositPercent = "Phần trăm đặt cọc phải từ 30% đến 100%";
+      }
     }
 
-    if (!tourData.paymentDeadline) {
-      newErrors.paymentDeadline = "Vui lòng chọn thời hạn thanh toán";
-    } else if (dayjs(tourData.paymentDeadline).isBefore(tourData.registerOpenDate) || 
-               dayjs(tourData.paymentDeadline).isAfter(tourData.startDate)) {
-      newErrors.paymentDeadline = "Thời hạn thanh toán phải sau ngày mở đăng ký và trước ngày khởi hành";
+    if (Number(tourData.depositPercent) < 100) {
+      if (!tourData.paymentDeadline) {
+        newErrors.paymentDeadline = "Vui lòng chọn thời hạn thanh toán";
+      } else if (tourData.paymentDeadline) {
+        if (dayjs(tourData.paymentDeadline).isAfter(tourData.startDate)) {
+          newErrors.paymentDeadline = "Thời hạn thanh toán phải trước ngày khởi hành";
+        } else if (tourData.registerOpenDate && dayjs(tourData.paymentDeadline).isBefore(tourData.registerOpenDate)) {
+          newErrors.paymentDeadline = "Thời hạn thanh toán phải sau ngày mở đăng ký";
+        }
+      }
+    }
+
+    // Add refund policy validation
+    const policyValidation = validateRefundPolicies(
+      tourData.tourPolicies,
+      tourData.registerOpenDate,
+      tourData.startDate,
+      tourData.paymentDeadline,
+      tourData.depositPercent
+    );
+
+    if (!policyValidation.isValid) {
+      // Merge policy errors with other form errors
+      Object.assign(newErrors, policyValidation.errors);
     }
 
     setErrors(newErrors);
@@ -248,7 +277,9 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
     const policyValidation = validateRefundPolicies(
       tourData.tourPolicies,
       tourData.registerOpenDate,
-      tourData.startDate
+      tourData.startDate,
+      tourData.paymentDeadline,
+      tourData.depositPercent
     );
 
     if (!policyValidation.isValid) {
@@ -484,34 +515,38 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
           sx={{ width: '100%', mt: 1.5, mb: 2 }}
           value={tourData.depositPercent}
           onChange={(e) => {
-            const value = Math.min(Math.max(0, Number(e.target.value)), 100);
-            setTourData(prev => ({ ...prev, depositPercent: value.toString() }));
+            setTourData(prev => ({
+              ...prev,
+              depositPercent: e.target.value,
+              paymentDeadline: Number(e.target.value) === 100 ? null : prev.paymentDeadline
+            }));
           }}
           error={!!errors.depositPercent}
           helperText={errors.depositPercent || "Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc"}
           InputProps={{
-            endAdornment: <InputAdornment position="end">%</InputAdornment>,
-            inputProps: { min: 0, max: 100 }
+            endAdornment: <InputAdornment position="end">%</InputAdornment>
           }}
         />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Thời hạn thanh toán"
-            value={tourData.paymentDeadline}
-            onChange={(value) => setTourData(prev => ({ ...prev, paymentDeadline: value }))}
-            format="DD/MM/YYYY"
-            minDate={tourData.registerOpenDate}
-            maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                error: !!errors.paymentDeadline,
-                helperText: errors.paymentDeadline || "Phải thanh toán toàn bộ trước khi đặt tour",
-                inputProps: { style: { height: '15px' } }
-              }
-            }}
-          />
-        </LocalizationProvider>
+        {Number(tourData.depositPercent) < 100 && (
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Thời hạn thanh toán"
+              value={tourData.paymentDeadline}
+              onChange={(value) => setTourData(prev => ({ ...prev, paymentDeadline: value }))}
+              format="DD/MM/YYYY"
+              minDate={tourData.registerOpenDate}
+              maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  error: !!errors.paymentDeadline,
+                  helperText: errors.paymentDeadline || "Phải thanh toán toàn bộ trước khi đặt tour",
+                  inputProps: { style: { height: '15px' } }
+                }
+              }}
+            />
+          </LocalizationProvider>
+        )}
       </Box>
 
       <Box sx={{ mt: 3 }}>
@@ -529,8 +564,8 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    error: !!policyErrors[index],
-                    helperText: policyErrors[index]
+                    error: !!errors[`policy${index}Date`],
+                    helperText: errors[`policy${index}Date`]
                   }
                 }}
               />
@@ -540,8 +575,8 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice }) => {
               type="number"
               value={policy.refundPercent}
               onChange={(e) => handlePolicyChange(index, 'refundPercent', e.target.value)}
-              error={!!policyErrors[index]}
-              helperText={policyErrors[index]}
+              error={!!errors[`policy${index}Rate`]}
+              helperText={errors[`policy${index}Rate`]}
               fullWidth
               inputProps={{ min: 0, max: 100 }}
             />

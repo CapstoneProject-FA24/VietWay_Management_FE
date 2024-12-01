@@ -34,29 +34,21 @@ const ManageBooking = () => {
       label: getBookingStatusInfo(BookingStatus.Pending).text,
       color: getBookingStatusInfo(BookingStatus.Pending).color
     },
-    [BookingStatus.Confirmed]: {
-      label: getBookingStatusInfo(BookingStatus.Confirmed).text,
-      color: getBookingStatusInfo(BookingStatus.Confirmed).color
+    [BookingStatus.Deposited]: {
+      label: getBookingStatusInfo(BookingStatus.Deposited).text,
+      color: getBookingStatusInfo(BookingStatus.Deposited).color
+    },
+    [BookingStatus.Paid]: {
+      label: getBookingStatusInfo(BookingStatus.Paid).text,
+      color: getBookingStatusInfo(BookingStatus.Paid).color
     },
     [BookingStatus.Completed]: {
       label: getBookingStatusInfo(BookingStatus.Completed).text,
       color: getBookingStatusInfo(BookingStatus.Completed).color
     },
-    [BookingStatus.Expired]: {
-      label: getBookingStatusInfo(BookingStatus.Expired).text,
-      color: getBookingStatusInfo(BookingStatus.Expired).color
-    },
     [BookingStatus.Cancelled]: {
       label: getBookingStatusInfo(BookingStatus.Cancelled).text,
       color: getBookingStatusInfo(BookingStatus.Cancelled).color
-    },
-    [BookingStatus.PendingRefund]: {
-      label: getBookingStatusInfo(BookingStatus.PendingRefund).text,
-      color: getBookingStatusInfo(BookingStatus.PendingRefund).color
-    },
-    [BookingStatus.Refunded]: {
-      label: getBookingStatusInfo(BookingStatus.Refunded).text,
-      color: getBookingStatusInfo(BookingStatus.Refunded).color
     }
   };
 
@@ -254,8 +246,12 @@ const ManageBooking = () => {
                 value={BookingStatus.Pending.toString()} 
               />
               <Tab 
-                label={statusDisplay[BookingStatus.Confirmed].label} 
-                value={BookingStatus.Confirmed.toString()} 
+                label={statusDisplay[BookingStatus.Deposited].label} 
+                value={BookingStatus.Deposited.toString()} 
+              />
+              <Tab 
+                label={statusDisplay[BookingStatus.Paid].label} 
+                value={BookingStatus.Paid.toString()} 
               />
               <Tab 
                 label={statusDisplay[BookingStatus.Completed].label} 
@@ -264,14 +260,6 @@ const ManageBooking = () => {
               <Tab 
                 label={statusDisplay[BookingStatus.Cancelled].label} 
                 value={BookingStatus.Cancelled.toString()} 
-              />
-              <Tab 
-                label={statusDisplay[BookingStatus.PendingRefund].label} 
-                value={BookingStatus.PendingRefund.toString()} 
-              />
-              <Tab 
-                label={statusDisplay[BookingStatus.Refunded].label} 
-                value={BookingStatus.Refunded.toString()} 
               />
             </Tabs>
           </Grid>

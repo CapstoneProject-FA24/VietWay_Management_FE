@@ -153,41 +153,49 @@ const CreateTour = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const validateRefundPolicies = () => {
-    if (tourData.refundPolicies.length === 0) {
-      setSnackbar({ open: true, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền', severity: 'error' });
-      return false;
+  const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
+    if (policies.length === 0) {
+      return { isValid: false, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền' };
     }
 
-    const sortedPolicies = [...tourData.refundPolicies].sort((a, b) =>
-      dayjs(b.cancelBefore).valueOf() - dayjs(a.cancelBefore).valueOf()
-    );
+    const errors = {};
+    
+    for (let i = 0; i < policies.length; i++) {
+      const policy = policies[i];
+      
+      // Separate validation for cancelBefore
+      if (!policy.cancelBefore) {
+        errors[`policy${i}Date`] = 'Vui lòng nhập ngày hủy tour';
+      } else if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
+                 !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
+        errors[`policy${i}Date`] = 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành';
+      }
 
-    const isValidData = sortedPolicies.every(policy =>
-      policy.cancelBefore &&
-      policy.refundRate !== '' &&
-      Number(policy.refundRate) >= 0 &&
-      Number(policy.refundRate) <= 100
-    );
-    if (!isValidData) {
-      setSnackbar({ open: true, message: 'Vui lòng điền đầy đủ thông tin cho tất cả các chính sách hoàn tiền', severity: 'error' });
-      return false;
+      // Separate validation for refundRate
+      if (policy.refundRate === '') {
+        errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
+      } else if (Number(policy.refundRate) < 0 || Number(policy.refundRate) > 100) {
+        errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 100%';
+      } else if (paymentDeadline && Number(depositPercent) < 100) {
+        const refundPercent = Number(policy.refundRate);
+        const deposit = Number(depositPercent);
+
+        if (dayjs(policy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
+          if (refundPercent > deposit) {
+            errors[`policy${i}Rate`] = `Trước hạn thanh toán, tỷ lệ hoàn tiền không được vượt quá tỷ lệ đặt cọc (${deposit}%)`;
+          }
+        } else {
+          if (refundPercent <= deposit) {
+            errors[`policy${i}Rate`] = `Sau hạn thanh toán, tỷ lệ hoàn tiền phải lớn hơn tỷ lệ đặt cọc (${deposit}%)`;
+          }
+        }
+      }
     }
-
-    const isValidDates = sortedPolicies.every(policy =>
-      dayjs(policy.cancelBefore).isSameOrAfter(dayjs(tourData.registerOpenDate)) &&
-      dayjs(policy.cancelBefore).isSameOrBefore(dayjs(tourData.startDate))
-    );
-    if (!isValidDates) {
-      setSnackbar({
-        open: true,
-        message: 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành',
-        severity: 'error'
-      });
-      return false;
-    }
-
-    return true;
+    
+    return { 
+      isValid: Object.keys(errors).length === 0,
+      errors: errors
+    };
   };
 
   const validateForm = () => {
@@ -238,14 +246,26 @@ const CreateTour = () => {
       }
     }
 
-    // Payment deadline validation
-    if (!tourData.paymentDeadline) {
-      newErrors.paymentDeadline = "Vui lòng chọn thời hạn thanh toán";
-    } else if (tourData.paymentDeadline) {
-      if (dayjs(tourData.paymentDeadline).isAfter(tourData.startDate)) {
-        newErrors.paymentDeadline = "Thời hạn thanh toán phải trước ngày khởi hành";
-      } else if (tourData.registerOpenDate && dayjs(tourData.paymentDeadline).isBefore(tourData.registerOpenDate)) {
-        newErrors.paymentDeadline = "Thời hạn thanh toán phải sau ngày mở đăng ký";
+    // Update deposit validation
+    if (!tourData.depositPercent) {
+      newErrors.depositPercent = "Vui lòng nhập phần trăm đặt cọc";
+    } else {
+      const depositPercent = Number(tourData.depositPercent);
+      if (isNaN(depositPercent) || depositPercent < 30 || depositPercent > 100) {
+        newErrors.depositPercent = "Phần trăm đặt cọc phải từ 30% đến 100%";
+      }
+    }
+
+    // Payment deadline validation only if deposit is less than 100%
+    if (Number(tourData.depositPercent) < 100) {
+      if (!tourData.paymentDeadline) {
+        newErrors.paymentDeadline = "Vui lòng chọn thời hạn thanh toán";
+      } else if (tourData.paymentDeadline) {
+        if (dayjs(tourData.paymentDeadline).isAfter(tourData.startDate)) {
+          newErrors.paymentDeadline = "Thời hạn thanh toán phải trước ngày khởi hành";
+        } else if (tourData.registerOpenDate && dayjs(tourData.paymentDeadline).isBefore(tourData.registerOpenDate)) {
+          newErrors.paymentDeadline = "Thời hạn thanh toán phải sau ngày mở đăng ký";
+        }
       }
     }
 
@@ -277,24 +297,28 @@ const CreateTour = () => {
 
     if (!tourData.childPrice) {
       newErrors.childPrice = "Vui lòng nhập giá trẻ em";
-    } else if (tourData.childPrice === '0' || (tourData.childPrice > tourData.adultPrice && tourData.adultPrice)) {
+    } else if (tourData.childPrice === '0' || (Number(tourData.childPrice) > Number(tourData.adultPrice) && tourData.adultPrice)) {
       newErrors.childPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
     }
 
     if (!tourData.infantPrice) {
       newErrors.infantPrice = "Vui lòng nhập giá em bé";
-    } else if (tourData.infantPrice === '0' || (tourData.infantPrice > tourData.adultPrice && tourData.adultPrice)) {
+    } else if (tourData.infantPrice === '0' || (Number(tourData.infantPrice) > Number(tourData.adultPrice) && tourData.adultPrice)) {
       newErrors.infantPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
     }
 
-    // Deposit validation
-    if (!tourData.depositPercent) {
-      newErrors.depositPercent = "Vui lòng nhập phần trăm đặt cọc";
-    } else {
-      const depositPercent = Number(tourData.depositPercent);
-      if (isNaN(depositPercent) || depositPercent < 0 || depositPercent > 100) {
-        newErrors.depositPercent = "Phần trăm đặt cọc phải từ 0 đến 100";
-      }
+    // Add refund policy validation
+    const policyValidation = validateRefundPolicies(
+      tourData.refundPolicies,
+      tourData.registerOpenDate,
+      tourData.startDate,
+      tourData.paymentDeadline,
+      tourData.depositPercent
+    );
+
+    if (!policyValidation.isValid) {
+      // Merge policy errors with other form errors
+      Object.assign(newErrors, policyValidation.errors);
     }
 
     setErrors(newErrors);
@@ -303,7 +327,6 @@ const CreateTour = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(id);
     if (!validateForm()) {
       return;
     }
@@ -624,37 +647,41 @@ const CreateTour = () => {
                   sx={{ width: '100%', mt: 1.5, mb: 2 }}
                   value={tourData.depositPercent}
                   onChange={(e) => {
-                    const value = Math.min(Math.max(0, Number(e.target.value)), 100);
-                    handleNewTourChange('depositPercent', value.toString());
+                    handleNewTourChange('depositPercent', e.target.value);
+                    // Clear payment deadline if deposit is 100%
+                    if (Number(e.target.value) === 100) {
+                      handleNewTourChange('paymentDeadline', null);
+                    }
                   }}
                   error={!!errors.depositPercent}
                   helperText={errors.depositPercent || "Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc"}
                   InputProps={{
-                    endAdornment: <InputAdornment position="end">%</InputAdornment>,
-                    inputProps: { min: 0, max: 100 }
+                    endAdornment: <InputAdornment position="end">%</InputAdornment>
                   }}
                 />
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="Thời hạn thanh toán"
-                    value={tourData.paymentDeadline}
-                    onChange={(value) => handleNewTourChange('paymentDeadline', value)}
-                    format={DATE_FORMAT}
-                    minDate={tourData.registerOpenDate}
-                    maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        error: !!errors.paymentDeadline,
-                        helperText: errors.paymentDeadline || "Phải thanh toán toàn bộ trước khi đặt tour",
-                        inputProps: { style: { height: '15px' } }
-                      }
-                    }}
-                  />
-                </LocalizationProvider>
+                {Number(tourData.depositPercent) < 100 && (
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Thời hạn thanh toán"
+                      value={tourData.paymentDeadline}
+                      onChange={(value) => handleNewTourChange('paymentDeadline', value)}
+                      format="DD/MM/YYYY"
+                      minDate={tourData.registerOpenDate}
+                      maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          error: !!errors.paymentDeadline,
+                          helperText: errors.paymentDeadline || "Phải thanh toán toàn bộ trước khi đặt tour",
+                          inputProps: { style: { height: '15px' } }
+                        }
+                      }}
+                    />
+                  </LocalizationProvider>
+                )}
               </Box>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn ti��n</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>Chính sách hoàn tiền</Typography>
                 {tourData.refundPolicies.map((policy, index) => (
                   <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -668,8 +695,8 @@ const CreateTour = () => {
                         slotProps={{
                           textField: {
                             fullWidth: true,
-                            error: !!errors[`policy${index}CancelBefore`],
-                            helperText: errors[`policy${index}CancelBefore`]
+                            error: !!errors[`policy${index}Date`],
+                            helperText: errors[`policy${index}Date`]
                           }
                         }}
                       />
@@ -679,14 +706,14 @@ const CreateTour = () => {
                       type="number"
                       value={policy.refundRate}
                       onChange={(e) => handlePolicyChange(index, 'refundRate', e.target.value)}
-                      error={!!errors[`policy${index}RefundRate`]}
-                      helperText={errors[`policy${index}RefundRate`]}
+                      error={!!errors[`policy${index}Rate`]}
+                      helperText={errors[`policy${index}Rate`]}
                       fullWidth
                       inputProps={{ min: 0, max: 100 }}
                     />
                     <Button
                       variant="outlined"
-                      color="error"
+                      color="error" sx={{ height: '2.5rem', mt: 1}}
                       onClick={() => handleRemovePolicy(index)}
                       disabled={tourData.refundPolicies.length === 1}
                     >
@@ -694,6 +721,11 @@ const CreateTour = () => {
                     </Button>
                   </Box>
                 ))}
+                {errors.refundPolicies && (
+                  <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                    {errors.refundPolicies}
+                  </Typography>
+                )}
                 <Box sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
                   <Button variant="outlined" onClick={handleAddPolicy} startIcon={<AddIcon />} >Thêm chính sách</Button>
                 </Box>

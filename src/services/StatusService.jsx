@@ -101,19 +101,15 @@ export const getTourTemplateStatusInfo = (statusCode) => {
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
     case BookingStatus.Pending:
-      return { text: "Đang chờ thanh toán", color: "#f0b302" };
-    case BookingStatus.Confirmed:
-      return { text: "Đã thanh toán", color: "#48d0ee" };
+      return { text: "Chờ thanh toán", color: "#FFA000" };
+    case BookingStatus.Deposited:
+      return { text: "Đã đặt cọc", color: "#00cbdf" };
+    case BookingStatus.Paid:
+      return { text: "Đã thanh toán", color: "#2eb033" };
     case BookingStatus.Completed:
-      return { text: "Hoàn tất", color: "#1ec425" };
-    case BookingStatus.Expired:
-      return { text: "Hết hạn thanh toán", color: "#9b9b9b" };
+      return { text: "Hoàn tất", color: "#9d9d9d" };
     case BookingStatus.Cancelled:
-      return { text: "Đã hủy", color: "#dc4b40" };
-    case BookingStatus.PendingRefund:
-      return { text: "Đang chờ hoàn tiền", color: "#d55d0b" };
-    case BookingStatus.Refunded:
-      return { text: "Đã hoàn tiền", color: "#3f6eec" };
+      return { text: "Đã hủy", color: "#F44336" };
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
   }
