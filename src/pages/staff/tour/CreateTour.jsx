@@ -109,15 +109,6 @@ const CreateTour = () => {
     setTouchedFields(prev => ({ ...prev, [field]: true }));
   };
 
-  const calculatePrices = (adultPrice) => {
-    // Round adult price first
-    const roundedAdultPrice = roundToThousand(adultPrice);
-    // Calculate and round child and infant prices
-    const childPrice = roundToThousand(roundedAdultPrice * 0.6);
-    const infantPrice = roundToThousand(roundedAdultPrice * 0.3);
-    return { childPrice, infantPrice };
-  };
-
   const validatePrice = (price, minPrice, maxPrice) => {
     const numPrice = Number(price);
     if (isNaN(numPrice)) return false;
@@ -159,15 +150,15 @@ const CreateTour = () => {
     }
 
     const errors = {};
-    
+
     for (let i = 0; i < policies.length; i++) {
       const policy = policies[i];
-      
+
       // Separate validation for cancelBefore
       if (!policy.cancelBefore) {
         errors[`policy${i}Date`] = 'Vui lòng nhập ngày hủy tour';
       } else if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
-                 !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
+        !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
         errors[`policy${i}Date`] = 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành';
       }
 
@@ -191,8 +182,8 @@ const CreateTour = () => {
         }
       }
     }
-    
-    return { 
+
+    return {
       isValid: Object.keys(errors).length === 0,
       errors: errors
     };
@@ -297,14 +288,18 @@ const CreateTour = () => {
 
     if (!tourData.childPrice) {
       newErrors.childPrice = "Vui lòng nhập giá trẻ em";
+    } else if (!validatePrice(tourData.childPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
+      newErrors.childPrice = `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`;
     } else if (tourData.childPrice === '0' || (Number(tourData.childPrice) > Number(tourData.adultPrice) && tourData.adultPrice)) {
-      newErrors.childPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
+      newErrors.childPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn hoặc bằng giá người lớn`;
     }
 
     if (!tourData.infantPrice) {
       newErrors.infantPrice = "Vui lòng nhập giá em bé";
-    } else if (tourData.infantPrice === '0' || (Number(tourData.infantPrice) > Number(tourData.adultPrice) && tourData.adultPrice)) {
-      newErrors.infantPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn giá người lớn`;
+    } else if (!validatePrice(tourData.infantPrice, tourTemplate?.minPrice, tourTemplate?.maxPrice)) {
+      newErrors.infantPrice = `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`;
+    } else if (tourData.infantPrice === '0' || (Number(tourData.infantPrice) > Number(tourData.childPrice) && tourData.childPrice)) {
+      newErrors.infantPrice = `Giá phải lớn hơn 0 VND và nhỏ hơn hoặc bằng giá trẻ em`;
     }
 
     // Add refund policy validation
@@ -442,7 +437,9 @@ const CreateTour = () => {
               </Typography>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
-                <Typography variant="body2" sx={{ color: 'red', mt: 2 }}>*Lưu ý: Tour phải khởi hành từ {tourTemplate?.startingProvince?.provinceName}</Typography>
+                <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem', mb: -1.5 }}>
+                  Tour phải khởi hành từ {tourTemplate?.startingProvince?.provinceName}
+                </Typography>
                 <TextField
                   label="Khởi hành từ"
                   fullWidth
@@ -574,7 +571,10 @@ const CreateTour = () => {
                 />
               </Box>
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
+                <Typography variant="body2"><span style={{ fontWeight: 700 }}>Giá tour</span> (phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND)</Typography>
+                <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem', mb: -1.5 }}>
+                  Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND
+                </Typography>
                 <TextField
                   fullWidth
                   type="number"
@@ -589,13 +589,16 @@ const CreateTour = () => {
                     }
                   }}
                   error={!!errors.adultPrice}
-                  helperText={errors.adultPrice || `Giá phải từ ${tourTemplate?.minPrice?.toLocaleString()} đến ${tourTemplate?.maxPrice?.toLocaleString()} VND`}
+                  helperText={errors.adultPrice}
                   sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
                   InputProps={{
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
                   }}
                 />
+                <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem' }}>
+                  Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND và nhỏ hơn hoặc bằng giá người lớn.
+                </Typography>
                 <TextField
                   fullWidth
                   type="number"
@@ -617,6 +620,9 @@ const CreateTour = () => {
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
                   }}
                 />
+                <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem' }}>
+                  Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND và nhỏ hơn hoặc bằng giá trẻ em.
+                </Typography>
                 <TextField
                   fullWidth
                   type="number"
@@ -641,8 +647,11 @@ const CreateTour = () => {
               </Box>
               <Box sx={{ mt: 3 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
+                <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem', mb: -1.2 }}>
+                  Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc
+                </Typography>
                 <TextField
-                  label="Yêu cầu cọc"
+                  label="Yêu cầu cọc (%) - tính trên tổng tiền booking"
                   type="number"
                   sx={{ width: '100%', mt: 1.5, mb: 2 }}
                   value={tourData.depositPercent}
@@ -654,15 +663,16 @@ const CreateTour = () => {
                     }
                   }}
                   error={!!errors.depositPercent}
-                  helperText={errors.depositPercent || "Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc"}
+                  helperText={errors.depositPercent}
                   InputProps={{
+                    style: { height: '50px' },
                     endAdornment: <InputAdornment position="end">%</InputAdornment>
                   }}
                 />
                 {Number(tourData.depositPercent) < 100 && (
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
-                      label="Thời hạn thanh toán"
+                      label="Thời hạn thanh toán toàn bộ tổng tiền booking"
                       value={tourData.paymentDeadline}
                       onChange={(value) => handleNewTourChange('paymentDeadline', value)}
                       format="DD/MM/YYYY"
@@ -672,8 +682,8 @@ const CreateTour = () => {
                         textField: {
                           fullWidth: true,
                           error: !!errors.paymentDeadline,
-                          helperText: errors.paymentDeadline || "Phải thanh toán toàn bộ trước khi đặt tour",
-                          inputProps: { style: { height: '15px' } }
+                          helperText: errors.paymentDeadline,
+                          inputProps: { style: { height: '17px' } }
                         }
                       }}
                     />
@@ -702,7 +712,7 @@ const CreateTour = () => {
                       />
                     </LocalizationProvider>
                     <TextField
-                      label="Tỷ lệ hoàn tiền (%)"
+                      label="Tỷ lệ phạt hủy tour (%) - tính trên tổng tiền booking"
                       type="number"
                       value={policy.refundRate}
                       onChange={(e) => handlePolicyChange(index, 'refundRate', e.target.value)}
@@ -713,7 +723,7 @@ const CreateTour = () => {
                     />
                     <Button
                       variant="outlined"
-                      color="error" sx={{ height: '2.5rem', mt: 1}}
+                      color="error" sx={{ height: '2.5rem', mt: 1 }}
                       onClick={() => handleRemovePolicy(index)}
                       disabled={tourData.refundPolicies.length === 1}
                     >

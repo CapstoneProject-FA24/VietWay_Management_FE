@@ -1,4 +1,4 @@
-import { BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus, TourTemplateStatus, PaymentStatus } from "@hooks/Statuses";
+import { BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus, TourTemplateStatus, PaymentStatus, RefundStatus } from "@hooks/Statuses";
 
 export const getAttractionStatusInfo = (statusCode) => {
   switch (statusCode) {
@@ -127,5 +127,16 @@ export const getPaymentStatusInfo = (statusCode) => {
       return { text: "Đã hoàn tiền", color: "#3f6eec", textColor: "#002687", backgroundColor: "#b8d4ff" };
     default:
       return { text: "Không xác định", color: "#9E9E9E", textColor: "#424242", backgroundColor: "#E0E0E0" };
+  }
+};
+
+export const getRefundStatusInfo = (statusCode) => {
+  switch (statusCode) {
+    case RefundStatus.Pending:
+      return { text: "Đang chờ hoàn tiền", color: "#e05e13" };
+    case RefundStatus.Refunded:
+      return { text: "Đã hoàn tiền", color: "#2eb033" };
+    default:
+      return { text: "Không xác định", color: "#9E9E9E" };
   }
 };
