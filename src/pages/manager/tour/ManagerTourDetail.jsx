@@ -46,6 +46,7 @@ const ManagerTourDetail = () => {
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+  const [openApproveDialog, setOpenApproveDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,6 +83,14 @@ const ManagerTourDetail = () => {
   };
 
   const handleApproveTour = async () => {
+    if (dayjs(tour.registerOpenDate).isBefore(dayjs(), 'day')) {
+      setOpenApproveDialog(true);
+    } else {
+      await approveTour();
+    }
+  };
+
+  const approveTour = async () => {
     try {
       await updateTourStatus(id, TourStatus.Accepted);
       const updatedTour = await fetchTourById(id);
@@ -228,6 +237,15 @@ const ManagerTourDetail = () => {
     </Dialog>
   );
 
+  const handleCloseApproveDialog = () => {
+    setOpenApproveDialog(false);
+  };
+
+  const handleConfirmApprove = async () => {
+    setOpenApproveDialog(false);
+    await approveTour();
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
       <Helmet>
@@ -345,12 +363,18 @@ const ManagerTourDetail = () => {
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                      <Typography>Người lớn: {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
+                      <Typography>Người lớn (trên 12 tuổi): {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
                       {tour.tourPrices?.map((price, index) => (
                         <Typography key={index}>
                           {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} VND
                         </Typography>
                       ))}
+                    </Box>
+
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
+                      <Typography>Yêu cầu cọc: {tour.depositPercent}% tổng tiền booking</Typography>
+                      <Typography>Thời hạn thanh toán toàn bộ: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
                     </Box>
 
                     {tour.tourPolicies && tour.tourPolicies.length > 0 && (
@@ -360,7 +384,7 @@ const ManagerTourDetail = () => {
                           <Box key={index} sx={{ mt: 1 }}>
                             <Typography>
                               Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
-                              Hoàn {policy.refundPercent}% tổng tiền
+                              Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
                             </Typography>
                           </Box>
                         ))}
@@ -412,8 +436,9 @@ const ManagerTourDetail = () => {
             ) : (
               <TourUpdateForm
                 tour={tour}
-                maxPrice={tourTemplate?.maxPrice}
-                minPrice={tourTemplate?.minPrice}
+                maxPrice={tourTemplate.maxPrice}
+                minPrice={tourTemplate.minPrice}
+                startingProvince={tourTemplate.startingProvince}
                 onUpdateSuccess={handleUpdateSuccess}
               />
             )}
@@ -493,6 +518,29 @@ const ManagerTourDetail = () => {
             }}
           >
             Xác nhận hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openApproveDialog} onClose={handleCloseApproveDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận duyệt tour
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Ngày mở đăng ký đã qua. Nếu duyệt, tour sẽ được mở ngay. Bạn có chắc chắn muốn duyệt?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={handleCloseApproveDialog} sx={{ color: '#666666' }}>
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmApprove}
+            variant="contained"
+            sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' } }}
+          >
+            Có
           </Button>
         </DialogActions>
       </Dialog>

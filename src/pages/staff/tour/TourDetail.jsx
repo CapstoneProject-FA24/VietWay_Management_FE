@@ -312,8 +312,8 @@ const TourDetail = () => {
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
-                      <Typography>Yêu cầu cọc: {tour.depositPercent}%</Typography>
-                      <Typography>Thời hạn thanh toán: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
+                      <Typography>Yêu cầu cọc: {tour.depositPercent}% tổng tiền booking</Typography>
+                      <Typography>Thời hạn thanh toán toàn bộ: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
                     </Box>
 
                     {tour.tourPolicies && tour.tourPolicies.length > 0 && (
@@ -323,7 +323,7 @@ const TourDetail = () => {
                           <Box key={index} sx={{ mt: 1 }}>
                             <Typography>
                               Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
-                              Hoàn {policy.refundPercent}% tổng tiền
+                              Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
                             </Typography>
                           </Box>
                         ))}
@@ -357,6 +357,7 @@ const TourDetail = () => {
                 tour={tour}
                 maxPrice={tourTemplate.maxPrice}
                 minPrice={tourTemplate.minPrice}
+                startingProvince={tourTemplate.startingProvince}
                 onUpdateSuccess={handleUpdateSuccess}
               />
             )}
