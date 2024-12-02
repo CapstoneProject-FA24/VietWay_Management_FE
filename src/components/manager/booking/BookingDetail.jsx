@@ -4,7 +4,7 @@ import {
     DialogContentText, DialogActions, TextField, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText
 } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
-import { getBookingStatusInfo, getRefundStatusInfo, getEntityModifyActionInfo } from '@services/StatusService';
+import { getBookingStatusInfo, getRefundStatusInfo, getEntityModifyActionInfo, getRoleName } from '@services/StatusService';
 import { BookingStatus, RefundStatus, EntityModifyAction } from '@hooks/Statuses';
 import { cancelBooking, createRefundTransaction, getBookingHistory } from '@services/BookingService';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -224,6 +224,10 @@ const BookingDetail = ({ booking }) => {
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                                         <Typography variant="body1">Hành động:</Typography>
                                         <Typography variant="body1">{getEntityModifyActionInfo(historyItem.action).text}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                        <Typography variant="body1">Thực hiện bởi:</Typography>
+                                        <Typography variant="body1">{getRoleName(historyItem.modifierRole)}</Typography>
                                     </Box>
                                     {historyItem.action !== EntityModifyAction.Create && historyItem.action !== EntityModifyAction.Delete && (
                                         <>
