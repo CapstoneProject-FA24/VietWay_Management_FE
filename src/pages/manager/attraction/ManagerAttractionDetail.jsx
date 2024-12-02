@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionById, changeAttractionStatus } from '@services/AttractionService';
+import { fetchAttractionById, changeAttractionStatus, deleteAttraction } from '@services/AttractionService';
 import { AttractionStatus } from '@hooks/Statuses';
 import { getAttractionStatusInfo } from '@services/StatusService';
 import SidebarManager from '@layouts/SidebarManager';
@@ -38,6 +38,7 @@ const ManagerAttractionDetail = () => {
     severity: 'success'
   });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchAttraction = async () => {
@@ -145,6 +146,34 @@ const ManagerAttractionDetail = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAttraction(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa điểm tham quan thành công',
+        severity: 'success'
+      });
+      navigate(-1);
+    } catch (error) {
+      console.error('Error deleting attraction:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa điểm tham quan',
+        severity: 'error'
+      });
+    }
+  };
+
   if (!attraction) {
     return <Typography>Loading...</Typography>;
   }
@@ -227,7 +256,13 @@ const ManagerAttractionDetail = () => {
             
             <Button 
               variant="contained" 
-              sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
+              onClick={handleDeleteClick}
+              sx={{ 
+                width: 'fit-content', 
+                p: 1.1, 
+                backgroundColor: '#DC2626',
+                '&:hover': { backgroundColor: '#B91C1C' }
+              }}
             >
               Xóa
             </Button>
@@ -433,6 +468,31 @@ const ManagerAttractionDetail = () => {
             disabled={!rejectReason.trim()}
           >
             Từ chối
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận xóa điểm tham quan
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Bạn có chắc chắn muốn xóa điểm tham quan này? Hành động này không thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            sx={{ color: '#666666' }}
+          >
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+          >
+            Xác nhận xóa
           </Button>
         </DialogActions>
       </Dialog>

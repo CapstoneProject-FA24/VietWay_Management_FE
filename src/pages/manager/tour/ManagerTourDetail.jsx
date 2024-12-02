@@ -4,7 +4,7 @@ import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, Dialog
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus, cancelTour } from '@services/TourService';
+import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus, cancelTour, deleteTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -47,6 +47,7 @@ const ManagerTourDetail = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,6 +134,34 @@ const ManagerTourDetail = () => {
   };
 
   const handleDeleteTour = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteTour(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa tour thành công',
+        severity: 'success'
+      });
+      navigate(-1);
+    } catch (error) {
+      console.error('Error deleting tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa tour',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCancelTour = () => {
     setOpenCancelDialog(true);
   };
 
@@ -246,6 +275,76 @@ const ManagerTourDetail = () => {
     await approveTour();
   };
 
+  const ActionButtons = () => {
+    return (
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        {tour?.status === TourStatus.Pending && (
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleApproveTour()}
+              sx={{ height: '45px' }}
+            >
+              Duyệt
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleOpenRejectDialog}
+              sx={{ height: '45px' }}
+            >
+              Từ chối
+            </Button>
+          </>
+        )}
+        {canUpdate && (
+          <>
+            {view === 'edit' ? (
+              <Button
+                variant="contained"
+                startIcon={<CancelIcon />}
+                onClick={handleCancelClick}
+                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+              >
+                Hủy sửa
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                startIcon={<EditIcon />}
+                onClick={() => setView('edit')}
+                sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+              >
+                Sửa
+              </Button>
+            )}
+          </>
+        )}
+        {(tour?.totalBookings == 0 && tour?.status != TourStatus.Accepted) && (
+          <Button
+            variant="contained"
+            onClick={handleDeleteTour}
+            color="error"
+            sx={{ height: '45px' }}
+          >
+            Xóa
+          </Button>
+        )}
+        {(tour?.totalBookings > 0 && (tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed)) && (
+          <Button
+            variant="contained"
+            onClick={handleCancelTour}
+            color="warning"
+            sx={{ height: '45px' }}
+          >
+            Hủy tour
+          </Button>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
       <Helmet>
@@ -267,41 +366,7 @@ const ManagerTourDetail = () => {
                 Chi tiết tour
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {canUpdate && (
-                <>
-                  {view === 'edit' ? (
-                    <Button
-                      variant="contained"
-                      startIcon={<CancelIcon />}
-                      onClick={handleCancelClick}
-                      sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
-                    >
-                      Hủy sửa
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      startIcon={<EditIcon />}
-                      onClick={() => setView('edit')}
-                      sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                    >
-                      Sửa
-                    </Button>
-                  )}
-                </>
-              )}
-              {(tour?.status == TourStatus.Accepted || tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed) && (
-                <Button
-                  variant="contained"
-                  onClick={handleDeleteTour}
-                  color="warning"
-                  sx={{ height: '45px' }}
-                >
-                  Hủy tour
-                </Button>
-              )}
-            </Box>
+            <ActionButtons />
           </Grid>
 
           <Grid item xs={12} md={12}>
@@ -346,7 +411,7 @@ const ManagerTourDetail = () => {
                       <Typography sx={{ mt: 2 }}>Khởi hành từ: {tour.startLocation}</Typography>
                       <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
                       <Typography>Giờ khởi hành: {tour.startTime}</Typography>
-                      
+
                       <Box sx={{ mt: 3 }}>
                         <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
                         <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
@@ -409,26 +474,6 @@ const ManagerTourDetail = () => {
                           fontWeight: 600, '& .MuiChip-label': { px: 1 }
                         }}
                       />
-                      {tour.status === TourStatus.Pending && (
-                        <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="medium"
-                            onClick={() => handleApproveTour()}
-                          >
-                            Duyệt
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="medium"
-                            onClick={handleOpenRejectDialog}
-                          >
-                            Từ chối
-                          </Button>
-                        </Box>
-                      )}
                     </Box>
                   </>
                 )}
@@ -541,6 +586,32 @@ const ManagerTourDetail = () => {
             sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' } }}
           >
             Có
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận xóa tour
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            sx={{ color: '#666666' }}
+          >
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+          >
+            Xác nhận xóa
           </Button>
         </DialogActions>
       </Dialog>

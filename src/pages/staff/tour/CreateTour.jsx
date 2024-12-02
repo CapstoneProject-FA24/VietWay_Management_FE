@@ -347,13 +347,16 @@ const CreateTour = () => {
         }
       ];
 
+      // Create a copy of tourData and handle paymentDeadline
       const formData = {
         tourTemplateId: id,
         ...tourData,
         defaultTouristPrice: Number(tourData.adultPrice),
         tourPrices: tourPrices,
         refundPolicies: formattedPolicies,
-        depositPercent: Number(tourData.depositPercent)
+        depositPercent: Number(tourData.depositPercent),
+        // Only include paymentDeadline if depositPercent is not 100
+        paymentDeadline: Number(tourData.depositPercent) === 100 ? null : tourData.paymentDeadline
       };
 
       console.log(formData);

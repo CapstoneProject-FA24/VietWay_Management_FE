@@ -3,7 +3,7 @@ import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActi
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionById, updateAttraction, updateAttractionImages } from '@services/AttractionService';
+import { fetchAttractionById, updateAttraction, updateAttractionImages, deleteAttraction } from '@services/AttractionService';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttractionInfo from '@components/staff/attraction/AttractionInfo';
@@ -15,6 +15,7 @@ import { AttractionStatus } from '@hooks/Statuses';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import { Snackbar, Alert } from '@mui/material';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -29,6 +30,12 @@ const AttractionDetail = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,19 +89,7 @@ const AttractionDetail = () => {
   };
 
   const handleDelete = async () => {
-    /* if (window.confirm('Bạn có chắc chắn muốn xóa điểm tham quan này?')) {
-      try {
-        const response = await deleteAttraction(id);
-        if (response.status === 200) {
-          navigate('/nhan-vien/diem-tham-quan');
-        } else {
-          alert('Có lỗi xảy ra khi xóa điểm tham quan. Vui lòng thử lại.');
-        }
-      } catch (error) {
-        console.error('Error deleting attraction:', error);
-        alert('Có lỗi xảy ra khi xóa điểm tham quan. Vui lòng thử lại.');
-      }
-    } */
+    handleDeleteAttraction();
   };
 
   const handleSidebarToggle = () => {
@@ -116,6 +111,38 @@ const AttractionDetail = () => {
 
   const handleHistoryClick = () => {
     setIsHistoryOpen(!isHistoryOpen);
+  };
+
+  const handleDeleteAttraction = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAttraction(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa điểm tham quan thành công',
+        severity: 'success'
+      });
+      navigate(-1); // Navigate back after successful deletion
+    } catch (error) {
+      console.error('Error deleting attraction:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa điểm tham quan',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const CancelConfirmationDialog = () => (
@@ -291,6 +318,32 @@ const AttractionDetail = () => {
         </Box>
       </Box>
       <CancelConfirmationDialog />
+
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Xác nhận xóa điểm tham quan</DialogTitle>
+        <DialogContent>
+          <Typography>Bạn có chắc chắn muốn xóa điểm tham quan này? Hành động này không thể hoàn tác.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Không
+          </Button>
+          <Button onClick={handleConfirmDelete} color="secondary" variant="contained">
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

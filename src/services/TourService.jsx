@@ -306,3 +306,20 @@ export const cancelTour = async (tourId, reason) => {
         throw error;
     }
 };
+
+export const deleteTour = async (tourId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.delete(`${baseURL}/api/tours/${tourId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response;
+    } catch (error) {
+        console.error('Error canceling tour:', error);
+        throw error;
+    }
+};

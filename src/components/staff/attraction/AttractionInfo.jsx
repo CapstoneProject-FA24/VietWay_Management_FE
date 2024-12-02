@@ -203,10 +203,6 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
               <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
               <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
             </Box>
-            <Box sx={{ display: 'flex', width: '100%' }}>
-              <Typography sx={{ fontWeight: 700 }}>Tạo bởi: </Typography>
-              <Typography sx={{ mb: 1, ml: 1 }}>{attraction.creatorName}</Typography>
-            </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={12}>

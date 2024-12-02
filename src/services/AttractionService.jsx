@@ -228,3 +228,18 @@ export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
         throw error;
     }
 };
+
+export const deleteAttraction = async (attractionId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.delete(`${baseURL}/api/attractions/${attractionId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting attraction:', error.response);
+        throw error;
+    }
+};

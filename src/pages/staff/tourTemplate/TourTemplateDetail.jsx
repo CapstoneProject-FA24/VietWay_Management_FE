@@ -3,7 +3,7 @@ import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActi
 import { Edit as EditIcon, Delete as DeleteIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, updateTourTemplate, deleteTourTemplate } from '@services/TourTemplateService';
+import { fetchTourTemplateById, updateTourTemplate, deleteTourTemplate, changeTourTemplateStatus } from '@services/TourTemplateService';
 import TourTemplateInfo from '@components/staff/tourTemplate/TourTemplateInfo';
 import TourTemplateUpdateForm from '@components/staff/tourTemplate/TourTemplateUpdateForm';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -125,9 +125,25 @@ const TourTemplateDetails = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
+  const handleSend = async () => {
+    try {
+      await changeTourTemplateStatus(id, TourTemplateStatus.Pending, null);
+      const updatedTourTemplate = await fetchTourTemplateById(id);
+      setState(prev => ({
+        ...prev,
+        tourTemplate: updatedTourTemplate
+      }));
+      alert('Gửi duyệt tour mẫu thành công');
+    } catch (error) {
+      console.error('Error sending tour template for approval:', error);
+      alert('Có lỗi xảy ra khi gửi duyệt tour mẫu');
+    }
+  };
+
   const ActionButtons = ({ status }) => {
     const showEditDelete = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
     const showDeleteOnly = status === TourTemplateStatus.Pending;
+    const showSendButton = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
 
     if (!showEditDelete && !showDeleteOnly) return null;
 
@@ -181,7 +197,7 @@ const TourTemplateDetails = () => {
                 variant="contained"
                 startIcon={<EditIcon />}
                 onClick={handleEdit}
-                sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
               >
                 Sửa
               </Button>
@@ -196,14 +212,16 @@ const TourTemplateDetails = () => {
         >
           Xóa
         </Button>
-        <Button
-          variant="contained"
-          startIcon={<SendIcon />}
-          onClick={handleSend}
-          sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-        >
-          Gửi duyệt
-        </Button>
+        {showSendButton && (
+          <Button
+            variant="contained"
+            startIcon={<SendIcon />}
+            onClick={handleSend}
+            sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+          >
+            Gửi duyệt
+          </Button>
+        )}
       </Box>
     );
   };
