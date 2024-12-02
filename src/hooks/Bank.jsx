@@ -2,67 +2,67 @@ export const bankData = [
   {
     code: "VCB",
     name: "VietcomBank",
-    imageUrl: "/bank/VCB.png"
+    imageUrl: "/Bank/VCB.png"
   },
   {
     code: "CTG",
     name: "VietinBank",
-    imageUrl: "/bank/CTG.png"
+    imageUrl: "/Bank/CTG.png"
   },
   {
     code: "TCB",
     name: "Techcombank",
-    imageUrl: "/bank/TCB.png"
+    imageUrl: "/Bank/TCB.png"
   },
   {
     code: "BIDV",
     name: "BIDV",
-    imageUrl: "/bank/BIDV.png"
+    imageUrl: "/Bank/BIDV.png"
   },
   {
     code: "VARB",
     name: "AgriBank",
-    imageUrl: "/bank/VARB.png"
+    imageUrl: "/Bank/VARB.png"
   },
   {
     code: "STB",
     name: "Sacombank",
-    imageUrl: "/bank/STB.png"
+    imageUrl: "/Bank/STB.png"
   },
   {
     code: "ACB",
     name: "ACB",
-    imageUrl: "/bank/ACB.png"
+    imageUrl: "/Bank/ACB.png"
   },
   {
     code: "MB",
     name: "MBBank",
-    imageUrl: "/bank/MB.png"
+    imageUrl: "/Bank/MB.png"
   },
   {
     code: "TPB",
     name: "TPBank",
-    imageUrl: "/bank/TPB.png"
+    imageUrl: "/Bank/TPB.png"
   },
   {
     code: "VIB",
     name: "VIB Bank",
-    imageUrl: "/bank/VIB.png"
+    imageUrl: "/Bank/VIB.png"
   },
   {
     code: "VPB",
     name: "VPBank",
-    imageUrl: "/bank/VPB.png"
+    imageUrl: "/Bank/VPB.png"
   },
   {
     code: "EIB",
     name: "Eximbank",
-    imageUrl: "/bank/EIB.png"
+    imageUrl: "/Bank/EIB.png"
   },
   {
     code: "SCB",
     name: "SCB",
-    imageUrl: "/bank/SCB.png"
+    imageUrl: "/Bank/SCB.png"
   }
 ];
 

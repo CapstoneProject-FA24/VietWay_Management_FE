@@ -50,6 +50,8 @@ export const fetchTours = async ({ params }) => {
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
+        queryParams.append('sortBy', 'createdAt');
+        queryParams.append('sortDirection', 'desc');
         queryParams.append('pageSize', params.pageSize);
         queryParams.append('pageIndex', params.pageIndex);
         if (params.searchTerm) queryParams.append('nameSearch', params.searchTerm);
@@ -81,7 +83,8 @@ export const fetchTours = async ({ params }) => {
             maxParticipant: item.maxParticipant,
             minParticipant: item.minParticipant,
             currentParticipant: item.currentParticipant,
-            status: item.status
+            status: item.status,
+            createdAt: new Date(item.createdAt)
         }));
 
         return {
