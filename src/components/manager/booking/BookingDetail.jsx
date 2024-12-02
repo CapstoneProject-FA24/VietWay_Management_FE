@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box, Grid, Typography, Button, Paper, Dialog, DialogTitle, DialogContent,
     DialogContentText, DialogActions, TextField, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText
 } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
-import { getBookingStatusInfo, getRefundStatusInfo } from '@services/StatusService';
-import { BookingStatus, RefundStatus } from '@hooks/Statuses';
-import { cancelBooking, createRefundTransaction } from '@services/BookingService';
+import { getBookingStatusInfo, getRefundStatusInfo, getEntityModifyActionInfo } from '@services/StatusService';
+import { BookingStatus, RefundStatus, EntityModifyAction } from '@hooks/Statuses';
+import { cancelBooking, createRefundTransaction, getBookingHistory } from '@services/BookingService';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -45,6 +45,26 @@ const BookingDetail = ({ booking }) => {
         refundId: null
     });
     const [refundErrors, setRefundErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [bookingData, setBooking] = useState(booking);
+
+    useEffect(() => {
+        fetchBookingDetail();
+    }, [booking.bookingId]);
+
+    const fetchBookingDetail = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await getBookingHistory(booking.bookingId);
+            setBooking(data);
+        } catch (error) {
+            setError('Không thể tải lịch sử đặt tour');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCancelClick = () => {
         setOpenCancelDialog(true);
@@ -192,6 +212,85 @@ const BookingDetail = ({ booking }) => {
                             <Typography variant="body1">{booking.note}</Typography>
                         </Box>
                     </Paper>
+                    <Paper elevation={3} sx={{ p: 2, borderRadius: '8px', mt: 2 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Lịch sử</Typography>
+                        {bookingData && bookingData.length > 0 ? (
+                            bookingData.map((historyItem, index) => (
+                                <Box key={index} sx={{ mb: 2 }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                        <Typography variant="body1">Ngày:</Typography>
+                                        <Typography variant="body1">{formatDateTime(historyItem.timestamp)}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                        <Typography variant="body1">Hành động:</Typography>
+                                        <Typography variant="body1">{getEntityModifyActionInfo(historyItem.action).text}</Typography>
+                                    </Box>
+                                    {historyItem.action !== EntityModifyAction.Create && historyItem.action !== EntityModifyAction.Delete && (
+                                        <>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                                <Typography variant="body1">Trạng thái cũ:</Typography>
+                                                <Typography variant="body1">{getBookingStatusInfo(historyItem.oldStatus).text}</Typography>
+                                            </Box>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                                <Typography variant="body1">Trạng thái mới:</Typography>
+                                                <Typography variant="body1">{getBookingStatusInfo(historyItem.newStatus).text}</Typography>
+                                            </Box>
+                                        </>
+                                    )}
+                                    {historyItem.action !== EntityModifyAction.Create && (
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                            <Typography variant="body1">Lý do:</Typography>
+                                            <Typography variant="body1">{historyItem.reason}</Typography>
+                                        </Box>
+                                    )}
+                                    {index !== bookingData.length - 1 && <hr />}
+                                </Box>
+                            ))
+                        ) : (
+                            <Typography variant="body1">Không có lịch sử đặt tour</Typography>
+                        )}
+                    </Paper>
+                </Grid>
+                <Grid item xs={12} md={5}>
+                    <Paper elevation={3} sx={{ p: 2, borderRadius: '8px' }}>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Thông tin tour</Typography>
+                        <Typography variant="h5" sx={{ mt: 1 }}>{booking.tourName}</Typography>
+                        <Typography variant="body1" sx={{ mt: 1 }}><strong>Mã tour:</strong> {booking.tourCode}</Typography>
+                        <Typography variant="body1" sx={{ mt: 1 }}>
+                            <strong>Ngày đi:</strong> {formatDateTime(booking.startDate)}
+                        </Typography><hr />
+                        {booking.tourPolicies && booking.tourPolicies.length > 0 && (
+                            <>
+                                <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>
+                                    Chính sách hủy tour
+                                </Typography>
+                                {booking.tourPolicies.map((policy, index) => (
+                                    <Typography key={index} variant="body2">
+                                        Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}: Chi phí hủy là {policy.refundPercent}% tổng tiền booking
+                                    </Typography>
+                                ))}<hr />
+                            </>
+                        )}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                            <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold' }}>Tổng tiền:</Typography>
+                            <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold', color: 'primary.main' }}>{booking.totalPrice.toLocaleString()} đ</Typography>
+                        </Box>
+                        {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                                <Button
+                                    variant="contained"
+                                    color="error"
+                                    sx={{ width: '48%' }}
+                                    onClick={handleCancelClick}
+                                >
+                                    Hủy booking
+                                </Button>
+                                <Button variant="contained" color="primary" sx={{ width: '48%' }}>
+                                    Chuyển tour
+                                </Button>
+                            </Box>
+                        )}
+                    </Paper>
                     <Paper elevation={3} sx={{ p: 3, borderRadius: '8px', mt: 2 }}>
                         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>Thông tin hoàn tiền</Typography>
                         {booking.refundRequests?.map((refund, index) => (
@@ -245,51 +344,6 @@ const BookingDetail = ({ booking }) => {
                                 {index !== booking.refundRequests.length - 1 && <hr />}
                             </>
                         ))}
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={5}>
-                    <Paper elevation={3} sx={{ p: 2, borderRadius: '8px' }}>
-                        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Thông tin tour</Typography>
-                        <Typography variant="h5" sx={{ mt: 1 }}>{booking.tourName}</Typography>
-                        <Typography variant="body1" sx={{ mt: 1 }}><strong>Mã tour:</strong> {booking.tourCode}</Typography>
-                        <Typography variant="body1" sx={{ mt: 1 }}>
-                            <strong>Ngày đi:</strong> {formatDateTime(booking.startDate)}
-                        </Typography><hr />
-                        <Typography variant="h5" color="primary.main" sx={{ mt: 1, fontWeight: 'bold' }}>
-                            Tổng tiền: {booking.totalPrice.toLocaleString()} đ
-                        </Typography>
-                        {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                                <Button
-                                    variant="contained"
-                                    color="error"
-                                    sx={{ width: '48%' }}
-                                    onClick={handleCancelClick}
-                                >
-                                    Hủy booking
-                                </Button>
-                                <Button variant="contained" color="primary" sx={{ width: '48%' }}>
-                                    Chuyển tour
-                                </Button>
-                            </Box>
-                        )}
-                        {booking.tourPolicies && booking.tourPolicies.length > 0 && (
-                            <>
-                                <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>
-                                    Chính sách hủy tour
-                                </Typography>
-                                {booking.tourPolicies.map((policy, index) => (
-                                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                        <Typography variant="body2">
-                                            Hủy trước {formatDateTime(policy.cancelBefore)} ngày:
-                                        </Typography>
-                                        <Typography variant="body2" color="primary">
-                                            Hoàn {policy.refundPercent}% tổng tiền
-                                        </Typography>
-                                    </Box>
-                                ))}
-                            </>
-                        )}
                     </Paper>
                 </Grid>
             </Grid>

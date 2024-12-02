@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert, CircularProgress } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
@@ -24,6 +24,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import Collapse from '@mui/material/Collapse';
+import { getTourHistory } from '@services/BookingService';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -47,6 +48,8 @@ const ManagerTourDetail = () => {
   const [cancelReason, setCancelReason] = useState('');
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,6 +69,27 @@ const ManagerTourDetail = () => {
     };
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      if (!tour?.tourId) return;
+      setIsHistoryLoading(true);
+      try {
+        const historyData = await getTourHistory(tour.tourId);
+        setHistory(historyData);
+      } catch (error) {
+        console.error('Error fetching history:', error);
+        setSnackbar({
+          open: true,
+          message: 'Không thể tải lịch sử tour',
+          severity: 'error'
+        });
+      } finally {
+        setIsHistoryLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [tour?.tourId]);
 
   const handleMonthChange = (newMonth) => {
     setSelectedMonth(newMonth);
@@ -450,6 +474,84 @@ const ManagerTourDetail = () => {
               <BookingByTemplate tourId={id} />
             </Grid>
           )}
+
+          <Grid item xs={12} md={12}>
+            <Paper elevation={2} sx={{ p: 2, mt: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+                Lịch sử thay đổi
+              </Typography>
+              {isHistoryLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+                  <CircularProgress />
+                </Box>
+              ) : history.length > 0 ? (
+                history.map((item, index) => (
+                  <Box key={index} sx={{ 
+                    mb: 2, 
+                    p: 2, 
+                    borderLeft: '4px solid',
+                    borderColor: 'primary.main',
+                    bgcolor: 'background.paper',
+                    borderRadius: '4px'
+                  }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      {item.action}
+                    </Typography>
+                    {item.reason && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        Lý do: {item.reason}
+                      </Typography>
+                    )}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between',
+                      mt: 1,
+                      color: 'text.secondary',
+                      fontSize: '0.875rem'
+                    }}>
+                      <Typography variant="body2">
+                        {item.modifierRole} - {item.modifierName}
+                      </Typography>
+                      <Typography variant="body2">
+                        {dayjs(item.timestamp).format('DD/MM/YYYY HH:mm')}
+                      </Typography>
+                    </Box>
+                    {(item.oldStatus || item.newStatus) && (
+                      <Box sx={{ mt: 1, display: 'flex', gap: 1, alignItems: 'center' }}>
+                        {item.oldStatus && (
+                          <Chip
+                            label={getTourStatusInfo(item.oldStatus).text}
+                            size="small"
+                            sx={{
+                              backgroundColor: getTourStatusInfo(item.oldStatus).backgroundColor,
+                              color: getTourStatusInfo(item.oldStatus).textColor
+                            }}
+                          />
+                        )}
+                        {item.oldStatus && item.newStatus && (
+                          <Typography variant="body2">→</Typography>
+                        )}
+                        {item.newStatus && (
+                          <Chip
+                            label={getTourStatusInfo(item.newStatus).text}
+                            size="small"
+                            sx={{
+                              backgroundColor: getTourStatusInfo(item.newStatus).backgroundColor,
+                              color: getTourStatusInfo(item.newStatus).textColor
+                            }}
+                          />
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                  Chưa có lịch sử thay đổi
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
         </Grid>
       </Box>
 

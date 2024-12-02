@@ -189,3 +189,27 @@ export const changeBookingTour = async (bookingId, newTourId, reason) => {
         throw error;
     }
 };
+
+export const getBookingHistory = async (bookingId) => {
+    try {
+        const response = await axios.get(
+            `${baseURL}/api/booking/${bookingId}/history`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}`
+                }
+            }
+        );
+        return response.data.data.map(history => ({
+            modifierRole: history.modifierRole,
+            reason: history.reason,
+            action: history.action,
+            timestamp: history.timestamp,
+            oldStatus: history.oldStatus,
+            newStatus: history.newStatus
+        }));
+    } catch (error) {
+        console.error('Error fetching booking history:', error.response);
+        throw error;
+    }
+};

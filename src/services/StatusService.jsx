@@ -1,4 +1,7 @@
-import { BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus, TourTemplateStatus, PaymentStatus, RefundStatus } from "@hooks/Statuses";
+import {
+  BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus, TourTemplateStatus,
+  PaymentStatus, RefundStatus, EntityModifyAction
+} from "@hooks/Statuses";
 
 export const getAttractionStatusInfo = (statusCode) => {
   switch (statusCode) {
@@ -138,5 +141,20 @@ export const getRefundStatusInfo = (statusCode) => {
       return { text: "Đã hoàn tiền", color: "#2eb033" };
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
+  }
+};
+
+export const getEntityModifyActionInfo = (actionCode) => {
+  switch (actionCode) {
+    case EntityModifyAction.Create:
+      return { text: "Tạo mới", color: "#2eb033", backgroundColor: "#d3ffa4" };
+    case EntityModifyAction.Update:
+      return { text: "Cập nhật", color: "#3f6eec", backgroundColor: "#b8d4ff" };
+    case EntityModifyAction.ChangeStatus:
+      return { text: "Thay đổi trạng thái", color: "#FFA000", backgroundColor: "#fff9b8" };
+    case EntityModifyAction.Delete:
+      return { text: "Xóa", color: "#F44336", backgroundColor: "#ffb8b8" };
+    default:
+      return { text: "Không xác định", color: "#9E9E9E", backgroundColor: "#E0E0E0" };
   }
 };
