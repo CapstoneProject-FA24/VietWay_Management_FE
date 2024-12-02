@@ -57,7 +57,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
               {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
+              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
             </Box>
           </Box>

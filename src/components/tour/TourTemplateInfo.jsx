@@ -52,6 +52,9 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
                 <Typography gutterBottom>
                     <strong>Thời lượng:</strong> {tourTemplate.duration.durationName}
                 </Typography>
+                <Typography gutterBottom>
+                    <strong>Phương tiện:</strong> {tourTemplate.transportation}
+                </Typography>
             </Box>
 
             <Collapse in={expanded}>

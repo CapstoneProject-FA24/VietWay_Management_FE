@@ -453,9 +453,11 @@ const ManagerTourDetail = () => {
                             </Typography>
                           </Box>
                         ))}
+                        <Typography>
+                          Hủy từ ngày {new Date(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).toLocaleDateString()}: Chi phí hủy tour là 100% tổng giá trị booking
+                        </Typography>
                       </Box>
                     )}
-
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
                       <Chip
