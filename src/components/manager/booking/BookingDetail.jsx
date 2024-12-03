@@ -13,6 +13,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
 import { bankData } from '@hooks/Bank';
 import 'dayjs/locale/vi';
+import ChangeBooking from '@components/booking/ChangeBooking';
 
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -48,6 +49,7 @@ const BookingDetail = ({ booking }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [bookingData, setBooking] = useState(booking);
+    const [isChangeBookingOpen, setIsChangeBookingOpen] = useState(false);
 
     useEffect(() => {
         fetchBookingDetail();
@@ -166,6 +168,16 @@ const BookingDetail = ({ booking }) => {
         }
     };
 
+    const handleChangeTour = () => {
+        setIsChangeBookingOpen(true);
+    };
+
+    const handleTourSelect = (selectedTour) => {
+        console.log('Selected new tour:', selectedTour);
+        // Here you would implement the logic to change the tour
+        setIsChangeBookingOpen(false);
+    };
+
     return (
         <>
             <Grid container spacing={1.5}>
@@ -279,7 +291,7 @@ const BookingDetail = ({ booking }) => {
                             <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold' }}>Tổng tiền:</Typography>
                             <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold', color: 'primary.main' }}>{booking.totalPrice.toLocaleString()} đ</Typography>
                         </Box>
-                        {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
+                        {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Deposited || booking.status === BookingStatus.Paid) && (
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                                 <Button
                                     variant="contained"
@@ -289,7 +301,12 @@ const BookingDetail = ({ booking }) => {
                                 >
                                     Hủy booking
                                 </Button>
-                                <Button variant="contained" color="primary" sx={{ width: '48%' }}>
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    sx={{ width: '48%' }}
+                                    onClick={handleChangeTour}
+                                >
                                     Chuyển tour
                                 </Button>
                             </Box>
@@ -497,6 +514,13 @@ const BookingDetail = ({ booking }) => {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
+
+            <ChangeBooking
+                open={isChangeBookingOpen}
+                onClose={() => setIsChangeBookingOpen(false)}
+                onTourSelect={handleTourSelect}
+                booking={booking}
+            />
         </>
     );
 };
