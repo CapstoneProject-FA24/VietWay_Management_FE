@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress } from '@mui/material';
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
@@ -16,6 +16,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
 import { Snackbar, Alert } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -36,6 +37,7 @@ const AttractionDetail = () => {
     message: '',
     severity: 'success'
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,8 +61,83 @@ const AttractionDetail = () => {
   const handleEdit = () => {
     setIsEditing(true);
   };
+  
+  const handleSendForApproval = async () => {
+    setIsSubmitting(true);
+    try {
+      console.log(attraction);
+      const requiredFields = {
+        name: 'Tên điểm tham quan',
+        description: 'Mô tả',
+        address: 'Địa chỉ',
+        provinceId: 'Tỉnh/Thành phố',
+        attractionTypeId: 'Loại điểm tham quan',
+      };
+
+      const missingFields = [];
+      Object.entries(requiredFields).forEach(([field, label]) => {
+        if (!attraction[field] || attraction[field].trim() === '') {
+          missingFields.push(label);
+        }
+      });
+
+      // Check for image
+      if (!attraction.images) {
+        missingFields.push('Hình ảnh');
+      }
+
+      if (missingFields.length > 0) {
+        setSnackbar({
+          open: true,
+          message: `Vui lòng điền đầy đủ thông tin trước khi gửi`,
+          severity: 'error'
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const updatedAttraction = {
+        id: id,
+        name: attraction.name,
+        description: attraction.description,
+        address: attraction.address,
+        contactInfo: attraction.contactInfo || '',
+        website: attraction.website || '',
+        provinceId: attraction.provinceId,
+        attractionTypeId: attraction.attractionTypeId,
+        googlePlaceId: attraction.googlePlaceId || '',
+        isDraft: false
+      };
+
+      const response = await updateAttraction(updatedAttraction);
+
+      setAttraction(prevPost => ({
+        ...prevPost,
+        ...updatedAttraction,
+        status: AttractionStatus.Pending
+      }));
+
+      setIsEditMode(false);
+      setSnackbar({
+        open: true,
+        message: 'Đã gửi điểm tham quan để duyệt',
+        severity: 'success'
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error sending for approval:', error);
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi gửi duyệt: ' + (error.response?.data?.message || error.message),
+        severity: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSave = async (attractionData, newImages, removedImageIds) => {
+    setIsSubmitting(true);
     try {
       const response = await updateAttraction(attractionData);
       if (response.status === 200) {
@@ -85,6 +162,8 @@ const AttractionDetail = () => {
     } catch (error) {
       console.error('Error updating attraction:', error);
       alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -260,14 +339,25 @@ const AttractionDetail = () => {
                         Hủy sửa
                       </Button>
                     ) : (
-                      <Button
-                        variant="contained"
-                        startIcon={<EditIcon />}
-                        onClick={handleEdit}
-                        sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                      >
-                        Sửa
-                      </Button>
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                          onClick={handleSendForApproval}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
+                        </Button>
+                        <Button
+                          variant="contained"
+                          startIcon={<EditIcon />}
+                          onClick={handleEdit}
+                          sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                        >
+                          Sửa
+                        </Button>
+                      </>
                     )}
                     <Button
                       variant="contained"

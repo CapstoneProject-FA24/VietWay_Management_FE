@@ -116,7 +116,6 @@ export const updatePost = async (id, postData) => {
 };
 
 export const deletePost = async (id) => {
-    console.log(id);
     const token = getCookie('token');
     try {
         await axios.delete(`${baseURL}/api/Post/${id}`, {
@@ -181,7 +180,6 @@ export const sharePostOnFacebook = async (postId) => {
 };
 
 export const updatePostImages = async (postId, newImages) => {
-    console.log(newImages);
     const token = getCookie('token');
     try {
         const formData = new FormData();

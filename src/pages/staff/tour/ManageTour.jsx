@@ -43,7 +43,7 @@ const ManageTour = () => {
     status: ''
   });
   const [searchCode, setSearchCode] = useState("");
-  const [statusTab, setStatusTab] = useState("all");
+  const [statusTab, setStatusTab] = useState("0");
 
   const [pagination, setPagination] = useState({
     pageIndex: 1,
@@ -312,7 +312,7 @@ const ManageTour = () => {
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label="Tất cả" value="all" />
+          {/* <Tab label="Tất cả" value="all" /> */}
           {Object.entries(TourStatus).map(([key, value]) => (
             <Tab 
               key={value}

@@ -127,6 +127,41 @@ const TourTemplateDetails = () => {
 
   const handleSend = async () => {
     try {
+      const template = state.tourTemplate;
+      const requiredFields = {
+        'Mã tour': template.code,
+        'Tên tour': template.tourName,
+        'Mô tả': template.description,
+        'Thời gian': template.durationId,
+        'Loại tour': template.tourCategoryId,
+        'Chính sách': template.policy,
+        'Giá thấp nhất': template.minPrice,
+        'Giá cao nhất': template.maxPrice,
+        'Điểm khởi hành': template.startingProvinceId,
+        'Phương tiện di chuyển': template.transportation,
+        'Các tỉnh thành': template.provinceIds,
+      };
+
+      const missingFields = Object.entries(requiredFields)
+        .filter(([_, value]) => !value || (Array.isArray(value) && value.length === 0))
+        .map(([key]) => key);
+
+      const invalidSchedules = template.schedules?.filter(s =>
+        !s.dayNumber || !s.title || !s.description || !s.attractionIds?.length
+      ) || [];
+
+      if (missingFields.length > 0 || invalidSchedules.length > 0) {
+        let errorMessage = '';
+        if (missingFields.length > 0) {
+          errorMessage += `Vui lòng điền đầy đủ thông tin trước khi gửi`;
+        }
+        if (invalidSchedules.length > 0) {
+          errorMessage += 'Vui lòng điền đầy đủ thông tin lịch trình cho các ngày';
+        }
+        alert(errorMessage);
+        return;
+      }
+
       await changeTourTemplateStatus(id, TourTemplateStatus.Pending, null);
       const updatedTourTemplate = await fetchTourTemplateById(id);
       setState(prev => ({
@@ -143,7 +178,6 @@ const TourTemplateDetails = () => {
   const ActionButtons = ({ status }) => {
     const showEditDelete = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
     const showDeleteOnly = status === TourTemplateStatus.Pending;
-    const showSendButton = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
 
     if (!showEditDelete && !showDeleteOnly) return null;
 
@@ -193,14 +227,24 @@ const TourTemplateDetails = () => {
                 Hủy sửa
               </Button>
             ) : (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={handleEdit}
-                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
-              >
-                Sửa
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  startIcon={<SendIcon />}
+                  onClick={handleSend}
+                  sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                >
+                  Gửi duyệt
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  onClick={handleEdit}
+                  sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                >
+                  Sửa
+                </Button>
+              </>
             )}
           </>
         )}
@@ -212,16 +256,6 @@ const TourTemplateDetails = () => {
         >
           Xóa
         </Button>
-        {showSendButton && (
-          <Button
-            variant="contained"
-            startIcon={<SendIcon />}
-            onClick={handleSend}
-            sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-          >
-            Gửi duyệt
-          </Button>
-        )}
       </Box>
     );
   };
@@ -290,7 +324,7 @@ const TourTemplateDetails = () => {
                   sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
                   Quay lại
                 </Button>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1}}>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
                   Chi tiết tour mẫu
                 </Typography>
                 <ActionButtons status={state.tourTemplate.status} />

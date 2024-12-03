@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, Button, Collapse, Select, MenuItem, Tooltip, IconButton, useTheme, Chip, Divider, Tab, Tabs } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Box, Button, Collapse, Select, MenuItem, Tooltip, IconButton, useTheme, Chip, Divider, Tab, Tabs, Grid } from '@mui/material';
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
-import { ExpandMore, CalendarToday, Category, LocationOn, AccessTime, LocalActivity, Description, Schedule, Policy, InfoOutlined, Circle } from '@mui/icons-material';
+import { ExpandMore, DirectionsBus, Category, LocationOn, AccessTime, LocalActivity, Description, Schedule, Policy, InfoOutlined, Circle } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import BookingCalBox from '@components/booking/BookingCalBox';
 import ConfirmChange from '@components/booking/ConfirmChange';
@@ -28,6 +28,7 @@ const ExpandButton = styled((props) => {
 }));
 
 const CBTemplateCard = ({ tour, onSelect, booking }) => {
+    console.log(tour);
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -38,6 +39,9 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
         id: t.tourId,
         startDate: t.startDate,
         startLocation: t.startLocation,
+        tourPolicies: t.tourPolicies,
+        depositPercent: t.depositPercent,
+        paymentDeadline: t.paymentDeadline,
         prices: [
             {
                 priceId: 'adult',
@@ -107,11 +111,9 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
 
     // Handle date selection
     const handleDateChange = (event) => {
-        console.log("A");
         const dateId = event.target.value;
         setSelectedDate(dateId);
         const dateObj = availableDates.find(d => d.id === dateId);
-        console.log(dateObj);
         setSelectedDateObj(dateObj || null);
     };
 
@@ -173,7 +175,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                     />
 
                     {/* Right side - Content */}
-                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '65%' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '67%' }}>
                         <CardContent sx={{ flex: '1 0 auto', p: 2 }}>
                             {/* Tour Category & Duration */}
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
@@ -191,94 +193,97 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                             <Typography variant="h5" component="div" sx={{ mb: 1, mt: 2, fontSize: '1.5rem', fontWeight: 'bold' }}>
                                 {tour.tourName}
                             </Typography>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                                <Box>
-                                    {/* Code */}
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.7 }}>
-                                        <LocalActivity color="action" />
-                                        <Typography variant="body2" color="text.secondary"> {tour.code} </Typography>
-                                    </Box>
-
-                                    {/* Location */}
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                                        <LocationOn color="action" />
-                                        <Typography variant="body2" color="text.secondary"> {tour.provinces.join(' - ')} </Typography>
-                                    </Box>
-                                    {/* Booking Section */}
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mt: 'auto', width: '70%' }}>
-                                        {/* Date Selection Dropdown */}
-                                        <Select value={selectedDate} onChange={handleDateChange} displayEmpty size="small" sx={{ width: '28rem' }}>
-                                            <MenuItem value="" disabled>
-                                                Chọn ngày khởi hành
-                                            </MenuItem>
-                                            {availableDates?.map((date) => (
-                                                <MenuItem
-                                                    key={date.id} value={date.id}
-                                                    sx={{
-                                                        display: 'flex', flexDirection: 'column', alignItems: 'flex-start', py: 1
-                                                    }}
-                                                >
-                                                    <Box sx={{
-                                                        width: '100%', display: 'flex', flexDirection: 'column',
-                                                        justifyContent: 'space-between', mb: 1
-                                                    }}>
-                                                        <Typography variant="subtitle2">
-                                                            {new Date(date.startDate).toLocaleDateString('vi-VN')} - {new Date(date.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                                                        </Typography>
-                                                        <Typography variant="body2" color="text.secondary" noWrap>
-                                                            {date.startLocation.length > 47
-                                                                ? `${date.startLocation.substring(0, 47)}...`
-                                                                : date.startLocation}
-                                                        </Typography>
-                                                    </Box>
-                                                    <Box sx={{ width: '100%' }}>
-                                                        {date.prices?.map((priceInfo) => (
-                                                            <Box
-                                                                key={priceInfo.priceId}
-                                                                sx={{
-                                                                    display: 'flex', justifyContent: 'space-between',
-                                                                    alignItems: 'center', mb: 0.5
-                                                                }}
-                                                            >
-                                                                <Tooltip title={priceInfo.description || ''}>
-                                                                    <Typography variant="body2" color="text.secondary"> {priceInfo.name} </Typography>
-                                                                </Tooltip>
-                                                                <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }} >
-                                                                    {priceInfo.price?.toLocaleString('vi-VN')}đ
+                            {/* Code */}
+                            <Grid container spacing={2}>
+                                <Grid item xs={6.4}>
+                                    <Grid container spacing={1}>
+                                        <Grid item xs={5.5} sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <LocalActivity color="action" />
+                                            <Typography variant="body2" color="text.secondary">Mã: {tour.code} </Typography>
+                                        </Grid>
+                                        <Grid item xs={6.5} sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <DirectionsBus color="action" />
+                                            <Typography variant="body2" color="text.secondary">Phương tiện: {tour.transportation} </Typography>
+                                        </Grid>
+                                        <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <LocationOn color="action" />
+                                            <Typography variant="body2" color="text.secondary">Tour đi: {tour.provinces.join(' - ')} </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Box sx={{ display: 'flex', alignItems: 'flex-start', mt: 'auto' }}>
+                                                {/* Date Selection Dropdown */}
+                                                <Select value={selectedDate} onChange={handleDateChange} displayEmpty size="small" sx={{ width: '28rem' }}>
+                                                    <MenuItem value="" disabled>
+                                                        Chọn ngày khởi hành
+                                                    </MenuItem>
+                                                    {availableDates?.map((date) => (
+                                                        <MenuItem
+                                                            key={date.id} value={date.id}
+                                                            sx={{
+                                                                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', py: 1
+                                                            }}
+                                                        >
+                                                            <Box sx={{
+                                                                width: '100%', display: 'flex', flexDirection: 'column',
+                                                                justifyContent: 'space-between', mb: 1
+                                                            }}>
+                                                                <Typography variant="subtitle2">
+                                                                    Khởi hành lúc: {new Date(date.startDate).toLocaleDateString('vi-VN')} - {new Date(date.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                                </Typography>
+                                                                <Typography variant="body2" color="text.secondary" noWrap>
+                                                                    Khởi hành từ: {date.startLocation.length > 47
+                                                                        ? `${date.startLocation.substring(0, 47)}...`
+                                                                        : date.startLocation}
                                                                 </Typography>
                                                             </Box>
-                                                        ))}
-                                                    </Box>
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-
-                                        {/* Booking Calculation Box */}
-                                        {selectedDate && booking && selectedDateObj && (
-                                            <Box sx={{ width: '80%', display: 'flex', height: '70%'}}>
-                                                <BookingCalBox
-                                                    booking={booking}
-                                                    selectedDateObj={selectedDateObj}
-                                                    calculatePriceDetails={calculatePriceDetails}
-                                                    getTotalAmount={getTotalAmount}
-                                                    onTotalCalculated={setCalculatedTotal}
-                                                />
+                                                            <Box sx={{ width: '100%' }}>
+                                                                {date.prices?.map((priceInfo) => (
+                                                                    <Box
+                                                                        key={priceInfo.priceId}
+                                                                        sx={{
+                                                                            display: 'flex', justifyContent: 'space-between',
+                                                                            alignItems: 'center', mb: 0.5
+                                                                        }}
+                                                                    >
+                                                                        <Tooltip title={priceInfo.description || ''}>
+                                                                            <Typography variant="body2" color="text.secondary"> {priceInfo.name} </Typography>
+                                                                        </Tooltip>
+                                                                        <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }} >
+                                                                            {priceInfo.price?.toLocaleString('vi-VN')}đ
+                                                                        </Typography>
+                                                                    </Box>
+                                                                ))}
+                                                            </Box>
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
                                             </Box>
-                                        )}
-
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, width: '100%', mt: 12, alignItems: 'center', ml: 1 }}>
-                                            <Button variant="contained" disabled={!selectedDate} onClick={handleBookClick} sx={{ textTransform: 'none', minWidth: 120 }}>
-                                                Chọn tour
-                                            </Button>
-
-                                            <ExpandButton onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more" sx={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}>
-                                                <ExpandMore sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s' }} />
-                                                {expanded ? 'Thu gọn' : 'Xem thêm'}
-                                            </ExpandButton>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={3.8}>
+                                    {selectedDate && booking && selectedDateObj && (
+                                        <Box sx={{ display: 'flex', height: '70%' }}>
+                                            <BookingCalBox
+                                                booking={booking}
+                                                selectedDateObj={selectedDateObj}
+                                                calculatePriceDetails={calculatePriceDetails}
+                                                getTotalAmount={getTotalAmount}
+                                                onTotalCalculated={setCalculatedTotal}
+                                            />
                                         </Box>
-                                    </Box>
-                                </Box>
-                            </Box>
+                                    )}
+                                </Grid>
+                                <Grid item xs={1.8} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexDirection: 'column' }}>
+                                    <Button variant="contained" disabled={!selectedDate} onClick={handleBookClick} sx={{ textTransform: 'none' }}>
+                                        Chọn tour
+                                    </Button>
+                                    <ExpandButton onClick={handleExpandClick} aria-expanded={expanded} aria-label="show more" sx={{ fontSize: '0.9rem' }}>
+                                        <ExpandMore sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.3s' }} />
+                                        {expanded ? 'Thu gọn' : 'Xem thêm'}
+                                    </ExpandButton>
+                                </Grid>
+                            </Grid>
                         </CardContent>
                     </Box>
                 </Box>
@@ -351,14 +356,38 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         {/* Chính sách */}
                         {selectedTab === 2 && (
                             <Box sx={{ p: 3 }}>
-                                <Typography variant="h6" gutterBottom>Chính sách hoàn tiền:</Typography>
-                                {tour.tours?.[0]?.tourPolicies?.map((policy, index) => (
-                                    <Box key={index} sx={{ mb: 2, display: 'flex' }}>
-                                        <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                                            Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN')} - Hoàn tiền {policy.refundPercent}%
+                                {selectedDateObj ? (
+                                    <>
+                                        <Typography variant="h6" gutterBottom>Chính sách thanh toán:</Typography>
+                                        {selectedDateObj?.depositPercent === 100 ? (
+                                            <Typography variant="subtitle1">
+                                                - Thanh toán hết toàn bộ khi đăng ký
+                                            </Typography>
+                                        ) : (
+                                            <>
+                                                <Typography variant="subtitle1">
+                                                    - Thanh toán {selectedDateObj?.depositPercent}% khi đăng ký
+                                                </Typography>
+                                                <Typography variant="subtitle1">
+                                                    - Thanh toán hết toàn bộ trước {new Date(selectedDateObj?.paymentDeadline).toLocaleDateString('vi-VN')}
+                                                </Typography>
+                                            </>
+                                        )}
+                                        <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Chính sách hủy tour:</Typography>
+                                        {selectedDateObj?.tourPolicies?.map((policy, index) => (
+                                            <Box key={index} sx={{ display: 'flex' }}>
+                                                <Typography variant="subtitle1">
+                                                    - Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN')} - Chi phí hủy tour {policy.refundPercent}% giá trị booking
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                        <Typography variant="subtitle1">
+                                            - Hủy từ ngày {new Date(selectedDateObj?.tourPolicies?.[selectedDateObj.tourPolicies.length - 1]?.cancelBefore).toLocaleDateString('vi-VN')} - Chi phí hủy tour 100% giá trị booking
                                         </Typography>
-                                    </Box>
-                                ))}
+                                    </>
+                                ) : (
+                                    <Typography variant="subtitle1">Vui lòng chọn ngày khởi hành để xem chính sách</Typography>
+                                )}
                             </Box>
                         )}
 

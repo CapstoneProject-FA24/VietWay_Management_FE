@@ -41,7 +41,8 @@ export const BookingStatus = {
   Deposited: 1,
   Paid: 2,
   Completed: 3,
-  Cancelled: 4
+  Cancelled: 4,
+  PendingChangeConfirmation: 5
 };
 
 export const PaymentStatus = {

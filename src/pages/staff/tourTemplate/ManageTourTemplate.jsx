@@ -25,7 +25,7 @@ const ManageTourTemplate = () => {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [selectedDuration, setSelectedDuration] = useState([]);
-    const [statusTab, setStatusTab] = useState('all');
+    const [statusTab, setStatusTab] = useState('0');
     const location = useLocation();
     const currentPage = location.pathname;
     const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -222,7 +222,7 @@ const ManageTourTemplate = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="tour template status tabs" variant="scrollable" scrollButtons="auto">
-                            <Tab label="Tất cả" value="all" />
+                            {/* <Tab label="Tất cả" value="all" /> */}
                             <Tab label="Bản nháp" value="0" />
                             <Tab label="Chờ duyệt" value="1" />
                             <Tab label="Đã duyệt" value="2" />

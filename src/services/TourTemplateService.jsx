@@ -299,6 +299,7 @@ export const fetchTourTemplatesWithTourInfo = async (params) => {
         if (params.startDateTo) queryParams.append('startDateTo', params.startDateTo);
         if (params.minPrice) queryParams.append('minPrice', params.minPrice);
         if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice);
+        if (params.tourId) queryParams.append('tourId', params.tourId);
 
         const response = await axios.get(`${baseURL}/api/TourTemplate/with-tour-info?${queryParams.toString()}`, {
             headers: {
@@ -322,6 +323,7 @@ export const fetchTourTemplatesWithTourInfo = async (params) => {
             note: item.note,
             provinces: item.provinces,
             imageUrl: item.imageUrl,
+            transportation: item.transportation,
             schedules: item.schedules.map(schedule => ({
                 dayNumber: schedule.dayNumber,
                 title: schedule.title,
@@ -345,6 +347,8 @@ export const fetchTourTemplatesWithTourInfo = async (params) => {
                 maxParticipant: tour.maxParticipant,
                 minParticipant: tour.minParticipant,
                 currentParticipant: tour.currentParticipant,
+                depositPercent: tour.depositPercent,
+                paymentDeadline: tour.paymentDeadline,
                 tourPrices: tour.tourPrices.map(price => ({
                     priceId: price.priceId,
                     name: price.name,

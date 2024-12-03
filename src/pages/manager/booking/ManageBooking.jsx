@@ -49,6 +49,10 @@ const ManageBooking = () => {
     [BookingStatus.Cancelled]: {
       label: getBookingStatusInfo(BookingStatus.Cancelled).text,
       color: getBookingStatusInfo(BookingStatus.Cancelled).color
+    },
+    [BookingStatus.PendingChangeConfirmation]: {
+      label: getBookingStatusInfo(BookingStatus.PendingChangeConfirmation).text,
+      color: getBookingStatusInfo(BookingStatus.PendingChangeConfirmation).color
     }
   };
 
@@ -260,6 +264,10 @@ const ManageBooking = () => {
               <Tab 
                 label={statusDisplay[BookingStatus.Cancelled].label} 
                 value={BookingStatus.Cancelled.toString()} 
+              />
+              <Tab 
+                label={statusDisplay[BookingStatus.PendingChangeConfirmation].label} 
+                value={BookingStatus.PendingChangeConfirmation.toString()} 
               />
             </Tabs>
           </Grid>

@@ -428,7 +428,7 @@ const ManagerTourDetail = () => {
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                      <Typography>Người lớn (trên 12 tuổi): {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
+                      <Typography>Người lớn (từ 12 tuổi trở lên): {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
                       {tour.tourPrices?.map((price, index) => (
                         <Typography key={index}>
                           {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} VND

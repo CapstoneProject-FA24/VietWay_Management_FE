@@ -113,6 +113,8 @@ export const getBookingStatusInfo = (statusCode) => {
       return { text: "Hoàn tất", color: "#9d9d9d" };
     case BookingStatus.Cancelled:
       return { text: "Đã hủy", color: "#F44336" };
+    case BookingStatus.PendingChangeConfirmation:
+      return { text: "Chờ xác nhận đổi tour", color: "#6c80f5" };
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
   }
