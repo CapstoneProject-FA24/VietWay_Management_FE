@@ -10,7 +10,7 @@ export const fetchCustomer = async (params) => {
         queryParams.append('pageIndex', params.pageIndex);
         if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
 
-        const response = await axios.get(`${baseURL}/api/customer?${queryParams.toString()}`, {
+        const response = await axios.get(`${baseURL}/api/customers?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -49,7 +49,7 @@ export const changeCustomerStatus = async (customerId, isDeleted) => {
     const token = getCookie('token');
     try {
         const response = await axios.patch(
-            `${baseURL}/api/customer/${customerId}?isDeleted=${isDeleted}`, null,
+            `${baseURL}/api/customers/${customerId}?isDeleted=${isDeleted}`, null,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`

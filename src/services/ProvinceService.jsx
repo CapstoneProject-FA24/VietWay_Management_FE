@@ -9,7 +9,7 @@ export const fetchProvinces = async (params) => {
         queryParams.append('pageSize', params.pageSize || 63);
         queryParams.append('pageIndex', params.pageIndex || 1);
         if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
-        const response = await axios.get(`${baseURL}/api/Province?${queryParams.toString()}`, {
+        const response = await axios.get(`${baseURL}/api/provinces?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -34,7 +34,7 @@ export const fetchProvinces = async (params) => {
 export const updateProvince = async (provinceId, request) => {
     const token = getCookie('token');
     try {
-        const response = await axios.put(`${baseURL}/api/Province/${provinceId}`, request, {
+        const response = await axios.put(`${baseURL}/api/provinces/${provinceId}`, request, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -49,7 +49,7 @@ export const updateProvince = async (provinceId, request) => {
 export const deleteProvince = async (provinceId) => {
     const token = getCookie('token');
     try {
-        const response = await axios.delete(`${baseURL}/api/Province/${provinceId}`, {
+        const response = await axios.delete(`${baseURL}/api/provinces/${provinceId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -65,7 +65,7 @@ export const createProvince = async (request) => {
     const token = getCookie('token');
     try {
         const response = await axios.post(
-            `${baseURL}/api/Province`, request ,
+            `${baseURL}/api/provinces`, request ,
             {
                 headers: {
                     'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export const addOrUpdateProvinceImage = async (provinceId, imageFile) => {
         formData.append('newImage', imageFile);
 
         const response = await axios.patch(
-            `${baseURL}/api/Province/${provinceId}/images`,
+            `${baseURL}/api/provinces/${provinceId}/images`,
             formData,
             {
                 headers: {

@@ -10,7 +10,7 @@ export const fetchManager = async (params) => {
         queryParams.append('pageIndex', params.pageIndex);
         if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
 
-        const response = await axios.get(`${baseURL}/api/manager?${queryParams.toString()}`, {
+        const response = await axios.get(`${baseURL}/api/managers?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -69,7 +69,7 @@ export const changeManagerStatus = async (managerId, isDeleted) => {
     const token = getCookie('token');
     try {
         const response = await axios.patch(
-            `${baseURL}/api/manager/change-manager-account-status/${managerId}?isDeleted=${isDeleted}`, null,
+            `${baseURL}/api/managers/change-manager-account-status/${managerId}?isDeleted=${isDeleted}`, null,
             {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -87,7 +87,7 @@ export const updateManager = async (managerData) => {
     const token = getCookie('token');
     try {
         const response = await axios.put(
-            `${baseURL}/api/manager/${managerData.managerId}`,
+            `${baseURL}/api/managers/${managerData.managerId}`,
             managerData,
             {
                 headers: {

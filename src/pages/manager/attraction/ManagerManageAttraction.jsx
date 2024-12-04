@@ -47,7 +47,7 @@ const ManagerManageAttraction = () => {
                 nameSearch: searchTerm,
                 attractionTypeIds: selectedTypes.map(c => c.value),
                 provinceIds: selectedProvinces.map(p => p.value),
-                status: parseInt(statusTab)
+                statuses: statusTab == "all" ? [1, 2, 3] : [parseInt(statusTab)]
             };
             const result = await fetchAttractions(params);
             setAttractions(result.data);
@@ -201,6 +201,7 @@ const ManagerManageAttraction = () => {
                             <Tab label="Chờ duyệt" value="1" />
                             <Tab label="Đã duyệt" value="2" />
                             <Tab label="Từ chối" value="3" />
+                            <Tab label="Tất cả" value="all" />
                         </Tabs>
                     </Grid>
                 </Grid>

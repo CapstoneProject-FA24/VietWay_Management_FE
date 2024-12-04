@@ -244,7 +244,6 @@ const ManageBooking = () => {
               variant="scrollable"
               scrollButtons="auto"
             >
-              <Tab label="Tất cả" value="ALL" />
               <Tab 
                 label={statusDisplay[BookingStatus.Pending].label} 
                 value={BookingStatus.Pending.toString()} 
@@ -269,6 +268,7 @@ const ManageBooking = () => {
                 label={statusDisplay[BookingStatus.PendingChangeConfirmation].label} 
                 value={BookingStatus.PendingChangeConfirmation.toString()} 
               />
+              <Tab label="Tất cả" value="ALL" />
             </Tabs>
           </Grid>
         </Grid>

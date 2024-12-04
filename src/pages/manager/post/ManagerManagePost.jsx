@@ -62,7 +62,7 @@ const ManagerManagePost = () => {
           searchTerm: searchTerm,
           postCategoryIds: selectedCategories.map(cat => cat.value),
           provinceIds: selectedProvinces.map(prov => prov.value),
-          status: statusTab
+          statuses: statusTab == "all" ? [1, 2, 3] : [parseInt(statusTab)]
         };
 
         const response = await fetchPosts(params);
@@ -206,6 +206,7 @@ const ManagerManagePost = () => {
               <Tab label="Chờ duyệt" value="1" />
               <Tab label="Đã duyệt" value="2" />
               <Tab label="Từ chối" value="3" />
+              <Tab label="Tất cả" value="all" />
             </Tabs>
           </Grid>
 

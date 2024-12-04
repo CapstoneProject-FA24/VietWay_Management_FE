@@ -3,6 +3,7 @@ const baseURL = import.meta.env.VITE_API_URL;
 import { getCookie } from '@services/AuthenService';
 
 export const fetchAttractions = async (params) => {
+    console.log(params);
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
@@ -11,7 +12,7 @@ export const fetchAttractions = async (params) => {
         if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
         if (params.attractionTypeIds) params.attractionTypeIds.forEach(id => queryParams.append('attractionTypeIds', id));
         if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
-        if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
+        if (params.statuses) params.statuses.forEach(status => queryParams.append('statuses', status));
         const response = await axios.get(`${baseURL}/api/attractions?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`

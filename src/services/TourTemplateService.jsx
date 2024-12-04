@@ -22,9 +22,9 @@ export const fetchTourTemplates = async (params) => {
         if (params.templateCategoryIds) params.templateCategoryIds.forEach(id => queryParams.append('templateCategoryIds', id));
         if (params.durationIds) params.durationIds.forEach(id => queryParams.append('durationIds', id));
         if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
-        if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
+        if (params.statuses) params.statuses.forEach(status => queryParams.append('statuses', status));
 
-        const response = await axios.get(`${baseURL}/api/TourTemplate?${queryParams.toString()}`, {
+        const response = await axios.get(`${baseURL}/api/tour-templates?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -64,7 +64,7 @@ export const fetchTourTemplates = async (params) => {
 export const fetchTourTemplateById = async (id) => {
     const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/TourTemplate/${id}`, {
+        const response = await axios.get(`${baseURL}/api/tour-templates/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -121,7 +121,7 @@ export const createTourTemplate = async (tourTemplateData) => {
             })),
             isDraft: tourTemplateData.isDraft
         };
-        const response = await axios.post(`${baseURL}/api/TourTemplate`, requestData, {
+        const response = await axios.post(`${baseURL}/api/tour-templates`, requestData, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -157,7 +157,7 @@ export const updateTourTemplate = async (tourTemplateId, tourTemplateData) => {
             })),
             isDraft: tourTemplateData.isDraft
         };
-        const response = await axios.put(`${baseURL}/api/TourTemplate/${tourTemplateId}`, requestData, {
+        const response = await axios.put(`${baseURL}/api/tour-templates/${tourTemplateId}`, requestData, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -184,7 +184,7 @@ export const updateTemplateImages = async (tourTemplateId, newImages, deletedIma
             });
         }
 
-        const response = await axios.patch(`${baseURL}/api/TourTemplate/${tourTemplateId}/images`, formData, {
+        const response = await axios.patch(`${baseURL}/api/tour-templates/${tourTemplateId}/images`, formData, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data'
@@ -205,7 +205,7 @@ export const changeTourTemplateStatus = async (tourTemplateId, status, reason) =
             reason: reason
         };
 
-        const response = await axios.patch(`${baseURL}/api/TourTemplate/change-tour-template-status/${tourTemplateId}`, requestData, {
+        const response = await axios.patch(`${baseURL}/api/tour-templates/change-tour-template-status/${tourTemplateId}`, requestData, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -220,7 +220,7 @@ export const changeTourTemplateStatus = async (tourTemplateId, status, reason) =
 export const getTourTemplateReviews = async (tourTemplateId, options) => {
     const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/TourTemplate/${tourTemplateId}/reviews`, {
+        const response = await axios.get(`${baseURL}/api/tour-templates/${tourTemplateId}/reviews`, {
             params: {
                 ratingValue: options.ratingValue,
                 hasReviewContent: options.hasReviewContent,
@@ -255,7 +255,7 @@ export const getTourTemplateReviews = async (tourTemplateId, options) => {
 export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
     const token = getCookie('token');
     try {
-        const response = await axios.patch(`${baseURL}/api/TourTemplate/reviews/${reviewId}/hide`, {
+        const response = await axios.patch(`${baseURL}/api/tour-templates/reviews/${reviewId}/hide`, {
             isHided: isHidden,
             reason: reason
         }, {
@@ -273,7 +273,7 @@ export const toggleReviewVisibility = async (reviewId, isHidden, reason) => {
 export const deleteTourTemplate = async (tourTemplateId) => {
     const token = getCookie('token');
     try {
-        const response = await axios.delete(`${baseURL}/api/TourTemplate/${tourTemplateId}`, {
+        const response = await axios.delete(`${baseURL}/api/tour-templates/${tourTemplateId}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -301,7 +301,7 @@ export const fetchTourTemplatesWithTourInfo = async (params) => {
         if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice);
         if (params.tourId) queryParams.append('tourId', params.tourId);
 
-        const response = await axios.get(`${baseURL}/api/TourTemplate/with-tour-info?${queryParams.toString()}`, {
+        const response = await axios.get(`${baseURL}/api/tour-templates/with-tour-info?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

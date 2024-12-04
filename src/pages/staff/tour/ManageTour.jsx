@@ -312,7 +312,6 @@ const ManageTour = () => {
           variant="scrollable"
           scrollButtons="auto"
         >
-          {/* <Tab label="Tất cả" value="all" /> */}
           {Object.entries(TourStatus).map(([key, value]) => (
             <Tab 
               key={value}
@@ -320,6 +319,7 @@ const ManageTour = () => {
               value={value.toString()}
             />
           ))}
+          <Tab label="Tất cả" value="all" />
         </Tabs>
 
         {tours.length > 0 ? (
