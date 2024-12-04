@@ -16,7 +16,7 @@ import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { Helmet } from 'react-helmet';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
-import Map from '@components/staff/attraction/Map';
+import TourMap from '@components/tour/TourMap';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
@@ -387,9 +387,53 @@ const CreateTour = () => {
     handleNewTourChange('adultPrice', newAdultPrice);
   };
 
-  const handleSelectLocation = (placeId, address) => {
-    handleNewTourChange('startAddress', address);
-    handleNewTourChange('placeId', placeId); // Assuming you have a placeId field
+  const handleSelectLocation = (placeData) => {
+    handleNewTourChange('startAddress', placeData.address);
+    handleNewTourChange('startLocationPlaceId', placeData.place_id);
+    
+    // Add validation error if province doesn't match
+    if (!placeData.isValidProvince) {
+      setErrors(prev => ({
+        ...prev,
+        startAddress: `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}`
+      }));
+    } else {
+      // Clear the error if province is valid
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.startAddress;
+        return newErrors;
+      });
+    }
+  };
+
+  const validateAddress = (address) => {
+    if (!address || !tourTemplate?.startingProvince?.provinceName) return true;
+    
+    // Convert to lowercase and remove diacritics for more flexible matching
+    const normalizedAddress = address.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const normalizedProvince = tourTemplate.startingProvince.provinceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    
+    return normalizedAddress.includes(normalizedProvince);
+  };
+
+  const handleAddressChange = (e) => {
+    const newAddress = e.target.value;
+    handleNewTourChange('startAddress', newAddress);
+    
+    // Validate address when changed
+    if (!validateAddress(newAddress)) {
+      setErrors(prev => ({
+        ...prev,
+        startAddress: `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}`
+      }));
+    } else {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.startAddress;
+        return newErrors;
+      });
+    }
   };
 
   return (
@@ -448,29 +492,33 @@ const CreateTour = () => {
                   fullWidth
                   variant="outlined"
                   value={tourData.startAddress}
-                  onChange={(e) => handleNewTourChange('startAddress', e.target.value)}
+                  onChange={handleAddressChange}
                   error={!!errors.startAddress}
                   helperText={errors.startAddress}
                   sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ style: { height: '15px' } }}
                 />
-                {/* <TextField
-                  label="Place Id của điểm bắt đầu"
+                <TextField
+                  label="Place Id của điểm bắt đầu chọn trên map"
                   fullWidth
                   variant="outlined"
-                  value={newTourData.startAddress}
-                  onChange={(e) => handleNewTourChange('startAddress', e.target.value)}
-                  error={!!errors.startAddress}
-                  helperText={errors.startAddress}
+                  value={tourData.startLocationPlaceId}
+                  onChange={(e) => handleNewTourChange('startLocationPlaceId', e.target.value)}
+                  error={!!errors.startLocationPlaceId}
+                  helperText={errors.startLocationPlaceId}
                   sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ style: { height: '15px' } }}
+                  disabled="true"
                 />
                 <Box sx={{
                   height: '500px', width: '100%', position: 'relative', mb: 3,
                   overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
                 }}>
-                  <Map />
-                </Box> */}
+                  <TourMap 
+                    onPlaceSelect={handleSelectLocation}
+                    startingProvince={tourTemplate?.startingProvince?.provinceName}
+                  />
+                </Box>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Box sx={{ mb: 2 }}>
                     <DatePicker
