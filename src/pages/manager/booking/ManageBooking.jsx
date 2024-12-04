@@ -27,6 +27,8 @@ const ManageBooking = () => {
     bookingId: null,
     reason: ''
   });
+  const [searchByCode, setSearchByCode] = useState('');
+  const [tempSearchByCode, setTempSearchByCode] = useState('');
   const navigate = useNavigate();
 
   const statusDisplay = {
@@ -58,17 +60,20 @@ const ManageBooking = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, [page, pageSize, searchText, statusFilter]);
+  }, [page, pageSize, searchText, searchByCode, statusFilter]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
+
+      const isNumber = /^\d+$/.test(searchText);
+
       const response = await getBookings(
         pageSize,
         page,
-        searchText,
-        searchText,
-        searchText,
+        searchByCode,
+        isNumber ? undefined : searchText,
+        isNumber ? searchText : undefined,
         statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
       );
       
@@ -160,6 +165,11 @@ const ManageBooking = () => {
     }
   };
 
+  const handleSearchByCode = () => {
+    setSearchByCode(tempSearchByCode);
+    setPage(1);
+  };
+
   const sortedBookings = bookings
     .sort((a, b) => {
       switch (sortOrder) {
@@ -198,7 +208,31 @@ const ManageBooking = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <TextField
                 variant="outlined"
-                placeholder="Tìm kiếm theo mã, tên, số điện thoại..."
+                placeholder="Tìm kiếm theo mã booking"
+                size="small"
+                sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
+                value={tempSearchByCode}
+                onChange={(e) => setTempSearchByCode(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSearchByCode}
+                sx={{ backgroundColor: 'lightGray', color: 'black' }}
+              >
+                Tìm kiếm
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <TextField
+                variant="outlined"
+                placeholder="Tìm kiếm theo tên, số điện thoại"
                 size="small"
                 sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
                 value={tempSearchText}
@@ -211,8 +245,8 @@ const ManageBooking = () => {
                   ),
                 }}
               />
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={handleSearch}
                 sx={{ backgroundColor: 'lightGray', color: 'black' }}
               >

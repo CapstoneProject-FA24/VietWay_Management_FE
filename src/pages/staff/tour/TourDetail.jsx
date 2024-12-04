@@ -65,6 +65,7 @@ const TourDetail = () => {
   useEffect(() => {
     if (tour && !editTourData) {
       setEditTourData({
+        startLocationPlaceId: tour.startLocationPlaceId,
         startAddress: tour.startLocation,
         startDate: dayjs(tour.startDate),
         startTime: dayjs(tour.startTime),

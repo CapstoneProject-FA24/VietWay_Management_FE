@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import { updateTour } from '@services/TourService';
 import { InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import TourMap from '@components/tour/TourMap';
 
 const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
   if (policies.length === 0) {
@@ -54,13 +55,15 @@ const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDe
 };
 
 const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingProvince }) => {
-  const navigate = useNavigate();
+  useEffect(() => {
+    validateForm();
+  }, []);
 
   const initialStartTime = () => {
     const [hours, minutes] = tour.startTime.split(':');
     return dayjs().hour(parseInt(hours)).minute(parseInt(minutes));
   };
-
+  const [startAddressError, setStartAddressError] = useState("");
   const [tourData, setTourData] = useState({
     startLocation: tour.startLocation || '',
     startLocationPlaceId: tour.startLocationPlaceId || '',
@@ -147,12 +150,15 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
     }
   };
 
-  // Update validateForm function
   const validateForm = () => {
     const newErrors = {};
 
-    if (!tourData.startLocation?.trim()) {
-      newErrors.startLocation = "Vui lòng nhập địa điểm khởi hành";
+    if (!tourData.startLocation) {
+      newErrors.startLocation = "Vui lòng chọn điểm khởi hành";
+    } else if (!validateAddress(tourData.startLocation)) {
+      setStartAddressError(`Địa điểm phải thuộc ${startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
+    } else {
+      setStartAddressError("");
     }
 
     if (!tourData.startDate) {
@@ -223,6 +229,14 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
       }
     }
 
+    if (!!getMaxParticipantsError()) {
+      newErrors.maxParticipant = getMaxParticipantsError();
+    }
+
+    if (!!getMinParticipantsError()) {
+      newErrors.minParticipant = getMinParticipantsError();
+    }
+
     // Add refund policy validation
     const policyValidation = validateRefundPolicies(
       tourData.tourPolicies,
@@ -233,10 +247,8 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
     );
 
     if (!policyValidation.isValid) {
-      // Merge policy errors with other form errors
       Object.assign(newErrors, policyValidation.errors);
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -263,7 +275,6 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       setSnackbar({
         open: true,
@@ -362,6 +373,65 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
     }
   };
 
+  const handleSelectLocation = (placeData) => {
+    const normalizeText = (text) => {
+      return text.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/d\./g, "duong")
+        .replace(/p\./g, "pho")
+        .replace(/\s+/g, "")
+        .replace(/\,/g, "");
+    };
+
+    const newName = normalizeText(placeData.name);
+    const newAddress = normalizeText(placeData.address);
+
+    // Update tourData with new address
+    if (newAddress.includes(newName)) {
+      setTourData(prev => ({
+        ...prev,
+        startLocation: placeData.address,
+        startLocationPlaceId: placeData.place_id
+      }));
+    } else {
+      setTourData(prev => ({
+        ...prev,
+        startLocation: `${placeData.name} - ${placeData.address}`,
+        startLocationPlaceId: placeData.place_id
+      }));
+    }
+
+    // Update error message
+    if (!validateAddress(`${placeData.name} - ${placeData.address}`)) {
+      setStartAddressError(`Địa điểm phải thuộc ${startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
+    } else {
+      setStartAddressError("");
+    }
+  };
+
+  const validateAddress = (address) => {
+    if (!address || !startingProvince?.provinceName) return true;
+
+    // Convert to lowercase and remove diacritics for more flexible matching
+    const normalizedAddress = address.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const normalizedProvince = startingProvince.provinceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    return normalizedAddress.includes(normalizedProvince);
+  };
+
+  const handleAddressChange = (e) => {
+    const newAddress = e.target.value;
+    setTourData(prev => ({ ...prev, startLocation: newAddress }));
+    
+    if (!validateAddress(newAddress)) {
+      setStartAddressError(`Địa điểm phải thuộc ${startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
+    } else {
+      setStartAddressError("");
+    }
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Box sx={{ mb: 3 }}>
@@ -374,12 +444,30 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
           fullWidth
           variant="outlined"
           value={tourData.startLocation}
-          onChange={(e) => setTourData(prev => ({ ...prev, startLocation: e.target.value }))}
+          onChange={handleAddressChange}
           error={!!errors.startLocation}
           helperText={errors.startLocation}
           sx={{ mb: 2, mt: 1.5 }}
           inputProps={{ style: { height: '15px' } }}
         />
+        <Typography sx={{ fontSize: '0.75rem', color: 'red', mt: -2, mb: 2 }} >
+          {startAddressError}
+        </Typography>
+        <Box sx={{
+          height: '500px',
+          width: '100%',
+          position: 'relative',
+          mb: 3,
+          overflow: 'hidden',
+          borderRadius: '10px',
+          border: '1px solid #e0e0e0'
+        }}>
+          <TourMap
+            onPlaceSelect={handleSelectLocation}
+            startingProvince={startingProvince?.provinceName}
+            searchValue={tourData.startLocation}
+          />
+        </Box>
 
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Box sx={{ mb: 2 }}>
@@ -461,12 +549,12 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
         <TextField
           label="Số khách tối đa" fullWidth type="number" variant="outlined" value={tourData.maxParticipant}
           onChange={(e) => setTourData(prev => ({ ...prev, maxParticipant: e.target.value }))} sx={{ mb: 2 }}
-          error={!!getMaxParticipantsError()} helperText={getMaxParticipantsError()} inputProps={{ style: { height: '15px' } }}
+          error={!!errors.maxParticipant} helperText={errors.maxParticipant} inputProps={{ style: { height: '15px' } }}
         />
         <TextField
           label="Số khách tối thiểu" fullWidth type="number" variant="outlined" value={tourData.minParticipant}
           onChange={(e) => setTourData(prev => ({ ...prev, minParticipant: e.target.value }))}
-          error={!!getMinParticipantsError()} helperText={getMinParticipantsError()} inputProps={{ style: { height: '15px' } }}
+          error={!!errors.minParticipant} helperText={errors.minParticipant} inputProps={{ style: { height: '15px' } }}
         />
       </Box>
 

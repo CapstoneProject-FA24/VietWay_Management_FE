@@ -58,9 +58,8 @@ const CreateTour = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [errors, setErrors] = useState({});
-  const [isMapPopupOpen, setIsMapPopupOpen] = useState(false);
+  const [startAddressError, setStartAddressError] = useState("");
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
-  const [touchedFields, setTouchedFields] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,7 +105,6 @@ const CreateTour = () => {
 
   const handleNewTourChange = (field, value) => {
     setTourData(prev => ({ ...prev, [field]: value }));
-    setTouchedFields(prev => ({ ...prev, [field]: true }));
   };
 
   const validatePrice = (price, minPrice, maxPrice) => {
@@ -137,7 +135,6 @@ const CreateTour = () => {
         i === index ? { ...policy, [field]: value } : policy
       )
     }));
-    setTouchedFields(prev => ({ ...prev, [`policy${index}${field}`]: true }));
   };
 
   const handleCloseSnackbar = () => {
@@ -322,6 +319,7 @@ const CreateTour = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(validateForm());
     if (!validateForm()) {
       return;
     }
@@ -359,11 +357,9 @@ const CreateTour = () => {
         paymentDeadline: Number(tourData.depositPercent) === 100 ? null : tourData.paymentDeadline
       };
 
-      console.log(formData);
-
-      await createTour(formData);
-      setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
-      navigate('/nhan-vien/tour-du-lich');
+      //await createTour(formData);
+      //setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
+      //navigate('/nhan-vien/tour-du-lich');
     } catch (error) {
       setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error' });
       console.error('Error creating tour:', error);
@@ -388,51 +384,58 @@ const CreateTour = () => {
   };
 
   const handleSelectLocation = (placeData) => {
-    handleNewTourChange('startAddress', placeData.address);
+
+    const normalizeText = (text) => {
+      return text.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/d\./g, "duong")
+        .replace(/p\./g, "pho")
+        .replace(/\s+/g, "")
+        .replace(/\,/g, "");
+    };
+
+    const newName = normalizeText(placeData.name);
+    const newAddress = normalizeText(placeData.address);
+
+    if (newAddress.includes(newName)) {
+      handleNewTourChange('startAddress', placeData.address);
+    }
+    else {
+      handleNewTourChange('startAddress', `${placeData.name} - ${placeData.address}`);
+    }
+
     handleNewTourChange('startLocationPlaceId', placeData.place_id);
-    
+
     // Add validation error if province doesn't match
-    if (!placeData.isValidProvince) {
-      setErrors(prev => ({
-        ...prev,
-        startAddress: `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}`
-      }));
+    if (!validateAddress(`${placeData.name} - ${placeData.address}`)) {
+      console.log(startAddressError);
+      setStartAddressError(`Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
     } else {
-      // Clear the error if province is valid
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.startAddress;
-        return newErrors;
-      });
+      setStartAddressError("");
     }
   };
 
   const validateAddress = (address) => {
     if (!address || !tourTemplate?.startingProvince?.provinceName) return true;
-    
+
     // Convert to lowercase and remove diacritics for more flexible matching
     const normalizedAddress = address.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const normalizedProvince = tourTemplate.startingProvince.provinceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
+
     return normalizedAddress.includes(normalizedProvince);
   };
 
   const handleAddressChange = (e) => {
     const newAddress = e.target.value;
     handleNewTourChange('startAddress', newAddress);
-    
+
     // Validate address when changed
     if (!validateAddress(newAddress)) {
-      setErrors(prev => ({
-        ...prev,
-        startAddress: `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}`
-      }));
+      setStartAddressError(`Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
     } else {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors.startAddress;
-        return newErrors;
-      });
+      setStartAddressError("");
     }
   };
 
@@ -488,7 +491,7 @@ const CreateTour = () => {
                   Tour phải khởi hành từ {tourTemplate?.startingProvince?.provinceName}
                 </Typography>
                 <TextField
-                  label="Khởi hành từ"
+                  label="Khởi hành từ (có thể chọn từ bản đồ)"
                   fullWidth
                   variant="outlined"
                   value={tourData.startAddress}
@@ -498,23 +501,14 @@ const CreateTour = () => {
                   sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ style: { height: '15px' } }}
                 />
-                <TextField
-                  label="Place Id của điểm bắt đầu chọn trên map"
-                  fullWidth
-                  variant="outlined"
-                  value={tourData.startLocationPlaceId}
-                  onChange={(e) => handleNewTourChange('startLocationPlaceId', e.target.value)}
-                  error={!!errors.startLocationPlaceId}
-                  helperText={errors.startLocationPlaceId}
-                  sx={{ mb: 2, mt: 1.5 }}
-                  inputProps={{ style: { height: '15px' } }}
-                  disabled="true"
-                />
+                <Typography sx={{ fontSize: '0.75rem', color: 'red', mt: -2, mb: 2 }} >
+                  {startAddressError}
+                </Typography>
                 <Box sx={{
                   height: '500px', width: '100%', position: 'relative', mb: 3,
                   overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
                 }}>
-                  <TourMap 
+                  <TourMap
                     onPlaceSelect={handleSelectLocation}
                     startingProvince={tourTemplate?.startingProvince?.provinceName}
                   />

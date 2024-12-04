@@ -5,7 +5,7 @@ import { getBookings, createRefundTransaction } from '@services/BookingService';
 import { Search } from '@mui/icons-material';
 import BookingCard from '@components/manager/booking/BookingCard';
 import { Snackbar, Alert } from '@mui/material';
-import SidebarStaff from '@layouts/SidebarStaff'; 
+import SidebarStaff from '@layouts/SidebarStaff';
 import { Helmet } from 'react-helmet';
 import { BookingStatus } from '@hooks/Statuses';
 import { getBookingStatusInfo } from '@services/StatusService';
@@ -15,7 +15,9 @@ const ManageBooking = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [searchByCode, setSearchByCode] = useState('');
   const [tempSearchText, setTempSearchText] = useState('');
+  const [tempSearchByCode, setTempSearchByCode] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(1);
@@ -53,20 +55,24 @@ const ManageBooking = () => {
 
   useEffect(() => {
     fetchBookings();
-  }, [page, pageSize, searchText, statusFilter]);
+  }, [page, pageSize, searchText, searchByCode, statusFilter]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
+
+      // Determine if the search text is a number
+      const isNumber = /^\d+$/.test(searchText);
+
       const response = await getBookings(
         pageSize,
         page,
-        searchText,
-        searchText, 
-        searchText,
+        searchByCode, // bookingIdSearch
+        isNumber ? undefined : searchText, // Use searchText for name if not a number
+        isNumber ? searchText : undefined, // Use searchText for phone if it's a number
         statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
       );
-      
+
       setBookings(response.items || []);
       setTotalPages(Math.ceil(response.total / pageSize));
     } catch (error) {
@@ -109,6 +115,11 @@ const ManageBooking = () => {
     setPage(1);
   };
 
+  const handleSearchByCode = () => {
+    setSearchByCode(tempSearchByCode);
+    setPage(1);
+  };
+
   const handleSearch = () => {
     setSearchText(tempSearchText);
     setPage(1);
@@ -131,7 +142,7 @@ const ManageBooking = () => {
       fetchBookings();
     } catch (error) {
       console.error('Error creating refund transaction:', error);
-      if(error.response?.data?.error?.includes('Refund policy not found')){
+      if (error.response?.data?.error?.includes('Refund policy not found')) {
         showSnackbar('Không thể tìm thấy chính sách hoàn tiền.', 'error');
       } else {
         showSnackbar('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'error');
@@ -140,11 +151,11 @@ const ManageBooking = () => {
   };
 
   const sortedAndFilteredBookings = bookings
-    .filter(booking => 
+    .filter(booking =>
       (statusFilter === 'ALL' || booking.status === parseInt(statusFilter)) &&
       (booking.bookingId.toLowerCase().includes(searchText.toLowerCase()) ||
-       booking.contactFullName.toLowerCase().includes(searchText.toLowerCase()) ||
-       booking.contactPhoneNumber.includes(searchText))
+        booking.contactFullName.toLowerCase().includes(searchText.toLowerCase()) ||
+        booking.contactPhoneNumber.includes(searchText))
     )
     .sort((a, b) => {
       switch (sortOrder) {
@@ -166,14 +177,14 @@ const ManageBooking = () => {
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet> <title>Quản lý đặt tour</title> </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      
-      <Box sx={{ 
-        flexGrow: 1, 
-        p: 4, 
-        transition: 'margin-left 0.3s', 
-        marginLeft: isSidebarOpen ? '260px' : '20px', 
-        width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)', 
-        overflowX: 'hidden' 
+
+      <Box sx={{
+        flexGrow: 1,
+        p: 4,
+        transition: 'margin-left 0.3s',
+        marginLeft: isSidebarOpen ? '260px' : '20px',
+        width: isSidebarOpen ? 'calc(100vw - 260px)' : 'calc(100vw - 20px)',
+        overflowX: 'hidden'
       }}>
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} md={12} sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
@@ -184,7 +195,31 @@ const ManageBooking = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <TextField
                 variant="outlined"
-                placeholder="Tìm kiếm theo mã, tên, số điện thoại..."
+                placeholder="Tìm kiếm theo mã booking"
+                size="small"
+                sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
+                value={tempSearchByCode}
+                onChange={(e) => setTempSearchByCode(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSearchByCode}
+                sx={{ backgroundColor: 'lightGray', color: 'black' }}
+              >
+                Tìm kiếm
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <TextField
+                variant="outlined"
+                placeholder="Tìm kiếm theo tên, số điện thoại"
                 size="small"
                 sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
                 value={tempSearchText}
@@ -197,8 +232,8 @@ const ManageBooking = () => {
                   ),
                 }}
               />
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={handleSearch}
                 sx={{ backgroundColor: 'lightGray', color: 'black' }}
               >
@@ -207,52 +242,54 @@ const ManageBooking = () => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-            <Typography>Sắp xếp theo</Typography>
-            <Select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-              variant="outlined"
-              sx={{ width: '200px', ml: 2, height: '40px' }}
-            >
-              <MenuItem value="newest">Mới nhất</MenuItem>
-              <MenuItem value="oldest">Cũ nhất</MenuItem>
-              <MenuItem value="priceHighToLow">Giá cao - thấp</MenuItem>
-              <MenuItem value="priceLowToHigh">Giá thấp - cao</MenuItem>
-            </Select>
+          <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              <Typography>Sắp xếp theo</Typography>
+              <Select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                variant="outlined"
+                sx={{ width: '200px', ml: 2, height: '40px' }}
+              >
+                <MenuItem value="newest">Mới nhất</MenuItem>
+                <MenuItem value="oldest">Cũ nhất</MenuItem>
+                <MenuItem value="priceHighToLow">Giá cao - thấp</MenuItem>
+                <MenuItem value="priceLowToHigh">Giá thấp - cao</MenuItem>
+              </Select>
+            </Box>
           </Grid>
 
           <Grid item xs={12}>
-            <Tabs 
-              value={statusFilter} 
-              onChange={handleStatusChange} 
+            <Tabs
+              value={statusFilter}
+              onChange={handleStatusChange}
               aria-label="booking status tabs"
               variant="scrollable"
               scrollButtons="auto"
             >
-              <Tab 
-                label={statusDisplay[BookingStatus.Pending].label} 
-                value={BookingStatus.Pending.toString()} 
+              <Tab
+                label={statusDisplay[BookingStatus.Pending].label}
+                value={BookingStatus.Pending.toString()}
               />
-              <Tab 
-                label={statusDisplay[BookingStatus.Deposited].label} 
-                value={BookingStatus.Deposited.toString()} 
+              <Tab
+                label={statusDisplay[BookingStatus.Deposited].label}
+                value={BookingStatus.Deposited.toString()}
               />
-              <Tab 
-                label={statusDisplay[BookingStatus.Paid].label} 
-                value={BookingStatus.Paid.toString()} 
+              <Tab
+                label={statusDisplay[BookingStatus.Paid].label}
+                value={BookingStatus.Paid.toString()}
               />
-              <Tab 
-                label={statusDisplay[BookingStatus.Completed].label} 
-                value={BookingStatus.Completed.toString()} 
+              <Tab
+                label={statusDisplay[BookingStatus.Completed].label}
+                value={BookingStatus.Completed.toString()}
               />
-              <Tab 
-                label={statusDisplay[BookingStatus.Cancelled].label} 
-                value={BookingStatus.Cancelled.toString()} 
+              <Tab
+                label={statusDisplay[BookingStatus.Cancelled].label}
+                value={BookingStatus.Cancelled.toString()}
               />
-              <Tab 
-                label={statusDisplay[BookingStatus.PendingChangeConfirmation].label} 
-                value={BookingStatus.PendingChangeConfirmation.toString()} 
+              <Tab
+                label={statusDisplay[BookingStatus.PendingChangeConfirmation].label}
+                value={BookingStatus.PendingChangeConfirmation.toString()}
               />
               <Tab label="Tất cả" value="ALL" />
             </Tabs>
@@ -306,8 +343,8 @@ const ManageBooking = () => {
           onClose={handleCloseSnackbar}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          <Alert 
-            onClose={handleCloseSnackbar} 
+          <Alert
+            onClose={handleCloseSnackbar}
             severity={snackbar.severity}
             variant="filled"
           >

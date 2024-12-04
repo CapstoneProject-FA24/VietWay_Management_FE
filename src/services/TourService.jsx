@@ -16,6 +16,7 @@ export const fetchToursByTemplateId = async (id) => {
             id: item.tourId,
             tourTemplateId: item.tourTemplateId,
             startLocation: item.startLocation,
+            startLocationPlaceId: item.startLocationPlaceId,
             startTime: new Date(item.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
             startDate: new Date(item.startDate),
             defaultTouristPrice: item.defaultTouristPrice,

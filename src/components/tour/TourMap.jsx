@@ -130,7 +130,9 @@ function TourMap({ onPlaceSelect, startingProvince }) {
       return text.toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
-        .replace(/đ/g, 'd');
+        .replace(/đ/g, 'd')
+        .replace(/đ\./g, "đường")
+        .replace(/\s+/g, "");
     };
 
     const selectedProvince = normalizeText(provinceComponent.long_name);
@@ -150,7 +152,6 @@ function TourMap({ onPlaceSelect, startingProvince }) {
       }
 
       const isValidProvince = validateProvince(place.address_components);
-
       // Create marker with all necessary data
       const newMarker = {
         position: place.geometry.location,

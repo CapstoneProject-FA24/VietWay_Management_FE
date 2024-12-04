@@ -53,7 +53,7 @@ const ListApprovedTourTemplate = () => {
         templateCategoryIds: selectedCategories.map(c => c.value),
         durationIds: selectedDuration.map(d => d.value),
         provinceIds: selectedProvinces.map(p => p.value),
-        status: 2
+        statuses: [2]
       };
       const result = await fetchTourTemplates(params);
       setTourTemplates(result.data);
