@@ -98,7 +98,8 @@ const CreateTourTemplate = () => {
   }, []);
 
   const roundToThousand = (price) => {
-    return Math.ceil(price / 1000) * 1000;
+    if (!price || isNaN(price)) return '';
+    return Math.ceil(parseFloat(price) / 1000) * 1000;
   };
 
   useEffect(() => {
@@ -155,7 +156,7 @@ const CreateTourTemplate = () => {
   const handlePriceBlur = (field) => {
     const value = editableFields[field].value;
     if (!isNaN(value) && value !== '') {
-      const roundedValue = roundToThousand(parseFloat(value)).toString();
+      const roundedValue = roundToThousand(value).toString();
       handleFieldChange(field, roundedValue);
     }
   };
@@ -287,7 +288,7 @@ const CreateTourTemplate = () => {
 
         // Check provinces
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
-          alert('Vui lòng chọn ít nhất một t��nh thành.');
+          alert('Vui lòng chọn ít nhất một tnh thành.');
           return;
         }
 
