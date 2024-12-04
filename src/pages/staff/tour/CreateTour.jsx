@@ -343,8 +343,7 @@ const CreateTour = () => {
           ageTo: 4
         }
       ];
-
-      // Create a copy of tourData and handle paymentDeadline
+      
       const formData = {
         tourTemplateId: id,
         ...tourData,
@@ -352,13 +351,12 @@ const CreateTour = () => {
         tourPrices: tourPrices,
         refundPolicies: formattedPolicies,
         depositPercent: Number(tourData.depositPercent),
-        // Only include paymentDeadline if depositPercent is not 100
         paymentDeadline: Number(tourData.depositPercent) === 100 ? null : tourData.paymentDeadline
       };
 
-      //await createTour(formData);
-      //setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
-      //navigate('/nhan-vien/tour-du-lich');
+      await createTour(formData);
+      setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
+      navigate('/nhan-vien/tour-du-lich');
     } catch (error) {
       setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error' });
       console.error('Error creating tour:', error);

@@ -437,6 +437,19 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         );
     };
 
+    const roundToThousand = (price) => {
+        if (!price || isNaN(price)) return '';
+        return Math.ceil(parseFloat(price) / 1000) * 1000;
+    };
+
+    const handlePriceBlur = (field) => {
+        const value = editableFields[field].value;
+        if (!isNaN(value) && value !== '') {
+            const roundedValue = roundToThousand(value).toString();
+            handleFieldChange(field, roundedValue);
+        }
+    };
+
     return (
         <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
@@ -687,6 +700,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                     handleFieldChange('minPrice', newValue);
                                     validatePrice(newValue, editableFields.maxPrice.value);
                                 }}
+                                onBlur={() => handlePriceBlur('minPrice')}
                                 variant="outlined"
                                 fullWidth
                                 placeholder="Giá thấp nhất"
@@ -707,6 +721,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                     handleFieldChange('maxPrice', newValue);
                                     validatePrice(editableFields.minPrice.value, newValue);
                                 }}
+                                onBlur={() => handlePriceBlur('maxPrice')}
                                 variant="outlined"
                                 fullWidth
                                 placeholder="Giá cao nhất"
