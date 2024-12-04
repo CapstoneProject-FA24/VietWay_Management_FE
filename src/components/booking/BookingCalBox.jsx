@@ -3,7 +3,6 @@ import { Box, Typography, Divider } from '@mui/material';
 
 const BookingCalBox = ({ booking, selectedDateObj, calculatePriceDetails, getTotalAmount, onTotalCalculated }) => {
     if (!booking || !selectedDateObj) return null;
-    console.log(selectedDateObj);
     const calculatePriceForTourist = (tourist, prices) => {
         const birthDate = new Date(tourist.dateOfBirth);
         const today = new Date();

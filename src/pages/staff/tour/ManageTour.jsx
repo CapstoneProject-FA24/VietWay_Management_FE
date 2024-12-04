@@ -43,7 +43,7 @@ const ManageTour = () => {
     status: ''
   });
   const [searchCode, setSearchCode] = useState("");
-  const [statusTab, setStatusTab] = useState("all");
+  const [statusTab, setStatusTab] = useState("0");
 
   const [pagination, setPagination] = useState({
     pageIndex: 1,
@@ -119,7 +119,9 @@ const ManageTour = () => {
           provinceIds: filters.location,
           status: statusTab === 'all' ? null : parseInt(statusTab),
           startDateFrom: dateRange.from ? dayjs(dateRange.from).format('YYYY-MM-DD') : null,
-          startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null
+          startDateTo: dateRange.to ? dayjs(dateRange.to).format('YYYY-MM-DD') : null,
+          sortBy: 'createdAt',
+          sortDirection: 'desc'
         };
 
         const response = await fetchTours({ params });
@@ -310,7 +312,6 @@ const ManageTour = () => {
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab label="Tất cả" value="all" />
           {Object.entries(TourStatus).map(([key, value]) => (
             <Tab 
               key={value}
@@ -318,6 +319,7 @@ const ManageTour = () => {
               value={value.toString()}
             />
           ))}
+          <Tab label="Tất cả" value="all" />
         </Tabs>
 
         {tours.length > 0 ? (

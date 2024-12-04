@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
@@ -10,7 +11,6 @@ import ReviewListTour from '@components/review/ReviewListTour';
 import TourTable from '@components/tourTemplate/TourTable';
 
 const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
-  console.log(tourTemplate);
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5, width: '100%' }}>
       <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
@@ -57,7 +57,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
               {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
+              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
             </Box>
           </Box>
@@ -195,7 +195,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
               </Typography>
             </Box>
             {tourTemplate.status === 2 && (
-              <Button variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#2954B5' } }}>Tạo tour từ mẫu</Button>
+              <Button component={Link} to={`/nhan-vien/tour-du-lich/tour-mau-duoc-duyet/tao-tour/${tourTemplate.tourTemplateId}`} variant="contained" fullWidth sx={{ mb: 2, height: '45px', backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#2954B5' } }}>Tạo tour từ mẫu</Button>
             )}
           </Paper>
         </Grid>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Collapse } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress, Collapse } from '@mui/material';
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionById, updateAttraction, updateAttractionImages } from '@services/AttractionService';
+import { fetchAttractionById, updateAttraction, updateAttractionImages, deleteAttraction } from '@services/AttractionService';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttractionInfo from '@components/staff/attraction/AttractionInfo';
@@ -15,6 +15,8 @@ import { AttractionStatus } from '@hooks/Statuses';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import { Snackbar, Alert } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -29,6 +31,13 @@ const AttractionDetail = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,8 +61,83 @@ const AttractionDetail = () => {
   const handleEdit = () => {
     setIsEditing(true);
   };
+  
+  const handleSendForApproval = async () => {
+    setIsSubmitting(true);
+    try {
+      console.log(attraction);
+      const requiredFields = {
+        name: 'Tên điểm tham quan',
+        description: 'Mô tả',
+        address: 'Địa chỉ',
+        provinceId: 'Tỉnh/Thành phố',
+        attractionTypeId: 'Loại điểm tham quan',
+      };
+
+      const missingFields = [];
+      Object.entries(requiredFields).forEach(([field, label]) => {
+        if (!attraction[field] || attraction[field].trim() === '') {
+          missingFields.push(label);
+        }
+      });
+
+      // Check for image
+      if (!attraction.images) {
+        missingFields.push('Hình ảnh');
+      }
+
+      if (missingFields.length > 0) {
+        setSnackbar({
+          open: true,
+          message: `Vui lòng điền đầy đủ thông tin trước khi gửi`,
+          severity: 'error'
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const updatedAttraction = {
+        id: id,
+        name: attraction.name,
+        description: attraction.description,
+        address: attraction.address,
+        contactInfo: attraction.contactInfo || '',
+        website: attraction.website || '',
+        provinceId: attraction.provinceId,
+        attractionTypeId: attraction.attractionTypeId,
+        googlePlaceId: attraction.googlePlaceId || '',
+        isDraft: false
+      };
+
+      const response = await updateAttraction(updatedAttraction);
+
+      setAttraction(prevPost => ({
+        ...prevPost,
+        ...updatedAttraction,
+        status: AttractionStatus.Pending
+      }));
+
+      setIsEditMode(false);
+      setSnackbar({
+        open: true,
+        message: 'Đã gửi điểm tham quan để duyệt',
+        severity: 'success'
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error sending for approval:', error);
+      setSnackbar({
+        open: true,
+        message: 'Lỗi khi gửi duyệt: ' + (error.response?.data?.message || error.message),
+        severity: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSave = async (attractionData, newImages, removedImageIds) => {
+    setIsSubmitting(true);
     try {
       const response = await updateAttraction(attractionData);
       if (response.status === 200) {
@@ -78,23 +162,13 @@ const AttractionDetail = () => {
     } catch (error) {
       console.error('Error updating attraction:', error);
       alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    /* if (window.confirm('Bạn có chắc chắn muốn xóa điểm tham quan này?')) {
-      try {
-        const response = await deleteAttraction(id);
-        if (response.status === 200) {
-          navigate('/nhan-vien/diem-tham-quan');
-        } else {
-          alert('Có lỗi xảy ra khi xóa điểm tham quan. Vui lòng thử lại.');
-        }
-      } catch (error) {
-        console.error('Error deleting attraction:', error);
-        alert('Có lỗi xảy ra khi xóa điểm tham quan. Vui lòng thử lại.');
-      }
-    } */
+    handleDeleteAttraction();
   };
 
   const handleSidebarToggle = () => {
@@ -116,6 +190,38 @@ const AttractionDetail = () => {
 
   const handleHistoryClick = () => {
     setIsHistoryOpen(!isHistoryOpen);
+  };
+
+  const handleDeleteAttraction = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAttraction(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa điểm tham quan thành công',
+        severity: 'success'
+      });
+      navigate(-1); // Navigate back after successful deletion
+    } catch (error) {
+      console.error('Error deleting attraction:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa điểm tham quan',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   const CancelConfirmationDialog = () => (
@@ -235,14 +341,25 @@ const AttractionDetail = () => {
                         Hủy sửa
                       </Button>
                     ) : (
-                      <Button
-                        variant="contained"
-                        startIcon={<EditIcon />}
-                        onClick={handleEdit}
-                        sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                      >
-                        Sửa
-                      </Button>
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                          onClick={handleSendForApproval}
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
+                        </Button>
+                        <Button
+                          variant="contained"
+                          startIcon={<EditIcon />}
+                          onClick={handleEdit}
+                          sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                        >
+                          Sửa
+                        </Button>
+                      </>
                     )}
                     <Button
                       variant="contained"
@@ -293,6 +410,32 @@ const AttractionDetail = () => {
         </Box>
       </Box>
       <CancelConfirmationDialog />
+
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Xác nhận xóa điểm tham quan</DialogTitle>
+        <DialogContent>
+          <Typography>Bạn có chắc chắn muốn xóa điểm tham quan này? Hành động này không thể hoàn tác.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog} color="primary">
+            Không
+          </Button>
+          <Button onClick={handleConfirmDelete} color="secondary" variant="contained">
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

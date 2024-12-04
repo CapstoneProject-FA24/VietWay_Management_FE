@@ -28,7 +28,6 @@ const ManageBookingDetail = () => {
       setLoading(true);
       setError(null);
       const data = await fetchBookingById(id);
-      console.log(data);
       setBooking(data);
     } catch (error) {
       setError('Không thể tải thông tin đặt tour');

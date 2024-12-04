@@ -27,6 +27,8 @@ const ManageBooking = () => {
     bookingId: null,
     reason: ''
   });
+  const [searchByCode, setSearchByCode] = useState('');
+  const [tempSearchByCode, setTempSearchByCode] = useState('');
   const navigate = useNavigate();
 
   const statusDisplay = {
@@ -34,45 +36,44 @@ const ManageBooking = () => {
       label: getBookingStatusInfo(BookingStatus.Pending).text,
       color: getBookingStatusInfo(BookingStatus.Pending).color
     },
-    [BookingStatus.Confirmed]: {
-      label: getBookingStatusInfo(BookingStatus.Confirmed).text,
-      color: getBookingStatusInfo(BookingStatus.Confirmed).color
+    [BookingStatus.Deposited]: {
+      label: getBookingStatusInfo(BookingStatus.Deposited).text,
+      color: getBookingStatusInfo(BookingStatus.Deposited).color
+    },
+    [BookingStatus.Paid]: {
+      label: getBookingStatusInfo(BookingStatus.Paid).text,
+      color: getBookingStatusInfo(BookingStatus.Paid).color
     },
     [BookingStatus.Completed]: {
       label: getBookingStatusInfo(BookingStatus.Completed).text,
       color: getBookingStatusInfo(BookingStatus.Completed).color
     },
-    [BookingStatus.Expired]: {
-      label: getBookingStatusInfo(BookingStatus.Expired).text,
-      color: getBookingStatusInfo(BookingStatus.Expired).color
-    },
     [BookingStatus.Cancelled]: {
       label: getBookingStatusInfo(BookingStatus.Cancelled).text,
       color: getBookingStatusInfo(BookingStatus.Cancelled).color
     },
-    [BookingStatus.PendingRefund]: {
-      label: getBookingStatusInfo(BookingStatus.PendingRefund).text,
-      color: getBookingStatusInfo(BookingStatus.PendingRefund).color
-    },
-    [BookingStatus.Refunded]: {
-      label: getBookingStatusInfo(BookingStatus.Refunded).text,
-      color: getBookingStatusInfo(BookingStatus.Refunded).color
+    [BookingStatus.PendingChangeConfirmation]: {
+      label: getBookingStatusInfo(BookingStatus.PendingChangeConfirmation).text,
+      color: getBookingStatusInfo(BookingStatus.PendingChangeConfirmation).color
     }
   };
 
   useEffect(() => {
     fetchBookings();
-  }, [page, pageSize, searchText, statusFilter]);
+  }, [page, pageSize, searchText, searchByCode, statusFilter]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
+
+      const isNumber = /^\d+$/.test(searchText);
+
       const response = await getBookings(
         pageSize,
         page,
-        searchText,
-        searchText,
-        searchText,
+        searchByCode,
+        isNumber ? undefined : searchText,
+        isNumber ? searchText : undefined,
         statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
       );
       
@@ -164,6 +165,11 @@ const ManageBooking = () => {
     }
   };
 
+  const handleSearchByCode = () => {
+    setSearchByCode(tempSearchByCode);
+    setPage(1);
+  };
+
   const sortedBookings = bookings
     .sort((a, b) => {
       switch (sortOrder) {
@@ -202,7 +208,31 @@ const ManageBooking = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <TextField
                 variant="outlined"
-                placeholder="Tìm kiếm theo mã, tên, số điện thoại..."
+                placeholder="Tìm kiếm theo mã booking"
+                size="small"
+                sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
+                value={tempSearchByCode}
+                onChange={(e) => setTempSearchByCode(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                variant="contained"
+                onClick={handleSearchByCode}
+                sx={{ backgroundColor: 'lightGray', color: 'black' }}
+              >
+                Tìm kiếm
+              </Button>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <TextField
+                variant="outlined"
+                placeholder="Tìm kiếm theo tên, số điện thoại"
                 size="small"
                 sx={{ width: '100%', maxWidth: '400px', mr: 1 }}
                 value={tempSearchText}
@@ -215,8 +245,8 @@ const ManageBooking = () => {
                   ),
                 }}
               />
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 onClick={handleSearch}
                 sx={{ backgroundColor: 'lightGray', color: 'black' }}
               >
@@ -248,14 +278,17 @@ const ManageBooking = () => {
               variant="scrollable"
               scrollButtons="auto"
             >
-              <Tab label="Tất cả" value="ALL" />
               <Tab 
                 label={statusDisplay[BookingStatus.Pending].label} 
                 value={BookingStatus.Pending.toString()} 
               />
               <Tab 
-                label={statusDisplay[BookingStatus.Confirmed].label} 
-                value={BookingStatus.Confirmed.toString()} 
+                label={statusDisplay[BookingStatus.Deposited].label} 
+                value={BookingStatus.Deposited.toString()} 
+              />
+              <Tab 
+                label={statusDisplay[BookingStatus.Paid].label} 
+                value={BookingStatus.Paid.toString()} 
               />
               <Tab 
                 label={statusDisplay[BookingStatus.Completed].label} 
@@ -266,13 +299,10 @@ const ManageBooking = () => {
                 value={BookingStatus.Cancelled.toString()} 
               />
               <Tab 
-                label={statusDisplay[BookingStatus.PendingRefund].label} 
-                value={BookingStatus.PendingRefund.toString()} 
+                label={statusDisplay[BookingStatus.PendingChangeConfirmation].label} 
+                value={BookingStatus.PendingChangeConfirmation.toString()} 
               />
-              <Tab 
-                label={statusDisplay[BookingStatus.Refunded].label} 
-                value={BookingStatus.Refunded.toString()} 
-              />
+              <Tab label="Tất cả" value="ALL" />
             </Tabs>
           </Grid>
         </Grid>

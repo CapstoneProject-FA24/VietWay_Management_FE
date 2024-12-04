@@ -1,4 +1,7 @@
-import { BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus, TourTemplateStatus, PaymentStatus } from "@hooks/Statuses";
+import {
+  BookingStatus, AttractionStatus, UserRole, TourStatus, PostStatus, TourTemplateStatus,
+  PaymentStatus, RefundStatus, EntityModifyAction
+} from "@hooks/Statuses";
 
 export const getAttractionStatusInfo = (statusCode) => {
   switch (statusCode) {
@@ -101,19 +104,17 @@ export const getTourTemplateStatusInfo = (statusCode) => {
 export const getBookingStatusInfo = (statusCode) => {
   switch (statusCode) {
     case BookingStatus.Pending:
-      return { text: "Đang chờ thanh toán", color: "#f0b302" };
-    case BookingStatus.Confirmed:
-      return { text: "Đã thanh toán", color: "#48d0ee" };
+      return { text: "Chờ thanh toán", color: "#FFA000" };
+    case BookingStatus.Deposited:
+      return { text: "Đã đặt cọc", color: "#00cbdf" };
+    case BookingStatus.Paid:
+      return { text: "Đã thanh toán", color: "#2eb033" };
     case BookingStatus.Completed:
-      return { text: "Hoàn tất", color: "#1ec425" };
-    case BookingStatus.Expired:
-      return { text: "Hết hạn thanh toán", color: "#9b9b9b" };
+      return { text: "Hoàn tất", color: "#9d9d9d" };
     case BookingStatus.Cancelled:
-      return { text: "Đã hủy", color: "#dc4b40" };
-    case BookingStatus.PendingRefund:
-      return { text: "Đang chờ hoàn tiền", color: "#d55d0b" };
-    case BookingStatus.Refunded:
-      return { text: "Đã hoàn tiền", color: "#3f6eec" };
+      return { text: "Đã hủy", color: "#F44336" };
+    case BookingStatus.PendingChangeConfirmation:
+      return { text: "Chờ xác nhận đổi tour", color: "#6c80f5" };
     default:
       return { text: "Không xác định", color: "#9E9E9E" };
   }
@@ -131,5 +132,31 @@ export const getPaymentStatusInfo = (statusCode) => {
       return { text: "Đã hoàn tiền", color: "#3f6eec", textColor: "#002687", backgroundColor: "#b8d4ff" };
     default:
       return { text: "Không xác định", color: "#9E9E9E", textColor: "#424242", backgroundColor: "#E0E0E0" };
+  }
+};
+
+export const getRefundStatusInfo = (statusCode) => {
+  switch (statusCode) {
+    case RefundStatus.Pending:
+      return { text: "Đang chờ hoàn tiền", color: "#e05e13" };
+    case RefundStatus.Refunded:
+      return { text: "Đã hoàn tiền", color: "#2eb033" };
+    default:
+      return { text: "Không xác định", color: "#9E9E9E" };
+  }
+};
+
+export const getEntityModifyActionInfo = (actionCode) => {
+  switch (actionCode) {
+    case EntityModifyAction.Create:
+      return { text: "Tạo mới", color: "#2eb033", backgroundColor: "#d3ffa4" };
+    case EntityModifyAction.Update:
+      return { text: "Cập nhật", color: "#3f6eec", backgroundColor: "#b8d4ff" };
+    case EntityModifyAction.ChangeStatus:
+      return { text: "Thay đổi trạng thái", color: "#FFA000", backgroundColor: "#fff9b8" };
+    case EntityModifyAction.Delete:
+      return { text: "Xóa", color: "#F44336", backgroundColor: "#ffb8b8" };
+    default:
+      return { text: "Không xác định", color: "#9E9E9E", backgroundColor: "#E0E0E0" };
   }
 };

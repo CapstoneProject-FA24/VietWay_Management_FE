@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchAttractionById, changeAttractionStatus } from '@services/AttractionService';
+import { fetchAttractionById, changeAttractionStatus, deleteAttraction, updateAttraction, updateAttractionImages } from '@services/AttractionService';
 import { AttractionStatus } from '@hooks/Statuses';
 import { getAttractionStatusInfo } from '@services/StatusService';
 import SidebarManager from '@layouts/SidebarManager';
@@ -19,6 +19,11 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import ReviewList from '@components/review/ReviewList';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import AttractionUpdateForm from '@components/staff/attraction/AttractionUpdateForm';
+import { fetchProvinces } from '@services/ProvinceService';
+import { fetchAttractionType } from '@services/AttractionTypeService';
+import EditIcon from '@mui/icons-material/Edit';
+import AttractionInfo from '@components/staff/attraction/AttractionInfo';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -38,19 +43,35 @@ const ManagerAttractionDetail = () => {
     severity: 'success'
   });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [provinces, setProvinces] = useState([]);
+  const [attractionTypes, setAttractionTypes] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    const fetchAttraction = async () => {
+    const fetchData = async () => {
       try {
-        const fetchedAttraction = await fetchAttractionById(id);
+        const [fetchedProvinces, fetchedAttractionTypes, fetchedAttraction] = await Promise.all([
+          fetchProvinces({}),
+          fetchAttractionType(),
+          fetchAttractionById(id)
+        ]);
+
+        setProvinces(fetchedProvinces.items);
+        setAttractionTypes(fetchedAttractionTypes);
         setAttraction(fetchedAttraction);
       } catch (error) {
-        console.error('Error fetching attraction:', error);
+        console.error('Error fetching data:', error);
+        setSnackbar({
+          open: true,
+          message: 'Có lỗi xảy ra khi tải dữ liệu',
+          severity: 'error'
+        });
       }
     };
 
-    fetchAttraction();
-  }, [id, navigate]);
+    fetchData();
+  }, [id]);
 
   useEffect(() => {
     const getPlaceDetails = async () => {
@@ -145,6 +166,74 @@ const ManagerAttractionDetail = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteAttraction(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa điểm tham quan thành công',
+        severity: 'success'
+      });
+      navigate(-1);
+    } catch (error) {
+      console.error('Error deleting attraction:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa điểm tham quan',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleSave = async (attractionData, newImages, removedImageIds) => {
+    try {
+      const response = await updateAttraction(attractionData);
+      if (response.status === 200) {
+        if (newImages.length > 0 || removedImageIds.length > 0) {
+          const imagesResponse = await updateAttractionImages(
+            id,
+            newImages.length > 0 ? newImages : null,
+            removedImageIds.length > 0 ? removedImageIds : null
+          );
+          if (imagesResponse.statusCode !== 200) {
+            alert('Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.');
+            return;
+          }
+        }
+        // Refresh attraction data
+        const updatedAttraction = await fetchAttractionById(id);
+        setAttraction(updatedAttraction);
+        setSnackbar({
+          open: true,
+          message: 'Cập nhật điểm tham quan thành công',
+          severity: 'success'
+        });
+      } else {
+        alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Error updating attraction:', error);
+      alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+    }
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
   if (!attraction) {
     return <Typography>Loading...</Typography>;
   }
@@ -208,191 +297,51 @@ const ManagerAttractionDetail = () => {
               <HistoryIcon color="primary" />
             </IconButton>
 
-            <Box
+            {!isEditing ? (
+              <Button
+                variant="contained"
+                onClick={handleEditClick}
+                startIcon={<EditIcon />}
+                sx={{
+                  width: 'fit-content',
+                  p: 1.1,
+                  backgroundColor: '#3572EF',
+                  '&:hover': { backgroundColor: '#1C4ED8' }
+                }}
+              >
+                Sửa
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={handleCancelEdit}
+                startIcon={<CancelIcon />}
+                sx={{
+                  width: 'fit-content',
+                  p: 1.1,
+                  backgroundColor: '#767676',
+                  '&:hover': { backgroundColor: '#575757' }
+                }}
+              >
+                Hủy sửa
+              </Button>
+            )}
+
+            <Button
+              variant="contained"
+              onClick={handleDeleteClick}
               sx={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                width: '400px',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                borderRadius: '4px',
-                display: isHistoryOpen ? 'block' : 'none',
-                zIndex: 1000,
-                marginTop: '8px'
+                width: 'fit-content',
+                p: 1.1,
+                backgroundColor: '#DC2626',
+                '&:hover': { backgroundColor: '#B91C1C' }
               }}
-            >
-              <VersionHistory />
-            </Box>
-            
-            <Button 
-              variant="contained" 
-              sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
             >
               Xóa
             </Button>
           </Box>
         )}
       </Box>
-      <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
-            <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-              {attraction.attractionTypeName}
-            </Typography>
-          </Box>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-            {attraction.name}
-          </Typography>
-        </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
-              <Box className="slick-slider-container" sx={{ height: '450px' }}>
-                <Slider ref={setSliderRef} {...settings}>
-                  {attraction.images.map((image, index) => (
-                    <div key={index} style={{ position: 'relative' }}>
-                      <img
-                        src={image.url}
-                        alt={`Attraction image ${index + 1}`}
-                        style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-                      />
-                    </div>
-                  ))}
-                </Slider>
-              </Box>
-            </Paper>
-            <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
-              {attraction.images.map((image, index) => (
-                <Box
-                  key={index}
-                  sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
-                  onClick={() => handleThumbnailClick(index)}
-                >
-                  <img
-                    src={image.url}
-                    alt={image.alt}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                </Box>
-              ))}
-            </Box>
-            <Box sx={{ mt: 3 }}>
-              <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-              <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px', mb: 2 }}>Thông tin liên hệ</Typography>
-              <Typography sx={{ mb: 3 }}><strong>Địa chỉ: </strong> {attraction.address}</Typography>
-
-              <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-              <Box sx={{ mb: 3 }}>
-                <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                  {attraction.website}
-                </a>
-              </Box>
-
-              <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px' }}>Các thông tin liên hệ khác</Typography>
-              <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
-
-              {attraction.googlePlaceId && (
-                <Box sx={{ mt: 4 }}>
-                  <Typography variant="h4" sx={{
-                    fontWeight: '700',
-                    fontFamily: 'Inter, sans-serif',
-                    color: '#05073C',
-                    fontSize: '27px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    mb: 2
-                  }}>
-                    <AccessTimeIcon /> Giờ mở cửa
-                  </Typography>
-
-                  {loading ? (
-                    <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
-                  ) : openingHours ? (
-                    <Box>
-                      <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mb: 2,
-                        color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
-                      }}>
-                        {openingHours.opening_hours ? (
-                          <>
-                            {openingHours.opening_hours?.open_now === true ? (
-                              <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
-                            ) : (
-                              <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
-                            )}</>
-                        ) : (
-                          <Typography>Không có thông tin giờ mở cửa</Typography>
-                        )}
-                      </Box>
-                      <Box>
-                        {openingHours.opening_hours?.periods?.map((period, index) => {
-                          const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-                          const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-                          const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-
-                          return (
-                            <Typography key={index} sx={{
-                              py: 1,
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              borderBottom: '1px solid #eee',
-                              '&:last-child': {
-                                borderBottom: 'none'
-                              }
-                            }}>
-                              <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
-                                {days[period.open.day]}
-                              </span>
-                              <span>{openTime} - {closeTime}</span>
-                            </Typography>
-                          );
-                        })}
-                      </Box>
-                    </Box>
-                  ) : (
-                    <Typography sx={{ mt: 2 }}>Không có thông tin giờ mở cửa</Typography>
-                  )}
-                </Box>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-      <Grid item xs={12} md={12}>
-        <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}><strong>Google Place ID:</strong> {attraction.googlePlaceId}</Typography>
-        <Box sx={{
-          height: '500px',
-          width: '100%',
-          position: 'relative',
-          mb: 3,
-          overflow: 'hidden',
-          borderRadius: '10px',
-          border: '1px solid #e0e0e0'
-        }}>
-          <Map placeId={attraction.googlePlaceId} />
-        </Box>
-      </Grid>
-      {attraction.status === AttractionStatus.Approved && (
-        <Grid item xs={12} md={12}>
-          <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-            Đánh giá từ khách hàng
-          </Typography>
-          <ReviewList attractionId={id} />
-        </Grid>
-      )}
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>
         <DialogContent>
@@ -436,6 +385,31 @@ const ManagerAttractionDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận xóa điểm tham quan
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Bạn có chắc chắn muốn xóa điểm tham quan này? Hành động này không thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            sx={{ color: '#666666' }}
+          >
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+          >
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -451,6 +425,183 @@ const ManagerAttractionDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      {attraction?.status === AttractionStatus.Approved && isEditing ? (
+        <AttractionUpdateForm
+          attraction={attraction}
+          provinces={provinces}
+          attractionTypes={attractionTypes}
+          onSave={(data, newImages, removedImageIds) => {
+            handleSave(data, newImages, removedImageIds);
+            setIsEditing(false);
+          }}
+          currentSlide={currentSlide}
+          setCurrentSlide={setCurrentSlide}
+          sliderRef={sliderRef}
+          setSliderRef={setSliderRef}
+        />
+      ) : (
+        <>
+          <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box>
+                <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
+                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+                  {attraction.attractionTypeName}
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
+                {attraction.name}
+              </Typography>
+            </Box>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={8}>
+                <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
+                  <Box className="slick-slider-container" sx={{ height: '450px' }}>
+                    <Slider ref={setSliderRef} {...settings}>
+                      {attraction.images.map((image, index) => (
+                        <div key={index} style={{ position: 'relative' }}>
+                          <img
+                            src={image.url}
+                            alt={`Attraction image ${index + 1}`}
+                            style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                          />
+                        </div>
+                      ))}
+                    </Slider>
+                  </Box>
+                </Paper>
+                <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
+                  {attraction.images.map((image, index) => (
+                    <Box
+                      key={index}
+                      sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
+                      onClick={() => handleThumbnailClick(index)}
+                    >
+                      <img
+                        src={image.url}
+                        alt={image.alt}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
+                  <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
+                </Box>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                  <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px', mb: 2 }}>Thông tin liên hệ</Typography>
+                  <Typography sx={{ mb: 3 }}><strong>Địa chỉ: </strong> {attraction.address}</Typography>
+
+                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
+                  <Box sx={{ mb: 3 }}>
+                    <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
+                      {attraction.website}
+                    </a>
+                  </Box>
+
+                  <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px' }}>Các thông tin liên hệ khác</Typography>
+                  <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+
+                  {attraction.googlePlaceId && (
+                    <Box sx={{ mt: 4 }}>
+                      <Typography variant="h4" sx={{
+                        fontWeight: '700',
+                        fontFamily: 'Inter, sans-serif',
+                        color: '#05073C',
+                        fontSize: '27px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        mb: 2
+                      }}>
+                        <AccessTimeIcon /> Giờ mở cửa
+                      </Typography>
+
+                      {loading ? (
+                        <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
+                      ) : openingHours ? (
+                        <Box>
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            mb: 2,
+                            color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
+                          }}>
+                            {openingHours.opening_hours ? (
+                              <>
+                                {openingHours.opening_hours?.open_now === true ? (
+                                  <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
+                                ) : (
+                                  <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
+                                )}</>
+                            ) : (
+                              <Typography>Không có thông tin giờ mở cửa</Typography>
+                            )}
+                          </Box>
+                          <Box>
+                            {openingHours.opening_hours?.periods?.map((period, index) => {
+                              const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                              const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
+                              const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
+
+                              return (
+                                <Typography key={index} sx={{
+                                  py: 1,
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  borderBottom: '1px solid #eee',
+                                  '&:last-child': {
+                                    borderBottom: 'none'
+                                  }
+                                }}>
+                                  <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
+                                    {days[period.open.day]}
+                                  </span>
+                                  <span>{openTime} - {closeTime}</span>
+                                </Typography>
+                              );
+                            })}
+                          </Box>
+                        </Box>
+                      ) : (
+                        <Typography sx={{ mt: 2 }}>Không có thông tin giờ mở cửa</Typography>
+                      )}
+                    </Box>
+                  )}
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
+          <Grid item xs={12} md={12}>
+            <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}><strong>Google Place ID:</strong> {attraction.googlePlaceId}</Typography>
+            <Box sx={{
+              height: '500px',
+              width: '100%',
+              position: 'relative',
+              mb: 3,
+              overflow: 'hidden',
+              borderRadius: '10px',
+              border: '1px solid #e0e0e0'
+            }}>
+              <Map placeId={attraction.googlePlaceId} />
+            </Box>
+          </Grid>
+          {attraction.status === AttractionStatus.Approved && (
+            <Grid item xs={12} md={12}>
+              <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+                Đánh giá từ khách hàng
+              </Typography>
+              <ReviewList attractionId={id} />
+            </Grid>
+          )}
+        </>
+      )}
     </Box >
   );
 };

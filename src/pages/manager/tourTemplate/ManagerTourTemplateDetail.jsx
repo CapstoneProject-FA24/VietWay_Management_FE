@@ -281,15 +281,26 @@ const ManagerTourTemplateDetails = () => {
           </Grid>
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
                 <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
-                <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
                 <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
-                <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
+                <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Phương tiện:</Typography>
+                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
+                </Box>
               </Box>
             </Box>
             <Box sx={{ mb: 5 }}>
@@ -416,10 +427,6 @@ const ManagerTourTemplateDetails = () => {
                 <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <FontAwesomeIcon icon={faUser} style={{ marginRight: '10px', color: '#3572EF' }} />
-                <Typography sx={{ color: '#05073C' }}>Người tạo: {tourTemplate.creatorName}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C' }}>
                   Giá từ: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.minPrice)}
@@ -442,12 +449,12 @@ const ManagerTourTemplateDetails = () => {
           </Grid>
           <Grid item xs={12} md={12}>
             <Box sx={{ mb: 5, maxWidth: '100%' }}>
-              <Typography variant="h5" gutterBottom sx={{ 
-                textAlign: 'left', 
-                fontWeight: '700', 
-                fontSize: '1.6rem', 
+              <Typography variant="h5" gutterBottom sx={{
+                textAlign: 'left',
+                fontWeight: '700',
+                fontSize: '1.6rem',
                 color: '#05073C',
-                mb: 3 
+                mb: 3
               }}>
                 Danh sách tour
               </Typography>

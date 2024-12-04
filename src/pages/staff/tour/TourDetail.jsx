@@ -4,7 +4,7 @@ import { Box, Typography, Paper, Button, Grid, Chip, TextField, Dialog, DialogTi
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, fetchTourById, calculateEndDate } from '@services/TourService';
+import { fetchToursByTemplateId, fetchTourById, calculateEndDate, deleteTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -41,6 +41,7 @@ const TourDetail = () => {
   const [view, setView] = useState('details'); // 'details' or 'edit'
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +65,7 @@ const TourDetail = () => {
   useEffect(() => {
     if (tour && !editTourData) {
       setEditTourData({
+        startLocationPlaceId: tour.startLocationPlaceId,
         startAddress: tour.startLocation,
         startDate: dayjs(tour.startDate),
         startTime: dayjs(tour.startTime),
@@ -93,45 +95,31 @@ const TourDetail = () => {
     }
   };
 
-  const handleEditTour = () => {
-    setIsEditing(true);
+  const handleDeleteTour = () => {
+    setOpenDeleteDialog(true);
   };
 
-  const handleEditTourChange = (field, value) => {
-    setEditTourData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
   };
 
-  const calculatePrices = (adultPrice) => {
-    const childPrice = Math.round(adultPrice * 0.6);
-    const infantPrice = Math.round(adultPrice * 0.3);
-    return { childPrice, infantPrice };
-  };
-
-  const validatePrice = (price, minPrice, maxPrice) => {
-    const numPrice = Number(price);
-    if (isNaN(numPrice)) return false;
-    if (!price) return true;
-    return numPrice >= minPrice && numPrice <= maxPrice;
-  };
-
-  const handleSaveDraft = async () => {
-    // Implement save draft logic
-  };
-
-  const handleSubmitEdit = async () => {
-    // Implement submit edit logic
-  };
-
-  const handleDeleteTour = async () => {
-    console.log('Delete tour:', id);
-  };
-
-  const handleViewChange = (event, newView) => {
-    if (newView !== null) {
-      setView(newView);
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteTour(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa tour thành công',
+        severity: 'success'
+      });
+      navigate(-1); // Navigate back after successful deletion
+    } catch (error) {
+      console.error('Error deleting tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa tour',
+        severity: 'error'
+      });
     }
   };
 
@@ -240,6 +228,7 @@ const TourDetail = () => {
                   )}
                 </>
               )}
+              <Button variant="contained" onClick={handleDeleteTour} color="error">Xóa</Button>
             </Box>
           </Grid>
 
@@ -285,7 +274,7 @@ const TourDetail = () => {
                       <Typography sx={{ mt: 2 }}>Khởi hành từ: {tour.startLocation}</Typography>
                       <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
                       <Typography>Giờ khởi hành: {tour.startTime}</Typography>
-                      
+
                       <Box sx={{ mt: 3 }}>
                         <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
                         <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
@@ -302,7 +291,7 @@ const TourDetail = () => {
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                      <Typography>Người lớn (trên 12 tuổi): {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
+                      <Typography>Người lớn (từ 12 tuổi trở lên): {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
                       {tour.tourPrices?.map((price, index) => (
                         <Typography key={index}>
                           {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} VND
@@ -312,8 +301,14 @@ const TourDetail = () => {
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
-                      <Typography>Yêu cầu cọc: {tour.depositPercent}%</Typography>
-                      <Typography>Thời hạn thanh toán: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
+                      {tour.depositPercent === 100 ? (
+                        <Typography>Yêu cầu thanh toán 100% khi đăng ký</Typography>
+                      ) : (
+                        <>
+                          <Typography>Yêu cầu cọc: {tour.depositPercent}% tổng tiền booking</Typography>
+                          <Typography>Thời hạn thanh toán toàn bộ: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
+                        </>
+                      )}
                     </Box>
 
                     {tour.tourPolicies && tour.tourPolicies.length > 0 && (
@@ -323,10 +318,13 @@ const TourDetail = () => {
                           <Box key={index} sx={{ mt: 1 }}>
                             <Typography>
                               Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
-                              Hoàn {policy.refundPercent}% tổng tiền
+                              Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
                             </Typography>
                           </Box>
                         ))}
+                        <Typography>
+                          Hủy từ ngày {new Date(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).toLocaleDateString()}: Chi phí hủy tour là 100% tổng giá trị booking
+                        </Typography>
                       </Box>
                     )}
 
@@ -357,6 +355,7 @@ const TourDetail = () => {
                 tour={tour}
                 maxPrice={tourTemplate.maxPrice}
                 minPrice={tourTemplate.minPrice}
+                startingProvince={tourTemplate.startingProvince}
                 onUpdateSuccess={handleUpdateSuccess}
               />
             )}
@@ -372,6 +371,32 @@ const TourDetail = () => {
       </Box>
 
       <CancelConfirmationDialog />
+
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận xóa tour
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            sx={{ color: '#666666' }}
+          >
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+          >
+            Xác nhận xóa
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

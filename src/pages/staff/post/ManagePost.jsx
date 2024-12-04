@@ -19,7 +19,7 @@ const ManagePost = () => {
 
   const [posts, setPosts] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [statusTab, setStatusTab] = useState('all');
+  const [statusTab, setStatusTab] = useState('0');
   const [provinces, setProvinces] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [tempSearchTerm, setTempSearchTerm] = useState('');
@@ -62,7 +62,7 @@ const ManagePost = () => {
           searchTerm: searchTerm,
           postCategoryIds: selectedCategories.map(cat => cat.value),
           provinceIds: selectedProvinces.map(prov => prov.value),
-          status: statusTab !== 'all' ? statusTab : null
+          statuses: statusTab == "all" ? [0, 1, 2, 3] : [parseInt(statusTab)]
         };
 
         const response = await fetchPosts(params);
@@ -199,11 +199,12 @@ const ManagePost = () => {
 
           <Grid item xs={12} sx={{ mb: 2 }}>
             <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="post status tabs">
-              <Tab label="Tất cả" value="all" />
+              {/* <Tab label="Tất cả" value="all" /> */}
               <Tab label="Bản nháp" value="0" />
               <Tab label="Chờ duyệt" value="1" />
               <Tab label="Đã duyệt" value="2" />
               <Tab label="Từ chối" value="3" />
+              <Tab label="Tất cả" value="all" />
             </Tabs>
           </Grid>
 

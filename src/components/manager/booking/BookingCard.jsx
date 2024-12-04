@@ -68,15 +68,15 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
 
   const validateRefundData = () => {
     const errors = {};
-    
+
     if (!refundData.bankCode) {
       errors.bankCode = 'Vui lòng chọn ngân hàng';
     }
-    
+
     if (!refundData.bankTransactionNumber) {
       errors.bankTransactionNumber = 'Vui lòng nhập mã giao dịch';
     }
-    
+
     if (!refundData.payTime) {
       errors.payTime = 'Vui lòng chọn thời gian hoàn tiền';
     } else if (dayjs(refundData.payTime).isAfter(dayjs())) {
@@ -101,7 +101,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
         bankTransactionNumber: refundData.bankTransactionNumber.trim(),
         payTime: refundData.payTime
       });
-      
+
       setOpenRefundDialog(false);
       setRefundErrors({}); // Clear any errors
       setRefundData({
@@ -135,7 +135,12 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
       <CardContent>
         <Grid container spacing={1}>
           <Grid item xs={12} md={7}>
-            <Chip label={statusInfo.text} sx={{ backgroundColor: statusInfo.color, height: '1.5rem' }} />
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Chip label={statusInfo.text} sx={{ backgroundColor: statusInfo.color, height: '1.5rem' }} />
+              {booking.havePendingRefund && (
+                <Chip label="Chờ hoàn tiền" sx={{ backgroundColor: 'warning.light', height: '1.5rem' }} />
+              )}
+            </Box>
             <Box sx={{ display: 'flex', mb: 0.5 }}>
               <Typography sx={{ fontWeight: 'bold', fontSize: '1.5rem', mr: 1 }}> Booking:</Typography>
               <Typography sx={{ fontWeight: 'bold', fontSize: '1.5rem', color: 'primary.main' }}> {booking.bookingId}</Typography>
@@ -169,11 +174,11 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
                 <Box sx={{ display: 'flex', alignItems: 'center', ml: -1 }}>
                   <CardActions>
                     <Button variant="outlined" onClick={() => onViewDetails(booking.bookingId)}>Chi tiết</Button>
-                    {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
+                    {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Deposited || booking.status === BookingStatus.Paid) && (
                       <>
-                        <Button 
-                          variant="contained" 
-                          color="primary" 
+                        <Button
+                          variant="contained"
+                          color="primary"
                           onClick={handleChangeTour}
                         >
                           Đổi tour
@@ -181,7 +186,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
                         <Button variant="contained" color="error" onClick={handleClickDelete}>Hủy booking</Button>
                       </>
                     )}
-                    {booking.status === BookingStatus.PendingRefund && (
+                    {/* {booking.havePendingRefund && (
                       <Button
                         variant="contained"
                         color="warning"
@@ -189,7 +194,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
                       >
                         Hoàn tiền
                       </Button>
-                    )}
+                    )} */}
                   </CardActions>
                 </Box>
               </Grid>
@@ -239,9 +244,9 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Hủy</Button>
-          <Button 
-            onClick={handleConfirmDelete} 
-            color="error" 
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
             autoFocus
             disabled={!cancelDialog.reason.trim()}
           >
@@ -328,7 +333,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefund, onRefresh }) 
         </DialogActions>
       </Dialog>
 
-      <ChangeBooking 
+      <ChangeBooking
         open={isChangeBookingOpen}
         onClose={() => setIsChangeBookingOpen(false)}
         onTourSelect={handleTourSelect}

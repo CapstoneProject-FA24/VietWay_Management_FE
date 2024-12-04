@@ -61,6 +61,7 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
             const response = await fetchTourTemplatesWithTourInfo({
                 pageSize: pagination.pageSize,
                 pageIndex: pagination.pageIndex,
+                tourId: booking.tourId,
             });
             setTours(response.data);
             setPagination(prev => ({
@@ -132,7 +133,7 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
         <Dialog 
             open={open} 
             onClose={onClose}
-            maxWidth="lg"
+            maxWidth="xl"
             fullWidth
         >
             <Box sx={{ p: 3 }}>

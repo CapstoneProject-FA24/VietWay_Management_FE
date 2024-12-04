@@ -3,7 +3,7 @@ import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActi
 import { Edit as EditIcon, Delete as DeleteIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, updateTourTemplate, deleteTourTemplate } from '@services/TourTemplateService';
+import { fetchTourTemplateById, updateTourTemplate, deleteTourTemplate, changeTourTemplateStatus } from '@services/TourTemplateService';
 import TourTemplateInfo from '@components/staff/tourTemplate/TourTemplateInfo';
 import TourTemplateUpdateForm from '@components/staff/tourTemplate/TourTemplateUpdateForm';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -13,6 +13,7 @@ import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchToursByTemplateId } from '@services/TourService';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import SendIcon from '@mui/icons-material/Send';
 
 const TourTemplateDetails = () => {
   const [state, setState] = useState({
@@ -124,6 +125,56 @@ const TourTemplateDetails = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
+  const handleSend = async () => {
+    try {
+      const template = state.tourTemplate;
+      const requiredFields = {
+        'Mã tour': template.code,
+        'Tên tour': template.tourName,
+        'Mô tả': template.description,
+        'Thời gian': template.durationId,
+        'Loại tour': template.tourCategoryId,
+        'Chính sách': template.policy,
+        'Giá thấp nhất': template.minPrice,
+        'Giá cao nhất': template.maxPrice,
+        'Điểm khởi hành': template.startingProvinceId,
+        'Phương tiện di chuyển': template.transportation,
+        'Các tỉnh thành': template.provinceIds,
+      };
+
+      const missingFields = Object.entries(requiredFields)
+        .filter(([_, value]) => !value || (Array.isArray(value) && value.length === 0))
+        .map(([key]) => key);
+
+      const invalidSchedules = template.schedules?.filter(s =>
+        !s.dayNumber || !s.title || !s.description || !s.attractionIds?.length
+      ) || [];
+
+      if (missingFields.length > 0 || invalidSchedules.length > 0) {
+        let errorMessage = '';
+        if (missingFields.length > 0) {
+          errorMessage += `Vui lòng điền đầy đủ thông tin trước khi gửi`;
+        }
+        if (invalidSchedules.length > 0) {
+          errorMessage += 'Vui lòng điền đầy đủ thông tin lịch trình cho các ngày';
+        }
+        alert(errorMessage);
+        return;
+      }
+
+      await changeTourTemplateStatus(id, TourTemplateStatus.Pending, null);
+      const updatedTourTemplate = await fetchTourTemplateById(id);
+      setState(prev => ({
+        ...prev,
+        tourTemplate: updatedTourTemplate
+      }));
+      alert('Gửi duyệt tour mẫu thành công');
+    } catch (error) {
+      console.error('Error sending tour template for approval:', error);
+      alert('Có lỗi xảy ra khi gửi duyệt tour mẫu');
+    }
+  };
+
   const ActionButtons = ({ status }) => {
     const showEditDelete = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
     const showDeleteOnly = status === TourTemplateStatus.Pending;
@@ -176,14 +227,24 @@ const TourTemplateDetails = () => {
                 Hủy sửa
               </Button>
             ) : (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={handleEdit}
-                sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-              >
-                Sửa
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  startIcon={<SendIcon />}
+                  onClick={handleSend}
+                  sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                >
+                  Gửi duyệt
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  onClick={handleEdit}
+                  sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+                >
+                  Sửa
+                </Button>
+              </>
             )}
           </>
         )}
@@ -263,7 +324,7 @@ const TourTemplateDetails = () => {
                   sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
                   Quay lại
                 </Button>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1}}>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
                   Chi tiết tour mẫu
                 </Typography>
                 <ActionButtons status={state.tourTemplate.status} />

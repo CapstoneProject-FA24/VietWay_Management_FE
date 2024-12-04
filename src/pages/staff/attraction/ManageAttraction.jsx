@@ -21,7 +21,7 @@ const ManageAttraction = () => {
     const [selectedProvinces, setSelectedProvinces] = useState([]);
     const [attractions, setAttractions] = useState([]);
     const [sortOrder, setSortOrder] = useState('createdDate');
-    const [statusTab, setStatusTab] = useState('all');
+    const [statusTab, setStatusTab] = useState('0');
     const [openDeletePopup, setOpenDeletePopup] = useState(false);
     const [selectedAttraction, setSelectedAttraction] = useState(null);
     const [provinces, setProvinces] = useState([]);
@@ -50,7 +50,7 @@ const ManageAttraction = () => {
                 nameSearch: searchTerm,
                 attractionTypeIds: selectedTypes.map(c => c.value),
                 provinceIds: selectedProvinces.map(p => p.value),
-                status: statusTab === 'all' ? null : parseInt(statusTab)
+                statuses: statusTab == "all" ? [0, 1, 2, 3] : [parseInt(statusTab)]
             };
             const result = await fetchAttractions(params);
             setAttractions(result.data);
@@ -215,11 +215,12 @@ const ManageAttraction = () => {
                     </Grid>
                     <Grid item xs={12}>
                         <Tabs value={statusTab} onChange={handleStatusTabChange} aria-label="attraction status tabs">
-                            <Tab label="Tất cả" value="all" />
+                            {/* <Tab label="Tất cả" value="all" /> */}
                             <Tab label="Bản nháp" value="0" />
                             <Tab label="Chờ duyệt" value="1" />
                             <Tab label="Đã duyệt" value="2" />
                             <Tab label="Từ chối" value="3" />
+                            <Tab label="Tất cả" value="all" />
                         </Tabs>
                     </Grid>
                 </Grid>

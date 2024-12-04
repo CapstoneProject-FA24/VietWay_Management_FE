@@ -10,9 +10,9 @@ export const fetchPosts = async (params) => {
         if (params.searchTerm) queryParams.append('nameSearch', params.searchTerm);
         if (params.postCategoryIds?.length > 0) params.postCategoryIds.forEach(id => queryParams.append('postCategoryIds', id));
         if (params.provinceIds?.length > 0) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
-        if (params.status !== undefined && params.status !== null) queryParams.append('status', params.status);
+        if (params.statuses) params.statuses.forEach(status => queryParams.append('statuses', status));
 
-        const response = await axios.get(`${baseURL}/api/Post?${queryParams.toString()}`);
+        const response = await axios.get(`${baseURL}/api/posts?${queryParams.toString()}`);
         const items = response.data?.data?.items;
 
         if (!items || !Array.isArray(items)) {
@@ -46,7 +46,7 @@ export const fetchPosts = async (params) => {
 
 export const fetchPostById = async (id) => {
     try {
-        const response = await axios.get(`${baseURL}/api/Post/${id}`);
+        const response = await axios.get(`${baseURL}/api/posts/${id}`);
         const item = response.data.data;
         return {
             postId: item.postId,
@@ -80,7 +80,7 @@ export const createPost = async (postData) => {
             description: postData.description,
             isDraft: postData.isDraft
         };
-        const response = await axios.post(`${baseURL}/api/Post`, post, {
+        const response = await axios.post(`${baseURL}/api/posts`, post, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -103,7 +103,7 @@ export const updatePost = async (id, postData) => {
             description: postData.description,
             isDraft: postData.isDraft
         };
-        const response = await axios.put(`${baseURL}/api/Post/${id}`, post, {
+        const response = await axios.put(`${baseURL}/api/posts/${id}`, post, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -116,10 +116,9 @@ export const updatePost = async (id, postData) => {
 };
 
 export const deletePost = async (id) => {
-    console.log(id);
     const token = getCookie('token');
     try {
-        await axios.delete(`${baseURL}/api/Post/${id}`, {
+        await axios.delete(`${baseURL}/api/posts/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -138,7 +137,7 @@ export const changePostStatus = async (postId, status, reason) => {
             reason: reason
         };
 
-        const response = await axios.patch(`${baseURL}/api/Post/change-post-status/${postId}`, requestData, {
+        const response = await axios.patch(`${baseURL}/api/posts/change-post-status/${postId}`, requestData, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -153,7 +152,7 @@ export const changePostStatus = async (postId, status, reason) => {
 export const sharePostOnTwitter = async (postId) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/Post/${postId}/twitter`, {}, {
+        const response = await axios.post(`${baseURL}/api/posts/${postId}/twitter`, {}, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -168,7 +167,7 @@ export const sharePostOnTwitter = async (postId) => {
 export const sharePostOnFacebook = async (postId) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/Post/${postId}/facebook`, {}, {
+        const response = await axios.post(`${baseURL}/api/posts/${postId}/facebook`, {}, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -181,7 +180,6 @@ export const sharePostOnFacebook = async (postId) => {
 };
 
 export const updatePostImages = async (postId, newImages) => {
-    console.log(newImages);
     const token = getCookie('token');
     try {
         const formData = new FormData();
@@ -191,7 +189,7 @@ export const updatePostImages = async (postId, newImages) => {
             });
         }
 
-        const response = await axios.patch(`${baseURL}/api/Post/${postId}/images`, formData, {
+        const response = await axios.patch(`${baseURL}/api/posts/${postId}/images`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': `Bearer ${token}`
@@ -207,7 +205,7 @@ export const updatePostImages = async (postId, newImages) => {
 export const getTwitterReactionsByPostId = async (postId) => {
     const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/Post/${postId}/twitter/reactions-by-post-id`, {
+        const response = await axios.get(`${baseURL}/api/posts/${postId}/twitter/reactions-by-post-id`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -229,7 +227,7 @@ export const getTwitterReactionsByPostId = async (postId) => {
 export const getFacebookReactionsByPostId = async (postId) => {
     const token = getCookie('token');
     try {
-        const response = await axios.get(`${baseURL}/api/Post/${postId}/facebook/metrics`, {
+        const response = await axios.get(`${baseURL}/api/posts/${postId}/facebook/metrics`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

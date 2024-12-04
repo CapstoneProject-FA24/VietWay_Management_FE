@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import { ArrowBack, Edit, Delete, Save, Send, Cancel as CancelIcon } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -86,6 +86,7 @@ const PostDetail = () => {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadPost = async () => {
@@ -195,6 +196,7 @@ const PostDetail = () => {
   };
 
   const handleSaveChanges = async () => {
+    setIsSubmitting(true);
     try {
       const updatedPost = {
         title: editablePost.title,
@@ -217,7 +219,7 @@ const PostDetail = () => {
         postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
         provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
       }));
-      
+
       setIsEditMode(false);
       setSnackbar({
         open: true,
@@ -232,11 +234,28 @@ const PostDetail = () => {
         message: 'Lỗi khi lưu nháp: ' + (error.response?.data?.message || error.message),
         severity: 'error'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSendForApproval = async () => {
+    setIsSubmitting(true);
     try {
+      // Check required fields
+      if (!editablePost.title?.trim() || 
+          !editablePost.content?.trim() ||
+          !editablePost.postCategoryId ||
+          !editablePost.provinceId ||
+          !editablePost.description?.trim()) {
+        setSnackbar({
+          open: true,
+          message: 'Vui lòng điền đầy đủ thông tin trước khi gửi',
+          severity: 'error'
+        });
+        return;
+      }
+
       const updatedPost = {
         title: editablePost.title,
         content: editablePost.content,
@@ -258,7 +277,7 @@ const PostDetail = () => {
         postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
         provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
       }));
-      
+
       setIsEditMode(false);
       setSnackbar({
         open: true,
@@ -273,6 +292,8 @@ const PostDetail = () => {
         message: 'Lỗi khi gửi bài viết: ' + (error.response?.data?.message || error.message),
         severity: 'error'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -293,7 +314,7 @@ const PostDetail = () => {
   const renderActionButtons = () => {
     return (
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <IconButton 
+        <IconButton
           onClick={handleHistoryClick}
           sx={{ backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
         >
@@ -303,8 +324,8 @@ const PostDetail = () => {
         {post.status === PostStatus.Draft || post.status === PostStatus.Rejected ? (
           <>
             {isEditMode ? (
-              <Button 
-                variant="contained" 
+              <Button
+                variant="contained"
                 startIcon={<CancelIcon />}
                 onClick={handleCancelClick}
                 sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }}}
@@ -312,9 +333,14 @@ const PostDetail = () => {
                 Hủy sửa
               </Button>
             ) : (
-              <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}>
-                Chỉnh sửa
-              </Button>
+              <>
+                <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
+                  Gửi duyệt
+                </Button>
+                <Button variant="contained" sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }}} startIcon={<Edit />} onClick={handleEditPost}>
+                  Chỉnh sửa
+                </Button>
+              </>
             )}
             <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
               Xóa
@@ -334,7 +360,6 @@ const PostDetail = () => {
   };
 
   const handleConfirmDelete = async (postId) => {
-    console.log(postId);
     try {
       await deletePost(postId);
       setSnackbar({
@@ -379,18 +404,12 @@ const PostDetail = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-        // Store the file for later upload
-        setEditablePost(prev => ({
-            ...prev,
-            imageFile: file  // Store the actual file
-        }));
-        
-        // Create preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            handleFieldChange('image', reader.result);
-        };
-        reader.readAsDataURL(file);
+      // Store the file for later upload
+      setEditablePost(prev => ({
+        ...prev,
+        imageFile: file,  // Store the actual file
+        image: URL.createObjectURL(file)  // Create local preview URL
+      }));
     }
   };
 
@@ -454,8 +473,8 @@ const PostDetail = () => {
         <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', mt: 5 }}>
           <Box maxWidth="89vw">
             <Box sx={{ position: 'relative' }}>
-              <Box 
-                sx={{ 
+              <Box
+                sx={{
                   position: 'fixed',
                   top: '120px',
                   right: isSidebarOpen ? '280px' : '40px',
@@ -491,17 +510,17 @@ const PostDetail = () => {
                         <Typography sx={commonStyles.labelTypography}>
                           Danh mục:
                         </Typography>
-                        <Select 
-                          value={editablePost?.postCategoryId || ''} 
+                        <Select
+                          value={editablePost?.postCategoryId || ''}
                           onChange={(e) => {
                             const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
                             if (selectedCategory) {
                               handleFieldChange('postCategoryId', selectedCategory.postCategoryId);
                               handleFieldChange('postCategoryName', selectedCategory.name);
                             }
-                          }} 
-                          variant="outlined" 
-                          fullWidth 
+                          }}
+                          variant="outlined"
+                          fullWidth
                           sx={commonStyles.inputField}
                           disabled={isLoadingCategories}
                         >
@@ -517,18 +536,18 @@ const PostDetail = () => {
                         <Typography sx={commonStyles.labelTypography}>
                           Tỉnh/Thành phố:
                         </Typography>
-                        <Select 
-                          value={editablePost?.provinceId || ''} 
+                        <Select
+                          value={editablePost?.provinceId || ''}
                           onChange={(e) => {
                             const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
                             if (selectedProvince) {
                               handleFieldChange('provinceId', selectedProvince.value);
                               handleFieldChange('provinceName', selectedProvince.label);
                             }
-                          }} 
-                          variant="outlined" 
-                          fullWidth 
-                          sx={commonStyles.inputField} 
+                          }}
+                          variant="outlined"
+                          fullWidth
+                          sx={commonStyles.inputField}
                           disabled={isLoadingProvinces}
                         >
                           {provinceOptions.map(option => (
@@ -545,12 +564,13 @@ const PostDetail = () => {
 
                     <Box sx={commonStyles.imageContainer}>
                       <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
-                      <Box sx={{ position: 'relative', width: '100%', height: '300px', border: '2px dashed #ccc',
+                      <Box sx={{
+                        position: 'relative', width: '100%', height: '300px', border: '2px dashed #ccc',
                         borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
                       }}>
                         {editablePost.image ? (
-                          <img 
-                            src={editablePost.imageUrl} 
+                          <img
+                            src={editablePost.image}
                             alt={editablePost.title}
                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                           />
@@ -565,8 +585,8 @@ const PostDetail = () => {
                             }}
                           />
                         )}
-                        <Button 
-                          variant="outlined" 
+                        <Button
+                          variant="outlined"
                           component="label"
                           sx={{
                             position: 'absolute',
@@ -582,9 +602,9 @@ const PostDetail = () => {
                           }}
                         >
                           {editablePost.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
-                          <input 
-                            type="file" 
-                            hidden 
+                          <input
+                            type="file"
+                            hidden
                             accept="image/*"
                             onChange={handleImageChange}
                           />
@@ -601,10 +621,7 @@ const PostDetail = () => {
 
                         <ReactQuill
                           value={editableFields.content.value}
-                          onChange={(value) => setEditableFields(prev => ({
-                            ...prev,
-                            content: { ...prev.content, value }
-                          }))}
+                          onChange={(value) => handleFieldChange('content', value)}
                           modules={{
                             toolbar: [
                               [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -612,7 +629,7 @@ const PostDetail = () => {
                               [{ 'size': ['small', false, 'large', 'huge'] }],
                               ['bold', 'italic', 'underline', 'strike'],
                               [{ 'color': [] }, { 'background': [] }],
-                              [{ 'script': 'sub'}, { 'script': 'super' }],
+                              [{ 'script': 'sub' }, { 'script': 'super' }],
                               [{ 'align': [] }],
                               [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                               [{ 'direction': 'rtl' }],
@@ -651,11 +668,23 @@ const PostDetail = () => {
                     )}
 
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                      <Button variant="contained" sx={{ backgroundColor: 'grey', mr: 1 }} startIcon={<Save />} onClick={handleSaveChanges}>
-                        Lưu nháp
+                      <Button
+                        variant="contained"
+                        sx={{ backgroundColor: 'grey', mr: 1 }}
+                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <Save />}
+                        onClick={handleSaveChanges}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
                       </Button>
-                      <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
-                        Gửi duyệt
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
+                        onClick={handleSendForApproval}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
                       </Button>
                     </Box>
                   </Box>
@@ -701,13 +730,7 @@ const PostDetail = () => {
                         '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '90%', margin: '0 auto'
                       }}
                     />
-
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                      <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>
-                        Gửi duyệt
-                      </Button>
-                    </Box>
-                  </Box> 
+                  </Box>
                 )}
               </Box>
             </Box>
@@ -715,14 +738,14 @@ const PostDetail = () => {
         </Box>
       </Box>
 
-      <Snackbar 
-        open={snackbar.open} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert 
-          onClose={handleSnackbarClose} 
+        <Alert
+          onClose={handleSnackbarClose}
           severity={snackbar.severity}
           variant="filled"
           sx={{ width: '100%' }}
@@ -730,11 +753,11 @@ const PostDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <PostDeleteConfirm 
-        open={isDeleteConfirmOpen} 
-        onClose={() => setIsDeleteConfirmOpen(false)} 
-        postId={post.postId} 
-        onDelete={handleConfirmDelete} 
+      <PostDeleteConfirm
+        open={isDeleteConfirmOpen}
+        onClose={() => setIsDeleteConfirmOpen(false)}
+        postId={post.postId}
+        onDelete={handleConfirmDelete}
       />
       <CancelConfirmationDialog />
     </Box>

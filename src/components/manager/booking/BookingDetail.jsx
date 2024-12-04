@@ -1,18 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box, Grid, Typography, Button, Paper, Dialog, DialogTitle, DialogContent,
     DialogContentText, DialogActions, TextField, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText
 } from '@mui/material';
 import { CalendarToday } from '@mui/icons-material';
-import { getBookingStatusInfo, getRoleName } from '@services/StatusService';
-import { BookingStatus } from '@hooks/Statuses';
-import { cancelBooking, createRefundTransaction } from '@services/BookingService';
+import { getBookingStatusInfo, getRefundStatusInfo, getEntityModifyActionInfo, getRoleName } from '@services/StatusService';
+import { BookingStatus, RefundStatus, EntityModifyAction } from '@hooks/Statuses';
+import { cancelBooking, createRefundTransaction, getBookingHistory } from '@services/BookingService';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
 import { bankData } from '@hooks/Bank';
 import 'dayjs/locale/vi';
+import ChangeBooking from '@components/booking/ChangeBooking';
 
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -41,9 +42,31 @@ const BookingDetail = ({ booking }) => {
         note: '',
         bankCode: '',
         bankTransactionNumber: '',
-        payTime: dayjs()
+        payTime: dayjs(),
+        refundId: null
     });
     const [refundErrors, setRefundErrors] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [bookingData, setBooking] = useState(booking);
+    const [isChangeBookingOpen, setIsChangeBookingOpen] = useState(false);
+
+    useEffect(() => {
+        fetchBookingDetail();
+    }, [booking.bookingId]);
+
+    const fetchBookingDetail = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const data = await getBookingHistory(booking.bookingId);
+            setBooking(data);
+        } catch (error) {
+            setError('Không thể tải lịch sử đặt tour');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCancelClick = () => {
         setOpenCancelDialog(true);
@@ -69,7 +92,11 @@ const BookingDetail = ({ booking }) => {
         }
     };
 
-    const handleRefund = () => {
+    const handleRefund = (refundId) => () => {
+        setRefundData(prev => ({
+            ...prev,
+            refundId
+        }));
         setOpenRefundDialog(true);
     };
 
@@ -77,6 +104,10 @@ const BookingDetail = ({ booking }) => {
         setRefundData(prev => ({
             ...prev,
             [field]: value
+        }));
+        setRefundErrors(prev => ({
+            ...prev,
+            [field]: undefined
         }));
     };
 
@@ -101,18 +132,20 @@ const BookingDetail = ({ booking }) => {
     };
 
     const handleConfirmRefund = async () => {
-        if (!refundData.bankCode || !refundData.bankTransactionNumber || !refundData.payTime) {
+        const errors = validateRefundData();
+        if (Object.keys(errors).length > 0) {
+            setRefundErrors(errors);
             return;
         }
 
         try {
-            await createRefundTransaction(booking.bookingId, {
+            await createRefundTransaction(refundData.refundId, {
                 note: refundData.note.trim(),
                 bankCode: refundData.bankCode,
                 bankTransactionNumber: refundData.bankTransactionNumber.trim(),
                 payTime: refundData.payTime
             });
-            
+
             setOpenRefundDialog(false);
             setRefundData({
                 note: '',
@@ -133,6 +166,16 @@ const BookingDetail = ({ booking }) => {
                 severity: 'error'
             });
         }
+    };
+
+    const handleChangeTour = () => {
+        setIsChangeBookingOpen(true);
+    };
+
+    const handleTourSelect = (selectedTour) => {
+        console.log('Selected new tour:', selectedTour);
+        // Here you would implement the logic to change the tour
+        setIsChangeBookingOpen(false);
     };
 
     return (
@@ -170,34 +213,58 @@ const BookingDetail = ({ booking }) => {
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                             <Typography variant="body1">Trị giá booking:</Typography>
-                            <Typography variant="body1">{booking.totalPrice.toLocaleString()} đ</Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 700 }}>{booking.totalPrice.toLocaleString()} đ</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                             <Typography variant="body1">Tình trạng:</Typography>
                             <Typography variant="body1" sx={{ color: getBookingStatusInfo(booking.status).color }}>{getBookingStatusInfo(booking.status).text}</Typography>
                         </Box>
-                        {(booking.status === BookingStatus.PendingRefund || booking.status === BookingStatus.Refunded) && (
-                            <>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                    <Typography variant="body1">Hủy lúc:</Typography>
-                                    <Typography variant="body1">{formatDateTime(booking.cancelAt)}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                    <Typography variant="body1">Hủy bởi:</Typography>
-                                    <Typography variant="body1">{getRoleName(booking.cancelBy)}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                    <Typography variant="body1">
-                                        {booking.status === BookingStatus.PendingRefund ? 'Tổng tiền cần hoàn:' : 'Tổng tiền đã hoàn:'}
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ color: 'red' }}>{booking.refundAmount?.toLocaleString()} đ</Typography>
-                                </Box>
-                            </>
-                        )}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                             <Typography variant="body1">Ghi chú:</Typography>
                             <Typography variant="body1">{booking.note}</Typography>
                         </Box>
+                    </Paper>
+                    <Paper elevation={3} sx={{ p: 2, borderRadius: '8px', mt: 2 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Lịch sử</Typography>
+                        {bookingData && bookingData.length > 0 ? (
+                            bookingData.map((historyItem, index) => (
+                                <Box key={index} sx={{ mb: 2 }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                        <Typography variant="body1">Ngày:</Typography>
+                                        <Typography variant="body1">{formatDateTime(historyItem.timestamp)}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                        <Typography variant="body1">Hành động:</Typography>
+                                        <Typography variant="body1">{getEntityModifyActionInfo(historyItem.action).text}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                        <Typography variant="body1">Thực hiện bởi:</Typography>
+                                        <Typography variant="body1">{getRoleName(historyItem.modifierRole)}</Typography>
+                                    </Box>
+                                    {historyItem.action !== EntityModifyAction.Create && historyItem.action !== EntityModifyAction.Delete && (
+                                        <>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                                <Typography variant="body1">Trạng thái cũ:</Typography>
+                                                <Typography variant="body1">{getBookingStatusInfo(historyItem.oldStatus).text}</Typography>
+                                            </Box>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                                <Typography variant="body1">Trạng thái mới:</Typography>
+                                                <Typography variant="body1">{getBookingStatusInfo(historyItem.newStatus).text}</Typography>
+                                            </Box>
+                                        </>
+                                    )}
+                                    {historyItem.action !== EntityModifyAction.Create && (
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                            <Typography variant="body1">Lý do:</Typography>
+                                            <Typography variant="body1">{historyItem.reason}</Typography>
+                                        </Box>
+                                    )}
+                                    {index !== bookingData.length - 1 && <hr />}
+                                </Box>
+                            ))
+                        ) : (
+                            <Typography variant="body1">Không có lịch sử đặt tour</Typography>
+                        )}
                     </Paper>
                 </Grid>
                 <Grid item xs={12} md={5}>
@@ -208,10 +275,23 @@ const BookingDetail = ({ booking }) => {
                         <Typography variant="body1" sx={{ mt: 1 }}>
                             <strong>Ngày đi:</strong> {formatDateTime(booking.startDate)}
                         </Typography><hr />
-                        <Typography variant="h5" color="primary.main" sx={{ mt: 1, fontWeight: 'bold' }}>
-                            Tổng tiền: {booking.totalPrice.toLocaleString()} đ
-                        </Typography>
-                        {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Confirmed) && (
+                        {booking.tourPolicies && booking.tourPolicies.length > 0 && (
+                            <>
+                                <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>
+                                    Chính sách hủy tour
+                                </Typography>
+                                {booking.tourPolicies.map((policy, index) => (
+                                    <Typography key={index} variant="body2">
+                                        Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}: Chi phí hủy là {policy.refundPercent}% tổng tiền booking
+                                    </Typography>
+                                ))}<hr />
+                            </>
+                        )}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                            <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold' }}>Tổng tiền:</Typography>
+                            <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold', color: 'primary.main' }}>{booking.totalPrice.toLocaleString()} đ</Typography>
+                        </Box>
+                        {(booking.status === BookingStatus.Pending || booking.status === BookingStatus.Deposited || booking.status === BookingStatus.Paid) && (
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                                 <Button
                                     variant="contained"
@@ -221,41 +301,70 @@ const BookingDetail = ({ booking }) => {
                                 >
                                     Hủy booking
                                 </Button>
-                                <Button variant="contained" color="primary" sx={{ width: '48%' }}>
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    sx={{ width: '48%' }}
+                                    onClick={handleChangeTour}
+                                >
                                     Chuyển tour
                                 </Button>
                             </Box>
                         )}
-                        {booking.status === BookingStatus.PendingRefund && (
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                                <Button
-                                    variant="contained"
-                                    color="warning"
-                                    sx={{ width: '48%' }}
-                                    onClick={handleRefund}
-                                >
-                                    Hoàn tiền
-                                </Button>
-                            </Box>
-                        )}
-
-                        {booking.tourPolicies && booking.tourPolicies.length > 0 && (
+                    </Paper>
+                    <Paper elevation={3} sx={{ p: 3, borderRadius: '8px', mt: 2 }}>
+                        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>Thông tin hoàn tiền</Typography>
+                        {booking.refundRequests?.map((refund, index) => (
                             <>
-                                <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>
-                                    Chính sách hủy tour
-                                </Typography>
-                                {booking.tourPolicies.map((policy, index) => (
-                                    <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                        <Typography variant="body2">
-                                            Hủy trước {formatDateTime(policy.cancelBefore)} ngày:
-                                        </Typography>
-                                        <Typography variant="body2" color="primary">
-                                            Hoàn {policy.refundPercent}% tổng tiền
-                                        </Typography>
+                                <Typography variant="body1"><span style={{ fontWeight: 700 }}>{index + 1}. Hoàn tiền do: </span>{refund.refundReason}</Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                    <Typography variant="body1">Tình trạng:</Typography>
+                                    <Typography variant="body1" sx={{ color: `${getRefundStatusInfo(refund.refundStatus).color}` }}>{getRefundStatusInfo(refund.refundStatus).text}</Typography>
+                                </Box>
+                                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                    <Typography variant="body1">
+                                        {refund.refundStatus === RefundStatus.Pending ? 'Số tiền cần hoàn:' : 'Số tiền đã hoàn:'}
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ fontWeight: 700 }}>{refund.refundAmount?.toLocaleString()} đ</Typography>
+                                </Box>
+                                {refund.refundStatus === RefundStatus.Refunded && (
+                                    <>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                            <Typography variant="body1">Ngày hoàn:</Typography>
+                                            <Typography variant="body1">{formatDateTime(refund.refundDate)}</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                            <Typography variant="body1">Ngân hàng:</Typography>
+                                            <Typography variant="body1">{bankData.find(bank => bank.code === refund.bankCode)?.name} ({refund.bankCode})</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                            <Typography variant="body1">Mã giao dịch:</Typography>
+                                            <Typography variant="body1">{refund.bankTransactionNumber}</Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                            <Typography variant="body1">Ghi chú:</Typography>
+                                            <Typography variant="body1">{refund.refundNote}</Typography>
+                                        </Box>
+                                    </>
+                                )}
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                    <Typography variant="body1">Ngày hủy tour:</Typography>
+                                    <Typography variant="body1">{formatDateTime(refund.createdAt)}</Typography>
+                                </Box>
+                                {refund.refundStatus === RefundStatus.Pending && (
+                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                                        <Button
+                                            variant="contained"
+                                            color="warning"
+                                            onClick={handleRefund(refund.refundId)}
+                                        >
+                                            Hoàn tiền
+                                        </Button>
                                     </Box>
-                                ))}
+                                )}
+                                {index !== booking.refundRequests.length - 1 && <hr />}
                             </>
-                        )}
+                        ))}
                     </Paper>
                 </Grid>
             </Grid>
@@ -299,7 +408,10 @@ const BookingDetail = ({ booking }) => {
             {/* Refund Dialog */}
             <Dialog
                 open={openRefundDialog}
-                onClose={() => setOpenRefundDialog(false)}
+                onClose={() => {
+                    setOpenRefundDialog(false);
+                    setRefundErrors({});
+                }}
                 maxWidth="sm"
                 fullWidth
             >
@@ -318,7 +430,7 @@ const BookingDetail = ({ booking }) => {
                             onChange={(e) => handleRefundDataChange('note', e.target.value)}
                         />
 
-                        <FormControl fullWidth>
+                        <FormControl fullWidth error={!!refundErrors.bankCode}>
                             <InputLabel id="bank-select-label">Ngân hàng *</InputLabel>
                             <Select
                                 labelId="bank-select-label"
@@ -341,6 +453,9 @@ const BookingDetail = ({ booking }) => {
                                     </MenuItem>
                                 ))}
                             </Select>
+                            {refundErrors.bankCode && (
+                                <FormHelperText>{refundErrors.bankCode}</FormHelperText>
+                            )}
                         </FormControl>
 
                         <TextField
@@ -349,6 +464,8 @@ const BookingDetail = ({ booking }) => {
                             required
                             value={refundData.bankTransactionNumber}
                             onChange={(e) => handleRefundDataChange('bankTransactionNumber', e.target.value)}
+                            error={!!refundErrors.bankTransactionNumber}
+                            helperText={refundErrors.bankTransactionNumber}
                         />
 
                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
@@ -358,6 +475,12 @@ const BookingDetail = ({ booking }) => {
                                 value={refundData.payTime}
                                 onChange={(newValue) => handleRefundDataChange('payTime', newValue)}
                                 format="DD/MM/YYYY HH:mm"
+                                slotProps={{
+                                    textField: {
+                                        error: !!refundErrors.payTime,
+                                        helperText: refundErrors.payTime
+                                    }
+                                }}
                             />
                         </LocalizationProvider>
                     </Box>
@@ -391,6 +514,13 @@ const BookingDetail = ({ booking }) => {
                     {snackbar.message}
                 </Alert>
             </Snackbar>
+
+            <ChangeBooking
+                open={isChangeBookingOpen}
+                onClose={() => setIsChangeBookingOpen(false)}
+                onTourSelect={handleTourSelect}
+                booking={booking}
+            />
         </>
     );
 };

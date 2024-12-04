@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Pagination } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import StaffUpdatePopup from '@components/manager/staff/StaffUpdatePopup';
 import StaffCreatePopup from '@components/manager/staff/StaffCreatePopup';
@@ -18,9 +18,9 @@ const ManageStaff = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [pageIndex, setPageIndex] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
     staffId: null,
@@ -36,11 +36,11 @@ const ManageStaff = () => {
       try {
         const result = await fetchStaff({
           pageSize,
-          pageIndex,
+          pageIndex: page,
           nameSearch: searchTerm,
         });
         setStaff(result.data);
-        setTotal(result.total);
+        setTotalPages(Math.ceil(result.total / pageSize));
       } catch (error) {
         console.error('Failed to fetch staff:', error);
         // Consider adding error handling UI here
@@ -50,7 +50,7 @@ const ManageStaff = () => {
     };
 
     loadStaff();
-  }, [pageSize, pageIndex, searchTerm]);
+  }, [page, pageSize, searchTerm]);
 
   const sortedStaff = [...staff].sort((a, b) => {
     if (sortOrder === 'name-asc') {
@@ -92,11 +92,11 @@ const ManageStaff = () => {
       // Refresh the staff list
       const result = await fetchStaff({
         pageSize,
-        pageIndex,
+        pageIndex: page - 1,
         nameSearch: searchTerm,
       });
       setStaff(result.data);
-      setTotal(result.total);
+      setTotalPages(Math.ceil(result.total / pageSize));
     } catch (error) {
       console.error('Error changing staff status:', error);
       // Consider adding error handling UI here
@@ -107,7 +107,16 @@ const ManageStaff = () => {
 
   const handleSearch = () => {
     setSearchTerm(searchInput);
-    setPageIndex(1);
+    setPage(1);
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(parseInt(event.target.value));
+    setPage(1);
   };
 
   return (
@@ -220,27 +229,27 @@ const ManageStaff = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        {/* Add pagination controls */}
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography>
-            Showing {(pageIndex - 1) * pageSize + 1} - {Math.min(pageIndex * pageSize, total)} of {total}
-          </Typography>
-          <Box>
-            <Button
-              disabled={pageIndex === 1}
-              onClick={() => setPageIndex(prev => Math.max(1, prev - 1))}
-            >
-              Previous
-            </Button>
-            <Button
-              disabled={pageIndex * pageSize >= total}
-              onClick={() => setPageIndex(prev => prev + 1)}
-            >
-              Next
-            </Button>
-          </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Box sx={{ flexGrow: 1 }} />
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+          <Box sx={{ flexGrow: 1 }} />
+          <Select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            variant="outlined"
+            sx={{ height: '40px', ml: 2 }}
+          >
+            <MenuItem value={5}>5 / trang</MenuItem>
+            <MenuItem value={10}>10 / trang</MenuItem>
+            <MenuItem value={20}>20 / trang</MenuItem>
+            <MenuItem value={50}>50 / trang</MenuItem>
+          </Select>
         </Box>
-        {/* Popup components */}
         <StaffCreatePopup
           open={openCreatePopup}
           onClose={() => setOpenCreatePopup(false)}
@@ -252,11 +261,11 @@ const ManageStaff = () => {
             // Reload the staff list
             fetchStaff({
               pageSize,
-              pageIndex,
+              pageIndex: page - 1,
               nameSearch: searchTerm,
             }).then(result => {
               setStaff(result.data);
-              setTotal(result.total);
+              setTotalPages(Math.ceil(result.total / pageSize));
             });
           }}
         />

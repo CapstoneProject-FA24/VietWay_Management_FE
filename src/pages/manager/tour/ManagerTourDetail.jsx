@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert, CircularProgress } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus, cancelTour } from '@services/TourService';
+import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus, cancelTour, deleteTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -21,6 +21,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import Collapse from '@mui/material/Collapse';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -42,6 +45,9 @@ const ManagerTourDetail = () => {
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
+  const [openApproveDialog, setOpenApproveDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,6 +84,14 @@ const ManagerTourDetail = () => {
   };
 
   const handleApproveTour = async () => {
+    if (dayjs(tour.registerOpenDate).isBefore(dayjs(), 'day')) {
+      setOpenApproveDialog(true);
+    } else {
+      await approveTour();
+    }
+  };
+
+  const approveTour = async () => {
     try {
       await updateTourStatus(id, TourStatus.Accepted);
       const updatedTour = await fetchTourById(id);
@@ -120,6 +134,34 @@ const ManagerTourDetail = () => {
   };
 
   const handleDeleteTour = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteTour(id);
+      setOpenDeleteDialog(false);
+      setSnackbar({
+        open: true,
+        message: 'Xóa tour thành công',
+        severity: 'success'
+      });
+      navigate(-1);
+    } catch (error) {
+      console.error('Error deleting tour:', error);
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi xóa tour',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCancelTour = () => {
     setOpenCancelDialog(true);
   };
 
@@ -224,13 +266,92 @@ const ManagerTourDetail = () => {
     </Dialog>
   );
 
+  const handleCloseApproveDialog = () => {
+    setOpenApproveDialog(false);
+  };
+
+  const handleConfirmApprove = async () => {
+    setOpenApproveDialog(false);
+    await approveTour();
+  };
+
+  const ActionButtons = () => {
+    return (
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        {tour?.status === TourStatus.Pending && (
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleApproveTour()}
+              sx={{ height: '45px' }}
+            >
+              Duyệt
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleOpenRejectDialog}
+              sx={{ height: '45px' }}
+            >
+              Từ chối
+            </Button>
+          </>
+        )}
+        {canUpdate && (
+          <>
+            {view === 'edit' ? (
+              <Button
+                variant="contained"
+                startIcon={<CancelIcon />}
+                onClick={handleCancelClick}
+                sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
+              >
+                Hủy sửa
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                startIcon={<EditIcon />}
+                onClick={() => setView('edit')}
+                sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+              >
+                Sửa
+              </Button>
+            )}
+          </>
+        )}
+        {(tour?.totalBookings == 0 && tour?.status != TourStatus.Accepted) && (
+          <Button
+            variant="contained"
+            onClick={handleDeleteTour}
+            color="error"
+            sx={{ height: '45px' }}
+          >
+            Xóa
+          </Button>
+        )}
+        {(tour?.totalBookings > 0 && (tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed)) && (
+          <Button
+            variant="contained"
+            onClick={handleCancelTour}
+            color="warning"
+            sx={{ height: '45px' }}
+          >
+            Hủy tour
+          </Button>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
       <Helmet>
         <title>Chi tiết tour</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box component="main" sx={{ flexGrow: 1, p: 2, marginLeft: isSidebarOpen ? '245px' : 2, transition: 'margin 0.3s', mt: 1 }}>
+      <Box component="main" sx={{ flexGrow: 1, pl: 6, pr: 8, pt: 4, pb: 4, marginLeft: isSidebarOpen ? '280px' : 3, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={12} sx={{ ml: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
@@ -245,59 +366,41 @@ const ManagerTourDetail = () => {
                 Chi tiết tour
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              {canUpdate && (
-                <>
-                  {view === 'edit' ? (
-                    <Button
-                      variant="contained"
-                      startIcon={<CancelIcon />}
-                      onClick={handleCancelClick}
-                      sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
-                    >
-                      Hủy sửa
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      startIcon={<EditIcon />}
-                      onClick={() => setView('edit')}
-                      sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                    >
-                      Sửa
-                    </Button>
-                  )}
-                </>
-              )}
-              {(tour?.status == TourStatus.Accepted || tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed) && (
-                <Button
-                  variant="contained"
-                  onClick={handleDeleteTour}
-                  color="warning"
-                  sx={{ height: '45px' }}
-                >
-                  Hủy tour
-                </Button>
-              )}
-            </Box>
+            <ActionButtons />
           </Grid>
 
-          <Grid item xs={12} md={8.2}>
+          <Grid item xs={12} md={12}>
             <TourTemplateInfo
               tourTemplate={tourTemplate}
               isLoading={isLoading}
             />
-            <TourCalendar
-              tourId={id}
-              tours={tours}
-              selectedMonth={selectedMonth}
-              handleMonthChange={handleMonthChange}
-            />
+            <Paper elevation={2} sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.secondary', textAlign: 'center', width: '85%', pl: 20 }}>
+                  Lịch tour
+                </Typography>
+                <Button
+                  onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+                  endIcon={isCalendarExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                >
+                  {isCalendarExpanded ? 'Thu gọn' : 'Xem thêm'}
+                </Button>
+              </Box>
+
+              <Collapse in={isCalendarExpanded}>
+                <TourCalendar
+                  tourId={id}
+                  tours={tours}
+                  selectedMonth={selectedMonth}
+                  handleMonthChange={handleMonthChange}
+                />
+              </Collapse>
+            </Paper>
           </Grid>
 
-          <Grid item xs={12} md={3.8}>
+          <Grid item xs={12} md={12}>
             {view === 'details' ? (
-              <Paper elevation={2} sx={{ p: 2 }}>
+              <Paper elevation={2} sx={{ pl: 5, pr: 5, pt: 2, pb: 3 }}>
                 <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 700, mb: 0.5, color: 'primary.main' }}>
                   Thông tin tour
                 </Typography>
@@ -305,55 +408,56 @@ const ManagerTourDetail = () => {
                   <>
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
-                      <Typography>Khởi hành từ: {tour.startLocation}</Typography>
+                      <Typography sx={{ mt: 2 }}>Khởi hành từ: {tour.startLocation}</Typography>
                       <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
                       <Typography>Giờ khởi hành: {tour.startTime}</Typography>
-                      {/* <Typography>
-                        Ngày kết thúc: {(() => {
-                          if (!tour.startDate || !tour.startTime || !tourTemplate) {
-                            return '';
-                          }
-                          const result = calculateEndDate(tour.startDate, tour.startTime, tourTemplate.duration);
-                          return result ? result.endDate.format('DD/MM/YYYY') : '';
-                        })()}
-                      </Typography> */}
+
+                      <Box sx={{ mt: 3 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
+                        <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
+                        <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Thời gian đăng ký</Typography>
-                      <Typography>Ngày mở đăng ký: {dayjs(tour.registerOpenDate).format('DD/MM/YYYY')}</Typography>
-                      <Typography>Ngày đóng đăng ký: {dayjs(tour.registerCloseDate).format('DD/MM/YYYY')}</Typography>
-                    </Box>
-                    <Box sx={{ mb: 2 }}>
+
+                    <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
                       <Typography>Số khách tối đa: {tour.maxParticipant}</Typography>
                       <Typography>Số khách tối thiểu: {tour.minParticipant}</Typography>
                       <Typography>Số khách hiện tại: {tour.currentParticipant}</Typography>
                     </Box>
 
-                    <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Giá tour</Typography>
-                      <Typography>Người lớn: {tour.defaultTouristPrice?.toLocaleString()} đ</Typography>
+                      <Typography>Người lớn (từ 12 tuổi trở lên): {tour.defaultTouristPrice?.toLocaleString()} VND</Typography>
                       {tour.tourPrices?.map((price, index) => (
                         <Typography key={index}>
-                          {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} đ
+                          {price.name} ({price.ageFrom}-{price.ageTo} tuổi): {price.price.toLocaleString()} VND
                         </Typography>
                       ))}
                     </Box>
 
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
+                      <Typography>Yêu cầu cọc: {tour.depositPercent}% tổng tiền booking</Typography>
+                      <Typography>Thời hạn thanh toán toàn bộ: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
+                    </Box>
+
                     {tour.tourPolicies && tour.tourPolicies.length > 0 && (
-                      <Box sx={{ mb: 2 }}>
+                      <Box sx={{ mb: 3 }}>
                         <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
                         {tour.tourPolicies.map((policy, index) => (
                           <Box key={index} sx={{ mt: 1 }}>
                             <Typography>
                               Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
-                              Hoàn {policy.refundPercent}% tổng tiền
+                              Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
                             </Typography>
                           </Box>
                         ))}
+                        <Typography>
+                          Hủy từ ngày {new Date(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).toLocaleDateString()}: Chi phí hủy tour là 100% tổng giá trị booking
+                        </Typography>
                       </Box>
                     )}
-
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
                       <Chip
@@ -372,33 +476,16 @@ const ManagerTourDetail = () => {
                           fontWeight: 600, '& .MuiChip-label': { px: 1 }
                         }}
                       />
-                      {tour.status === TourStatus.Pending && (
-                        <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            size="medium"
-                            onClick={() => handleApproveTour()}
-                          >
-                            Duyệt
-                          </Button>
-                          <Button
-                            variant="contained"
-                            color="error"
-                            size="medium"
-                            onClick={handleOpenRejectDialog}
-                          >
-                            Từ chối
-                          </Button>
-                        </Box>
-                      )}
                     </Box>
                   </>
                 )}
               </Paper>
             ) : (
               <TourUpdateForm
-                tour={tour} maxPrice={tourTemplate.maxPrice} minPrice={tourTemplate.minPrice}
+                tour={tour}
+                maxPrice={tourTemplate.maxPrice}
+                minPrice={tourTemplate.minPrice}
+                startingProvince={tourTemplate.startingProvince}
                 onUpdateSuccess={handleUpdateSuccess}
               />
             )}
@@ -478,6 +565,55 @@ const ManagerTourDetail = () => {
             }}
           >
             Xác nhận hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openApproveDialog} onClose={handleCloseApproveDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận duyệt tour
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Ngày mở đăng ký đã qua. Nếu duyệt, tour sẽ được mở ngay. Bạn có chắc chắn muốn duyệt?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={handleCloseApproveDialog} sx={{ color: '#666666' }}>
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmApprove}
+            variant="contained"
+            sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' } }}
+          >
+            Có
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle sx={{ fontWeight: 600 }}>
+          Xác nhận xóa tour
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            onClick={handleCloseDeleteDialog}
+            sx={{ color: '#666666' }}
+          >
+            Không
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+          >
+            Xác nhận xóa
           </Button>
         </DialogActions>
       </Dialog>

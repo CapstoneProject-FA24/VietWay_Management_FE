@@ -35,12 +35,15 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
                 contactEmail: booking.contactEmail,
                 contactPhoneNumber: booking.contactPhoneNumber,
                 totalPrice: booking.totalPrice,
+                paidAmount: booking.paidAmount,
                 numberOfParticipants: booking.numberOfParticipants,
                 status: booking.status,
+                havePendingRefund: booking.havePendingRefund,
                 tourists: booking.tourists.map(tourist => ({
                     touristId: tourist.touristId,
                     fullName: tourist.fullName,
-                    dateOfBirth: tourist.dateOfBirth
+                    dateOfBirth: tourist.dateOfBirth,
+                    pin: tourist.pin
                 }))
             })),
             total,
@@ -53,10 +56,10 @@ export const getBookings = async (pageCount, pageIndex, bookingIdSearch, contact
     }
 };
 
-export const createRefundTransaction = async (bookingId, refundData) => {
+export const createRefundTransaction = async (refundId, refundData) => {
     try {
         const response = await axios.post(
-            `${baseURL}/api/booking/${bookingId}/create-refund-transaction`,
+            `${baseURL}/api/booking-refunds/${refundId}/refund`,
             {
                 note: refundData.note,
                 bankCode: refundData.bankCode,
@@ -101,16 +104,30 @@ export const fetchBookingById = async (bookingId) => {
             contactPhoneNumber: booking.contactPhoneNumber,
             contactAddress: booking.contactAddress,
             totalPrice: booking.totalPrice,
+            paidAmount: booking.paidAmount,
             numberOfParticipants: booking.numberOfParticipants,
             status: booking.status,
             note: booking.note,
+            refundRequests: booking.refundRequests.map(refund => ({
+                refundId: refund.refundId,
+                bookingId: refund.bookingId,
+                refundAmount: refund.refundAmount,
+                refundStatus: refund.refundStatus,
+                refundDate: refund.refundDate,
+                refundReason: refund.refundReason,
+                refundNote: refund.refundNote,
+                bankCode: refund.bankCode,
+                bankTransactionNumber: refund.bankTransactionNumber,
+                createdAt: refund.createdAt
+            })),
             tourists: booking.tourists.map(tourist => ({
                 touristId: tourist.touristId,
                 fullName: tourist.fullName,
                 gender: tourist.gender,
                 phoneNumber: tourist.phoneNumber,
                 dateOfBirth: tourist.dateOfBirth,
-                price: tourist.price
+                price: tourist.price,
+                pin: tourist.pin
             })),
             payments: booking.payments.map(payment => ({
                 paymentId: payment.paymentId,
@@ -123,7 +140,6 @@ export const fetchBookingById = async (bookingId) => {
                 thirdPartyTransactionNumber: payment.thirdPartyTransactionNumber,
                 status: payment.status
             })),
-            refundAmount: booking.refundAmount,
             cancelAt: booking.cancelAt,
             cancelBy: booking.cancelBy,
             tourPolicies: booking.tourPolicies.map(policy => ({
@@ -170,6 +186,30 @@ export const changeBookingTour = async (bookingId, newTourId, reason) => {
         return response.data;
     } catch (error) {
         console.error('Error changing booking tour:', error.response);
+        throw error;
+    }
+};
+
+export const getBookingHistory = async (bookingId) => {
+    try {
+        const response = await axios.get(
+            `${baseURL}/api/booking/${bookingId}/history`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${getCookie('token')}`
+                }
+            }
+        );
+        return response.data.data.map(history => ({
+            modifierRole: history.modifierRole,
+            reason: history.reason,
+            action: history.action,
+            timestamp: history.timestamp,
+            oldStatus: history.oldStatus,
+            newStatus: history.newStatus
+        }));
+    } catch (error) {
+        console.error('Error fetching booking history:', error.response);
         throw error;
     }
 };

@@ -6,6 +6,7 @@ import { getTourTemplateStatusInfo } from '@services/StatusService';
 import { getCookie } from '@services/AuthenService';
 
 const TourTemplateCard = ({ tour, isOpen }) => {
+    console.log(tour);
     const theme = useTheme();
     const isApproved = tour.status === 2;
 
@@ -58,7 +59,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                     />
                 </Box>
                 <Typography color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
-                    {tour.provinces.join(' - ')}
+                    {tour.provinces?.join(' - ')}
                 </Typography>
                 <Typography component="div" variant="h6" sx={{ fontWeight: 600, fontSize: '1.4rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: -1, lineHeight: 1.2 }}>
                     {tour.tourName ? tour.tourName : 'Không có tên'}
