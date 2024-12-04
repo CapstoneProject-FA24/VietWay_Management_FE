@@ -25,7 +25,6 @@ dayjs.extend(isSameOrBefore);
 
 const DATE_FORMAT = "DD/MM/YYYY";
 
-// Add this function to round price to nearest thousand
 const roundToThousand = (price) => {
   return Math.round(price / 1000) * 1000;
 };

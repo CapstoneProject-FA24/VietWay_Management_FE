@@ -24,7 +24,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import Collapse from '@mui/material/Collapse';
+import { Collapse } from '@mui/material';
 
 const TourDetail = () => {
   const { id } = useParams();
