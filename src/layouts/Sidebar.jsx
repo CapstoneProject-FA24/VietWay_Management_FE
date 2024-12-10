@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import PeopleIcon from '@mui/icons-material/People';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -128,8 +128,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <List sx={{ width: '100%' }}>
           {[
-            //{ text: 'Công ty', url: '/admin/cong-ty' },
-            { text: 'Quản lí', url: '/admin/quan-ly' }
+            { text: 'Quản lí', url: '/admin/quan-ly' },
+            { text: 'Nhân viên', url: '/admin/nhan-vien' },
           ].map(({ text, url }, index) => (
             <ListItem 
               key={text}
@@ -140,7 +140,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <MenuItemPaper elevation={0} isSelected={location.pathname === url}>
                 <MenuItemBox>
                   <MenuItemPaper2 elevation={1}>
-                    {index % 2 === 0 ? <BusinessOutlinedIcon sx={{ color: '#2196f3' }} /> : <PeopleIcon sx={{ color: '#2196f3' }} />}
+                    {index % 2 === 0 ? <ManageAccountsIcon sx={{ color: '#2196f3' }} /> : <PeopleIcon sx={{ color: '#2196f3' }} />}
                   </MenuItemPaper2>
                   <ListItemText 
                     primary={text} 

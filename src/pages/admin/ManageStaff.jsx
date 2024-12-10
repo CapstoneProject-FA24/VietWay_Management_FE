@@ -4,7 +4,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import StaffUpdatePopup from '@components/manager/staff/StaffUpdatePopup';
 import StaffCreatePopup from '@components/manager/staff/StaffCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
-import SidebarManager from '@layouts/SidebarManager';
+import Sidebar from '@layouts/Sidebar';
 import { Helmet } from 'react-helmet';
 import { fetchStaff, changeStaffStatus } from '@services/StaffService';
 
@@ -80,7 +80,7 @@ const ManageStaff = () => {
       staffId: staff.staffId,
       isDeleted: !staff.isDeleted,
       title: staff.isDeleted ? 'Kích hoạt nhân viên' : 'Ngưng hoạt động nhân viên',
-      message: staff.isDeleted 
+      message: staff.isDeleted
         ? `Bạn có chắc chắn muốn kích hoạt nhân viên ${staff.fullName}?`
         : `Bạn có chắc chắn muốn ngưng hoạt động nhân viên ${staff.fullName}?`
     });
@@ -124,33 +124,35 @@ const ManageStaff = () => {
       <Helmet>
         <title>Quản lý nhân viên</title>
       </Helmet>
-      <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '0', padding: 5, overflowY: 'auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant='h3' color='primary' sx={{ fontWeight: 700 }}>Quản lý nhân viên</Typography>
+          <Typography variant='h4' color='primary' sx={{ fontWeight: 700 }}>Nhân viên</Typography>
           <Button variant="contained" color="primary" onClick={handleOpenCreatePopup} startIcon={<AddIcon />}>
             Thêm nhân viên
           </Button>
         </Box>
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TextField
-            variant="outlined"
-            placeholder="Tìm kiếm nhân viên..."
-            size="small"
-            sx={{ width: '300px' }}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Button variant="contained" color="primary" onClick={handleSearch}>
-            Tìm kiếm
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <TextField
+              variant="outlined"
+              placeholder="Tìm kiếm nhân viên..."
+              size="small"
+              sx={{ width: '300px' }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button variant="contained" color="primary" onClick={handleSearch}>
+              Tìm kiếm
+            </Button>
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography>
               Sắp xếp theo
@@ -204,19 +206,19 @@ const ManageStaff = () => {
                     <TableCell sx={{ padding: '10px', textAlign: 'center' }}>{new Date(staff.createdAt).toLocaleDateString()}</TableCell>
                     <TableCell sx={{ padding: '10px', textAlign: 'center' }}>
                       {staff.isDeleted ? (
-                        <Button 
-                          variant="contained" 
-                          color="primary" 
-                          onClick={() => handleStatusChange(staff)} 
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleStatusChange(staff)}
                           sx={{ width: '8rem' }}
                         >
                           Kích hoạt
                         </Button>
                       ) : (
-                        <Button 
-                          variant="contained" 
-                          color="error" 
-                          onClick={() => handleStatusChange(staff)} 
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() => handleStatusChange(staff)}
                           sx={{ width: '9rem', fontSize: '0.75rem' }}
                         >
                           Khóa tài khoản
@@ -287,14 +289,14 @@ const ManageStaff = () => {
             {confirmDialog.message}
           </DialogContent>
           <DialogActions>
-            <Button 
+            <Button
               onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
               color="inherit"
             >
               Hủy
             </Button>
-            <Button 
-              onClick={handleConfirmStatusChange} 
+            <Button
+              onClick={handleConfirmStatusChange}
               color={confirmDialog.isDeleted ? "error" : "primary"}
               variant="contained"
             >
