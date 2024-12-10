@@ -35,6 +35,8 @@ const ManageManager = () => {
     message: '',
     severity: 'success'
   });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     const loadManagers = async () => {
@@ -42,21 +44,21 @@ const ManageManager = () => {
       try {
         const result = await fetchManager({
           pageSize,
-          pageIndex,
+          pageIndex: page,
           nameSearch: searchTerm
         });
         setManagers(result.data);
         setTotal(result.total);
+        setTotalPages(Math.ceil(result.total / pageSize));
       } catch (error) {
         console.error('Failed to fetch managers:', error);
-        // Consider adding error handling/notification here
       } finally {
         setIsLoading(false);
       }
     };
 
     loadManagers();
-  }, [pageSize, pageIndex, searchTerm]);
+  }, [pageSize, page, searchTerm]);
 
   const sortedManagers = [...managers].sort((a, b) => {
     if (sortOrder === 'name-asc') {
@@ -78,6 +80,7 @@ const ManageManager = () => {
 
   const handleSearch = () => {
     setSearchTerm(searchInput);
+    setPage(1);
   };
 
   const handleKeyPress = (e) => {
@@ -137,8 +140,13 @@ const ManageManager = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const handlePageChange = (event, newPage) => {
-    setPageIndex(newPage);
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handlePageSizeChange = (event) => {
+    setPageSize(parseInt(event.target.value));
+    setPage(1);
   };
 
   return (
@@ -248,18 +256,26 @@ const ManageManager = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography>
-            Hiển thị {managers.length} trên tổng số {total} kết quả
-          </Typography>
-          <Stack spacing={2}>
-            <Pagination 
-              count={Math.ceil(total / pageSize)} 
-              page={pageIndex}
-              onChange={handlePageChange}
-              color="primary"
-            />
-          </Stack>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Box sx={{ flexGrow: 1 }} />
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+          <Box sx={{ flexGrow: 1 }} />
+          <Select
+            value={pageSize}
+            onChange={handlePageSizeChange}
+            variant="outlined"
+            sx={{ height: '40px', ml: 2 }}
+          >
+            <MenuItem value={5}>5 / trang</MenuItem>
+            <MenuItem value={10}>10 / trang</MenuItem>
+            <MenuItem value={20}>20 / trang</MenuItem>
+            <MenuItem value={50}>50 / trang</MenuItem>
+          </Select>
         </Box>
         <ManagerCreatePopup
           open={openCreatePopup}
