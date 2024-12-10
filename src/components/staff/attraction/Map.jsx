@@ -99,6 +99,12 @@ const autocompleteStyle = `
 
   #pac-input{
     left: 0 !important;
+    background-color: #fff !important;
+    color: #000000 !important;
+  }
+
+  #map-button-container button{
+    color: #505050 !important;
   }
 `;
 
@@ -106,7 +112,9 @@ function Map({ placeId }) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries
+    libraries,
+    region: 'VN',
+    language: 'vi'
   });
 
   const [map, setMap] = useState(null);
