@@ -78,7 +78,7 @@ export const fetchTourTemplateById = async (id) => {
             maxPrice: response.data.data.maxPrice,
             minPrice: response.data.data.minPrice,
             tourCategoryId: response.data.data.tourCategory.tourCategoryId,
-            tourCategoryName: response.data.data.tourCategory.tourCategoryName,
+            tourCategoryName: response.data.data.tourCategory.name,
             policy: response.data.data.policy,
             note: response.data.data.note,
             status: response.data.data.status,

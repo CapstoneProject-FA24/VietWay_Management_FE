@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton } from '@mui/material';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, IconButton, Badge } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
@@ -7,8 +7,13 @@ import PeopleIcon from '@mui/icons-material/People';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SettingsIcon from '@mui/icons-material/Settings';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { styled } from '@mui/material/styles';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import { getCookie, removeCookie } from '@services/AuthenService';
+import Notification from '@components/Notification';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -84,32 +89,50 @@ const MenuItemBox = styled(Box)(({ theme }) => ({
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [unreadNotifications, setUnreadNotifications] = useState(2); // Replace with actual notification count
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleLogout = () => {
-    // Remove all necessary cookies
     removeCookie('token');
     removeCookie('role');
     removeCookie('username');
     navigate('/dang-nhap');
   };
 
+  const handleOpenNotification = () => {
+    handleClose();
+    setNotificationOpen(true);
+  };
+
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
+  };
+
   return (
     <>
-      <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
-        {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-      </ToggleButton>
-
       <SidebarContainer isopen={isOpen}>
+        <ToggleButton onClick={toggleSidebar} isopen={isOpen}>
+          {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </ToggleButton>
         <LogoLink to="/">
           <img src="/logo2_color.png" alt="VIETWAY" style={{ height: '55px' }} />
         </LogoLink>
-
         <Divider />
-
         <List sx={{ width: '100%' }}>
-          <ListItem 
-            component={Link} 
-            to="/admin/dashboard" 
+          <ListItem
+            component={Link}
+            to="/admin/dashboard"
             sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginBottom: 1, marginTop: 3 }}
           >
             <MenuItemPaper elevation={2} isSelected={location.pathname === '/admin/dashboard'}>
@@ -117,8 +140,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 <ListItemIcon sx={{ minWidth: '40px' }}>
                   <HomeIcon sx={{ color: '#2196f3' }} />
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Dashboard" 
+                <ListItemText
+                  primary="Dashboard"
                   primaryTypographyProps={{ fontWeight: 'bold', fontSize: '1rem' }}
                 />
               </MenuItemBox>
@@ -127,13 +150,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         </List>
 
         <List sx={{ width: '100%' }}>
-          {[
+          {[/* eslint-disable-line */
             { text: 'Quản lí', url: '/admin/quan-ly' },
             { text: 'Nhân viên', url: '/admin/nhan-vien' },
           ].map(({ text, url }, index) => (
-            <ListItem 
+            <ListItem
               key={text}
-              component={Link} 
+              component={Link}
               to={url}
               sx={{ textDecoration: 'none', color: 'inherit', padding: 0, marginBottom: 1 }}
             >
@@ -142,8 +165,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   <MenuItemPaper2 elevation={1}>
                     {index % 2 === 0 ? <ManageAccountsIcon sx={{ color: '#2196f3' }} /> : <PeopleIcon sx={{ color: '#2196f3' }} />}
                   </MenuItemPaper2>
-                  <ListItemText 
-                    primary={text} 
+                  <ListItemText
+                    primary={text}
                     primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
                   />
                 </MenuItemBox>
@@ -156,24 +179,67 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <Divider />
         <List sx={{ width: '100%', mt: 2 }}>
-          <ListItem 
-            onClick={handleLogout} 
-            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer' }}
+          <ListItem
+            onClick={handleClick}
+            sx={{ textDecoration: 'none', color: 'inherit', padding: 0, cursor: 'pointer', mb: 1 }}
           >
-            <MenuItemPaper elevation={1} isSelected={location.pathname === '/dang-xuat'}>
+            <MenuItemPaper elevation={1}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
-                  <ExitToAppIcon sx={{ color: '#2196f3', transform: 'rotate(180deg)' }} />
+                  <Badge color="error" variant="dot" invisible={!unreadNotifications}>
+                    <SettingsIcon sx={{ color: '#2196f3' }} />
+                  </Badge>
                 </ListItemIcon>
-                <ListItemText 
-                  primary="Đăng xuất" 
-                  primaryTypographyProps={{ fontWeight: 'bold', fontSize: '0.9rem' }}
+                <ListItemText
+                  primary="Tài khoản"
+                  primaryTypographyProps={{ fontSize: '0.97rem' }}
                 />
               </MenuItemBox>
             </MenuItemPaper>
           </ListItem>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+          >
+            <MenuItem onClick={() => {
+              handleClose();
+              navigate('/admin/thong-tin-tai-khoan');
+            }}>Thông tin tài khoản</MenuItem>
+            <MenuItem onClick={handleOpenNotification}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <span>Thông báo</span>
+                {unreadNotifications > 0 && (
+                  <Badge
+                    badgeContent={unreadNotifications}
+                    color="error"
+                    sx={{
+                      '& .MuiBadge-badge': { fontSize: '0.7rem', height: '16px', minWidth: '16px' }
+                    }}
+                  />
+                )}
+              </Box>
+            </MenuItem>
+            <MenuItem sx={{ color: 'red' }} onClick={() => {
+              handleClose();
+              handleLogout();
+            }}>Đăng xuất</MenuItem>
+          </Menu>
         </List>
       </SidebarContainer>
+
+      <Notification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+      />
     </>
   );
 };

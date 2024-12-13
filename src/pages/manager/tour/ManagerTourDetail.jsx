@@ -24,6 +24,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import Collapse from '@mui/material/Collapse';
+import MuiAlert from '@mui/material/Alert';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -48,6 +49,7 @@ const ManagerTourDetail = () => {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,6 +144,7 @@ const ManagerTourDetail = () => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
       await deleteTour(id);
       setOpenDeleteDialog(false);
@@ -150,14 +153,17 @@ const ManagerTourDetail = () => {
         message: 'Xóa tour thành công',
         severity: 'success'
       });
-      navigate(-1);
+      navigate('/quan-ly/tour-du-lich');
     } catch (error) {
       console.error('Error deleting tour:', error);
       setSnackbar({
         open: true,
-        message: 'Có lỗi xảy ra khi xóa tour',
+        message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour',
         severity: 'error'
       });
+      setOpenDeleteDialog(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -201,8 +207,11 @@ const ManagerTourDetail = () => {
     setRejectReason('');
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
   };
 
   const handleViewChange = (event, newView) => {
@@ -321,14 +330,14 @@ const ManagerTourDetail = () => {
             )}
           </>
         )}
-        {(tour?.totalBookings == 0 && tour?.status != TourStatus.Accepted) && (
+        {(tour?.totalBookings == 0 && tour?.status != TourStatus.Rejected && tour?.status != TourStatus.Pending ) && (
           <Button
             variant="contained"
             onClick={handleDeleteTour}
             color="error"
-            sx={{ height: '45px' }}
+            disabled={isDeleting}
           >
-            Xóa
+            {isDeleting ? 'Đang xóa...' : 'Xóa'}
           </Button>
         )}
         {(tour?.totalBookings > 0 && (tour?.status == TourStatus.Opened || tour?.status == TourStatus.Closed)) && (
@@ -406,6 +415,7 @@ const ManagerTourDetail = () => {
                 </Typography>
                 {tour && (
                   <>
+
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
                       <Typography sx={{ mt: 2 }}>Khởi hành từ: {tour.startLocation}</Typography>
@@ -478,6 +488,7 @@ const ManagerTourDetail = () => {
                       />
                     </Box>
                   </>
+
                 )}
               </Paper>
             ) : (
@@ -605,6 +616,7 @@ const ManagerTourDetail = () => {
           <Button
             onClick={handleCloseDeleteDialog}
             sx={{ color: '#666666' }}
+            disabled={isDeleting}
           >
             Không
           </Button>
@@ -612,8 +624,9 @@ const ManagerTourDetail = () => {
             onClick={handleConfirmDelete}
             variant="contained"
             sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+            disabled={isDeleting}
           >
-            Xác nhận xóa
+            {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -624,14 +637,14 @@ const ManagerTourDetail = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert
+        <MuiAlert
+          elevation={6}
+          variant="filled"
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
         >
           {snackbar.message}
-        </Alert>
+        </MuiAlert>
       </Snackbar>
 
       <CancelConfirmationDialog />

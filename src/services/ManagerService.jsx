@@ -101,3 +101,22 @@ export const updateManager = async (managerData) => {
         throw error;
     }
 };
+
+export const changeManagerPassword = async (oldPassword, newPassword) => {
+    const request = {
+        oldPassword: oldPassword,
+        newPassword: newPassword
+    };
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(`${baseURL}/api/managers/change-manager-password`, request, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing manager password:', error);
+        throw error;
+    }
+};

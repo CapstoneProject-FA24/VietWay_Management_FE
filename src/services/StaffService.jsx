@@ -102,3 +102,22 @@ export const updateStaff = async (staffData) => {
         throw error;
     }
 };
+
+export const changeStaffPassword = async (oldPassword, newPassword) => {
+    const request = {
+        oldPassword: oldPassword,
+        newPassword: newPassword
+    };
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(`${baseURL}/api/staff/change-staff-password`, request, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing staff password:', error);
+        throw error;
+    }
+};
