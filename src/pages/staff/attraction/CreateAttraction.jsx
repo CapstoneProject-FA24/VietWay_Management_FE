@@ -282,19 +282,6 @@ const AddAttraction = () => {
                             alt={`Attraction image ${index + 1}`}
                             style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                           />
-                          <IconButton
-                            onClick={() => handleRemoveImage(index)}
-                            sx={{
-                              position: 'absolute',
-                              top: 8,
-                              right: 8,
-                              backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-                              color: 'white'
-                            }}
-                          >
-                            <CloseIcon />
-                          </IconButton>
                         </div>
                       ))
                     ) : (

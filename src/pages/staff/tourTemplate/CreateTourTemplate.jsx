@@ -35,6 +35,7 @@ const quillModules = {
 
 const CreateTourTemplate = () => {
   const [provinces, setProvinces] = useState([]);
+  const navigate = useNavigate(); 
   const [tourTemplate, setTourTemplate] = useState({
     tourName: '', provinces: [], duration: '', departurePoint: '', tourCategory: '',
     description: '', note: '', imageUrls: Array(4).fill(null),
@@ -43,42 +44,19 @@ const CreateTourTemplate = () => {
   });
   const [tourCategories, setTourCategories] = useState([]);
   const [tourDurations, setTourDurations] = useState([]);
-
   const [editableFields, setEditableFields] = useState({
-    tourName: { value: '' },
-    description: { value: '' },
-    note: { value: '' },
-    provinces: { value: [] },
-    duration: { value: '' },
-    tourCategory: { value: '' },
-    code: { value: '' },
-    minPrice: { value: '' },
-    maxPrice: { value: '' },
-    startingProvinceId: { value: '' },
-    transportation: { value: '' }
+    tourName: { value: '' }, description: { value: '' }, note: { value: '' },
+    provinces: { value: [] }, duration: { value: '' }, tourCategory: { value: '' },
+    code: { value: '' }, minPrice: { value: '' }, maxPrice: { value: '' },
+    startingProvinceId: { value: '' }, transportation: { value: '' }
   });
-
   const [expandedDay, setExpandedDay] = useState(1);
   const [isAttractionPopupOpen, setIsAttractionPopupOpen] = useState(false);
   const [currentEditingDay, setCurrentEditingDay] = useState(null);
-  const pageTopRef = useRef(null);
-  const navigate = useNavigate();
-
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  const [priceErrors, setPriceErrors] = useState({
-    minPrice: '',
-    maxPrice: ''
-  });
-
-  const [selectedProvince, setSelectedProvince] = useState('');
-
+  const [priceErrors, setPriceErrors] = useState({ minPrice: '', maxPrice: '' });
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const handleProvinceChange = (event) => {
-    setSelectedProvince(event.target.value);
   };
 
   useEffect(() => {
@@ -197,26 +175,6 @@ const CreateTourTemplate = () => {
     setIsAttractionPopupOpen(false);
   };
 
-  const handleScheduleSubmit = (day) => {
-    const schedule = tourTemplate.schedule.find(item => item.dayNumber === day);
-    const isValid = schedule.title.trim() !== '' && schedule.description.trim() !== '' && schedule.attractions.length > 0;
-
-    if (isValid) {
-      setTourTemplate(prev => ({
-        ...prev, schedule: prev.schedule.map(item =>
-          item.dayNumber === day ? { ...item, isEditing: false } : item)
-      }));
-    } else { alert('Please ensure all fields are filled before submitting.'); }
-  };
-
-  const handleScheduleEdit = (day) => {
-    setTourTemplate(prev => ({
-      ...prev, schedule: prev.schedule.map(item =>
-        item.dayNumber === day ? { ...item, isEditing: true } : item)
-    }));
-    setExpandedDay(day);
-  };
-
   const validatePrice = (minPrice, maxPrice) => {
     const min = parseFloat(minPrice);
     const max = parseFloat(maxPrice);
@@ -288,7 +246,7 @@ const CreateTourTemplate = () => {
 
         // Check provinces
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
-          alert('Vui lòng chọn ít nhất một tnh thành.');
+          alert('Vui lòng chọn ít nhất một tỉnh thành.');
           return;
         }
 
@@ -389,11 +347,8 @@ const CreateTourTemplate = () => {
               <Typography
                 variant="h4"
                 sx={{
-                  fontSize: '2.7rem',
-                  fontWeight: 600,
-                  color: 'primary.main',
-                  alignSelf: 'center',
-                  marginBottom: '1rem'
+                  fontSize: '2.7rem', fontWeight: 600, color: 'primary.main',
+                  alignSelf: 'center', marginBottom: '1rem'
                 }}
               >
                 Tạo tour mẫu mới
@@ -404,12 +359,8 @@ const CreateTourTemplate = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                 <Typography gutterBottom>Tour đi qua tỉnh/thành phố</Typography>
                 <ReactSelect
-                  isMulti
-                  name="provinces"
-                  options={provinces.map(province => ({
-                    value: province.provinceId,
-                    label: province.provinceName
-                  }))}
+                  isMulti name="provinces"
+                  options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
                   className="basic-multi-select"
                   classNamePrefix="select"
                   placeholder="Chọn tỉnh/thành phố"
@@ -420,11 +371,9 @@ const CreateTourTemplate = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                 <Typography gutterBottom>Tour bắt đầu từ:</Typography>
                 <Select
-                  value={selectedProvince}
-                  onChange={handleProvinceChange}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ height: '40px' }}
+                  value={editableFields.startingProvinceId.value}
+                  onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
+                  variant="outlined" fullWidth sx={{ height: '40px' }}
                 >
                   {provinces.map((province) => (
                     <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
@@ -433,14 +382,11 @@ const CreateTourTemplate = () => {
               </Box>
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2, mb: 3 }}>
-              <Typography gutterBottom>
-                Tên tour
-              </Typography>
+              <Typography gutterBottom> Tên tour </Typography>
               <TextField
                 value={editableFields.tourName.value}
                 onChange={(e) => handleFieldChange('tourName', e.target.value)}
-                variant="outlined"
-                fullWidth
+                variant="outlined" fullWidth
               />
             </Box>
 
@@ -560,8 +506,7 @@ const CreateTourTemplate = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                       <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '7rem' }}>Phương tiện:</Typography>
                       <Select
-                        sx={{ width: '100%' }}
-                        value={editableFields.transportation.value}
+                        sx={{ width: '100%' }} value={editableFields.transportation.value}
                         onChange={(e) => handleFieldChange('transportation', e.target.value)}
                       >
                         <MenuItem value="Xe du lịch">Xe du lịch</MenuItem>
@@ -574,11 +519,8 @@ const CreateTourTemplate = () => {
                 <Box sx={{ mb: 5 }}>
                   <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
                   <ReactQuill
-                    value={editableFields.description.value}
-                    onChange={(value) => handleFieldChange('description', value)}
-                    modules={quillModules}
-                    theme="snow"
-                    style={{ height: '200px', marginBottom: '100px' }} />
+                    value={editableFields.description.value} onChange={(value) => handleFieldChange('description', value)}
+                    modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }} />
                 </Box>
                 <Box sx={{ mb: 5 }}>
                   <Typography variant="h5" gutterBottom
@@ -606,97 +548,60 @@ const CreateTourTemplate = () => {
                           width: '2px', backgroundColor: '#3572EF', zIndex: 0
                         }} />
                       )}
-                      {s.isEditing ? (
-                        <>
-                          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }}
-                            onClick={() => handleDayClick(s.dayNumber)}>
-                            <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
-                              {`Ngày ${s.dayNumber}`}
-                            </Typography>
-                            <IconButton size="small">
-                              {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </IconButton>
+                      <>
+                        <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }}
+                          onClick={() => handleDayClick(s.dayNumber)}>
+                          <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
+                            {`Ngày ${s.dayNumber}`}
+                          </Typography>
+                          <IconButton size="small">
+                            {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                          </IconButton>
+                        </Box>
+                        <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Tiêu đề:</Typography>
+                            <TextField value={s.title} onChange={(e) => handleScheduleChange(s.dayNumber, 'title', e.target.value)} variant="outlined" fullWidth />
                           </Box>
-                          <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                              <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Tiêu đề:</Typography>
-                              <TextField value={s.title} onChange={(e) => handleScheduleChange(s.dayNumber, 'title', e.target.value)} variant="outlined" fullWidth />
-                            </Box>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                              <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Mô tả:</Typography>
-                              <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
-                            </Box>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
-                              <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
-                              <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
-                                Chọn điểm đến
-                              </Button>
-                              {s.attractions.length > 0 && (
-                                <Box sx={{ mt: 1 }}>
-                                  <Typography variant="subtitle2">Đã chọn:</Typography>
-                                  <ul style={{ listStyleType: 'none', padding: 0 }}>
-                                    {s.attractions.map((attraction) => (
-                                      <li key={attraction.attractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                                        <Typography>{attraction.name}</Typography>
-                                        <IconButton size="small" sx={{ ml: 1 }}
-                                          onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
-                                          <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </Box>
-                              )}
-                            </Box>
-                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                              <Button variant="contained" onClick={() => handleScheduleSubmit(s.dayNumber)} sx={{ minWidth: '40px', padding: '8px' }}
-                                disabled={!s.title.trim() || !s.description.trim() || s.attractions.length === 0}>
-                                <CheckIcon />
-                              </Button>
-                            </Box>
-                          </Collapse>
-                        </>
-                      ) : (
-                        <>
-                          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }}
-                            onClick={() => handleDayClick(s.dayNumber)}>
-                            <Typography variant="h6" sx={{ fontWeight: '500', mr: 1 }}>
-                              {`Ngày ${s.dayNumber}: ${s.title}`}
-                            </Typography>
-                            <IconButton size="small">
-                              {expandedDay === s.dayNumber ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </IconButton>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Mô tả:</Typography>
+                            <ReactQuill
+                              value={s.description} onChange={(value) => handleScheduleChange(s.dayNumber, 'description', value)}
+                              modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }}
+                            />
                           </Box>
-                          <Collapse in={expandedDay === s.dayNumber} sx={{ mt: 1, ml: 1 }}>
-                            <Typography paragraph sx={{ mb: 2 }}>{s.description}</Typography>
-                            <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>Điểm đến:</Typography>
-                            {s.attractions.length > 0 ? (
-                              <ul>
-                                {s.attractions.map((attraction) => (
-                                  <li key={attraction.attractionId}>{attraction.name}</li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <Typography variant="body2">Chưa có điểm đến nào được chọn</Typography>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
+                            <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
+                              Chọn điểm đến
+                            </Button>
+                            {s.attractions.length > 0 && (
+                              <Box sx={{ mt: 1 }}>
+                                <Typography variant="subtitle2">Đã chọn:</Typography>
+                                <ul style={{ listStyleType: 'none', padding: 0 }}>
+                                  {s.attractions.map((attraction) => (
+                                    <li key={attraction.attractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                                      <Typography>{attraction.name}</Typography>
+                                      <IconButton size="small" sx={{ ml: 1 }}
+                                        onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
+                                        <CloseIcon fontSize="small" />
+                                      </IconButton>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </Box>
                             )}
-                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                              <IconButton onClick={() => handleScheduleEdit(s.dayNumber)}><EditIcon /></IconButton>
-                            </Box>
-                          </Collapse>
-                        </>
-                      )}
+                          </Box>
+                        </Collapse>
+                      </>
                     </Box>
                   ))}
                 </Box>
                 <Box sx={{ mb: 5, mt: 10 }}>
                   <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Lưu ý</Typography>
-                  <TextField
-                    value={editableFields.note.value}
-                    onChange={(e) => handleFieldChange('note', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    multiline
-                    rows={4}
+                  <ReactQuill
+                    value={editableFields.note.value} onChange={(value) => handleFieldChange('note', value)}
+                    modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }}
                   />
                 </Box>
               </Grid>
@@ -708,26 +613,18 @@ const CreateTourTemplate = () => {
                     <TextField
                       value={editableFields.code.value}
                       onChange={(e) => handleFieldChange('code', e.target.value)}
-                      variant="outlined"
-                      fullWidth
-                      placeholder="Nhập mã mẫu"
-                      sx={{ ml: 1 }}
+                      variant="outlined" fullWidth placeholder="Nhập mã mẫu" sx={{ ml: 1 }}
                     />
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
                     <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Giá từ: </Typography>
                     <TextField
-                      label="Giá thấp nhất"
-                      value={editableFields.minPrice.value}
+                      label="Giá thấp nhất" value={editableFields.minPrice.value}
                       onChange={(e) => handleFieldChange('minPrice', e.target.value)}
                       onBlur={() => handlePriceBlur('minPrice')}
-                      error={!!priceErrors.minPrice}
-                      helperText={priceErrors.minPrice}
-                      variant="outlined"
-                      fullWidth
-                      placeholder="Giá thấp nhất"
-                      inputProps={{ min: 0 }}
+                      error={!!priceErrors.minPrice} helperText={priceErrors.minPrice} variant="outlined"
+                      fullWidth placeholder="Giá thấp nhất" inputProps={{ min: 0 }}
                     />
                   </Box>
 
@@ -735,33 +632,20 @@ const CreateTourTemplate = () => {
                     <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
                     <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Đến: </Typography>
                     <TextField
-                      label="Giá cao nhất"
-                      value={editableFields.maxPrice.value}
+                      label="Giá cao nhất" value={editableFields.maxPrice.value}
                       onChange={(e) => handleFieldChange('maxPrice', e.target.value)}
                       onBlur={() => handlePriceBlur('maxPrice')}
-                      error={!!priceErrors.maxPrice}
-                      helperText={priceErrors.maxPrice}
-                      variant="outlined"
-                      fullWidth
-                      placeholder="Giá cao nhất"
-                      inputProps={{ min: 0 }}
+                      error={!!priceErrors.maxPrice} helperText={priceErrors.maxPrice} variant="outlined"
+                      fullWidth placeholder="Giá cao nhất" inputProps={{ min: 0 }}
                     />
                   </Box>
-
                   <Button
-                    variant="contained"
-                    fullWidth
+                    variant="contained" fullWidth onClick={() => handleSubmit(true)}
                     sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}
-                    onClick={() => handleSubmit(true)}
                   >
                     Lưu bản nháp
                   </Button>
-                  <Button
-                    variant="contained"
-                    fullWidth
-                    sx={{ height: '50px' }}
-                    onClick={() => handleSubmit(false)}
-                  >
+                  <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => handleSubmit(false)} >
                     Gửi
                   </Button>
                 </Paper>

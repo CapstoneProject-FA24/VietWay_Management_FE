@@ -132,14 +132,14 @@ const TourTemplateDetails = () => {
         'Mã tour': template.code,
         'Tên tour': template.tourName,
         'Mô tả': template.description,
-        'Thời gian': template.durationId,
+        'Thời gian': template.duration,
         'Loại tour': template.tourCategoryId,
-        'Chính sách': template.policy,
         'Giá thấp nhất': template.minPrice,
         'Giá cao nhất': template.maxPrice,
-        'Điểm khởi hành': template.startingProvinceId,
+        'Điểm khởi hành': template.startingProvince,
         'Phương tiện di chuyển': template.transportation,
-        'Các tỉnh thành': template.provinceIds,
+        'Các tỉnh thành': template.provinces,
+        'Lịch trình': template.schedule,
       };
 
       const missingFields = Object.entries(requiredFields)

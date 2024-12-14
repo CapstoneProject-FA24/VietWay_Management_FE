@@ -314,9 +314,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         {/* Tổng quan */}
                         {selectedTab === 0 && (
                             <Box sx={{ p: 3 }}>
-                                <Typography paragraph>
-                                    {tour.description}
-                                </Typography>
+                                <Box dangerouslySetInnerHTML={{ __html: tour.description }} sx={{ '& p': { lineHeight: 1.2, mt: 0, textAlign: 'justify' } }} />
                                 {tour.highlights && (
                                     <Box sx={{ mt: 2 }}>
                                         <Typography variant="h6" gutterBottom>Điểm nổi bật:</Typography>
@@ -345,7 +343,14 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                                                 <Typography variant="h6" component="span">
                                                     Ngày {day.dayNumber} - {day.title}
                                                 </Typography>
-                                                <Typography>{day.description}</Typography>
+                                                <Typography>Các điểm đến:</Typography>
+                                                <ul>
+                                                    {day.attractions.map((attraction) => (
+                                                        <li key={attraction.attractionId}>{attraction.name}</li>
+                                                    ))}
+                                                </ul>
+                                                <Typography sx={{ mt: 1.5 }}>Chi tiết:</Typography>
+                                                <Box dangerouslySetInnerHTML={{ __html: day.description }} sx={{ '& p': { lineHeight: 1.2, mt: 0, textAlign: 'justify' } }} />
                                             </TimelineContent>
                                         </TimelineItem>
                                     ))}
@@ -394,8 +399,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                         {/* Lưu ý */}
                         {selectedTab === 3 && (
                             <Box sx={{ p: 3 }}>
-                                <Typography variant="h6" gutterBottom>Lưu ý quan trọng:</Typography>
-                                <Typography>{tour.note}</Typography>
+                                <Box dangerouslySetInnerHTML={{ __html: tour.note }} sx={{ '& p': { lineHeight: 1.2, mt: 0, textAlign: 'justify' } }} />
                             </Box>
                         )}
                     </Box>

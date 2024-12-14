@@ -193,25 +193,12 @@ const AttractionUpdateForm = ({
             <Box className="slick-slider-container" sx={{ height: '450px' }}>
               <Slider ref={setSliderRef} {...settings}>
                 {images.map((image, index) => (
-                  <div key={index} style={{ position: 'relative' }}>
+                  <div key={index} style={{ position: 'relative'}}>
                     <img
                       src={image instanceof File ? URL.createObjectURL(image) : image.url}
                       alt={`Attraction ${index + 1}`}
                       style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                     />
-                    <IconButton
-                      onClick={() => handleRemoveImage(index)}
-                      sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-                        color: 'white'
-                      }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
                   </div>
                 ))}
               </Slider>
