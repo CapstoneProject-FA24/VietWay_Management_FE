@@ -305,13 +305,13 @@ const ManagerTourTemplateDetails = () => {
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
-              <Box 
-                dangerouslySetInnerHTML={{ __html: tourTemplate.description }} 
+              <Box
+                dangerouslySetInnerHTML={{ __html: tourTemplate.description }}
                 sx={{
                   '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
                   '& p': { lineHeight: 1.7, mb: 2, color: '#05073C', textAlign: 'justify' },
                   flexGrow: 1, width: '100%', margin: '0 auto'
-                }} 
+                }}
               />
             </Box>
             <Box sx={{ mb: 5 }}>
@@ -371,6 +371,7 @@ const ManagerTourTemplateDetails = () => {
                     </IconButton>
                   </Box>
                   <Collapse in={expandedDay === s.dayNumber} sx={{ ml: 1 }}>
+                    <Typography sx={{ mb: -1.5 }}>Các điểm đến:</Typography>
                     <ul>
                       {s.attractions.map((attraction, i) => (
                         <li key={attraction.attractionId}>
@@ -378,38 +379,18 @@ const ManagerTourTemplateDetails = () => {
                         </li>
                       ))}
                     </ul>
-                    <Typography paragraph sx={{ textAlign: 'justify' }}>
-                      {s.description}
-                    </Typography>
+                    <Typography>Chi tiết:</Typography>
+                    <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' }}}/>
                   </Collapse>
                 </Box>
               ))}
             </Box>
             <Box sx={{ mb: 5 }}>
               <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-                Chính sách
-              </Typography>
-              <Box 
-                dangerouslySetInnerHTML={{ __html: tourTemplate.policy }} 
-                sx={{
-                  '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                  '& p': { lineHeight: 1.7, mb: 2, color: '#05073C', textAlign: 'justify' },
-                  flexGrow: 1, width: '100%', margin: '0 auto'
-                }}
-              />
-            </Box>
-            <Box sx={{ mb: 5 }}>
-              <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
                 Lưu ý
               </Typography>
-              <Box 
-                dangerouslySetInnerHTML={{ __html: tourTemplate.note }}
-                sx={{
-                  '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                  '& p': { lineHeight: 1.7, mb: 2, color: '#05073C', textAlign: 'justify' },
-                  flexGrow: 1, width: '100%', margin: '0 auto'
-                }}
-              />
+              <Box
+                dangerouslySetInnerHTML={{ __html: tourTemplate.note }} />
             </Box>
           </Grid>
           <Grid item xs={12} md={4}>

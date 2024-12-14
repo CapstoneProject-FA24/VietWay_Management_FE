@@ -59,15 +59,15 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
 
             <Collapse in={expanded}>
                 <Box sx={{ mt: 2 }}>
-                    <Typography sx={{ fontWeight: 700, mb: 1 }}>Tổng quan:</Typography>
+                    <Typography sx={{ fontWeight: 700, mb: -2 }}>Tổng quan:</Typography>
                     <Typography paragraph sx={{ textAlign: 'justify' }}>
                         <Box dangerouslySetInnerHTML={{ __html: tourTemplate.description }} sx={{
                             '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                            '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                            '& p': { lineHeight: 1.2, mb: 1 }, flexGrow: 1, width: '100%', margin: '0 auto'
                         }} />
                     </Typography>
 
-                    <Typography sx={{ fontWeight: 700, mt: 2, mb: 1 }}>Lịch trình:</Typography>
+                    <Typography sx={{ fontWeight: 700, mt: 3, mb: 1 }}>Lịch trình:</Typography>
                     {tourTemplate.schedule.map((s, index, array) => (
                         <Box key={s.dayNumber} sx={{ pl: 6, position: 'relative' }}>
                             {(index === 0 || index === array.length - 1) && (
@@ -91,7 +91,7 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
                             )}
                             <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }}
                                 onClick={() => handleDayClick(s.dayNumber)}>
-                                <Typography sx={{ fontWeight: '500', mr: 1 }}>
+                                <Typography sx={{ fontWeight: '700', mr: 1, fontSize: '1.2rem' }}>
                                     {`Ngày ${s.dayNumber}: ${s.title}`}
                                 </Typography>
                                 <IconButton size="small">
@@ -99,14 +99,14 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
                                 </IconButton>
                             </Box>
                             <Collapse in={expandedDay === s.dayNumber} sx={{ ml: 1 }}>
+                                <Typography sx={{ mb: -1.5 }}>Các điểm đến:</Typography>
                                 <ul>
                                     {s.attractions.map((attraction) => (
                                         <li key={attraction.attractionId}>{attraction.name}</li>
                                     ))}
                                 </ul>
-                                <Typography paragraph sx={{ textAlign: 'justify' }}>
-                                    {s.description}
-                                </Typography>
+                                <Typography>Chi tiết:</Typography>
+                                <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' }}}/>
                             </Collapse>
                         </Box>
                     ))}

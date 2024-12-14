@@ -20,26 +20,26 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    [{ 'font': [] }],
-    [{ 'size': ['small', false, 'large', 'huge'] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'script': 'sub'}, { 'script': 'super' }],
-    [{ 'align': [] }],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-    [{ 'direction': 'rtl' }],
-    ['blockquote', 'code-block'],
-    ['link', 'image', 'video', 'formula'],
-    ['clean']
-  ]
+    toolbar: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'font': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'script': 'sub' }, { 'script': 'super' }],
+        [{ 'align': [] }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+        [{ 'direction': 'rtl' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image', 'video', 'formula'],
+        ['clean']
+    ]
 };
 
 const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onCancel }) => {
     const [tourTemplate, setTourTemplate] = useState({
         ...initialTourTemplate,
-        imageUrls: Array(4).fill(null).map((_, index) => 
+        imageUrls: Array(4).fill(null).map((_, index) =>
             initialTourTemplate.imageUrls?.[index] || null
         )
     });
@@ -176,7 +176,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         if (file) {
             setTourTemplate(prev => ({
                 ...prev,
-                imageUrls: prev.imageUrls.map((img, i) => 
+                imageUrls: prev.imageUrls.map((img, i) =>
                     i === index ? file : img
                 )
             }));
@@ -186,7 +186,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const handleImageRemove = (index) => {
         setTourTemplate(prev => ({
             ...prev,
-            imageUrls: prev.imageUrls.map((img, i) => 
+            imageUrls: prev.imageUrls.map((img, i) =>
                 i === index ? null : img
             )
         }));
@@ -342,7 +342,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     return;
                 }
 
-                const invalidSchedules = tourTemplateData.schedules.filter(s => 
+                const invalidSchedules = tourTemplateData.schedules.filter(s =>
                     !s.title || !s.description || !s.attractionIds || s.attractionIds.length === 0
                 );
                 if (invalidSchedules.length > 0) {
@@ -370,7 +370,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             if (response.statusCode === 200) {
                 const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
                 const deletedImageIds = initialTourTemplate.imageUrls
-                    .filter(originalImg => !tourTemplate.imageUrls.some(currentImg => 
+                    .filter(originalImg => !tourTemplate.imageUrls.some(currentImg =>
                         currentImg?.imageUrl === originalImg?.imageUrl))
                     .map(img => img.imageId);
 
@@ -391,47 +391,47 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
 
     const renderImageSlot = (index, dimensions) => {
         const image = tourTemplate.imageUrls[index];
-        
+
         return image ? (
             <>
-                <img 
+                <img
                     src={image instanceof File ? URL.createObjectURL(image) : image.imageUrl}
                     alt={`Tour image ${index + 1}`}
-                    style={{ 
-                        width: '100%', 
-                        height: dimensions.height, 
-                        objectFit: 'cover' 
+                    style={{
+                        width: '100%',
+                        height: dimensions.height,
+                        objectFit: 'cover'
                     }}
                 />
-                <IconButton 
+                <IconButton
                     onClick={() => handleImageRemove(index)}
-                    sx={{ 
-                        position: 'absolute', 
-                        top: 10, 
-                        right: 10, 
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)', 
-                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' } 
+                    sx={{
+                        position: 'absolute',
+                        top: 10,
+                        right: 10,
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' }
                     }}
                 >
                     <CloseIcon />
                 </IconButton>
             </>
         ) : (
-            <Button 
-                component="label" 
-                variant="outlined" 
-                sx={{ 
-                    width: '100%', 
-                    height: dimensions.buttonHeight || dimensions.height, 
-                    border: '2px dashed #3572EF' 
+            <Button
+                component="label"
+                variant="outlined"
+                sx={{
+                    width: '100%',
+                    height: dimensions.buttonHeight || dimensions.height,
+                    border: '2px dashed #3572EF'
                 }}
             >
                 Thêm ảnh
-                <input 
-                    type="file" 
-                    hidden 
+                <input
+                    type="file"
+                    hidden
                     accept="image/*"
-                    onChange={(e) => handleImageUpload(index, e)} 
+                    onChange={(e) => handleImageUpload(index, e)}
                 />
             </Button>
         );
@@ -476,7 +476,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
                         displayEmpty
                         fullWidth
-                        sx={{ 
+                        sx={{
                             height: '40px',
                             backgroundColor: 'white'
                         }}
@@ -572,11 +572,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ 
-                            textAlign: 'left', 
-                            fontWeight: '700', 
-                            fontSize: '1.6rem', 
-                            color: '#05073C' 
+                        <Typography variant="h5" gutterBottom sx={{
+                            textAlign: 'left',
+                            fontWeight: '700',
+                            fontSize: '1.6rem',
+                            color: '#05073C'
                         }}>
                             Tổng quan
                         </Typography>
@@ -630,7 +630,10 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                         <Typography variant="subtitle1" sx={{ fontWeight: '600', mb: 1 }}>
                                             Mô tả:
                                         </Typography>
-                                        <TextField value={s.description} onChange={(e) => handleScheduleChange(s.dayNumber, 'description', e.target.value)} variant="outlined" fullWidth multiline rows={3} />
+                                        <ReactQuill
+                                            value={s.description} onChange={(value) => handleScheduleChange(s.dayNumber, 'description', value)}
+                                            modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }}
+                                        />
                                     </Box>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
                                         <Typography variant="subtitle1" sx={{ fontWeight: '600' }}>Điểm đến:</Typography>
@@ -667,7 +670,10 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         }}>
                             Lưu ý
                         </Typography>
-                        <TextField value={editableFields.note.value} onChange={(e) => handleFieldChange('note', e.target.value)} variant="outlined" fullWidth multiline rows={4} sx={{ mr: 2 }} />
+                        <ReactQuill
+                            value={editableFields.note.value} onChange={(value) => handleFieldChange('note', value)}
+                            modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }}
+                        />
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4} >

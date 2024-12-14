@@ -70,7 +70,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
               <Box dangerouslySetInnerHTML={{ __html: tourTemplate.description }} sx={{
                 '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                '& p': { lineHeight: 1.2, mb: 1 }, flexGrow: 1, width: '100%', margin: '0 auto'
               }} />
             </Box>
           </Box>
@@ -134,6 +134,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
                   </IconButton>
                 </Box>
                 <Collapse in={expandedDay === s.dayNumber} sx={{ ml: 1 }}>
+                  <Typography sx={{ mb: -1.5 }}>Các điểm đến:</Typography>
                   <ul>
                     {s.attractions.map((attraction) => (
                       <li key={attraction.attractionId}>
@@ -141,9 +142,8 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
                       </li>
                     ))}
                   </ul>
-                  <Box sx={{ textAlign: 'justify' }}>
-                    {s.description}
-                  </Box>
+                  <Typography>Chi tiết:</Typography>
+                  <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' }}}/>
                 </Collapse>
               </Box>
             ))}
@@ -154,9 +154,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
               Lưu ý
             </Typography>
-            <Box sx={{ textAlign: 'justify', color: '#05073C' }}>
-              {tourTemplate.note}
-            </Box>
+            <Box dangerouslySetInnerHTML={{ __html: tourTemplate.note }}/>
           </Box>
         </Grid>
 

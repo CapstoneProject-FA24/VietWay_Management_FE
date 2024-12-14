@@ -6,7 +6,6 @@ import { getTourTemplateStatusInfo } from '@services/StatusService';
 import { getCookie } from '@services/AuthenService';
 
 const TourTemplateCard = ({ tour, isOpen }) => {
-    console.log(tour);
     const theme = useTheme();
     const isApproved = tour.status === 2;
 
