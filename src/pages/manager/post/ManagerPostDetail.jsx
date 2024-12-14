@@ -397,7 +397,7 @@ const ManagerPostDetail = () => {
                 </>
               )}
             </Box>
-            {(!post.xTweetId || !post.facebookPostId) && (
+            {((!post.xTweetId || !post.facebookPostId) && !isEditMode) && (
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Typography>Đăng bài:</Typography>
                 {!post.facebookPostId && (
@@ -424,7 +424,7 @@ const ManagerPostDetail = () => {
                 )}
               </Box>
             )}
-            {(post.xTweetId || post.facebookPostId) && (
+            {((post.xTweetId || post.facebookPostId) && !isEditMode) && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <Typography>Xem bài đã đăng tại:</Typography>
@@ -697,7 +697,7 @@ const ManagerPostDetail = () => {
                 </Button>
                 {renderActionButtons()}
               </Box>
-
+              {((post.xTweetId || post.facebookPostId) && !isEditMode) && renderSocialMetricsTable()}
               {isEditMode ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <TextField

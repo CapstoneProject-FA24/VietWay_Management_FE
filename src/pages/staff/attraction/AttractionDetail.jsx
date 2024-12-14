@@ -117,7 +117,6 @@ const AttractionDetail = () => {
         status: AttractionStatus.Pending
       }));
 
-      setIsEditMode(false);
       setSnackbar({
         open: true,
         message: 'Đã gửi điểm tham quan để duyệt',
