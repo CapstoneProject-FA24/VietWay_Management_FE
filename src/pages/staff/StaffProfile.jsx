@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Snackbar, Paper, Button, TextField, Grid, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Container, Typography, Snackbar, Paper, Button, TextField, Grid, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, InputAdornment } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { mockManager } from '@hooks/MockAccount';
 import TodayIcon from '@mui/icons-material/Today';
 import { Helmet } from 'react-helmet';
+import { changeStaffPassword } from '@services/StaffService';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -19,6 +22,11 @@ const StaffProfile = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
     const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
+    const [showPassword, setShowPassword] = useState({
+        currentPassword: false,
+        newPassword: false,
+        confirmPassword: false
+    });
     const [passwordForm, setPasswordForm] = useState({
         currentPassword: '',
         newPassword: '',
@@ -52,31 +60,43 @@ const StaffProfile = () => {
         }
         if (!passwordForm.newPassword) {
             newErrors.newPassword = 'Vui lòng nhập mật khẩu mới';
-        } else if (passwordForm.newPassword.length < 6) {
-            newErrors.newPassword = 'Mật khẩu phải có ít nhất 6 ký tự';
+        } else {
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
+            if (!passwordRegex.test(passwordForm.newPassword)) {
+                newErrors.newPassword = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt';
+            }
         }
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        if (!passwordForm.confirmPassword) {
+            newErrors.confirmPassword = 'Vui lòng nhập lại mật khẩu mới';
+        } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
             newErrors.confirmPassword = 'Mật khẩu không khớp';
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleUpdatePassword = () => {
+    const handleUpdatePassword = async () => {
         if (validatePasswordForm()) {
-            // Add your password update logic here
-            console.log('Password updated:', passwordForm);
-            setOpenPasswordDialog(false);
-            setPasswordForm({
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: ''
-            });
-            setSnackbar({
-                open: true,
-                message: 'Mật khẩu đã được cập nhật thành công',
-                severity: 'success'
-            });
+            try {
+                await changeStaffPassword(passwordForm.currentPassword, passwordForm.newPassword);
+                setOpenPasswordDialog(false);
+                setPasswordForm({
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                });
+                setSnackbar({
+                    open: true,
+                    message: 'Mật khẩu đã được cập nhật thành công',
+                    severity: 'success'
+                });
+            } catch (error) {
+                setSnackbar({
+                    open: true,
+                    message: error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật mật khẩu',
+                    severity: 'error'
+                });
+            }
         }
     };
 
@@ -101,13 +121,20 @@ const StaffProfile = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    const handleClickShowPassword = (field) => () => {
+        setShowPassword(prev => ({
+            ...prev,
+            [field]: !prev[field]
+        }));
+    };
+
     return (
         <Box sx={{ display: 'flex' }}>
             <Helmet>
                 <title>Thông tin tài khoản</title>
             </Helmet>
             <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-            <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0, mt: -1 }}>
+            <Box sx={{ flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0, mt: -12 }}>
                 <Box component="header" sx={{ width: isSidebarOpen ? 'calc(100vw - 250px)' : '100vw', position: 'relative', height: '400px', borderRadius: '0 0 30px 30px', overflow: 'hidden' }}>
                     <Box className="hero-text" sx={{
                         width: "100%", height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'center',
@@ -171,32 +198,71 @@ const StaffProfile = () => {
                         <TextField
                             margin="dense"
                             label="Mật khẩu hiện tại"
-                            type="password"
+                            type={showPassword.currentPassword ? 'text' : 'password'}
                             fullWidth
+                            required
                             value={passwordForm.currentPassword}
                             onChange={handlePasswordChange('currentPassword')}
                             error={!!errors.currentPassword}
                             helperText={errors.currentPassword}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={handleClickShowPassword('currentPassword')}
+                                            edge="end"
+                                        >
+                                            {showPassword.currentPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                         <TextField
                             margin="dense"
                             label="Mật khẩu mới"
-                            type="password"
+                            type={showPassword.newPassword ? 'text' : 'password'}
                             fullWidth
+                            required
                             value={passwordForm.newPassword}
                             onChange={handlePasswordChange('newPassword')}
                             error={!!errors.newPassword}
                             helperText={errors.newPassword}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={handleClickShowPassword('newPassword')}
+                                            edge="end"
+                                        >
+                                            {showPassword.newPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                         <TextField
                             margin="dense"
-                            label="Xác nhận mật khẩu mới"
-                            type="password"
+                            label="Nhập lại mật khẩu mới"
+                            type={showPassword.confirmPassword ? 'text' : 'password'}
                             fullWidth
+                            required
                             value={passwordForm.confirmPassword}
                             onChange={handlePasswordChange('confirmPassword')}
                             error={!!errors.confirmPassword}
                             helperText={errors.confirmPassword}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            onClick={handleClickShowPassword('confirmPassword')}
+                                            edge="end"
+                                        >
+                                            {showPassword.confirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                     </DialogContent>
                     <DialogActions>

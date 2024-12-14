@@ -203,10 +203,11 @@ const AttractionUpdateForm = ({
                       onClick={() => handleRemoveImage(index)}
                       sx={{
                         position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' },
+                        top: 8,
+                        right: 8,
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+                        color: 'white'
                       }}
                     >
                       <CloseIcon />
@@ -221,14 +222,42 @@ const AttractionUpdateForm = ({
             {images.map((image, index) => (
               <Box
                 key={index}
-                sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none' }}
-                onClick={() => handleThumbnailClick(index)}
+                sx={{
+                  width: 110,
+                  height: 110,
+                  flexShrink: 0,
+                  mr: 3,
+                  borderRadius: 1,
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  border: currentSlide === index ? '2px solid #3572EF' : 'none',
+                  position: 'relative'
+                }}
               >
-                <img
-                  src={image instanceof File ? URL.createObjectURL(image) : image.url}
-                  alt={`Thumbnail ${index + 1}`}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
+                <Box
+                  onClick={() => handleThumbnailClick(index)}
+                  sx={{ width: '100%', height: '100%' }}
+                >
+                  <img
+                    src={image instanceof File ? URL.createObjectURL(image) : image.url}
+                    alt={`Thumbnail ${index + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </Box>
+                <IconButton
+                  onClick={() => handleRemoveImage(index)}
+                  sx={{
+                    position: 'absolute',
+                    top: 2,
+                    right: 2,
+                    padding: '4px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
+                    color: 'white'
+                  }}
+                >
+                  <CloseIcon sx={{ fontSize: '1rem' }} />
+                </IconButton>
               </Box>
             ))}
             <Box
@@ -328,14 +357,14 @@ const AttractionUpdateForm = ({
             borderRadius: '10px',
             border: '1px solid #e0e0e0'
           }}>
-            <Map/>
+            <Map />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> 
-              Lưu bản nháp 
+            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}>
+              Lưu bản nháp
             </Button>
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> 
-              Cập nhật 
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}>
+              Cập nhật
             </Button>
           </Box>
         </Grid>

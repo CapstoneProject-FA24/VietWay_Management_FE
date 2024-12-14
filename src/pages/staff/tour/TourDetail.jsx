@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, TextField, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Snackbar } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 import dayjs from 'dayjs';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
@@ -35,6 +36,12 @@ const TourDetail = () => {
   const [tours, setTours] = useState([]);
   const [tour, setTour] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [editTourData, setEditTourData] = useState(null);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
@@ -104,6 +111,7 @@ const TourDetail = () => {
   };
 
   const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
       await deleteTour(id);
       setOpenDeleteDialog(false);
@@ -112,14 +120,17 @@ const TourDetail = () => {
         message: 'Xóa tour thành công',
         severity: 'success'
       });
-      navigate(-1); // Navigate back after successful deletion
+      navigate('/nhan-vien/tour-du-lich');
     } catch (error) {
       console.error('Error deleting tour:', error);
       setSnackbar({
         open: true,
-        message: 'Có lỗi xảy ra khi xóa tour',
+        message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour',
         severity: 'error'
       });
+      setOpenDeleteDialog(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -183,6 +194,13 @@ const TourDetail = () => {
 
   const canUpdate = tour?.status === TourStatus.Rejected || tour?.status === TourStatus.Pending;
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
       <Helmet>
@@ -228,7 +246,14 @@ const TourDetail = () => {
                   )}
                 </>
               )}
-              <Button variant="contained" onClick={handleDeleteTour} color="error">Xóa</Button>
+              <Button
+                variant="contained"
+                onClick={handleDeleteTour}
+                color="error"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Đang xóa...' : 'Xóa'}
+              </Button>
             </Box>
           </Grid>
 
@@ -385,6 +410,7 @@ const TourDetail = () => {
           <Button
             onClick={handleCloseDeleteDialog}
             sx={{ color: '#666666' }}
+            disabled={isDeleting}
           >
             Không
           </Button>
@@ -392,11 +418,28 @@ const TourDetail = () => {
             onClick={handleConfirmDelete}
             variant="contained"
             sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
+            disabled={isDeleting}
           >
-            Xác nhận xóa
+            {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa'}
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+        >
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </Box>
   );
 };

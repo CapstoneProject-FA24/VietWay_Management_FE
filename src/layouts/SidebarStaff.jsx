@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper } from '@mui/material';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Divider, Paper, Badge } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -9,10 +9,12 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArticleIcon from '@mui/icons-material/Article';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AirplaneTicketIcon from '@mui/icons-material/AirplaneTicket';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { styled } from '@mui/material/styles';
 import { getCookie, removeCookie } from '@services/AuthenService';
+import Notification from '@components/Notification';
 
 const SidebarContainer = styled(Box)(({ theme, isopen }) => ({
   backgroundColor: 'white',
@@ -94,8 +96,10 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const [unreadNotifications, setUnreadNotifications] = useState(5); // Replace with actual notification count
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -109,25 +113,30 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
   const handleLogout = () => {
     removeCookie('token');
     removeCookie('role');
-
     navigate('/dang-nhap');
+  };
+
+  const handleOpenNotification = () => {
+    handleClose();
+    setNotificationOpen(true);
+  };
+
+  const handleCloseNotification = () => {
+    setNotificationOpen(false);
   };
 
   return (
     <>
-      <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' } }}>
-        {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-      </ToggleButton>
-
       <SidebarContainer isopen={isOpen}>
         <LogoLink to="/">
           <img src="/logo2_color.png" alt="VIETWAY" style={{ height: '55px' }} />
         </LogoLink>
-
+        <ToggleButton onClick={toggleSidebar} isopen={isOpen} sx={{ '&:hover': { backgroundColor: 'lightGrey' } }}>
+          {isOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </ToggleButton>
         <Divider />
-
         <List sx={{ width: '110%', maxHeight: '60vh', overflow: 'auto', ml: -1 }}>
-          {[
+          {[/* eslint-disable */
             { text: 'Điểm Tham Quan', url: '/nhan-vien/diem-tham-quan', icon: <AttractionsIcon /> },
             { text: 'Tour Mẫu', url: '/nhan-vien/tour-mau', icon: <FileCopyIcon /> },
             { text: 'Tour Du Lịch', url: '/nhan-vien/tour-du-lich', icon: <DirectionsBusIcon /> },
@@ -169,7 +178,9 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
             <MenuItemPaper elevation={1}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
-                  <SettingsIcon sx={{ color: '#2196f3' }} />
+                  <Badge color="error" variant="dot" invisible={!unreadNotifications}>
+                    <SettingsIcon sx={{ color: '#2196f3' }} />
+                  </Badge>
                 </ListItemIcon>
                 <ListItemText
                   primary={getCookie('username')}
@@ -195,6 +206,20 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
               handleClose();
               navigate('/nhan-vien/thong-tin-tai-khoan');
             }}>Thông tin tài khoản</MenuItem>
+            <MenuItem onClick={handleOpenNotification}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <span>Thông báo</span>
+                {unreadNotifications > 0 && (
+                  <Badge
+                    badgeContent={unreadNotifications}
+                    color="error"
+                    sx={{
+                      '& .MuiBadge-badge': { fontSize: '0.7rem', height: '16px', minWidth: '16px' }
+                    }}
+                  />
+                )}
+              </Box>
+            </MenuItem>
             <MenuItem sx={{ color: 'red' }} onClick={() => {
               handleClose();
               handleLogout();
@@ -202,6 +227,11 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
           </Menu>
         </List>
       </SidebarContainer>
+
+      <Notification
+        open={notificationOpen}
+        onClose={handleCloseNotification}
+      />
     </>
   );
 };
