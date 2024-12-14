@@ -286,10 +286,11 @@ const AddAttraction = () => {
                             onClick={() => handleRemoveImage(index)}
                             sx={{
                               position: 'absolute',
-                              top: 10,
-                              right: 10,
-                              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' },
+                              top: 8,
+                              right: 8,
+                              backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+                              color: 'white'
                             }}
                           >
                             <CloseIcon />
@@ -327,11 +328,12 @@ const AddAttraction = () => {
                       }}
                       sx={{
                         position: 'absolute',
-                        top: 5,
-                        right: 5,
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                        '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' },
-                        padding: '2px',
+                        top: 2,
+                        right: 2,
+                        padding: '4px',
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
+                        color: 'white'
                       }}
                     >
                       <CloseIcon sx={{ fontSize: 16 }} />
