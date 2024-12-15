@@ -17,18 +17,10 @@ import '@styles/ReactQuill.css';
 
 const quillModules = {
   toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    [{ 'font': [] }],
-    [{ 'size': ['small', false, 'large', 'huge'] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'script': 'sub' }, { 'script': 'super' }],
-    [{ 'align': [] }],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-    [{ 'direction': 'rtl' }],
-    ['blockquote', 'code-block'],
-    ['link', 'image', 'video', 'formula'],
-    ['clean']
+    [{ 'font': [] }], [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }], [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
   ]
 };
 
@@ -49,12 +41,8 @@ const CreateTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [priceErrors, setPriceErrors] = useState({ minPrice: '', maxPrice: '' });
   const [fieldErrors, setFieldErrors] = useState({});
-  const handleSidebarToggle = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-  const [snackbar, setSnackbar] = useState({
-    open: false, message: '', severity: 'success', hide: 5000
-  });
+  const handleSidebarToggle = () => { setIsSidebarOpen(!isSidebarOpen); };
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,9 +72,7 @@ const CreateTourTemplate = () => {
         const numberOfDays = selectedDuration.dayNumber;
         const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
           const existingDay = tourTemplate.schedule.find(s => s.dayNumber === (index + 1));
-          if (existingDay) {
-            return existingDay;
-          }
+          if (existingDay) { return existingDay; }
           return { dayNumber: index + 1, title: '', description: '', attractions: [], isEditing: true };
         });
         setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
@@ -95,15 +81,9 @@ const CreateTourTemplate = () => {
   }, [tourTemplate.duration, tourDurations]);
 
   const handleFieldChange = (field, value) => {
-    setTourTemplate(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setTourTemplate(prev => ({ ...prev, [field]: value }));
 
-    setFieldErrors(prev => ({
-      ...prev,
-      [field]: undefined
-    }));
+    setFieldErrors(prev => ({ ...prev, [field]: undefined }));
 
     if (field === 'duration') {
       const selectedDuration = tourDurations.find(d => d.durationId === value);
@@ -111,9 +91,7 @@ const CreateTourTemplate = () => {
         const numberOfDays = selectedDuration.dayNumber;
         const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
           const existingDay = tourTemplate.schedule.find(s => s.dayNumber === (index + 1));
-          if (existingDay) {
-            return existingDay;
-          }
+          if (existingDay) { return existingDay; }
           return { dayNumber: index + 1, title: '', description: '', attractions: [], isEditing: true };
         });
         setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
@@ -131,18 +109,14 @@ const CreateTourTemplate = () => {
 
   const handleImageUpload = (index, event) => {
     const file = event.target.files[0];
-    if (file) {
-      setTourTemplate(prev => ({ ...prev, imageUrls: prev.imageUrls.map((img, i) => i === index ? file : img) }));
-    }
+    if (file) { setTourTemplate(prev => ({ ...prev, imageUrls: prev.imageUrls.map((img, i) => i === index ? file : img) })); }
   };
 
   const handleImageRemove = (index) => {
     setTourTemplate(prev => ({ ...prev, imageUrls: prev.imageUrls.map((img, i) => i === index ? null : img) }));
   };
 
-  const handleDayClick = (day) => {
-    setExpandedDay(expandedDay === day ? null : day);
-  };
+  const handleDayClick = (day) => { setExpandedDay(expandedDay === day ? null : day); };
 
   const handleScheduleChange = (day, field, value) => {
     setTourTemplate(prev => ({
@@ -169,26 +143,20 @@ const CreateTourTemplate = () => {
     const min = parseFloat(minPrice);
     const max = parseFloat(maxPrice);
     let isValid = true;
-    const newErrors = {
-      minPrice: '',
-      maxPrice: ''
-    };
+    const newErrors = { minPrice: '', maxPrice: '' };
 
     if (min < 0) {
       newErrors.minPrice = 'Giá thấp nhất phải lớn hơn 0';
       isValid = false;
     }
-
     if (max < 0) {
       newErrors.maxPrice = 'Giá cao nhất phải lớn hơn 0';
       isValid = false;
     }
-
     if (max && min && max <= min) {
       newErrors.maxPrice = 'Giá cao nhất phải lớn hơn giá thấp nhất';
       isValid = false;
     }
-
     setPriceErrors(newErrors);
     return isValid;
   };
@@ -198,7 +166,6 @@ const CreateTourTemplate = () => {
       if (!validatePrice(tourTemplate.minPrice || '', tourTemplate.maxPrice || '')) {
         return;
       }
-
       const tourTemplateData = {
         code: tourTemplate.code || '',
         tourName: tourTemplate.tourName || '',
@@ -221,54 +188,38 @@ const CreateTourTemplate = () => {
         imageUrls: tourTemplate.imageUrls.filter(img => img instanceof File) || []
       };
 
-      console.log(tourTemplateData);
-
       if (!isDraft) {
         const errors = {};
-
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
           errors.provinces = 'Vui lòng chọn ít nhất một tỉnh thành';
         }
-
         if (!tourTemplateData.schedules || tourTemplateData.schedules.length === 0) {
           errors.schedules = 'Vui lòng thêm ít nhất một lịch trình';
         }
-
         const invalidSchedules = tourTemplateData.schedules.filter(s =>
           !s.title || !s.description || !s.attractionIds || s.attractionIds.length === 0
         );
         if (invalidSchedules.length > 0) {
           errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
         }
-
         if (!tourTemplateData.imageUrls || tourTemplateData.imageUrls.length < 4) {
           errors.imageUrls = 'Vui lòng thêm đủ 4 ảnh';
         }
-
         if (!tourTemplateData.durationId) {
           errors.duration = 'Vui lòng chọn thời lượng';
         }
         if (!tourTemplateData.tourCategoryId) {
           errors.tourCategory = 'Vui lòng chọn loại tour';
         }
-
         const requiredFields = {
-          tourName: 'Tên tour',
-          code: 'Mã tour',
-          description: 'Mô tả',
-          transportation: 'Phương tiện',
-          note: 'Ghi chú',
-          startingProvinceId: 'Điểm khởi hành',
-          minPrice: 'Giá thấp nhất',
-          maxPrice: 'Giá cao nhất',
+          tourName: 'Tên tour', code: 'Mã tour', description: 'Mô tả', transportation: 'Phương tiện',
+          note: 'Ghi chú', startingProvinceId: 'Điểm khởi hành', minPrice: 'Giá thấp nhất', maxPrice: 'Giá cao nhất'
         };
-
         Object.entries(requiredFields).forEach(([key, label]) => {
           if (!tourTemplateData[key]) {
             errors[key] = `Vui lòng nhập ${label}`;
           }
         });
-
         if (Object.keys(errors).length > 0) {
           setFieldErrors(errors);
           return;
@@ -287,7 +238,6 @@ const CreateTourTemplate = () => {
         if (!tourTemplateData.tourCategoryId) {
           errors.tourCategory = 'Vui lòng chọn loại tour';
         }
-
         if (Object.keys(errors).length > 0) {
           setFieldErrors(errors);
           return;
@@ -298,7 +248,6 @@ const CreateTourTemplate = () => {
 
       if (response.statusCode === 200) {
         const tourTemplateId = response.data;
-
         const imagesToUpload = tourTemplate.imageUrls.filter(img => img instanceof File);
         if (imagesToUpload.length > 0) {
           const imagesResponse = await updateTemplateImages(tourTemplateId, imagesToUpload);
@@ -306,21 +255,26 @@ const CreateTourTemplate = () => {
             console.error('Error uploading images:', imagesResponse);
           }
         }
-
         setSnackbar({
-          open: true, severity: 'error', hide: 1000,
+          open: true, severity: 'success', hide: 1000,
           message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.',
         });
         setTimeout(() => {
-          navigate('/nhan-vien/diem-tham-quan');
+          navigate('/nhan-vien/tour-mau');
         }, 1000);
       } else {
         console.error('Error creating tour template:', response);
-        alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+        setSnackbar({
+          open: true, severity: 'error',
+          message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+        });
       }
     } catch (error) {
       console.error('Error creating tour template:', error);
-      alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+      setSnackbar({
+        open: true, severity: 'error',
+        message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+      });
     }
   };
 
@@ -355,16 +309,9 @@ const CreateTourTemplate = () => {
         }}>
           <Box maxWidth="95vw">
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-              <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ width: 'fit-content' }} >
-                Quay lại
-              </Button>
+              <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ width: 'fit-content' }}>Quay lại</Button>
 
-              <Typography variant="h4"
-                sx={{
-                  fontSize: '2.7rem', fontWeight: 600, color: 'primary.main',
-                  alignSelf: 'center', marginBottom: '1rem'
-                }}
-              >
+              <Typography variant="h4" sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', alignSelf: 'center', marginBottom: '1rem' }} >
                 Tạo tour mẫu mới
               </Typography>
             </Box>
@@ -373,43 +320,29 @@ const CreateTourTemplate = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                 <Typography gutterBottom>Tour đi qua tỉnh/thành phố</Typography>
                 <ReactSelect
-                  isMulti name="provinces"
+                  isMulti name="provinces" onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                   options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
                   className="basic-multi-select" classNamePrefix="select" value={tourTemplate.provinces}
-                  onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                   styles={{
-                    control: (base) => ({
-                      ...base,
-                      borderColor: fieldErrors.provinces ? 'red' : base.borderColor,
-                      height: '55px'
-                    })
+                    control: (base) => ({ ...base, borderColor: fieldErrors.provinces ? 'red' : base.borderColor, height: '55px' })
                   }}
                 />
                 {fieldErrors.provinces && (
-                  <Typography color="error" variant="caption">
-                    {fieldErrors.provinces}
-                  </Typography>
+                  <Typography color="error" variant="caption"> {fieldErrors.provinces} </Typography>
                 )}
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                 <Typography gutterBottom>Tour bắt đầu từ:</Typography>
                 <Select
-                  value={tourTemplate.startingProvinceId}
-                  onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
-                  error={!!fieldErrors.startingProvinceId}
-                  variant="outlined"
-                  fullWidth
+                  value={tourTemplate.startingProvinceId} onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
+                  error={!!fieldErrors.startingProvinceId} variant="outlined" fullWidth
                 >
                   {provinces.map((province) => (
-                    <MenuItem key={province.provinceId} value={province.provinceId}>
-                      {province.provinceName}
-                    </MenuItem>
+                    <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
                   ))}
                 </Select>
                 {fieldErrors.startingProvinceId && (
-                  <Typography color="error" variant="caption">
-                    {fieldErrors.startingProvinceId}
-                  </Typography>
+                  <Typography color="error" variant="caption">{fieldErrors.startingProvinceId}</Typography>
                 )}
               </Box>
             </Box>
@@ -418,9 +351,7 @@ const CreateTourTemplate = () => {
               <TextField
                 value={tourTemplate.tourName}
                 onChange={(e) => handleFieldChange('tourName', e.target.value)}
-                variant="outlined" fullWidth
-                error={!!fieldErrors.tourName}
-                helperText={fieldErrors.tourName}
+                variant="outlined" fullWidth error={!!fieldErrors.tourName} helperText={fieldErrors.tourName}
               />
             </Box>
 
@@ -659,9 +590,7 @@ const CreateTourTemplate = () => {
                           </Box>
                           <Box sx={{ display: 'flex', flexDirection: 'column', mb: 2 }}>
                             <Typography variant="subtitle1" sx={{ fontWeight: '500' }}>Điểm đến:</Typography>
-                            <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>
-                              Chọn điểm đến
-                            </Button>
+                            <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>Chọn điểm đến</Button>
                             {s.attractions.length > 0 && (
                               <Box sx={{ mt: 1 }}>
                                 <Typography variant="subtitle2">Đã chọn:</Typography>
@@ -669,8 +598,7 @@ const CreateTourTemplate = () => {
                                   {s.attractions.map((attraction) => (
                                     <li key={attraction.attractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                                       <Typography>{attraction.name}</Typography>
-                                      <IconButton size="small" sx={{ ml: 1 }}
-                                        onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
+                                      <IconButton size="small" sx={{ ml: 1 }} onClick={() => handleRemoveAttraction(s.dayNumber, attraction.attractionId)}>
                                         <CloseIcon fontSize="small" />
                                       </IconButton>
                                     </li>
@@ -694,9 +622,7 @@ const CreateTourTemplate = () => {
                       theme="snow" className={fieldErrors.note ? "ql-error" : null}
                       style={{ height: '200px', marginBottom: '100px' }}
                     />
-                    {fieldErrors.note && (
-                      <FormHelperText error sx={{ mt: -3 }}>{fieldErrors.note}</FormHelperText>
-                    )}
+                    {fieldErrors.note && (<FormHelperText error sx={{ mt: -3 }}>{fieldErrors.note}</FormHelperText>)}
                   </FormControl>
                 </Box>
               </Grid>
@@ -733,12 +659,8 @@ const CreateTourTemplate = () => {
                   <Button
                     variant="contained" fullWidth onClick={() => handleSubmit(true)}
                     sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}
-                  >
-                    Lưu bản nháp
-                  </Button>
-                  <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => handleSubmit(false)} >
-                    Gửi
-                  </Button>
+                  >Lưu bản nháp</Button>
+                  <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => handleSubmit(false)} >Gửi</Button>
                 </Paper>
               </Grid>
             </Grid>
@@ -754,9 +676,7 @@ const CreateTourTemplate = () => {
         open={snackbar.open} autoHideDuration={snackbar.hide} onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );
