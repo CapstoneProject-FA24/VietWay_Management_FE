@@ -14,6 +14,7 @@ import SidebarStaff from '@layouts/SidebarStaff';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '@styles/ReactQuill.css';
+import CloseIcon from '@mui/icons-material/Close';
 
 const quillModules = {
   toolbar: [
@@ -163,17 +164,17 @@ const CreateTourTemplate = () => {
 
   const handleSubmit = async (isDraft) => {
     try {
-      if (!validatePrice(tourTemplate.minPrice || '', tourTemplate.maxPrice || '')) {
+      if (!validatePrice(tourTemplate.minPrice || null, tourTemplate.maxPrice || null)) {
         return;
       }
       const tourTemplateData = {
-        code: tourTemplate.code || '',
-        tourName: tourTemplate.tourName || '',
+        code: tourTemplate.code || null,
+        tourName: tourTemplate.tourName || null,
         description: tourTemplate.description || '',
         durationId: tourTemplate.duration || null,
         tourCategoryId: tourTemplate.tourCategory || null,
-        transportation: tourTemplate.transportation || '',
-        note: tourTemplate.note || '',
+        transportation: tourTemplate.transportation || null,
+        note: tourTemplate.note || null,
         provinceIds: tourTemplate.provinces?.map(province => province.value) || [],
         startingProvinceId: tourTemplate.startingProvinceId || null,
         schedules: tourTemplate.schedule?.map(s => ({
@@ -187,7 +188,7 @@ const CreateTourTemplate = () => {
         maxPrice: roundToThousand(parseFloat(tourTemplate.maxPrice || '0')) || null,
         imageUrls: tourTemplate.imageUrls.filter(img => img instanceof File) || []
       };
-
+      console.log(tourTemplateData);
       if (!isDraft) {
         const errors = {};
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
@@ -213,7 +214,7 @@ const CreateTourTemplate = () => {
         }
         const requiredFields = {
           tourName: 'tên tour', code: 'mã tour', description: 'mô tả', transportation: 'phương tiện',
-          note: 'ghi chú', startingProvinceId: 'điểm khởi hành', minPrice: 'giá thấp nhất', maxPrice: 'giá cao nhất'
+          startingProvinceId: 'điểm khởi hành', minPrice: 'giá thấp nhất', maxPrice: 'giá cao nhất'
         };
         Object.entries(requiredFields).forEach(([key, label]) => {
           if (!tourTemplateData[key]) {
@@ -225,21 +226,28 @@ const CreateTourTemplate = () => {
           return;
         }
       } else {
-        const errors = {};
-        if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
-          errors.provinces = 'Vui lòng chọn tỉnh thành';
-        }
-        if (!tourTemplateData.startingProvinceId) {
-          errors.startingProvinceId = 'Vui lòng chọn điểm khởi hành';
-        }
-        if (!tourTemplateData.durationId) {
-          errors.duration = 'Vui lòng chọn thời lượng';
-        }
-        if (!tourTemplateData.tourCategoryId) {
-          errors.tourCategory = 'Vui lòng chọn loại tour';
-        }
-        if (Object.keys(errors).length > 0) {
-          setFieldErrors(errors);
+        const hasAnyField =
+          tourTemplate.code ||
+          tourTemplate.tourName ||
+          tourTemplate.description ||
+          tourTemplate.duration ||
+          tourTemplate.tourCategory ||
+          tourTemplate.transportation ||
+          tourTemplate.note ||
+          (tourTemplate.provinces && tourTemplate.provinces.length > 0) ||
+          tourTemplate.startingProvinceId ||
+          tourTemplate.minPrice ||
+          tourTemplate.maxPrice ||
+          (tourTemplate.imageUrls && tourTemplate.imageUrls.length > 0);
+        const invalidSchedules = tourTemplateData.schedules.filter(s =>
+          !s.title && !s.description && !s.attractionIds && s.attractionIds.length === 0
+        );
+        console.log(invalidSchedules);
+        if (!hasAnyField || invalidSchedules.length > 0) {
+          setSnackbar({
+            open: true, severity: 'error', hide: 5000,
+            message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+          });
           return;
         }
       }
@@ -298,9 +306,7 @@ const CreateTourTemplate = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
-      <Helmet>
-        <title>Tạo tour mẫu mới</title>
-      </Helmet>
+      <Helmet><title>Tạo tour mẫu mới</title></Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
         <Box sx={{
@@ -310,15 +316,13 @@ const CreateTourTemplate = () => {
           <Box maxWidth="95vw">
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
               <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(-1)} sx={{ width: 'fit-content' }}>Quay lại</Button>
-
               <Typography variant="h4" sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', alignSelf: 'center', marginBottom: '1rem' }} >
                 Tạo tour mẫu mới
               </Typography>
             </Box>
-
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-                <Typography gutterBottom>Tour đi qua tỉnh/thành phố</Typography>
+                <Typography gutterBottom>Tour đi qua tỉnh/thành phố *</Typography>
                 <ReactSelect
                   isMulti name="provinces" onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                   options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
@@ -332,7 +336,7 @@ const CreateTourTemplate = () => {
                 )}
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-                <Typography gutterBottom>Tour bắt đầu từ:</Typography>
+                <Typography gutterBottom>Tour bắt đầu từ *</Typography>
                 <Select
                   value={tourTemplate.startingProvinceId} onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
                   error={!!fieldErrors.startingProvinceId} variant="outlined" fullWidth
@@ -347,14 +351,13 @@ const CreateTourTemplate = () => {
               </Box>
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2, mb: 3 }}>
-              <Typography gutterBottom> Tên tour </Typography>
+              <Typography gutterBottom> Tên tour *</Typography>
               <TextField
                 value={tourTemplate.tourName}
                 onChange={(e) => handleFieldChange('tourName', e.target.value)}
                 variant="outlined" fullWidth error={!!fieldErrors.tourName} helperText={fieldErrors.tourName}
               />
             </Box>
-
             <Grid container spacing={3}>
               <Grid item xs={12} sx={{ minWidth: '100%' }}>
                 <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
@@ -451,12 +454,12 @@ const CreateTourTemplate = () => {
               <Grid item xs={12} md={8}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng:</Typography>
-                      <FormControl sx={{ width: '100%' }}>
+                    <FormControl sx={{ width: '100%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng *</Typography>
                         <Select
                           labelId="duration-select-label"
-                          id="duration-select"
+                          id="duration-select" sx={{ width: '100%' }}
                           value={tourTemplate.duration}
                           onChange={(e) => handleFieldChange('duration', e.target.value)}
                           error={!!fieldErrors.duration}
@@ -467,20 +470,19 @@ const CreateTourTemplate = () => {
                             </MenuItem>
                           ))}
                         </Select>
-                        {fieldErrors.duration && (
-                          <FormHelperText error>{fieldErrors.duration}</FormHelperText>
-                        )}
-                      </FormControl>
-                    </Box>
+                      </Box>
+                      {fieldErrors.duration && (
+                        <FormHelperText error sx={{ textAlign: 'right' }}>{fieldErrors.duration}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Box>
-
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '35%' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Loại tour:</Typography>
-                      <FormControl sx={{ width: '100%' }}>
+                    <FormControl sx={{ width: '100%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Loại tour *</Typography>
                         <Select
                           labelId="tourCategory-select-label"
-                          id="tourCategory-select"
+                          id="tourCategory-select" sx={{ width: '100%' }}
                           value={tourTemplate.tourCategory}
                           onChange={(e) => handleFieldChange('tourCategory', e.target.value)}
                           error={!!fieldErrors.tourCategory}
@@ -491,33 +493,32 @@ const CreateTourTemplate = () => {
                             </MenuItem>
                           ))}
                         </Select>
-                        {fieldErrors.tourCategory && (
-                          <FormHelperText error>{fieldErrors.tourCategory}</FormHelperText>
-                        )}
-                      </FormControl>
-                    </Box>
+                      </Box>
+                      {fieldErrors.tourCategory && (
+                        <FormHelperText error sx={{ textAlign: 'right' }}>{fieldErrors.tourCategory}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Box>
-
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                      <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Phương tiện:</Typography>
-                      <FormControl sx={{ width: '100%' }}>
+                    <FormControl sx={{ width: '100%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                        <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Phương tiện *</Typography>
                         <Select
                           labelId="transportation-select-label"
                           id="transportation-select"
                           value={tourTemplate.transportation}
                           onChange={(e) => handleFieldChange('transportation', e.target.value)}
-                          error={!!fieldErrors.transportation}
-                        >ư
+                          error={!!fieldErrors.transportation} sx={{ width: '100%' }}
+                        >
                           <MenuItem value="Xe du lịch">Xe du lịch</MenuItem>
                           <MenuItem value="Máy bay">Máy bay</MenuItem>
                           <MenuItem value="Tàu hỏa">Tàu hỏa</MenuItem>
                         </Select>
-                        {fieldErrors.transportation && (
-                          <FormHelperText error>{fieldErrors.transportation}</FormHelperText>
-                        )}
-                      </FormControl>
-                    </Box>
+                      </Box>
+                      {fieldErrors.transportation && (
+                        <FormHelperText error sx={{ textAlign: 'right' }}>{fieldErrors.transportation}</FormHelperText>
+                      )}
+                    </FormControl>
                   </Box>
                 </Box>
                 <Box sx={{ mb: 5 }}>
@@ -644,7 +645,7 @@ const CreateTourTemplate = () => {
                     />
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá đến: </Typography>
                     <TextField
                       value={tourTemplate.maxPrice} onBlur={() => handlePriceBlur('maxPrice')}
@@ -654,14 +655,22 @@ const CreateTourTemplate = () => {
                       variant="outlined" fullWidth inputProps={{ min: 0 }} type="number"
                     />
                   </Box>
-                  <Button
-                    variant="contained" fullWidth onClick={() => handleSubmit(true)}
-                    sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}
-                  >Lưu bản nháp</Button>
-                  <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => handleSubmit(false)} >Gửi</Button>
                 </Paper>
               </Grid>
             </Grid>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+            <Button
+              variant="contained" fullWidth onClick={() => handleSubmit(true)}
+              sx={{ backgroundColor: 'gray', height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }, width: 'fit-content' }}
+            >Lưu bản nháp</Button>
+            <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >Gửi duyệt</Button>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ mt: 1, width: '32rem' }}>
+              <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
+              <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+            </Box>
           </Box>
         </Box>
       </Box>

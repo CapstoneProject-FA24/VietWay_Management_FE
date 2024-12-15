@@ -66,20 +66,17 @@ const AttractionDetail = () => {
         name: 'Tên điểm tham quan', description: 'Mô tả', address: 'Địa chỉ',
         provinceId: 'Tỉnh/Thành phố', attractionTypeId: 'Loại điểm tham quan',
       };
-
       const missingFields = [];
       Object.entries(requiredFields).forEach(([field, label]) => {
         if (!attraction[field] || attraction[field].trim() === '') {
           missingFields.push(label);
         }
       });
-
-      if (!attraction.images) {
+      if (attraction.images.length === 0) {
         missingFields.push('Hình ảnh');
       }
-
       if (missingFields.length > 0) {
-        setSnackbar({ open: true, message: `Vui lòng điền đầy đủ thông tin trước khi gửi`, severity: 'error' });
+        setSnackbar({ open: true, message: `Vui lòng điền đầy đủ thông tin trước khi gửi`, severity: 'error', hide: 5000 });
         setIsSubmitting(false);
         return;
       }
@@ -100,13 +97,13 @@ const AttractionDetail = () => {
       }));
 
       setSnackbar({
-        open: true, message: 'Đã gửi duyệt thành công', severity: 'success'
+        open: true, message: 'Đã gửi duyệt thành công', severity: 'success', hide: 5000
       });
       await fetchAttractionData();
     } catch (error) {
       console.error('Error sending for approval:', error);
       setSnackbar({
-        open: true, severity: 'error',
+        open: true, severity: 'error', hide: 5000,
         message: 'Lỗi khi gửi duyệt: ' + (error.response?.data?.message || error.message),
       });
     } finally {
@@ -127,7 +124,7 @@ const AttractionDetail = () => {
           );
           if (imagesResponse.statusCode !== 200) {
             setSnackbar({
-              open: true, severity: 'error',
+              open: true, severity: 'error', hide: 5000,
               message: 'Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.'
             });
             return;
@@ -142,14 +139,14 @@ const AttractionDetail = () => {
         });
       } else {
         setSnackbar({
-          open: true, severity: 'error',
+          open: true, severity: 'error', hide: 5000,
           message: 'Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.'
         });
       }
     } catch (error) {
       console.error('Error updating attraction:', error);
       setSnackbar({
-        open: true, severity: 'error',
+        open: true, severity: 'error', hide: 5000,
         message: 'Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.'
       });
     } finally {
@@ -200,7 +197,7 @@ const AttractionDetail = () => {
     } catch (error) {
       console.error('Error deleting attraction:', error);
       setSnackbar({
-        open: true, message: 'Có lỗi xảy ra khi xóa điểm tham quan', severity: 'error',
+        open: true, message: 'Có lỗi xảy ra khi xóa điểm tham quan', severity: 'error', hide: 5000,
       });
     }
   };

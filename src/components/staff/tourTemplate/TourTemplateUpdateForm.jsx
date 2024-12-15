@@ -46,10 +46,10 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         departurePoint: { value: initialTourTemplate.departurePoint, isEditing: false },
         tourCategory: { value: initialTourTemplate.tourCategoryId, isEditing: false },
         code: { value: initialTourTemplate.code, isEditing: false },
-        minPrice: { value: initialTourTemplate.minPrice || '', isEditing: false },
-        maxPrice: { value: initialTourTemplate.maxPrice || '', isEditing: false },
-        startingProvinceId: { value: initialTourTemplate.startingProvince?.provinceId || '', isEditing: false },
-        transportation: { value: initialTourTemplate.transportation || '', isEditing: false }
+        minPrice: { value: initialTourTemplate.minPrice, isEditing: false },
+        maxPrice: { value: initialTourTemplate.maxPrice, isEditing: false },
+        startingProvinceId: { value: initialTourTemplate.startingProvince?.provinceId, isEditing: false },
+        transportation: { value: initialTourTemplate.transportation, isEditing: false }
     });
 
     const [expandedDay, setExpandedDay] = useState(null);
@@ -267,21 +267,28 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     return;
                 }
             } else {
-                const errors = {};
-                if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
-                    errors.provinces = 'Vui lòng chọn tỉnh thành';
-                }
-                if (!tourTemplateData.startingProvinceId) {
-                    errors.startingProvinceId = 'Vui lòng chọn điểm khởi hành';
-                }
-                if (!tourTemplateData.durationId) {
-                    errors.duration = 'Vui lòng chọn thời lượng';
-                }
-                if (!tourTemplateData.tourCategoryId) {
-                    errors.tourCategory = 'Vui lòng chọn loại tour';
-                }
-                if (Object.keys(errors).length > 0) {
-                    setFieldErrors(errors);
+                const hasAnyField =
+                    tourTemplate.code ||
+                    tourTemplate.tourName ||
+                    tourTemplate.description ||
+                    tourTemplate.duration ||
+                    tourTemplate.tourCategory ||
+                    tourTemplate.transportation ||
+                    tourTemplate.note ||
+                    (tourTemplate.provinces && tourTemplate.provinces.length > 0) ||
+                    tourTemplate.startingProvinceId ||
+                    tourTemplate.minPrice ||
+                    tourTemplate.maxPrice ||
+                    (tourTemplate.imageUrls && tourTemplate.imageUrls.length > 0);
+                const invalidSchedules = tourTemplateData.schedules.filter(s =>
+                    !s.title && !s.description && !s.attractionIds && s.attractionIds.length === 0
+                );
+                console.log(invalidSchedules);
+                if (!hasAnyField || invalidSchedules.length > 0) {
+                    setSnackbar({
+                        open: true, severity: 'error', hide: 5000,
+                        message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+                    });
                     return;
                 }
             }
@@ -409,62 +416,65 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 </Grid>
                 <Grid item xs={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '32%' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng:</Typography>
-                                <FormControl sx={{ width: '100%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
+                            <FormControl sx={{ width: '100%' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                    <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng *</Typography>
                                     <Select
-                                        value={editableFields.duration.value}
-                                        onChange={(e) => handleFieldChange('duration', e.target.value)}>
+                                        sx={{ width: '100%' }} value={editableFields.duration.value}
+                                        onChange={(e) => handleFieldChange('duration', e.target.value)}
+                                        error={!!fieldErrors.duration}
+                                    >
                                         {tourDurations.map((tourDuration) => (
                                             <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>
                                                 {tourDuration.durationName}
                                             </MenuItem>
                                         ))}
                                     </Select>
-                                    {fieldErrors.duration && (
-                                        <FormHelperText error>{fieldErrors.duration}</FormHelperText>
-                                    )}
-                                </FormControl>
-                            </Box>
+                                </Box>
+                                {fieldErrors.duration && (
+                                    <FormHelperText error sx={{ textAlign: 'right' }}>{fieldErrors.duration}</FormHelperText>
+                                )}
+                            </FormControl>
                         </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '32%' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
-                                <FormControl sx={{ width: '100%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '35%' }}>
+                            <FormControl sx={{ width: '100%' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                    <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Loại tour *</Typography>
                                     <Select
-                                        value={editableFields.tourCategory.value}
-                                        onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
+                                        sx={{ width: '100%' }} value={editableFields.tourCategory.value}
+                                        onChange={(e) => handleFieldChange('tourCategory', e.target.value)}
+                                        error={!!fieldErrors.tourCategory}
+                                    >
                                         {tourCategories.map((tourCategory) => (
                                             <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>
                                                 {tourCategory.tourCategoryName}
                                             </MenuItem>
                                         ))}
                                     </Select>
-                                    {fieldErrors.tourCategory && (
-                                        <FormHelperText error>{fieldErrors.tourCategory}</FormHelperText>
-                                    )}
-                                </FormControl>
-                            </Box>
+                                </Box>
+                                {fieldErrors.tourCategory && (
+                                    <FormHelperText error sx={{ textAlign: 'right' }}>{fieldErrors.tourCategory}</FormHelperText>
+                                )}
+                            </FormControl>
                         </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '32%' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '7rem' }}>Phương tiện:</Typography>
-                                <FormControl sx={{ width: '100%' }}>
-                                    <Select sx={{ width: '100%', mr: 1 }}
-                                        value={editableFields.transportation.value}
-                                        onChange={(e) => handleFieldChange('transportation', e.target.value)}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
+                            <FormControl sx={{ width: '100%' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                    <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Phương tiện *</Typography>
+                                    <Select
+                                        value={editableFields.transportation.value} error={!!fieldErrors.transportation}
+                                        onChange={(e) => handleFieldChange('transportation', e.target.value)} sx={{ width: '100%' }}
+                                    >
                                         <MenuItem value="Xe du lịch">Xe du lịch</MenuItem>
                                         <MenuItem value="Máy bay">Máy bay</MenuItem>
                                         <MenuItem value="Tàu hỏa">Tàu hỏa</MenuItem>
                                     </Select>
-                                    {fieldErrors.transportation && (
-                                        <FormHelperText error>{fieldErrors.transportation}</FormHelperText>
-                                    )}
-                                </FormControl>
-                            </Box>
+                                </Box>
+                                {fieldErrors.transportation && (
+                                    <FormHelperText error sx={{ textAlign: 'right' }}>{fieldErrors.transportation}</FormHelperText>
+                                )}
+                            </FormControl>
                         </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
@@ -610,14 +620,22 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 helperText={priceErrors.maxPrice || fieldErrors.maxPrice}
                             />
                         </Box>
-                        <Button
-                            variant="contained" fullWidth onClick={() => handleSubmit(true)}
-                            sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}
-                        >Lưu bản nháp</Button>
-                        <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => handleSubmit(false)}>Gửi</Button>
                     </Paper>
                 </Grid>
-            </Grid>
+            </Grid >
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                <Button
+                    variant="contained" fullWidth onClick={() => handleSubmit(true)}
+                    sx={{ backgroundColor: 'gray', height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }, width: 'fit-content' }}
+                >Lưu bản nháp</Button>
+                <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >Gửi duyệt</Button>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Box sx={{ mt: 1, width: '32rem' }}>
+                    <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
+                    <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+                </Box>
+            </Box>
             <TemplateAddAttractionPopup
                 open={isAttractionPopupOpen} onClose={() => setIsAttractionPopupOpen(false)}
                 onSelectAttraction={handleAttractionSelect} provinces={provinces}
@@ -629,7 +647,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             >
                 <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">{snackbar.message}</Alert>
             </Snackbar>
-        </Box>
+        </Box >
     );
 };
 
