@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Button, IconButton, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Grid, Paper, Snackbar, Alert, TextField, Button, IconButton, Select, MenuItem } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,8 +7,6 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
@@ -27,7 +25,6 @@ const AddAttraction = () => {
   const fileInputRef = useRef(null);
   const [provinces, setProvinces] = useState([]);
   const [attractionTypes, setAttractionTypes] = useState([]);
-
   const [selectedProvince, setSelectedProvince] = useState('');
   const [editableFields, setEditableFields] = useState({
     name: { value: '', isEditing: true },
@@ -38,7 +35,9 @@ const AddAttraction = () => {
     type: { value: '', isEditing: true },
     placeId: { value: '', isEditing: true }
   });
-
+  const [snackbar, setSnackbar] = useState({
+    open: false, message: '', severity: 'success', hide: 5000
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const handleSidebarToggle = () => {
@@ -63,24 +62,6 @@ const AddAttraction = () => {
     setEditableFields(prev => ({
       ...prev,
       [field]: { ...prev[field], value }
-    }));
-  };
-
-  const handleFieldSubmit = (field) => {
-    if (!editableFields[field].value) {
-      alert(`${field} cannot be blank or empty.`);
-      return;
-    }
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], isEditing: false }
-    }));
-  };
-
-  const handleFieldEdit = (field) => {
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], isEditing: true }
     }));
   };
 
@@ -154,11 +135,19 @@ const AddAttraction = () => {
         const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
         const missingFields = requiredFields.filter(field => !attractionData[field]);
         if (missingFields.length > 0) {
-          alert(`Vui lòng điền đy đủ thông tin trước khi tạo mới.`);
+          setSnackbar({
+            open: true,
+            message: 'Vui lòng điền đủ thông tin trước khi tạo mới.',
+            severity: 'error'
+          });
           return;
         }
         if (images.length === 0) {
-          alert('Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.');
+          setSnackbar({
+            open: true,
+            message: 'Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.',
+            severity: 'error'
+          });
           return;
         }
       }
@@ -166,13 +155,16 @@ const AddAttraction = () => {
         const requiredFields = ['provinceId', 'attractionTypeId'];
         const missingFields = requiredFields.filter(field => !attractionData[field]);
         if (missingFields.length > 0) {
-          alert(`Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.`);
+          setSnackbar({
+            open: true,
+            message: 'Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.',
+            severity: 'error'
+          });
           return;
         }
       }
 
       const response = await createAttraction(attractionData);
-      console.log(response);
       if (response.statusCode === 200) {
         if (images.length > 0) {
           const imagesResponse = await updateAttractionImages(
@@ -180,10 +172,27 @@ const AddAttraction = () => {
             images.length > 0 ? images : null
           );
           if (imagesResponse.statusCode === 200) {
-            navigate('/nhan-vien/diem-tham-quan');
+            setSnackbar({
+              open: true,
+              message: 'Tạo điểm tham quan thành công',
+              severity: 'success',
+              hide: 1000
+            });
+            setTimeout(() => {
+              navigate('/nhan-vien/diem-tham-quan');
+            }, 1000);
           }
+        } else {
+          setSnackbar({
+            open: true,
+            message: 'Tạo điểm tham quan thành công',
+            severity: 'success',
+            hide: 1000
+          });
+          setTimeout(() => {
+            navigate('/nhan-vien/diem-tham-quan');
+          }, 1000);
         }
-        navigate('/nhan-vien/diem-tham-quan');
       }
     } catch (error) {
       if (error.response && error.response.data.message === 'Incomplete attraction information') {
@@ -195,15 +204,19 @@ const AddAttraction = () => {
     }
   };
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
       <Box sx={{
-        flexGrow: 1,
-        p: 3,
-        transition: 'margin-left 0.3s',
+        flexGrow: 1, p: 3, transition: 'margin-left 0.3s',
         marginLeft: isSidebarOpen ? '260px' : '20px',
         width: `calc(100% - ${isSidebarOpen ? '260px' : '20px'})`,
         maxWidth: '100vw'
@@ -216,8 +229,7 @@ const AddAttraction = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
             <Button
               startIcon={<ArrowBackIosNewOutlinedIcon />}
-              onClick={() => navigate(-1)}
-              sx={{ width: 'fit-content' }}
+              onClick={() => navigate(-1)} sx={{ width: 'fit-content' }}
             >
               Quay lại
             </Button>
@@ -225,12 +237,8 @@ const AddAttraction = () => {
             <Typography
               variant="h4"
               sx={{
-                fontSize: '2.7rem',
-                fontWeight: 600,
-                color: 'primary.main',
-                alignSelf: 'center',
-                alignItems: 'center',
-                marginBottom: '1rem'
+                fontSize: '2.7rem', fontWeight: 600, color: 'primary.main',
+                alignSelf: 'center', alignItems: 'center', marginBottom: '1rem'
               }}
             >
               Tạo điểm tham quan
@@ -245,9 +253,7 @@ const AddAttraction = () => {
               <Select
                 value={editableFields.type.value}
                 onChange={(e) => handleFieldChange('type', e.target.value)}
-                variant="outlined"
-                fullWidth
-                sx={{ mr: 2 }}
+                variant="outlined" fullWidth sx={{ mr: 2 }}
               >
                 {attractionTypes.map((type) => (
                   <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
@@ -263,9 +269,7 @@ const AddAttraction = () => {
               <TextField
                 value={editableFields.name.value}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
-                variant="outlined"
-                fullWidth
-                sx={{ mr: 2 }}
+                variant="outlined" fullWidth sx={{ mr: 2 }}
               />
             </Box>
           </Box>
@@ -288,8 +292,7 @@ const AddAttraction = () => {
                       <div>
                         <img
                           src="https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg"
-                          alt="Default"
-                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                          alt="Default" style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                         />
                       </div>
                     )}
@@ -299,9 +302,8 @@ const AddAttraction = () => {
               <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3, maxWidth: '100%' }}>
                 {images.map((image, index) => (
                   <Box
-                    key={index}
+                    key={index} onClick={() => handleThumbnailClick(index)}
                     sx={{ maxWidth: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
-                    onClick={() => handleThumbnailClick(index)}
                   >
                     <img
                       src={image instanceof File ? URL.createObjectURL(image) : image}
@@ -309,18 +311,11 @@ const AddAttraction = () => {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveImage(index);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
                       sx={{
-                        position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        padding: '4px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
-                        color: 'white'
+                        position: 'absolute', top: 2,
+                        right: 2, padding: '4px', backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' }, color: 'white'
                       }}
                     >
                       <CloseIcon sx={{ fontSize: 16 }} />
@@ -337,12 +332,8 @@ const AddAttraction = () => {
                   <AddPhotoAlternateIcon sx={{ fontSize: 40, color: '#3572EF' }} />
                 </Box>
                 <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  multiple
+                  type="file" ref={fileInputRef} style={{ display: 'none' }}
+                  onChange={handleFileChange} accept="image/*" multiple
                 />
               </Box>
               <Box>
@@ -350,8 +341,7 @@ const AddAttraction = () => {
                 <ReactQuill
                   value={editableFields.description.value}
                   onChange={(value) => handleFieldChange('description', value)}
-                  theme="snow"
-                  modules={modules}
+                  theme="snow" modules={modules}
                 />
               </Box>
             </Grid>
@@ -359,11 +349,8 @@ const AddAttraction = () => {
               <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                 <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
                 <Select
-                  value={selectedProvince}
-                  onChange={handleProvinceChange}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ mr: 2, mb: 2 }}
+                  value={selectedProvince} onChange={handleProvinceChange}
+                  variant="outlined" fullWidth sx={{ mr: 2, mb: 2 }}
                 >
                   {provinces.map((province) => (
                     <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
@@ -374,9 +361,7 @@ const AddAttraction = () => {
                   <TextField
                     value={editableFields.address.value}
                     onChange={(e) => handleFieldChange('address', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
+                    variant="outlined" fullWidth sx={{ mb: 2 }}
                   />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -384,18 +369,14 @@ const AddAttraction = () => {
                   <TextField
                     value={editableFields.website.value}
                     onChange={(e) => handleFieldChange('website', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
+                    variant="outlined" fullWidth sx={{ mb: 2 }}
                   />
                 </Box>
                 <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
                 <ReactQuill
                   value={editableFields.contactInfo.value}
                   onChange={(value) => handleFieldChange('contactInfo', value)}
-                  theme="snow"
-                  modules={modules}
-                  style={{ width: '100%' }}
+                  theme="snow" modules={modules} style={{ width: '100%' }}
                 />
               </Paper>
             </Grid>
@@ -421,6 +402,16 @@ const AddAttraction = () => {
           </Box>
         </Box>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={snackbar.hide}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

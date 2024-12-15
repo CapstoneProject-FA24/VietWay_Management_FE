@@ -35,27 +35,29 @@ const AttractionDetail = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success'
+    severity: 'success',
+    hide: 5000
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const fetchAttractionData = async () => {
+    try {
+      const [fetchedProvinces, fetchedAttractionType, fetchedAttraction] = await Promise.all([
+        fetchProvinces({ pageSize: 63, pageIndex: 1 }),
+        fetchAttractionType(),
+        fetchAttractionById(id)
+      ]);
+      setProvinces(fetchedProvinces.items);
+      setAttractionTypes(fetchedAttractionType);
+      setAttraction(fetchedAttraction);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(error.message || 'An error occurred while fetching data');
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [fetchedProvinces, fetchedAttractionType, fetchedAttraction] = await Promise.all([
-          fetchProvinces({ pageSize: 63, pageIndex: 1 }),
-          fetchAttractionType(),
-          fetchAttractionById(id)
-        ]);
-        setProvinces(fetchedProvinces.items);
-        setAttractionTypes(fetchedAttractionType);
-        setAttraction(fetchedAttraction);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setError(error.message || 'An error occurred while fetching data');
-      }
-    };
-    fetchData();
+    fetchAttractionData();
   }, [id]);
 
   const handleEdit = () => {
@@ -65,7 +67,6 @@ const AttractionDetail = () => {
   const handleSendForApproval = async () => {
     setIsSubmitting(true);
     try {
-      console.log(attraction);
       const requiredFields = {
         name: 'Tên điểm tham quan',
         description: 'Mô tả',
@@ -119,10 +120,10 @@ const AttractionDetail = () => {
 
       setSnackbar({
         open: true,
-        message: 'Đã gửi điểm tham quan để duyệt',
+        message: 'Đã gửi duyệt thành công',
         severity: 'success'
       });
-      window.location.reload();
+      await fetchAttractionData();
     } catch (error) {
       console.error('Error sending for approval:', error);
       setSnackbar({
@@ -151,10 +152,15 @@ const AttractionDetail = () => {
             return;
           }
         }
+        console.log(attractionData);
         setIsEditing(false);
-        // Refresh attraction data
         const updatedAttraction = await fetchAttractionById(id);
         setAttraction(updatedAttraction);
+        setSnackbar({
+          open: true,
+          message: attractionData.isDraft ? 'Đã lưu nháp thành công' : 'Đã lưu và gửi duyệt thành công',
+          severity: 'success'
+        });
       } else {
         alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
       }
@@ -206,43 +212,39 @@ const AttractionDetail = () => {
       setSnackbar({
         open: true,
         message: 'Xóa điểm tham quan thành công',
-        severity: 'success'
+        severity: 'success',
+        hide: 1000
       });
-      navigate(-1); // Navigate back after successful deletion
     } catch (error) {
       console.error('Error deleting attraction:', error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi xóa điểm tham quan',
-        severity: 'error'
+        severity: 'error',
       });
     }
   };
 
-  const handleCloseSnackbar = () => {
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
     setSnackbar(prev => ({ ...prev, open: false }));
+    if (snackbar.message === 'Xóa điểm tham quan thành công') {
+      navigate(-1);
+    }
   };
 
   const CancelConfirmationDialog = () => (
     <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
-      <DialogTitle sx={{ fontWeight: 600 }}>
-        Xác nhận hủy
-      </DialogTitle>
+      <DialogTitle sx={{ fontWeight: 600 }}>Xác nhận hủy</DialogTitle>
       <DialogContent>
-        <Typography>
-          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
-        </Typography>
+        <Typography>Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.</Typography>
       </DialogContent>
       <DialogActions sx={{ p: 2, pt: 0 }}>
+        <Button onClick={handleCloseCancelPopup} sx={{ color: '#666666' }}>Không</Button>
         <Button
-          onClick={handleCloseCancelPopup}
-          sx={{ color: '#666666' }}
-        >
-          Không
-        </Button>
-        <Button
-          onClick={handleCancelConfirm}
-          variant="contained"
+          onClick={handleCancelConfirm} variant="contained"
           sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
         >
           Có
@@ -268,25 +270,17 @@ const AttractionDetail = () => {
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
         <Box sx={{
-          flexGrow: 1,
-          p: 3,
-          transition: 'margin-left 0.3s',
-          marginLeft: isSidebarOpen ? '260px' : '20px',
-          mt: 5
+          flexGrow: 1, p: 3, transition: 'margin-left 0.3s',
+          marginLeft: isSidebarOpen ? '260px' : '20px', mt: 5
         }}>
           <Box maxWidth="89vw">
             <Box elevation={2} sx={{
-              p: 1,
-              mb: 3,
-              marginTop: -1.5,
-              height: '100%',
+              p: 1, mb: 3, marginTop: -1.5, height: '100%',
               width: isSidebarOpen ? 'calc(93vw - 260px)' : 'calc(93vw - 20px)'
             }}>
               <Box sx={{ m: '-60px -60px 0px -60px', boxShadow: 2, pt: 3, pl: 4, pr: 4, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Button
-                  component={Link}
-                  to="/nhan-vien/diem-tham-quan"
-                  variant="contained"
+                  component={Link} to="/nhan-vien/diem-tham-quan" variant="contained"
                   startIcon={<ArrowBackIosNewOutlinedIcon />}
                   sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
                   Quay lại
@@ -310,20 +304,13 @@ const AttractionDetail = () => {
                       <HistoryIcon color="primary" />
                     </IconButton>
 
-                    {/* Version History Dropdown */}
                     <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit>
                       <Box
                         sx={{
-                          position: 'absolute',
-                          top: '100%',
-                          right: 0,
-                          width: '400px',
-                          backgroundColor: 'white',
-                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                          borderRadius: '4px',
-                          display: isHistoryOpen ? 'block' : 'none',
-                          zIndex: 1000,
-                          marginTop: '8px'
+                          position: 'absolute', top: '100%',
+                          right: 0, width: '400px', backgroundColor: 'white',
+                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)', borderRadius: '4px',
+                          display: isHistoryOpen ? 'block' : 'none', zIndex: 1000, marginTop: '8px'
                         }}
                       >
                         <VersionHistory />
@@ -332,9 +319,7 @@ const AttractionDetail = () => {
 
                     {isEditing ? (
                       <Button
-                        variant="contained"
-                        startIcon={<CancelIcon />}
-                        onClick={handleCancelClick}
+                        variant="contained" startIcon={<CancelIcon />} onClick={handleCancelClick}
                         sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
                       >
                         Hủy sửa
@@ -342,18 +327,14 @@ const AttractionDetail = () => {
                     ) : (
                       <>
                         <Button
-                          variant="contained"
-                          color="primary"
+                          variant="contained" color="primary"
                           startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-                          onClick={handleSendForApproval}
-                          disabled={isSubmitting}
+                          onClick={handleSendForApproval} disabled={isSubmitting}
                         >
                           {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
                         </Button>
                         <Button
-                          variant="contained"
-                          startIcon={<EditIcon />}
-                          onClick={handleEdit}
+                          variant="contained" startIcon={<EditIcon />} onClick={handleEdit}
                           sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
                         >
                           Sửa
@@ -361,9 +342,7 @@ const AttractionDetail = () => {
                       </>
                     )}
                     <Button
-                      variant="contained"
-                      startIcon={<DeleteIcon />}
-                      onClick={handleDelete}
+                      variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
                       sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
                     >
                       Xóa
@@ -373,9 +352,7 @@ const AttractionDetail = () => {
                 {attraction.status === AttractionStatus.Pending && (
                   <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button
-                      variant="contained"
-                      startIcon={<DeleteIcon />}
-                      onClick={handleDelete}
+                      variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
                       sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
                     >
                       Xóa
@@ -386,22 +363,14 @@ const AttractionDetail = () => {
 
               {isEditing ? (
                 <AttractionUpdateForm
-                  attraction={attraction}
-                  provinces={provinces}
-                  attractionTypes={attractionTypes}
-                  onSave={handleSave}
-                  currentSlide={currentSlide}
-                  setCurrentSlide={setCurrentSlide}
-                  sliderRef={sliderRef}
-                  setSliderRef={setSliderRef}
+                  attraction={attraction} provinces={provinces}
+                  attractionTypes={attractionTypes} onSave={handleSave} currentSlide={currentSlide}
+                  setCurrentSlide={setCurrentSlide} sliderRef={sliderRef} setSliderRef={setSliderRef}
                 />
               ) : (
                 <AttractionInfo
-                  attraction={attraction}
-                  currentSlide={currentSlide}
-                  setCurrentSlide={setCurrentSlide}
-                  sliderRef={sliderRef}
-                  setSliderRef={setSliderRef}
+                  attraction={attraction} currentSlide={currentSlide}
+                  setCurrentSlide={setCurrentSlide} sliderRef={sliderRef} setSliderRef={setSliderRef}
                 />
               )}
             </Box>
@@ -416,19 +385,13 @@ const AttractionDetail = () => {
           <Typography>Bạn có chắc chắn muốn xóa điểm tham quan này? Hành động này không thể hoàn tác.</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Không
-          </Button>
-          <Button onClick={handleConfirmDelete} color="secondary" variant="contained">
-            Xác nhận xóa
-          </Button>
+          <Button onClick={handleCloseDeleteDialog} color="primary">Không</Button>
+          <Button onClick={handleConfirmDelete} color="secondary" variant="contained">Xác nhận xóa</Button>
         </DialogActions>
       </Dialog>
 
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
+        open={snackbar.open} autoHideDuration={snackbar.hide} onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">

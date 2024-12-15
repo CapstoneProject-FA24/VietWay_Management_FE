@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, TextField, Button, IconButton, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Grid, Paper, Snackbar, Alert, TextField, Button, IconButton, Select, MenuItem } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -31,6 +31,9 @@ const AttractionUpdateForm = ({
     website: { value: '' },
     type: { value: '' },
     placeId: { value: '' }
+  });
+  const [snackbar, setSnackbar] = useState({
+    open: false, message: '', severity: 'success', hide: 5000
   });
 
   useEffect(() => {
@@ -135,24 +138,43 @@ const AttractionUpdateForm = ({
       const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
       const missingFields = requiredFields.filter(field => !attractionData[field]);
       if (missingFields.length > 0) {
-        alert(`Vui lòng điền đầy đủ thông tin trước khi cập nhật.`);
+        setSnackbar({
+          open: true,
+          message: 'Vui lòng điền đầy đủ thông tin trước khi cập nhật.',
+          severity: 'error',
+        });
         return;
       }
       if (images.length === 0) {
-        alert('Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.');
+        setSnackbar({
+          open: true,
+          message: 'Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.',
+          severity: 'error',
+        });
         return;
       }
     } else {
       const requiredFields = ['provinceId', 'attractionTypeId'];
       const missingFields = requiredFields.filter(field => !attractionData[field]);
       if (missingFields.length > 0) {
-        alert(`Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.`);
+        setSnackbar({
+          open: true,
+          message: 'Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.',
+          severity: 'error',
+        });
         return;
       }
     }
 
     const newImages = images.filter(img => img instanceof File);
     onSave(attractionData, newImages, removedImageIds);
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -193,7 +215,7 @@ const AttractionUpdateForm = ({
             <Box className="slick-slider-container" sx={{ height: '450px' }}>
               <Slider ref={setSliderRef} {...settings}>
                 {images.map((image, index) => (
-                  <div key={index} style={{ position: 'relative'}}>
+                  <div key={index} style={{ position: 'relative' }}>
                     <img
                       src={image instanceof File ? URL.createObjectURL(image) : image.url}
                       alt={`Attraction ${index + 1}`}
@@ -356,6 +378,16 @@ const AttractionUpdateForm = ({
           </Box>
         </Grid>
       </Grid>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={snackbar.hide}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
