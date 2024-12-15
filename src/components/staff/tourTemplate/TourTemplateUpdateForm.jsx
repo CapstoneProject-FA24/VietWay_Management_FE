@@ -1,36 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Grid, Paper, TextField, Button, Container, Collapse, IconButton, Select, MenuItem, Snackbar, Alert } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode, faBus } from '@fortawesome/free-solid-svg-icons';
+import { Box, Typography, Grid, Paper, TextField, Button, Collapse, IconButton, Select, MenuItem, Snackbar, Alert, FormControl, FormHelperText } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
-import { Link, useParams, useNavigate } from 'react-router-dom';
 import ReactSelect from 'react-select';
 import { Close as CloseIcon, Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import TemplateAddAttractionPopup from '@components/staff/tourTemplate/TemplateAddAttractionPopup';
-import { fetchTourTemplateById, updateTourTemplate, updateTemplateImages } from '@services/TourTemplateService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import PropTypes from 'prop-types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import '@styles/ReactQuill.css';
 
 const quillModules = {
     toolbar: [
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        [{ 'font': [] }],
-        [{ 'size': ['small', false, 'large', 'huge'] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'script': 'sub' }, { 'script': 'super' }],
-        [{ 'align': [] }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }], [{ 'font': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
         [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-        [{ 'direction': 'rtl' }],
-        ['blockquote', 'code-block'],
-        ['link', 'image', 'video', 'formula'],
-        ['clean']
+        [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
     ]
 };
 
@@ -50,11 +40,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         description: { value: initialTourTemplate.description, isEditing: false },
         note: { value: initialTourTemplate.note, isEditing: false },
         provinces: {
-            value: initialTourTemplate.provinces.map(p => ({
-                value: p.provinceId,
-                label: p.provinceName
-            })),
-            isEditing: false
+            value: initialTourTemplate.provinces.map(p => ({ value: p.provinceId, label: p.provinceName })), isEditing: false
         },
         duration: { value: initialTourTemplate.duration.durationId, isEditing: false },
         departurePoint: { value: initialTourTemplate.departurePoint, isEditing: false },
@@ -69,22 +55,8 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const [expandedDay, setExpandedDay] = useState(null);
     const [isAttractionPopupOpen, setIsAttractionPopupOpen] = useState(false);
     const [currentEditingDay, setCurrentEditingDay] = useState(null);
-    const pageTopRef = useRef(null);
-
-    const navigate = useNavigate();
-
-    const [priceErrors, setPriceErrors] = useState({
-        minPrice: '',
-        maxPrice: ''
-    });
-
-    const [snackbar, setSnackbar] = useState({ 
-        open: false, 
-        message: '', 
-        severity: 'success', 
-        hide: 5000 
-    });
-
+    const [priceErrors, setPriceErrors] = useState({ minPrice: '', maxPrice: '' });
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
     const [fieldErrors, setFieldErrors] = useState({});
 
     const handleCloseSnackbar = (event, reason) => {
@@ -116,19 +88,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             if (selectedDuration) {
                 const numberOfDays = selectedDuration.dayNumber;
                 const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
-                    // Keep existing schedule data if available
                     const existingDay = initialTourTemplate.schedule.find(s => s.dayNumber === (index + 1));
                     if (existingDay) {
                         return existingDay;
                     }
-                    // Create new day if doesn't exist
-                    return {
-                        dayNumber: index + 1,
-                        title: '',
-                        description: '',
-                        attractions: [],
-                        isEditing: true
-                    };
+                    return { dayNumber: index + 1, title: '', description: '', attractions: [], isEditing: true };
                 });
                 setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
             }
@@ -146,19 +110,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             if (selectedDuration) {
                 const numberOfDays = selectedDuration.dayNumber;
                 const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
-                    // Keep existing schedule data if available
                     const existingDay = tourTemplate.schedule.find(s => s.dayNumber === (index + 1));
                     if (existingDay) {
                         return existingDay;
                     }
-                    // Create new day if doesn't exist
-                    return {
-                        dayNumber: index + 1,
-                        title: '',
-                        description: '',
-                        attractions: [],
-                        isEditing: true
-                    };
+                    return { dayNumber: index + 1, title: '', description: '', attractions: [], isEditing: true };
                 });
                 setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
             }
@@ -169,8 +125,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         const file = event.target.files[0];
         if (file) {
             setTourTemplate(prev => ({
-                ...prev,
-                imageUrls: prev.imageUrls.map((img, i) =>
+                ...prev, imageUrls: prev.imageUrls.map((img, i) =>
                     i === index ? file : img
                 )
             }));
@@ -231,26 +186,19 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         const min = parseFloat(minPrice);
         const max = parseFloat(maxPrice);
         let isValid = true;
-        const newErrors = {
-            minPrice: '',
-            maxPrice: ''
-        };
-
+        const newErrors = { minPrice: '', maxPrice: '' };
         if (min < 0) {
             newErrors.minPrice = 'Giá thấp nhất phải lớn hơn 0';
             isValid = false;
         }
-
         if (max < 0) {
             newErrors.maxPrice = 'Giá cao nhất phải lớn hơn 0';
             isValid = false;
         }
-
         if (max && min && max <= min) {
             newErrors.maxPrice = 'Giá cao nhất phải lớn hơn giá thấp nhất';
             isValid = false;
         }
-
         setPriceErrors(newErrors);
         return isValid;
     };
@@ -260,7 +208,6 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             if (!validatePrice(editableFields.minPrice.value, editableFields.maxPrice.value)) {
                 return;
             }
-
             const tourTemplateData = {
                 tourTemplateId: initialTourTemplate.tourTemplateId,
                 code: editableFields.code.value,
@@ -295,104 +242,76 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     !s.title || !s.description || !s.attractionIds || s.attractionIds.length === 0
                 );
                 if (invalidSchedules.length > 0) {
-                    errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình';
+                    errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
                 }
-
+                if (!tourTemplateData.imageUrls || tourTemplateData.imageUrls.length < 4) {
+                    errors.imageUrls = 'Vui lòng thêm đủ 4 ảnh';
+                }
+                if (!tourTemplateData.durationId) {
+                    errors.duration = 'Vui lòng chọn thời lượng';
+                }
+                if (!tourTemplateData.tourCategoryId) {
+                    errors.tourCategory = 'Vui lòng chọn loại tour';
+                }
                 const requiredFields = {
-                    tourName: 'Tên tour',
-                    code: 'Mã tour',
-                    description: 'Mô tả',
-                    transportation: 'Phương tiện',
-                    note: 'Ghi chú',
-                    startingProvinceId: 'Điểm khởi hành',
-                    minPrice: 'Giá thấp nhất',
-                    maxPrice: 'Giá cao nhất'
+                    tourName: 'tên tour', code: 'mã tour', description: 'mô tả', transportation: 'phương tiện',
+                    note: 'ghi chú', startingProvinceId: 'điểm khởi hành', minPrice: 'giá thấp nhất', maxPrice: 'giá cao nhất'
                 };
-
                 Object.entries(requiredFields).forEach(([key, label]) => {
                     if (!tourTemplateData[key]) {
                         errors[key] = `Vui lòng nhập ${label}`;
                     }
                 });
-
                 if (Object.keys(errors).length > 0) {
                     setFieldErrors(errors);
-                    setSnackbar({
-                        open: true,
-                        severity: 'error',
-                        message: 'Vui lòng điền đầy đủ thông tin bắt buộc',
-                    });
                     return;
                 }
             } else {
                 const errors = {};
-                if (!tourTemplateData.durationId || !tourTemplateData.tourCategoryId) {
-                    errors.duration = 'Vui lòng chọn thời lượng và loại tour trước khi lưu bản nháp';
+                if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
+                    errors.provinces = 'Vui lòng chọn tỉnh thành';
+                }
+                if (!tourTemplateData.startingProvinceId) {
+                    errors.startingProvinceId = 'Vui lòng chọn điểm khởi hành';
+                }
+                if (!tourTemplateData.durationId) {
+                    errors.duration = 'Vui lòng chọn thời lượng';
+                }
+                if (!tourTemplateData.tourCategoryId) {
+                    errors.tourCategory = 'Vui lòng chọn loại tour';
+                }
+                if (Object.keys(errors).length > 0) {
                     setFieldErrors(errors);
-                    setSnackbar({
-                        open: true,
-                        severity: 'error',
-                        message: 'Vui lòng chọn thời lượng và loại tour',
-                    });
                     return;
                 }
             }
 
-            const response = await updateTourTemplate(tourTemplateData.tourTemplateId, tourTemplateData);
+            const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
+            const deletedImageIds = initialTourTemplate.imageUrls
+                .filter(originalImg => !tourTemplate.imageUrls.some(currentImg =>
+                    currentImg?.imageUrl === originalImg?.imageUrl))
+                .map(img => img.imageId);
+            onSave(tourTemplateData, newImages, deletedImageIds);
 
-            if (response.statusCode === 200) {
-                const newImages = tourTemplate.imageUrls.filter(img => img instanceof File);
-                const deletedImageIds = initialTourTemplate.imageUrls
-                    .filter(originalImg => !tourTemplate.imageUrls.some(currentImg =>
-                        currentImg?.imageUrl === originalImg?.imageUrl))
-                    .map(img => img.imageId);
-
-                if (newImages.length > 0 || deletedImageIds.length > 0) {
-                    await updateTemplateImages(tourTemplateData.tourTemplateId, newImages, deletedImageIds);
-                }
-
-                setSnackbar({
-                    open: true,
-                    severity: 'success',
-                    message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã cập nhật và gửi tour mẫu thành công.',
-                    hide: 1000
-                });
-
-                setTimeout(() => {
-                    navigate('/nhan-vien/tour-mau');
-                }, 1000);
-            }
         } catch (error) {
             console.error('Error updating tour template:', error);
             setSnackbar({
-                open: true,
-                severity: 'error',
-                message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+                open: true, severity: 'error', message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
             });
         }
     };
 
     const renderImageSlot = (index, dimensions) => {
         const image = tourTemplate.imageUrls[index];
-
         return image ? (
             <>
-                <img
-                    src={image instanceof File ? URL.createObjectURL(image) : image.imageUrl}
-                    alt={`Tour image ${index + 1}`}
-                    style={{
-                        width: '100%',
-                        height: dimensions.height,
-                        objectFit: 'cover'
-                    }}
+                <img src={image instanceof File ? URL.createObjectURL(image) : image.imageUrl}
+                    alt={`Tour image ${index + 1}`} style={{ width: '100%', height: dimensions.height, objectFit: 'cover' }}
                 />
                 <IconButton
                     onClick={() => handleImageRemove(index)}
                     sx={{
-                        position: 'absolute',
-                        top: 10,
-                        right: 10,
-                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255, 255, 255, 0.7)',
                         '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.9)' }
                     }}
                 >
@@ -401,21 +320,15 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             </>
         ) : (
             <Button
-                component="label"
-                variant="outlined"
+                component="label" variant="outlined"
                 sx={{
-                    width: '100%',
-                    height: dimensions.buttonHeight || dimensions.height,
-                    border: '2px dashed #3572EF'
+                    width: '100%', height: dimensions.buttonHeight || dimensions.height,
+                    color: fieldErrors.imageUrls ? 'red' : '#3572EF',
+                    border: fieldErrors.imageUrls ? '2px dashed red' : '2px dashed #3572EF'
                 }}
             >
                 Thêm ảnh
-                <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(index, e)}
-                />
+                <input type="file" hidden accept="image/*" onChange={(e) => handleImageUpload(index, e)} />
             </Button>
         );
     };
@@ -439,19 +352,23 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                     <Typography gutterBottom>Tour đi qua tỉnh/thành phố</Typography>
                     <ReactSelect
-                        isMulti name="provinces"
+                        isMulti name="provinces" onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                         options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
-                        className="basic-multi-select" classNamePrefix="select"
-                        placeholder="Chọn tỉnh/thành phố" value={editableFields.provinces.value}
-                        onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
+                        className="basic-multi-select" classNamePrefix="select" value={editableFields.provinces.value} placeholder=''
+                        styles={{
+                            control: (base) => ({ ...base, borderColor: fieldErrors.provinces ? 'red' : base.borderColor, height: '55px' })
+                        }}
                     />
+                    {fieldErrors.provinces && (
+                        <Typography color="error" variant="caption"> {fieldErrors.provinces} </Typography>
+                    )}
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                     <Typography gutterBottom>Khởi hành từ:</Typography>
                     <Select
                         value={editableFields.startingProvinceId.value}
                         onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
-                        displayEmpty fullWidth sx={{ height: '40px', backgroundColor: 'white' }}
+                        displayEmpty fullWidth sx={{ backgroundColor: 'white' }} error={!!fieldErrors.tourName} helperText={fieldErrors.tourName}
                     >
                         {provinces.map((province) => (
                             <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
@@ -494,79 +411,103 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '32%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '6.5rem' }}>Thời lượng:</Typography>
-                                <Select sx={{ width: '100%', mr: 1 }}
-                                    value={editableFields.duration.value}
-                                    onChange={(e) => handleFieldChange('duration', e.target.value)}>
-                                    {tourDurations.map((tourDuration) => (
-                                        <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>
-                                            {tourDuration.durationName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng:</Typography>
+                                <FormControl sx={{ width: '100%' }}>
+                                    <Select
+                                        value={editableFields.duration.value}
+                                        onChange={(e) => handleFieldChange('duration', e.target.value)}>
+                                        {tourDurations.map((tourDuration) => (
+                                            <MenuItem key={tourDuration.durationId} value={tourDuration.durationId}>
+                                                {tourDuration.durationName}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {fieldErrors.duration && (
+                                        <FormHelperText error>{fieldErrors.duration}</FormHelperText>
+                                    )}
+                                </FormControl>
                             </Box>
                         </Box>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '32%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '5.3rem' }}>Loại tour:</Typography>
-                                <Select sx={{ width: '100%', mr: 1 }}
-                                    value={editableFields.tourCategory.value}
-                                    onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
-                                    {tourCategories.map((tourCategory) => (
-                                        <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>
-                                            {tourCategory.tourCategoryName}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                <FormControl sx={{ width: '100%' }}>
+                                    <Select
+                                        value={editableFields.tourCategory.value}
+                                        onChange={(e) => handleFieldChange('tourCategory', e.target.value)}>
+                                        {tourCategories.map((tourCategory) => (
+                                            <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>
+                                                {tourCategory.tourCategoryName}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                    {fieldErrors.tourCategory && (
+                                        <FormHelperText error>{fieldErrors.tourCategory}</FormHelperText>
+                                    )}
+                                </FormControl>
                             </Box>
                         </Box>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '32%' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                 <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: '7rem' }}>Phương tiện:</Typography>
-                                <Select sx={{ width: '100%', mr: 1 }}
-                                    value={editableFields.transportation.value}
-                                    onChange={(e) => handleFieldChange('transportation', e.target.value)}>
-                                    <MenuItem value="Xe du lịch">Xe du lịch</MenuItem>
-                                    <MenuItem value="Máy bay">Máy bay</MenuItem>
-                                    <MenuItem value="Tàu hỏa">Tàu hỏa</MenuItem>
-                                </Select>
+                                <FormControl sx={{ width: '100%' }}>
+                                    <Select sx={{ width: '100%', mr: 1 }}
+                                        value={editableFields.transportation.value}
+                                        onChange={(e) => handleFieldChange('transportation', e.target.value)}>
+                                        <MenuItem value="Xe du lịch">Xe du lịch</MenuItem>
+                                        <MenuItem value="Máy bay">Máy bay</MenuItem>
+                                        <MenuItem value="Tàu hỏa">Tàu hỏa</MenuItem>
+                                    </Select>
+                                    {fieldErrors.transportation && (
+                                        <FormHelperText error>{fieldErrors.transportation}</FormHelperText>
+                                    )}
+                                </FormControl>
                             </Box>
                         </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-                            Tổng quan
-                        </Typography>
-                        <ReactQuill
-                            value={editableFields.description.value} onChange={(value) => handleFieldChange('description', value)}
-                            modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '50px' }}
-                        />
+                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
+                        <FormControl sx={{ width: '100%' }}>
+                            <ReactQuill
+                                value={editableFields.description.value} onChange={(value) => handleFieldChange('description', value)}
+                                modules={quillModules} theme="snow" className={fieldErrors.description ? "ql-error" : null}
+                                style={{ height: '200px', marginBottom: '100px' }}
+                            />
+                            {fieldErrors.description && (
+                                <FormHelperText error sx={{ mt: -3 }}>{fieldErrors.description}</FormHelperText>
+                            )}
+                        </FormControl>
                     </Box>
                     <Box sx={{ mb: 5 }}>
                         <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 2, mt: 12 }}>
                             Lịch trình
                         </Typography>
+                        {fieldErrors.scheduleDetails && (
+                            <Typography color="error" variant="caption" sx={{ ml: 1 }}>
+                                {fieldErrors.scheduleDetails}
+                            </Typography>
+                        )}
                         {tourTemplate.schedule.map((s, index) => (
                             <Box key={s.dayNumber} sx={{ pl: 6, position: 'relative', mb: 3 }}>
                                 {(index === 0 || index === tourTemplate.schedule.length - 1) && (
                                     <Box sx={{
                                         position: 'absolute', left: 0, top: '18px', width: '24px', height: '24px',
-                                        borderRadius: '50%', border: '2px solid #3572EF', backgroundColor: 'white',
+                                        borderRadius: '50%', border: fieldErrors.scheduleDetails ? '2px solid red' : '2px solid #3572EF', backgroundColor: 'white',
                                         transform: 'translateY(-50%)', zIndex: 1
                                     }} />
                                 )}
                                 {(index !== 0 && index !== tourTemplate.schedule.length - 1) && (
                                     <Box sx={{
                                         position: 'absolute', left: '4px', top: '17px', width: '15px', height: '15px',
-                                        borderRadius: '50%', backgroundColor: '#3572EF', transform: 'translateY(-50%)', zIndex: 1
+                                        borderRadius: '50%', backgroundColor: fieldErrors.scheduleDetails ? 'red' : '#3572EF', transform: 'translateY(-50%)', zIndex: 1
                                     }} />
                                 )}
                                 {index !== tourTemplate.schedule.length - 1 && (
                                     <Box sx={{
                                         position: 'absolute', left: 10.5, top: '24px', bottom: -35,
-                                        width: '2px', backgroundColor: '#3572EF', zIndex: 0
+                                        width: '2px', backgroundColor: fieldErrors.scheduleDetails ? 'red' : '#3572EF', zIndex: 0
                                     }} />
                                 )}
                                 <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', ml: 1 }} onClick={() => handleDayClick(s.dayNumber)}>
@@ -613,61 +554,65 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
                             Lưu ý
                         </Typography>
-                        <ReactQuill
-                            value={editableFields.note.value} onChange={(value) => handleFieldChange('note', value)}
-                            modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }}
-                        />
+                        <FormControl sx={{ width: '100%' }}>
+                            <ReactQuill
+                                value={editableFields.note.value} onChange={(value) => handleFieldChange('note', value)}
+                                modules={quillModules} theme="snow" style={{ height: '200px', marginBottom: '100px' }}
+                                className={fieldErrors.note ? "ql-error" : null}
+                            />
+                            {fieldErrors.note && (<FormHelperText error sx={{ mt: -3 }}>{fieldErrors.note}</FormHelperText>)}
+                        </FormControl>
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4} >
                     <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
                             <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                             <Typography sx={{ color: '#05073C', display: 'flex' }}>
                                 Trạng thái:
                                 <Typography sx={{ ml: 1, color: tourTemplate.statusName === 'Bản nháp' ? 'gray' : tourTemplate.statusName === 'Chờ duyệt' ? 'primary.main' : tourTemplate.statusName === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                             </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <FontAwesomeIcon icon={faQrcode} style={{ marginRight: '10px', color: '#3572EF' }} />
-                            <Typography sx={{ color: '#05073C', display: 'flex', minWidth: '4.2rem' }}> Mã mẫu: </Typography>
-                            <TextField value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined" fullWidth placeholder="Nhập mã tour" />
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
-                            <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Giá từ: </Typography>
+                            <Typography sx={{ color: '#05073C', display: 'flex', width: '6rem' }}> Mã mẫu: </Typography>
                             <TextField
-                                type="number" value={editableFields.minPrice.value}
+                                value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined"
+                                fullWidth error={!!fieldErrors.code} helperText={fieldErrors.code}
+                            />
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá từ: </Typography>
+                            <TextField
+                                type="number" value={editableFields.minPrice.value} inputProps={{ min: 0 }}
                                 onChange={(e) => {
                                     const newValue = e.target.value; handleFieldChange('minPrice', newValue);
                                     validatePrice(newValue, editableFields.maxPrice.value);
                                 }}
-                                onBlur={() => handlePriceBlur('minPrice')} variant="outlined" fullWidth placeholder="Giá thấp nhất"
-                                inputProps={{ min: 0 }} error={!!priceErrors.minPrice} helperText={priceErrors.minPrice}
+                                onBlur={() => handlePriceBlur('minPrice')} variant="outlined" fullWidth
+                                error={!!priceErrors.minPrice || !!fieldErrors.minPrice}
+                                helperText={priceErrors.minPrice || fieldErrors.minPrice}
                             />
                         </Box>
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
-                            <Typography sx={{ color: '#05073C', minWidth: '4.2rem' }}> Đến: </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá đến: </Typography>
                             <TextField
-                                type="number" value={editableFields.maxPrice.value}
+                                type="number" value={editableFields.maxPrice.value} inputProps={{ min: 0 }}
                                 onChange={(e) => {
                                     const newValue = e.target.value; handleFieldChange('maxPrice', newValue);
                                     validatePrice(editableFields.minPrice.value, newValue);
                                 }}
-                                onBlur={() => handlePriceBlur('maxPrice')} variant="outlined" fullWidth placeholder="Giá cao nhất"
-                                inputProps={{ min: 0 }} error={!!priceErrors.maxPrice} helperText={priceErrors.maxPrice}
+                                onBlur={() => handlePriceBlur('maxPrice')} variant="outlined" fullWidth
+                                error={!!priceErrors.maxPrice || !!fieldErrors.maxPrice}
+                                helperText={priceErrors.maxPrice || fieldErrors.maxPrice}
                             />
                         </Box>
                         <Button
                             variant="contained" fullWidth onClick={() => handleSubmit(true)}
-                            sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}                            
+                            sx={{ backgroundColor: 'gray', mb: 2, height: '50px', '&:hover': { backgroundColor: '#4F4F4F' } }}
                         >Lưu bản nháp</Button>
                         <Button variant="contained" fullWidth sx={{ height: '50px' }} onClick={() => handleSubmit(false)}>Gửi</Button>
                     </Paper>

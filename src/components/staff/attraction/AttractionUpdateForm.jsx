@@ -9,16 +9,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import Map from '@components/staff/attraction/Map';
 
-const AttractionUpdateForm = ({
-  attraction,
-  provinces,
-  attractionTypes,
-  onSave,
-  currentSlide,
-  setCurrentSlide,
-  sliderRef,
-  setSliderRef
-}) => {
+const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const [images, setImages] = useState([]);
   const [removedImageIds, setRemovedImageIds] = useState([]);
   const fileInputRef = useRef(null);

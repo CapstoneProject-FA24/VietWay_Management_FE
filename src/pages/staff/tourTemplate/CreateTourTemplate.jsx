@@ -212,8 +212,8 @@ const CreateTourTemplate = () => {
           errors.tourCategory = 'Vui lòng chọn loại tour';
         }
         const requiredFields = {
-          tourName: 'Tên tour', code: 'Mã tour', description: 'Mô tả', transportation: 'Phương tiện',
-          note: 'Ghi chú', startingProvinceId: 'Điểm khởi hành', minPrice: 'Giá thấp nhất', maxPrice: 'Giá cao nhất'
+          tourName: 'tên tour', code: 'mã tour', description: 'mô tả', transportation: 'phương tiện',
+          note: 'ghi chú', startingProvinceId: 'điểm khởi hành', minPrice: 'giá thấp nhất', maxPrice: 'giá cao nhất'
         };
         Object.entries(requiredFields).forEach(([key, label]) => {
           if (!tourTemplateData[key]) {
@@ -322,7 +322,7 @@ const CreateTourTemplate = () => {
                 <ReactSelect
                   isMulti name="provinces" onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                   options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
-                  className="basic-multi-select" classNamePrefix="select" value={tourTemplate.provinces}
+                  className="basic-multi-select" classNamePrefix="select" value={tourTemplate.provinces} placeholder=''
                   styles={{
                     control: (base) => ({ ...base, borderColor: fieldErrors.provinces ? 'red' : base.borderColor, height: '55px' })
                   }}
@@ -524,11 +524,9 @@ const CreateTourTemplate = () => {
                   <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
                   <FormControl sx={{ width: '100%' }}>
                     <ReactQuill
-                      value={tourTemplate.description}
-                      onChange={(value) => handleFieldChange('description', value)}
-                      modules={quillModules}
+                      value={tourTemplate.description} onChange={(value) => handleFieldChange('description', value)}
                       theme="snow" className={fieldErrors.description ? "ql-error" : null}
-                      style={{ height: '200px', marginBottom: '100px' }}
+                      style={{ height: '200px', marginBottom: '100px' }} modules={quillModules}
                     />
                     {fieldErrors.description && (
                       <FormHelperText error sx={{ mt: -3 }}>{fieldErrors.description}</FormHelperText>
