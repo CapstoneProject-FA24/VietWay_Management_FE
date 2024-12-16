@@ -21,6 +21,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import Collapse from '@mui/material/Collapse';
 import MuiAlert from '@mui/material/Alert';
+import TourDeletePopup from '@components/tour/TourDeletePopup';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -33,19 +34,15 @@ const ManagerTourDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [openRejectDialog, setOpenRejectDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
-  const [view, setView] = useState('details'); // 'details' or 'edit'
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
+  const [view, setView] = useState('details');
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,14 +94,14 @@ const ManagerTourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Đã duyệt tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       console.error('Error approving tour:', error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi duyệt tour',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     }
   };
@@ -119,14 +116,14 @@ const ManagerTourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Đã từ chối tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       console.error('Error rejecting tour:', error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi từ chối tour',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     }
   };
@@ -147,15 +144,17 @@ const ManagerTourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Xóa tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 1500
       });
-      navigate('/quan-ly/tour-du-lich');
+      setTimeout(() => {
+        navigate('/quan-ly/tour-du-lich');
+      }, 1500);
     } catch (error) {
       console.error('Error deleting tour:', error);
       setSnackbar({
         open: true,
         message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
       setOpenDeleteDialog(false);
     } finally {
@@ -182,14 +181,14 @@ const ManagerTourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Đã hủy tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       console.error('Error canceling tour:', error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi hủy tour',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     }
   };
@@ -210,12 +209,6 @@ const ManagerTourDetail = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const handleViewChange = (event, newView) => {
-    if (newView !== null) {
-      setView(newView);
-    }
-  };
-
   const handleUpdateSuccess = async () => {
     try {
       const updatedTour = await fetchTourById(id);
@@ -224,7 +217,7 @@ const ManagerTourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Cập nhật tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       console.error('Error fetching updated tour:', error);
@@ -326,7 +319,7 @@ const ManagerTourDetail = () => {
             )}
           </>
         )}
-        {(tour?.totalBookings == 0 && tour?.status != TourStatus.Rejected && tour?.status != TourStatus.Pending ) && (
+        {(tour?.totalBookings == 0 && tour?.status != TourStatus.Rejected && tour?.status != TourStatus.Pending) && (
           <Button
             variant="contained"
             onClick={handleDeleteTour}
@@ -511,26 +504,13 @@ const ManagerTourDetail = () => {
         <DialogTitle>Lý do từ chối</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
-            margin="dense"
-            label="Lý do"
-            type="text"
-            fullWidth
-            multiline
-            rows={4}
-            sx={{ minWidth: '30rem' }}
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
+            autoFocus margin="dense" label="Lý do" type="text" fullWidth multiline rows={4}
+            sx={{ minWidth: '30rem' }} value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseRejectDialog}>Hủy</Button>
-          <Button
-            onClick={handleRejectTour}
-            variant="contained"
-            color="error"
-            disabled={!rejectReason.trim()}
-          >
+          <Button onClick={handleRejectTour} variant="contained" color="error" disabled={!rejectReason.trim()} >
             Từ chối
           </Button>
         </DialogActions>
@@ -539,36 +519,18 @@ const ManagerTourDetail = () => {
       <Dialog open={openCancelDialog} onClose={handleCloseCancelDialog}>
         <DialogTitle sx={{ fontWeight: 600 }}>Xác nhận hủy tour</DialogTitle>
         <DialogContent>
-          <Typography sx={{ mb: 2 }}>
-            Bạn có chắc chắn muốn hủy tour này? Hành động này không thể hoàn tác.
-          </Typography>
+          <Typography sx={{ mb: 2 }}> Bạn có chắc chắn muốn hủy tour này? Hành động này không thể hoàn tác. </Typography>
           <TextField
-            autoFocus
-            margin="dense"
-            label="Lý do hủy"
-            type="text"
-            fullWidth
-            multiline
-            rows={4}
-            value={cancelReason}
-            onChange={(e) => setCancelReason(e.target.value)}
-            sx={{ minWidth: '30rem' }}
+            autoFocus margin="dense" label="Lý do hủy" type="text" fullWidth multiline rows={4} value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)} sx={{ minWidth: '30rem' }}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={handleCloseCancelDialog} sx={{ color: '#666666' }} > Không </Button>
           <Button
-            onClick={handleCloseCancelDialog}
-            sx={{ color: '#666666' }}
-          >
-            Không
-          </Button>
-          <Button
-            onClick={handleConfirmCancel}
-            variant="contained"
-            disabled={!cancelReason.trim()}
+            onClick={handleConfirmCancel} variant="contained" disabled={!cancelReason.trim()}
             sx={{
-              backgroundColor: '#DC2626',
-              '&:hover': { backgroundColor: '#B91C1C' }
+              backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }
             }}
           >
             Xác nhận hủy
@@ -577,68 +539,35 @@ const ManagerTourDetail = () => {
       </Dialog>
 
       <Dialog open={openApproveDialog} onClose={handleCloseApproveDialog}>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          Xác nhận duyệt tour
-        </DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600 }}> Xác nhận duyệt tour </DialogTitle>
         <DialogContent>
           <Typography>
             Ngày mở đăng ký đã qua. Nếu duyệt, tour sẽ được mở ngay. Bạn có chắc chắn muốn duyệt?
           </Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={handleCloseApproveDialog} sx={{ color: '#666666' }}>
-            Không
-          </Button>
+          <Button onClick={handleCloseApproveDialog} sx={{ color: '#666666' }}> Không </Button>
           <Button
-            onClick={handleConfirmApprove}
-            variant="contained"
+            onClick={handleConfirmApprove} variant="contained"
             sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' } }}
           >
             Có
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          Xác nhận xóa tour
-        </DialogTitle>
-        <DialogContent>
-          <Typography>
-            Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button
-            onClick={handleCloseDeleteDialog}
-            sx={{ color: '#666666' }}
-            disabled={isDeleting}
-          >
-            Không
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
-            disabled={isDeleting}
-          >
-            {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <TourDeletePopup
+        open={openDeleteDialog} onClose={handleCloseDeleteDialog}
+        onDelete={handleConfirmDelete} tour={{
+          tourId: id,
+          tourName: tourTemplate?.tourName,
+          startDate: tour?.startDate
+        }} />
 
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={snackbar.open} autoHideDuration={snackbar.hide}
+        onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-        >
+        <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity={snackbar.severity} >
           {snackbar.message}
         </MuiAlert>
       </Snackbar>

@@ -192,7 +192,7 @@ const AttractionDetail = () => {
       await deleteAttraction(id);
       setOpenDeleteDialog(false);
       setSnackbar({
-        open: true, message: 'Xóa điểm tham quan thành công', severity: 'success', hide: 1000
+        open: true, message: 'Xóa điểm tham quan thành công', severity: 'success', hide: 1500
       });
     } catch (error) {
       console.error('Error deleting attraction:', error);

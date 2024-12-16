@@ -123,8 +123,8 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
                 {attraction.website}
               </a>
             </Box>
-
-            <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+            <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Các thông tin liên hệ khác: </Typography>
+            <div style={{ marginTop: -15, marginBottom: 15 }} dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
 
             {attraction.googlePlaceId && (
               <Box sx={{ mt: 4 }}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton, Collapse } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -23,7 +23,7 @@ import AttractionUpdateForm from '@components/staff/attraction/AttractionUpdateF
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import EditIcon from '@mui/icons-material/Edit';
-import AttractionInfo from '@components/staff/attraction/AttractionInfo';
+import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -37,11 +37,7 @@ const ManagerAttractionDetail = () => {
   const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
   const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [snackbar, setSnackbar] = useState({  open: false, message: '', severity: 'success', hide: 5000 });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [provinces, setProvinces] = useState([]);
@@ -123,13 +119,13 @@ const ManagerAttractionDetail = () => {
       setSnackbar({
         open: true,
         message: 'Điểm tham quan đã được duyệt',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       setSnackbar({
         open: true,
         message: 'Lỗi khi duyệt điểm tham quan',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     } finally {
       setIsApprovePopupOpen(false);
@@ -143,13 +139,13 @@ const ManagerAttractionDetail = () => {
       setSnackbar({
         open: true,
         message: 'Điểm tham quan đã bị từ chối',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       setSnackbar({
         open: true,
         message: 'Lỗi khi từ chối điểm tham quan',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     } finally {
       setIsRejectPopupOpen(false);
@@ -181,15 +177,17 @@ const ManagerAttractionDetail = () => {
       setSnackbar({
         open: true,
         message: 'Xóa điểm tham quan thành công',
-        severity: 'success'
+        severity: 'success', hide: 1500
       });
-      navigate(-1);
+      setTimeout(() => {
+        navigate('/quan-ly/diem-tham-quan');
+      }, 1500);
     } catch (error) {
       console.error('Error deleting attraction:', error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi xóa điểm tham quan',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     }
   };
@@ -209,7 +207,6 @@ const ManagerAttractionDetail = () => {
             return;
           }
         }
-        // Refresh attraction data
         const updatedAttraction = await fetchAttractionById(id);
         setAttraction(updatedAttraction);
         setSnackbar({
@@ -286,17 +283,24 @@ const ManagerAttractionDetail = () => {
             <IconButton
               onClick={handleHistoryClick}
               sx={{
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                height: '45px',
-                '&:hover': {
-                  backgroundColor: '#f5f5f5'
-                }
+                backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: '45px',
+                '&:hover': { backgroundColor: '#f5f5f5' }
               }}
             >
               <HistoryIcon color="primary" />
             </IconButton>
-
+            <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit>
+              <Box
+                sx={{
+                  position: 'absolute', top: '100%',
+                  right: 0, width: '400px', backgroundColor: 'white',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)', borderRadius: '4px',
+                  display: isHistoryOpen ? 'block' : 'none', zIndex: 1000, marginTop: '8px'
+                }}
+              >
+                <VersionHistory />
+              </Box>
+            </Collapse>
             {!isEditing ? (
               <Button
                 variant="contained"
@@ -385,31 +389,10 @@ const ManagerAttractionDetail = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          Xác nhận xóa điểm tham quan
-        </DialogTitle>
-        <DialogContent>
-          <Typography>
-            Bạn có chắc chắn muốn xóa điểm tham quan này? Hành động này không thể hoàn tác.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button
-            onClick={handleCloseDeleteDialog}
-            sx={{ color: '#666666' }}
-          >
-            Không
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
-          >
-            Xác nhận xóa
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <AttractionDeletePopup
+        open={openDeleteDialog} onClose={handleCloseDeleteDialog}
+        attraction={attraction} onDelete={handleConfirmDelete}
+      />
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -440,167 +423,169 @@ const ManagerAttractionDetail = () => {
           setSliderRef={setSliderRef}
         />
       ) : (
-        <>
-          <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box>
-                <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
-                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-                  {attraction.attractionTypeName}
-                </Typography>
-              </Box>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-                {attraction.name}
-              </Typography>
-            </Box>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={8}>
-                <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative' }}>
-                  <Box className="slick-slider-container" sx={{ height: '450px' }}>
-                    <Slider ref={setSliderRef} {...settings}>
-                      {attraction.images.map((image, index) => (
-                        <div key={index} style={{ position: 'relative' }}>
-                          <img
-                            src={image.url}
-                            alt={`Attraction image ${index + 1}`}
-                            style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-                          />
-                        </div>
-                      ))}
-                    </Slider>
-                  </Box>
-                </Paper>
-                <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
-                  {attraction.images.map((image, index) => (
-                    <Box
-                      key={index}
-                      sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
-                      onClick={() => handleThumbnailClick(index)}
-                    >
-                      <img
-                        src={image.url}
-                        alt={image.alt}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-                  <div dangerouslySetInnerHTML={{ __html: attraction.description }} />
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-                  <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px', mb: 2 }}>Thông tin liên hệ</Typography>
-                  <Typography sx={{ mb: 3 }}><strong>Địa chỉ: </strong> {attraction.address}</Typography>
-
-                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-                  <Box sx={{ mb: 3 }}>
-                    <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                      {attraction.website}
-                    </a>
-                  </Box>
-
-                  <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px' }}>Các thông tin liên hệ khác</Typography>
-                  <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
-
-                  {attraction.googlePlaceId && (
-                    <Box sx={{ mt: 4 }}>
-                      <Typography variant="h4" sx={{
-                        fontWeight: '700',
-                        fontFamily: 'Inter, sans-serif',
-                        color: '#05073C',
-                        fontSize: '27px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        mb: 2
-                      }}>
-                        <AccessTimeIcon /> Giờ mở cửa
-                      </Typography>
-
-                      {loading ? (
-                        <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
-                      ) : openingHours ? (
-                        <Box>
-                          <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            mb: 2,
-                            color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
-                          }}>
-                            {openingHours.opening_hours ? (
-                              <>
-                                {openingHours.opening_hours?.open_now === true ? (
-                                  <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
-                                ) : (
-                                  <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
-                                )}</>
-                            ) : (
-                              <Typography>Không có thông tin giờ mở cửa</Typography>
-                            )}
-                          </Box>
-                          <Box>
-                            {openingHours.opening_hours?.periods?.map((period, index) => {
-                              const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-                              const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-                              const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-
-                              return (
-                                <Typography key={index} sx={{
-                                  py: 1,
-                                  display: 'flex',
-                                  justifyContent: 'space-between',
-                                  borderBottom: '1px solid #eee',
-                                  '&:last-child': {
-                                    borderBottom: 'none'
-                                  }
-                                }}>
-                                  <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
-                                    {days[period.open.day]}
-                                  </span>
-                                  <span>{openTime} - {closeTime}</span>
-                                </Typography>
-                              );
-                            })}
-                          </Box>
-                        </Box>
-                      ) : (
-                        <Typography sx={{ mt: 2 }}>Không có thông tin giờ mở cửa</Typography>
-                      )}
-                    </Box>
-                  )}
-                </Paper>
-              </Grid>
-            </Grid>
+        <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+              Thuộc tỉnh/thành phố: {attraction.provinceName}
+            </Typography>
           </Box>
-          <Grid item xs={12} md={12}>
-            <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}><strong>Google Place ID:</strong> {attraction.googlePlaceId}</Typography>
-            <Box sx={{
-              height: '500px',
-              width: '100%',
-              position: 'relative',
-              mb: 3,
-              overflow: 'hidden',
-              borderRadius: '10px',
-              border: '1px solid #e0e0e0'
-            }}>
-              <Map placeId={attraction.googlePlaceId} />
-            </Box>
-          </Grid>
-          {attraction.status === AttractionStatus.Approved && (
-            <Grid item xs={12} md={12}>
-              <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-                Đánh giá từ khách hàng
-              </Typography>
-              <ReviewList attractionId={id} />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+              Loại điểm tham quan: {attraction.attractionTypeName}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
+              {attraction.name}
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
+                <Box className="slick-slider-container" sx={{ height: '450px' }}>
+                  <Slider ref={setSliderRef} {...settings}>
+                    {attraction.images.map((image, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <img
+                          src={image.url}
+                          alt={`Attraction ${index + 1}`}
+                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                        />
+                      </div>
+                    ))}
+                  </Slider>
+                </Box>
+              </Paper>
+              <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
+                {attraction.images.map((image, index) => (
+                  <Box
+                    key={index}
+                    sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none' }}
+                    onClick={() => handleThumbnailClick(index)}
+                  >
+                    <img
+                      src={image.url}
+                      alt={`Thumbnail ${index + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
+                <Box dangerouslySetInnerHTML={{ __html: attraction.description }} sx={{
+                  '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                  '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                }} />
+              </Box>
             </Grid>
-          )}
-        </>
+            <Grid item xs={12} md={4}>
+              <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
+                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
+                <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
+                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
+                <Box sx={{ mb: 3 }}>
+                  <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
+                    {attraction.website}
+                  </a>
+                </Box>
+                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Các thông tin liên hệ khác: </Typography>
+                <div style={{ marginTop: -15, marginBottom: 15 }} dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+
+                {attraction.googlePlaceId && (
+                  <Box sx={{ mt: 4 }}>
+                    <Typography variant="h4" sx={{
+                      fontWeight: '700', fontFamily: 'Inter, sans-serif', color: '#05073C',
+                      fontSize: '27px', display: 'flex', alignItems: 'center', gap: 1, mb: 2
+                    }}>
+                      <AccessTimeIcon /> Giờ mở cửa
+                    </Typography>
+
+                    {loading ? (
+                      <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
+                    ) : openingHours ? (
+                      <Box>
+                        <Box sx={{
+                          display: 'flex', alignItems: 'center', gap: 1, mb: 2,
+                          color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
+                        }}>
+                          {openingHours.opening_hours ? (
+                            <>
+                              {openingHours.opening_hours?.open_now === true ? (
+                                <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
+                              ) : (
+                                <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
+                              )}</>
+                          ) : (
+                            <Typography>Không có thông tin giờ mở cửa</Typography>
+                          )}
+                        </Box>
+                        <Box>
+                          {openingHours.opening_hours?.periods?.map((period, index) => {
+                            const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                            const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
+                            const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
+
+                            return (
+                              <Typography key={index} sx={{
+                                py: 1, display: 'flex', justifyContent: 'space-between',
+                                borderBottom: '1px solid #eee', '&:last-child': { borderBottom: 'none' }
+                              }}>
+                                <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
+                                  {days[period.open.day]}
+                                </span>
+                                <span>{openTime} - {closeTime}</span>
+                              </Typography>
+                            );
+                          })}
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Typography sx={{ mt: 2 }}>Không có thông tin giờ mở cửa</Typography>
+                    )}
+                  </Box>
+                )}
+              </Paper>
+              <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px', mb: 2 }}>
+                  Thông tin tạo điểm tham quan
+                </Typography>
+                <Box sx={{ display: 'flex', width: '100%' }}>
+                  <Typography sx={{ fontWeight: 700 }}>Mã: </Typography>
+                  <Typography sx={{ mb: 1, ml: 1, color: 'primary.main' }}>{attraction.attractionId}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', width: '100%' }}>
+                  <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
+                  <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+                  <Typography sx={{ fontWeight: 700 }}>Trạng thái: </Typography>
+                  <Chip label={getAttractionStatusInfo(attraction.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={12}>
+              <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}>
+                <strong>Google Place ID:</strong> {attraction.googlePlaceId}
+              </Typography>
+              <Box sx={{
+                height: '500px', width: '100%', position: 'relative', mb: 3,
+                overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
+              }}>
+                <Map placeId={attraction.googlePlaceId} />
+              </Box>
+            </Grid>
+            {attraction.status === AttractionStatus.Approved && (
+              <Grid item xs={12} md={12}>
+                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+                  Đánh giá từ khách hàng
+                </Typography>
+                <ReviewList attractionId={attraction.attractionId} />
+              </Grid>
+            )}
+          </Grid>
+        </Box>
       )}
     </Box >
   );

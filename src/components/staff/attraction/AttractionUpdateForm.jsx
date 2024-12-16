@@ -8,6 +8,7 @@ import 'react-quill/dist/quill.snow.css';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import TourMap from '@components/tour/TourMap';
+import { getCookie } from '@services/AuthenService';
 
 const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const [images, setImages] = useState([]);
@@ -74,18 +75,6 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files);
     setImages(prevImages => [...prevImages, ...files]);
-  };
-
-  const handleRemoveImage = (index) => {
-    setImages(prevImages => {
-      const newImages = [...prevImages];
-      const removedImage = newImages[index];
-      if (removedImage.imageId) {
-        setRemovedImageIds(prev => [...prev, removedImage.imageId]);
-      }
-      newImages.splice(index, 1);
-      return newImages;
-    });
   };
 
   const handleProvinceChange = (event) => {
@@ -157,7 +146,8 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
         googlePlaceId: editableFields.placeId.value || null
       };
 
-      const newImages = images.filter(img => img instanceof File);
+      const newImages = images.filter(img => img.isNew).map(img => img.url);
+      console.log(removedImageIds);
       onSave(attractionData, newImages, removedImageIds);
     } catch (error) {
       if (error.response && error.response.data.message === 'Incomplete attraction information') {
@@ -184,6 +174,26 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
 
   const handleSelectLocation = (placeData) => {
     handleFieldChange('placeId', placeData.place_id);
+  };
+
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const newImages = files.map(file => ({
+      url: file,
+      isNew: true
+    }));
+    setImages(prev => [...prev, ...newImages]);
+  };
+
+  const handleRemoveImage = (index) => {
+    const removedImage = images[index];
+    if (!removedImage.isNew && removedImage.imageId) {
+      setRemovedImageIds(prev => [...prev, removedImage.imageId]);
+    }
+    setImages(images.filter((_, i) => i !== index));
+    if (currentSlide === index) {
+      setCurrentSlide(0);
+    }
   };
 
   return (
@@ -251,7 +261,7 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
                   images.map((image, index) => (
                     <div key={index} style={{ position: 'relative' }}>
                       <img
-                        src={image instanceof File ? URL.createObjectURL(image) : image}
+                        src={image.url instanceof File ? URL.createObjectURL(image.url) : image.url}
                         alt={`Attraction image ${index + 1}`}
                         style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                       />
@@ -260,7 +270,7 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
                 ) : (
                   <div>
                     <img
-                      src="https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg"
+                      src="/no-image.jpg"
                       alt="Default" style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                     />
                   </div>
@@ -271,20 +281,30 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
           <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3, maxWidth: '100%' }}>
             {images.map((image, index) => (
               <Box
-                key={index} onClick={() => handleThumbnailClick(index)}
+                key={index}
+                onClick={() => handleThumbnailClick(index)}
                 sx={{ maxWidth: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
               >
                 <img
-                  src={image instanceof File ? URL.createObjectURL(image) : image}
+                  src={image.isNew ? URL.createObjectURL(image.url) : image.url}
                   alt={`Thumbnail ${index + 1}`}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 <IconButton
-                  onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage(index);
+                  }}
                   sx={{
-                    position: 'absolute', top: 2,
-                    right: 2, padding: '4px', backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                    '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' }, color: 'white'
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    color: 'white',
+                    padding: '4px',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.7)'
+                    }
                   }}
                 >
                   <CloseIcon sx={{ fontSize: 16 }} />
@@ -302,7 +322,7 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
             </Box>
             <input
               type="file" ref={fileInputRef} style={{ display: 'none' }}
-              onChange={handleFileChange} accept="image/*" multiple
+              onChange={handleImageUpload} accept="image/*" multiple
             />
           </Box>
           {fieldErrors.images && (
@@ -368,16 +388,27 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
           onPlaceSelect={handleSelectLocation}
         />
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-        <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-        <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Box sx={{ mt: 1, width: '32rem' }}>
-          <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
-          <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
-        </Box>
-      </Box>
+      {getCookie('role') === 'nhan-vien' && (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
+            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ mt: 1, width: '32rem' }}>
+              <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
+              <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+            </Box>
+          </Box>
+        </>
+      )}
+      {getCookie('role') === 'quan-ly' && (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Lưu </Button>
+          </Box>
+        </>
+      )}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={snackbar.hide}

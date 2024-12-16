@@ -358,15 +358,6 @@ const PostDetail = () => {
     }
   };
 
-  const handleFieldEdit = (field) => {
-    setEditableFields(prev => ({ ...prev, [field]: { ...prev[field], isEditing: true, value: editablePost[field] } }));
-  };
-
-  const handleFieldSubmit = (field) => {
-    handleFieldChange(field, editableFields[field].value);
-    setEditableFields(prev => ({ ...prev, [field]: { ...prev[field], isEditing: false } }));
-  };
-
   const handleSnackbarClose = (event, reason) => {
     if (reason === 'clickaway') return;
     setSnackbar(prev => ({ ...prev, open: false }));

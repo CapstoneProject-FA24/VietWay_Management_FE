@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faIcons, faClock, faMoneyBill1, faCalendarAlt, faQrcode, faBus } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -251,9 +251,11 @@ const ManagerTourTemplateDetails = () => {
         )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="small" sx={{ mb: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
-        <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
-          {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
+        <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.1rem' }}>
+          Tour đi: <strong>{tourTemplate.provinces.map(province => province.provinceName).join(' - ')}</strong>
+        </Typography>
+        <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.1rem' }}>
+          Khởi hành từ: <strong>{tourTemplate.startingProvince?.provinceName}</strong>
         </Typography>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
           {tourTemplate.tourName}
@@ -281,26 +283,20 @@ const ManagerTourTemplateDetails = () => {
           </Grid>
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
                 <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
-                </Box>
+                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
+                <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
-                </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <FontAwesomeIcon icon={faIcons} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
+                <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Phương tiện:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
-                </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <FontAwesomeIcon icon={faBus} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
+                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
+                <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
               </Box>
             </Box>
             <Box sx={{ mb: 5 }}>
@@ -380,7 +376,7 @@ const ManagerTourTemplateDetails = () => {
                       ))}
                     </ul>
                     <Typography>Chi tiết:</Typography>
-                    <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' }}}/>
+                    <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' } }} />
                   </Collapse>
                 </Box>
               ))}
@@ -423,8 +419,8 @@ const ManagerTourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
                   Trạng thái:
-                  <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                 </Typography>
+                <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
               </Box>
             </Paper>
           </Grid>

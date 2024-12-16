@@ -24,46 +24,41 @@ const ManagerPostDetail = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000, });
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
   const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [socialMetrics, setSocialMetrics] = useState({
-    twitter: null,
-    facebook: null
-  });
-  const [isPublishing, setIsPublishing] = useState({
-    facebook: false,
-    twitter: false
-  });
+  const [socialMetrics, setSocialMetrics] = useState({ twitter: null, facebook: null });
+  const [isPublishing, setIsPublishing] = useState({ facebook: false, twitter: false });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editablePost, setEditablePost] = useState(null);
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
-  const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const loadPost = async () => {
+    try {
+      const data = await fetchPostById(id);
+      setPost(data);
+      const categories = await fetchPostCategory();
+      setCategoryOptions(categories.map(cat => ({
+        postCategoryId: cat.postCategoryId,
+        name: cat.name
+      })));
+      const provinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
+      setProvinceOptions(provinces.items.map(province => ({
+        value: province.provinceId,
+        label: province.provinceName
+      })));
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setSnackbar({ open: true, message: 'Lỗi tải thông tin', severity: 'error', hide: 5000 });
+    }
+  };
 
   useEffect(() => {
-    const loadPost = async () => {
-      try {
-        const data = await fetchPostById(id);
-        setPost(data);
-      } catch (error) {
-        console.error('Error loading post:', error);
-        setSnackbar({
-          open: true,
-          message: 'Không thể tải bài viết',
-          severity: 'error'
-        });
-      }
-    };
     loadPost();
   }, [id]);
 
@@ -76,12 +71,9 @@ const ManagerPostDetail = () => {
             setSocialMetrics(prev => ({
               ...prev,
               twitter: {
-                likeCount: data.likeCount,
-                retweetCount: data.retweetCount,
-                replyCount: data.replyCount,
-                impressionCount: data.impressionCount,
-                quoteCount: data.quoteCount,
-                bookmarkCount: data.bookmarkCount
+                likeCount: data.likeCount, retweetCount: data.retweetCount,
+                replyCount: data.replyCount, impressionCount: data.impressionCount,
+                quoteCount: data.quoteCount, bookmarkCount: data.bookmarkCount
               }
             }));
           }
@@ -90,18 +82,12 @@ const ManagerPostDetail = () => {
           setSocialMetrics(prev => ({
             ...prev,
             twitter: {
-              likeCount: 0,
-              retweetCount: 0,
-              replyCount: 0,
-              impressionCount: 0,
-              quoteCount: 0,
-              bookmarkCount: 0
+              likeCount: 0, retweetCount: 0, replyCount: 0, impressionCount: 0, quoteCount: 0, bookmarkCount: 0
             }
           }));
         }
       }
     };
-
     fetchTwitterReactions();
     const interval = setInterval(fetchTwitterReactions, 30000);
     return () => clearInterval(interval);
@@ -118,75 +104,21 @@ const ManagerPostDetail = () => {
             setSocialMetrics(prev => ({
               ...prev,
               facebook: {
-                reactionCount: totalReactions,
-                reactionDetails: data.postReactions || {},
-                shareCount: data.shareCount,
-                commentCount: data.commentCount,
-                impressionCount: data.impressionCount
+                reactionCount: totalReactions, reactionDetails: data.postReactions || {}, shareCount: data.shareCount,
+                commentCount: data.commentCount, impressionCount: data.impressionCount
               }
             }));
           }
         } catch (error) {
           console.error('Error fetching Facebook reactions:', error);
-          setSnackbar({
-            open: true,
-            message: 'Không thể tải thông tin tương tác Facebook',
-            severity: 'error'
-          });
+          setSnackbar({ open: true, message: 'Không thể tải thông tin tương tác Facebook', severity: 'error', hide: 5000 });
         }
       }
     };
-
     fetchFacebookReactions();
     const interval = setInterval(fetchFacebookReactions, 30000);
     return () => clearInterval(interval);
   }, [post?.postId, post?.facebookPostId]);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      setIsLoadingCategories(true);
-      try {
-        const categories = await fetchPostCategory();
-        setCategoryOptions(categories.map(cat => ({
-          postCategoryId: cat.postCategoryId,
-          name: cat.name
-        })));
-      } catch (error) {
-        console.error('Error loading categories:', error);
-        setSnackbar({
-          open: true,
-          message: 'Không thể tải danh mục',
-          severity: 'error'
-        });
-      } finally {
-        setIsLoadingCategories(false);
-      }
-    };
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    const loadProvinces = async () => {
-      setIsLoadingProvinces(true);
-      try {
-        const provinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
-        setProvinceOptions(provinces.items.map(province => ({
-          value: province.provinceId,
-          label: province.provinceName
-        })));
-      } catch (error) {
-        console.error('Error loading provinces:', error);
-        setSnackbar({
-          open: true,
-          message: 'Không thể tải danh sách tỉnh thành',
-          severity: 'error'
-        });
-      } finally {
-        setIsLoadingProvinces(false);
-      }
-    };
-    loadProvinces();
-  }, []);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -196,17 +128,9 @@ const ManagerPostDetail = () => {
     try {
       await changePostStatus(post.postId, 2);
       setPost({ ...post, status: 2 });
-      setSnackbar({
-        open: true,
-        message: 'Bài viết đã được duyệt',
-        severity: 'success'
-      });
+      setSnackbar({ open: true, message: 'Bài viết đã được duyệt', severity: 'success', hide: 5000 });
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Lỗi khi duyệt bài viết',
-        severity: 'error'
-      });
+      setSnackbar({ open: true, message: 'Lỗi khi duyệt bài viết', severity: 'error', hide: 5000 });
     } finally {
       setIsApprovePopupOpen(false);
     }
@@ -216,17 +140,9 @@ const ManagerPostDetail = () => {
     try {
       await changePostStatus(post.postId, 3, rejectReason);
       setPost({ ...post, status: 3 });
-      setSnackbar({
-        open: true,
-        message: 'Bài viết đã bị từ chối',
-        severity: 'success'
-      });
+      setSnackbar({ open: true, message: 'Bài viết đã bị từ chối', severity: 'success', hide: 5000 });
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Lỗi khi từ chối bài viết',
-        severity: 'error'
-      });
+      setSnackbar({ open: true, message: 'Lỗi khi từ chối bài viết', severity: 'error', hide: 5000 });
     } finally {
       setIsRejectPopupOpen(false);
       setRejectReason('');
@@ -237,50 +153,75 @@ const ManagerPostDetail = () => {
     setIsEditMode(true);
     setEditablePost({
       ...post,
-      postCategoryId: post.postCategoryId,
-      postCategoryName: post.postCategoryName,
-      provinceId: post.provinceId,
-      provinceName: post.provinceName,
-      image: post.imageUrl
+      postCategoryId: post.postCategoryId, postCategoryName: post.postCategoryName,
+      provinceId: post.provinceId, provinceName: post.provinceName, image: post.imageUrl
     });
   };
 
   const handleSaveChanges = async () => {
     try {
-      const updatedPost = {
-        title: editablePost.title,
-        content: editablePost.content,
-        postCategoryId: editablePost.postCategoryId,
-        provinceId: editablePost.provinceId,
-        description: editablePost.description,
-      };
+      const errors = {};
+      if (!editablePost.title?.trim()) errors.title = 'Vui lòng nhập tiêu đề bài viết';
+      if (!editablePost.description?.trim()) errors.description = 'Vui lòng nhập mô tả ngắn';
+      if (!editablePost.content?.trim()) errors.content = 'Vui lòng nhập nội dung bài viết';
+      else if (editablePost.content.length < 50) errors.content = 'Nội dung bài viết phải có ít nhất 50 ký tự';
+      if (!editablePost.category) errors.category = 'Vui lòng chọn danh mục';
+      if (!editablePost.provinceId) errors.provinceId = 'Vui lòng chọn tỉnh thành';
+      if (!editablePost.image) errors.image = 'Vui lòng chọn ảnh cho bài viết';
 
-      await updatePost(id, updatedPost);
-
-      if (editablePost.imageFile) {
-        await updatePostImages(id, [editablePost.imageFile]);
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        return;
       }
-
-      setPost(prevPost => ({
-        ...prevPost,
-        ...updatedPost,
-        postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
-        provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
-      }));
-
-      setIsEditMode(false);
-      setSnackbar({
-        open: true,
-        message: 'Cập nhật thành công',
-        severity: 'success'
-      });
-      window.location.reload();
+      const updatedPost = {
+        title: editablePost.title || null,
+        content: editablePost.content || null,
+        description: editablePost.description || null,
+        postCategoryId: editablePost.postCategoryId || null,
+        provinceId: editablePost.provinceId || null,
+        isDraft: false
+      };
+      const createdPost = await updatePost(id, updatedPost);
+      if (createdPost.status === 200) {
+        if (editablePost.image) {
+          const response = await fetch(editablePost.image);
+          const blob = await response.blob();
+          const imageFile = new File([blob], 'post-image.jpg', { type: 'image/jpeg' });
+          const imagesResponse = await updatePostImages(createdPost.data, [imageFile]);
+          if (imagesResponse.statusCode !== 200) {
+            console.error('Error uploading images:', imagesResponse);
+            setSnackbar({
+              open: true, severity: 'error', hide: 5000, message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+            });
+          } else {
+            setPost(prevPost => ({
+              ...prevPost,
+              ...updatedPost,
+              postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
+              provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
+            }));
+            setIsEditMode(false);
+            setSnackbar({ open: true, severity: 'success', hide: 1500, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.', });
+            loadPost();
+          }
+        } else {
+          setPost(prevPost => ({
+            ...prevPost,
+            ...updatedPost,
+            postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
+            provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
+          }));
+          setIsEditMode(false);
+          setSnackbar({ open: true, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi bài viết thành công.', severity: 'success', hide: 1500 });
+          loadPost();
+        }
+      } else {
+        console.error('Error creating tour template:', createdPost);
+        setSnackbar({ open: true, severity: 'error', message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.', hide: 5000 });
+      }
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Lỗi khi cập nhật: ' + (error.response?.data?.message || error.message),
-        severity: 'error'
-      });
+      console.error('Error creating post:', error);
+      setSnackbar({ open: true, message: error.createdPost?.data?.message || 'Có lỗi xảy ra khi lưu bài viết', severity: 'error', hide: 5000 });
     }
   };
 
@@ -323,27 +264,18 @@ const ManagerPostDetail = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
             <IconButton
               onClick={handleHistoryClick}
-              sx={{
-                mb: 1,
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                '&:hover': {
-                  backgroundColor: '#f5f5f5'
-                }
-              }}
+              sx={{ mb: 1, backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
             >
               <HistoryIcon color="primary" />
             </IconButton>
             <Button
-              variant="contained"
-              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
+              variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
               onClick={() => setIsApprovePopupOpen(true)}
             >
               Duyệt
             </Button>
             <Button
-              variant="contained"
-              sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
+              variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'red' }}
               onClick={() => setIsRejectPopupOpen(true)}
             >
               Từ chối
@@ -356,44 +288,26 @@ const ManagerPostDetail = () => {
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton
                 onClick={handleHistoryClick}
-                sx={{
-                  mb: 1,
-                  backgroundColor: 'white',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  '&:hover': {
-                    backgroundColor: '#f5f5f5'
-                  }
-                }}
+                sx={{ mb: 1, backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
               >
                 <HistoryIcon color="primary" />
               </IconButton>
               {isEditMode ? (
                 <>
                   <Button
-                    variant="contained"
-                    startIcon={<Cancel />}
-                    onClick={handleCancelClick}
+                    variant="contained" startIcon={<Cancel />} onClick={handleCancelClick}
                     sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' } }}
                   >
                     Hủy sửa
                   </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<Save />}
-                    onClick={handleSaveChanges}
-                  >
+                  <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveChanges} >
                     Lưu thay đổi
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}>
-                    Xóa
-                  </Button>
-                  <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}>
-                    Sửa
-                  </Button>
+                  <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}> Xóa </Button>
+                  <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}> Sửa </Button>
                 </>
               )}
             </Box>
@@ -402,10 +316,8 @@ const ManagerPostDetail = () => {
                 <Typography>Đăng bài:</Typography>
                 {!post.facebookPostId && (
                   <Button
-                    variant="contained"
-                    startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
-                    onClick={() => handleShareToSocial('facebook')}
-                    disabled={isPublishing.facebook}
+                    variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
+                    onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
                     sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
                   >
                     {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
@@ -413,10 +325,8 @@ const ManagerPostDetail = () => {
                 )}
                 {!post.xTweetId && (
                   <Button
-                    variant="contained"
-                    startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
-                    onClick={() => handleShareToSocial('twitter')}
-                    disabled={isPublishing.twitter}
+                    variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
+                    onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
                     sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
                   >
                     {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
@@ -430,9 +340,7 @@ const ManagerPostDetail = () => {
                   <Typography>Xem bài đã đăng tại:</Typography>
                   {post.facebookPostId && (
                     <Button
-                      variant="contained"
-                      startIcon={<FacebookIcon />}
-                      onClick={() => handleViewOnSocial('facebook')}
+                      variant="contained" startIcon={<FacebookIcon />} onClick={() => handleViewOnSocial('facebook')}
                       sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
                     >
                       Facebook
@@ -440,9 +348,7 @@ const ManagerPostDetail = () => {
                   )}
                   {post.xTweetId && (
                     <Button
-                      variant="contained"
-                      startIcon={<XIcon />}
-                      onClick={() => handleViewOnSocial('twitter')}
+                      variant="contained" startIcon={<XIcon />} onClick={() => handleViewOnSocial('twitter')}
                       sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
                     >
                       Twitter
@@ -465,18 +371,12 @@ const ManagerPostDetail = () => {
   const handleConfirmDelete = async (postId) => {
     try {
       await deletePost(postId);
-      setSnackbar({
-        open: true,
-        message: 'Bài viết đã được xóa',
-        severity: 'success'
-      });
-      navigate(`/quan-ly/bai-viet`);
+      setSnackbar({ open: true, message: 'Bài viết đã được xóa', severity: 'success', hide: 1500 });
+      setTimeout(() => {
+        navigate('/quan-ly/bai-viet/');
+      }, 1500);
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: 'Lỗi khi xóa bài viết: ' + (error.response?.data?.message || error.message),
-        severity: 'error'
-      });
+      setSnackbar({ open: true, message: 'Lỗi khi xóa bài viết: ' + (error.response?.data?.message || error.message), severity: 'error', hide: 5000 });
     }
   };
 
@@ -490,18 +390,10 @@ const ManagerPostDetail = () => {
     try {
       if (platform === 'facebook') {
         await sharePostOnFacebook(post.postId);
-        setSnackbar({
-          open: true,
-          message: 'Đã đăng bài viết lên Facebook thành công',
-          severity: 'success'
-        });
+        setSnackbar({ open: true, message: 'Đã đăng bài viết lên Facebook thành công', severity: 'success', hide: 5000 });
       } else if (platform === 'twitter') {
         await sharePostOnTwitter(post.postId);
-        setSnackbar({
-          open: true,
-          message: 'Đã đăng bài viết lên Twitter thành công',
-          severity: 'success'
-        });
+        setSnackbar({ open: true, message: 'Đã đăng bài viết lên Twitter thành công', severity: 'success', hide: 5000 });
       }
       const updatedPost = await fetchPostById(post.postId);
       setPost(updatedPost);
@@ -550,10 +442,7 @@ const ManagerPostDetail = () => {
           {post.xTweetId && socialMetrics.twitter && (
             <TableRow>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <XIcon sx={{ fontSize: 20 }} />
-                  Twitter
-                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <XIcon sx={{ fontSize: 20 }} /> Twitter </Box>
               </TableCell>
               <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
               <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
@@ -566,18 +455,13 @@ const ManagerPostDetail = () => {
           {post.facebookPostId && socialMetrics.facebook && (
             <TableRow>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FacebookIcon sx={{ fontSize: 20 }} />
-                  Facebook
-                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <FacebookIcon sx={{ fontSize: 20 }} /> Facebook </Box>
               </TableCell>
               <TableCell align="center">
                 <Tooltip title={
                   <Box>
                     {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
-                      <Typography key={type} variant="body2">
-                        {type}: {count}
-                      </Typography>
+                      <Typography key={type} variant="body2"> {type}: {count} </Typography>
                     ))}
                   </Box>
                 }>
@@ -588,10 +472,7 @@ const ManagerPostDetail = () => {
               <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
               <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
               {post.xTweetId && (
-                <>
-                  <TableCell align="center">-</TableCell>
-                  <TableCell align="center">-</TableCell>
-                </>
+                <> <TableCell align="center">-</TableCell> <TableCell align="center">-</TableCell> </>
               )}
             </TableRow>
           )}
@@ -606,114 +487,60 @@ const ManagerPostDetail = () => {
 
   const CancelConfirmationDialog = () => (
     <Dialog open={isCancelPopupOpen} onClose={handleCloseCancelPopup}>
-      <DialogTitle sx={{ fontWeight: 600 }}>
-        Xác nhận hủy
-      </DialogTitle>
-      <DialogContent>
-        <Typography>
-          Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu.
-        </Typography>
-      </DialogContent>
+      <DialogTitle sx={{ fontWeight: 600 }}> Xác nhận hủy </DialogTitle>
+      <DialogContent> <Typography> Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu. </Typography> </DialogContent>
       <DialogActions sx={{ p: 2, pt: 0 }}>
-        <Button onClick={handleCloseCancelPopup} sx={{ color: '#666666' }}>
-          Không
-        </Button>
+        <Button onClick={handleCloseCancelPopup} sx={{ color: '#666666' }}> Không </Button>
         <Button
-          onClick={handleCancelConfirm}
-          variant="contained"
+          onClick={handleCancelConfirm} variant="contained"
           sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
-        >
-          Có
-        </Button>
+        > Có </Button>
       </DialogActions>
     </Dialog>
   );
 
   if (!post) return null;
-
   const statusInfo = getPostStatusInfo(post.status);
-
-  // Thêm styles cho form chỉnh sửa
   const commonStyles = {
     boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
     flexContainer: { display: 'flex', alignItems: 'center', flex: 1, width: '80%' },
-    labelTypography: {
-      color: '#05073C',
-      fontWeight: 600,
-      whiteSpace: 'nowrap',
-      marginRight: '1rem'
-    },
+    labelTypography: { color: '#05073C', fontWeight: 600, whiteSpace: 'nowrap', marginRight: '1rem' },
     inputField: {
-      '& .MuiOutlinedInput-root': {
-        height: '40px',
-      },
-      '& .MuiOutlinedInput-input': {
-        padding: '8px 14px'
-      }
+      '& .MuiOutlinedInput-root': { height: '40px', },
+      '& .MuiOutlinedInput-input': { padding: '8px 14px' }
     },
-    imageContainer: {
-      mb: 2,
-      flexGrow: 1,
-      position: 'relative',
-      '&:hover .overlay': { opacity: 1 },
-      '&:hover .change-image-btn': { opacity: 1 }
-    },
+    imageContainer: { mb: 2, flexGrow: 1, position: 'relative', '&:hover .overlay': { opacity: 1 }, '&:hover .change-image-btn': { opacity: 1 } },
     editorContainer: {
-      '& .ql-container': {
-        minHeight: '200px',
-        fontSize: '1.1rem'
-      },
-      '& .ql-editor': {
-        minHeight: '200px',
-        fontSize: '1.1rem'
-      },
-      contentDisplay: {
-        display: 'flex',
-        flexDirection: 'column',
-        maxWidth: '80vw',
-        overflow: 'auto'
-      }
+      '& .ql-container': { minHeight: '200px', fontSize: '1.1rem' },
+      '& .ql-editor': { minHeight: '200px', fontSize: '1.1rem' },
+      contentDisplay: { display: 'flex', flexDirection: 'column', maxWidth: '80vw', overflow: 'auto' }
     }
   };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Helmet>
-        <title>Chi tiết bài viết</title>
-      </Helmet>
+      <Helmet> <title>Chi tiết bài viết</title> </Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarManager isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
-
         <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', mt: 6 }}>
           <Box maxWidth="89vw">
             <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button
-                  startIcon={<ArrowBack />}
-                  onClick={() => navigate(-1)}
-                  sx={{ mb: 2, height: 'fit-content' }}
-                >
-                  Quay lại
-                </Button>
+                <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2, height: 'fit-content' }} > Quay lại </Button>
                 {renderActionButtons()}
               </Box>
               {((post.xTweetId || post.facebookPostId) && !isEditMode) && renderSocialMetricsTable()}
               {isEditMode ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <TextField
-                    label="Tiêu đề"
-                    value={editablePost.title}
+                    label="Tiêu đề" value={editablePost.title}
                     onChange={(e) => setEditablePost(prev => ({ ...prev, title: e.target.value }))}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
+                    variant="outlined" fullWidth sx={{ mb: 2 }}
                   />
 
                   <Box sx={commonStyles.boxContainer}>
                     <Box sx={commonStyles.flexContainer}>
-                      <Typography sx={commonStyles.labelTypography}>
-                        Danh mục:
-                      </Typography>
+                      <Typography sx={commonStyles.labelTypography}> Danh mục: </Typography>
                       <Select
                         value={editablePost?.postCategoryId || ''}
                         onChange={(e) => {
@@ -726,23 +553,16 @@ const ManagerPostDetail = () => {
                             }));
                           }
                         }}
-                        variant="outlined"
-                        fullWidth
-                        sx={commonStyles.inputField}
-                        disabled={isLoadingCategories}
+                        variant="outlined" fullWidth sx={commonStyles.inputField}
                       >
                         {categoryOptions.map(category => (
-                          <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
-                            {category.name}
-                          </MenuItem>
+                          <MenuItem key={category.postCategoryId} value={category.postCategoryId}> {category.name} </MenuItem>
                         ))}
                       </Select>
                     </Box>
 
                     <Box sx={commonStyles.flexContainer}>
-                      <Typography sx={commonStyles.labelTypography}>
-                        Tỉnh/Thành phố:
-                      </Typography>
+                      <Typography sx={commonStyles.labelTypography}> Tỉnh/Thành phố: </Typography>
                       <Select
                         value={editablePost?.provinceId || ''}
                         onChange={(e) => {
@@ -755,107 +575,58 @@ const ManagerPostDetail = () => {
                             }));
                           }
                         }}
-                        variant="outlined"
-                        fullWidth
-                        sx={commonStyles.inputField}
-                        disabled={isLoadingProvinces}
+                        variant="outlined" fullWidth sx={commonStyles.inputField}
                       >
                         {provinceOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
+                          <MenuItem key={option.value} value={option.value}> {option.label} </MenuItem>
                         ))}
                       </Select>
                     </Box>
                   </Box>
 
                   <TextField
-                    sx={{ mb: 2, fontWeight: 600 }}
-                    label="Mô tả"
-                    value={editablePost.description}
-                    onChange={(e) => setEditablePost(prev => ({ ...prev, description: e.target.value }))}
-                    multiline
-                    rows={3}
+                    sx={{ mb: 2, fontWeight: 600 }} label="Mô tả" value={editablePost.description}
+                    onChange={(e) => setEditablePost(prev => ({ ...prev, description: e.target.value }))} multiline rows={3}
                   />
 
                   <Box sx={commonStyles.imageContainer}>
                     <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
                     <Box sx={{
-                      position: 'relative',
-                      width: '100%',
-                      height: '300px',
-                      border: '2px dashed #ccc',
-                      borderRadius: '8px',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      overflow: 'hidden'
+                      position: 'relative', width: '100%', height: '300px',
+                      border: '2px dashed #ccc', borderRadius: '8px', display: 'flex',
+                      justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
                     }}>
                       {editablePost.image ? (
-                        <img
-                          src={editablePost.image}
-                          alt={editablePost.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        />
+                        <img src={editablePost.image} alt={editablePost.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       ) : (
-                        <img
-                          src="/add-image.png"
-                          alt="Add image"
-                          style={{
-                            width: '100px',
-                            height: '100px',
-                            opacity: 0.5
-                          }}
-                        />
+                        <img src="/add-image.png" alt="Add image" style={{ width: '100px', height: '100px', opacity: 0.5 }} />
                       )}
                       <Button
-                        variant="outlined"
-                        component="label"
+                        variant="outlined" component="label"
                         sx={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          opacity: 0,
-                          transition: 'opacity 0.3s ease',
-                          '&:hover': { opacity: 1 },
-                          backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                          color: '#000',
-                          border: '1px solid #ccc',
+                          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                          opacity: 0, transition: 'opacity 0.3s ease', '&:hover': { opacity: 1 },
+                          backgroundColor: 'rgba(255, 255, 255, 0.8)', color: '#000', border: '1px solid #ccc',
                         }}
                       >
                         {editablePost.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={handleImageChange}
-                        />
+                        <input type="file" hidden accept="image/*" onChange={handleImageChange} />
                       </Button>
                     </Box>
                   </Box>
 
                   <Box sx={commonStyles.editorContainer}>
-                    <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}>
-                      Nội dung
-                    </Typography>
+                    <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}> Nội dung </Typography>
                     <ReactQuill
                       value={editablePost.content}
                       onChange={(content) => setEditablePost(prev => ({ ...prev, content }))}
                       modules={{
                         toolbar: [
                           [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                          [{ 'font': [] }],
-                          [{ 'size': ['small', false, 'large', 'huge'] }],
-                          ['bold', 'italic', 'underline', 'strike'],
-                          [{ 'color': [] }, { 'background': [] }],
-                          [{ 'script': 'sub' }, { 'script': 'super' }],
-                          [{ 'align': [] }],
+                          [{ 'font': [] }], [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
+                          [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
                           [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                          [{ 'direction': 'rtl' }],
-                          ['blockquote', 'code-block'],
-                          ['link', 'image', 'video', 'formula'],
-                          ['clean']
+                          [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
                         ]
                       }}
                       theme="snow"
@@ -863,32 +634,17 @@ const ManagerPostDetail = () => {
                   </Box>
                 </Box>
               ) : (
-                // Existing view mode
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
                     <Chip
-                      label={statusInfo.text}
-                      size="small"
-                      sx={{
-                        mb: 1,
-                        color: `${statusInfo.color}`,
-                        bgcolor: `${statusInfo.backgroundColor}`,
-                        fontWeight: 600
-                      }}
+                      label={statusInfo.text} size="small"
+                      sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }}
                     />
-
-                    {/* Version History Dropdown */}
                     <Box
                       sx={{
-                        position: 'absolute',
-                        top: '100%',
-                        right: 0,
-                        width: '400px',
-                        backgroundColor: 'white',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        borderRadius: '4px',
-                        display: isHistoryOpen ? 'block' : 'none',
-                        zIndex: 1000
+                        position: 'absolute', top: '100%', right: 0,
+                        width: '400px', backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        borderRadius: '4px', display: isHistoryOpen ? 'block' : 'none', zIndex: 1000
                       }}
                     >
                       <VersionHistory />
@@ -903,11 +659,7 @@ const ManagerPostDetail = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4, flexWrap: 'wrap' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <FontAwesomeIcon icon={faTag} style={{ color: '#666' }} />
-                      <Chip label={post.postCategoryName}
-                        sx={{
-                          bgcolor: '#f5f5f5', color: '#666', fontWeight: 500,
-                          '&:hover': { bgcolor: '#eeeeee' }
-                        }} />
+                      <Chip label={post.postCategoryName} sx={{ bgcolor: '#f5f5f5', color: '#666', fontWeight: 500, '&:hover': { bgcolor: '#eeeeee' } }} />
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -942,67 +694,38 @@ const ManagerPostDetail = () => {
       </Box>
 
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
+        open={snackbar.open} autoHideDuration={6000} onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
+          onClose={handleSnackbarClose} severity={snackbar.severity}
+          variant="filled" sx={{ width: '100%' }}
+        > {snackbar.message} </Alert>
       </Snackbar>
       <PostDeleteConfirm
-        open={isDeleteConfirmOpen}
-        onClose={() => setIsDeleteConfirmOpen(false)}
-        postId={post.postId}
-        onDelete={handleConfirmDelete}
+        open={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)}
+        postId={post.postId} onDelete={handleConfirmDelete}
       />
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Bạn có chắc chắn muốn duyệt bài viết này?
-          </DialogContentText>
-        </DialogContent>
+        <DialogContent> <DialogContentText> Bạn có chắc chắn muốn duyệt bài viết này? </DialogContentText> </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsApprovePopupOpen(false)}>Hủy</Button>
-          <Button onClick={handleApprove} variant="contained" color="primary">
-            Xác nhận
-          </Button>
+          <Button onClick={handleApprove} variant="contained" color="primary"> Xác nhận </Button>
         </DialogActions>
       </Dialog>
       <Dialog open={isRejectPopupOpen} onClose={() => setIsRejectPopupOpen(false)}>
         <DialogTitle>Xác nhận từ chối</DialogTitle>
         <DialogContent sx={{ width: '30rem' }}>
-          <DialogContentText>
-            Vui lòng nhập lý do từ chối:
-          </DialogContentText>
+          <DialogContentText> Vui lòng nhập lý do từ chối: </DialogContentText>
           <TextField
-            autoFocus
-            margin="dense"
-            label="Lý do"
-            fullWidth
-            multiline
-            rows={4}
-            value={rejectReason}
-            onChange={(e) => setRejectReason(e.target.value)}
+            autoFocus margin="dense" label="Lý do" fullWidth multiline rows={4}
+            value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsRejectPopupOpen(false)}>Hủy</Button>
-          <Button
-            onClick={handleReject}
-            variant="contained"
-            color="error"
-            disabled={!rejectReason.trim()}
-          >
-            Từ chối
-          </Button>
+          <Button onClick={handleReject} variant="contained" color="error" disabled={!rejectReason.trim()} > Từ chối </Button>
         </DialogActions>
       </Dialog>
       <CancelConfirmationDialog />

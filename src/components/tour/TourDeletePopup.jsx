@@ -25,6 +25,9 @@ const TourDeletePopup = ({ open, onClose, tour, onDelete }) => {
                         day: '2-digit', month: '2-digit', year: 'numeric'
                     })}</strong> lúc <strong>{new Date(tour.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</strong> không?
                 </Typography>
+                <Typography variant="body2" sx={{ color: 'red', fontStyle: 'italic' }} gutterBottom>
+                    Lưu ý: Hành động này không thể hoàn tác.
+                </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
                         Hủy

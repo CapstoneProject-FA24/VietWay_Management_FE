@@ -288,9 +288,28 @@ const TourDetail = () => {
                 </Typography>
                 {tour && (
                   <>
+                    <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái:</Typography>
+                      <Chip
+                        label={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Box sx={{ width: 13, height: 13, borderRadius: '50%', backgroundColor: getTourStatusInfo(tour.status).color }} />
+                            <Typography sx={{ color: getTourStatusInfo(tour.status).textColor, fontWeight: 600, fontSize: 13 }}>
+                              {getTourStatusInfo(tour.status).text}
+                            </Typography>
+                          </Box>
+                        }
+                        size="small"
+                        sx={{
+                          pt: 1.7, pb: 1.7, pr: 0.3,
+                          backgroundColor: getTourStatusInfo(tour.status).backgroundColor,
+                          fontWeight: 600, '& .MuiChip-label': { px: 1 }
+                        }}
+                      />
+                    </Box>
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Thông tin khởi hành</Typography>
-                      <Typography sx={{ mt: 2 }}>Khởi hành từ: {tour.startLocation}</Typography>
+                      <Typography>Khởi hành từ: {tour.startLocation}</Typography>
                       <Typography>Ngày khởi hành: {dayjs(tour.startDate).format('DD/MM/YYYY')}</Typography>
                       <Typography>Giờ khởi hành: {tour.startTime}</Typography>
 
@@ -346,26 +365,6 @@ const TourDetail = () => {
                         </Typography>
                       </Box>
                     )}
-
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Trạng thái</Typography>
-                      <Chip
-                        label={
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Box sx={{ width: 13, height: 13, borderRadius: '50%', backgroundColor: getTourStatusInfo(tour.status).color }} />
-                            <Typography sx={{ color: getTourStatusInfo(tour.status).textColor, fontWeight: 600, fontSize: 13 }}>
-                              {getTourStatusInfo(tour.status).text}
-                            </Typography>
-                          </Box>
-                        }
-                        size="small"
-                        sx={{
-                          pt: 1.7, pb: 1.7, pr: 0.3,
-                          backgroundColor: getTourStatusInfo(tour.status).backgroundColor,
-                          fontWeight: 600, '& .MuiChip-label': { px: 1 }
-                        }}
-                      />
-                    </Box>
                   </>
                 )}
               </Paper>

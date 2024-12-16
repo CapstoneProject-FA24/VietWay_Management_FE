@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, IconButton, Chip } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -9,6 +9,7 @@ import { Collapse, Button } from '@mui/material';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import ReviewListTour from '@components/review/ReviewListTour';
 import TourTable from '@components/tourTemplate/TourTable';
+import { getTourTemplateStatusInfo } from '@services/StatusService';
 
 const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
   return (
@@ -46,23 +47,19 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
         <Grid item xs={12} md={8}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              {/* <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
               <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
               <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
               <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
               <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
             </Box>
           </Box>
 
-          {/* Overview section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
               Tổng quan
@@ -75,12 +72,10 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             </Box>
           </Box>
 
-          {/* Schedule section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3 }}>Lịch trình</Typography>
             {tourTemplate.schedule.map((s, index, array) => (
               <Box key={s.dayNumber} sx={{ pl: 6, position: 'relative' }}>
-                {/* Timeline dots and lines */}
                 {(index === 0 || index === array.length - 1) && (
                   <Box
                     sx={{
@@ -149,7 +144,6 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             ))}
           </Box>
 
-          {/* Note section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
               Lưu ý
@@ -158,7 +152,6 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
           </Box>
         </Grid>
 
-        {/* Sidebar */}
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
             <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
@@ -189,7 +182,7 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
               <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
               <Typography sx={{ color: '#05073C', display: 'flex' }}>
                 Trạng thái:
-                <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
+                <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
               </Typography>
             </Box>
             {tourTemplate.status === 2 && (
