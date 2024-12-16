@@ -169,22 +169,29 @@ const AddAttraction = () => {
               open: true,
               message: 'Tạo điểm tham quan thành công',
               severity: 'success',
-              hide: 1000
+              hide: 1500
             });
             setTimeout(() => {
-              navigate('/nhan-vien/diem-tham-quan');
-            }, 1000);
+              navigate('/nhan-vien/diem-tham-quan/chi-tiet/' + response.data);
+            }, 1500);
+          }
+          else {
+            console.error('Error uploading images:', imagesResponse);
+            setSnackbar({
+              open: true, severity: 'error',
+              message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+            });
           }
         } else {
           setSnackbar({
             open: true,
             message: isDraft ? 'Lưu nháp điểm tham quan thành công' : 'Gửi duyệt điểm tham quan thành công',
             severity: 'success',
-            hide: 1000
+            hide: 1500
           });
           setTimeout(() => {
-            navigate('/nhan-vien/diem-tham-quan');
-          }, 1000);
+            navigate('/nhan-vien/diem-tham-quan/chi-tiet/' + response.data);
+          }, 1500);
         }
       }
     } catch (error) {

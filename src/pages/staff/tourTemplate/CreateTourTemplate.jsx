@@ -261,15 +261,28 @@ const CreateTourTemplate = () => {
           const imagesResponse = await updateTemplateImages(tourTemplateId, imagesToUpload);
           if (imagesResponse.statusCode !== 200) {
             console.error('Error uploading images:', imagesResponse);
+            setSnackbar({
+              open: true, severity: 'error',
+              message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+            });
+          } else {
+            setSnackbar({
+              open: true, severity: 'success', hide: 1000,
+              message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.',
+            });
+            setTimeout(() => {
+              navigate('/nhan-vien/tour-mau/chi-tiet/' + response.data);
+            }, 1000);
           }
+        } else {
+          setSnackbar({
+            open: true, severity: 'success', hide: 1000,
+            message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.',
+          });
+          setTimeout(() => {
+            navigate('/nhan-vien/tour-mau/chi-tiet/' + response.data);
+          }, 1000);
         }
-        setSnackbar({
-          open: true, severity: 'success', hide: 1000,
-          message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.',
-        });
-        setTimeout(() => {
-          navigate('/nhan-vien/tour-mau');
-        }, 1000);
       } else {
         console.error('Error creating tour template:', response);
         setSnackbar({

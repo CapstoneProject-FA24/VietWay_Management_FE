@@ -25,7 +25,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                 sx={{
                     color: getTourTemplateStatusInfo(tour.status).color,
                     bgcolor: getTourTemplateStatusInfo(tour.status).backgroundColor,
-                    position: 'absolute', top: 12, left: 12,
+                    position: 'absolute', top: 12, left: 12, boxShadow: '1px 1px 4px 1px rgb(0, 0, 0, 0.2)',
                     fontWeight: 700, borderRadius: 5, padding: '4px'
                 }}
             />
@@ -36,7 +36,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                     height: '200px',
                     objectFit: 'cover'
                 }}
-                image={tour.imageUrl}
+                image={tour.imageUrl ? tour.imageUrl : '/no-image.jpg'}
             />
             <CardContent sx={{ flexGrow: 1, p: 2.5, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -53,21 +53,27 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                         sx={{
                             height: '28px',
                             '& .MuiChip-label': { fontSize: '0.8rem', fontWeight: 600 },
-                            borderRadius: 5, pl: 0.5, pr: 0.5,
+                            borderRadius: 5, pl: 0.5, pr: 0.5
                         }}
                     />
                 </Box>
-                <Typography color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: 0.3 }}>
-                    {tour.provinces?.join(' - ')}
-                </Typography>
                 <Typography component="div" variant="h6" sx={{ fontWeight: 600, fontSize: '1.4rem', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', mt: -1, lineHeight: 1.2 }}>
                     {tour.tourName ? tour.tourName : 'Không có tên'}
                 </Typography>
                 <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis', mb: -1 }}>
-                    Mã tour: {tour.code}
+                    <strong>Mã tour:</strong> {tour.code}
+                </Typography>
+                <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis', mb: -1 }}>
+                    <strong>Thời lượng:</strong> {tour.duration}
+                </Typography>
+                <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis', mb: -1 }}>
+                    <strong>Tour đi:</strong> {tour.provinces?.join(' - ')}
+                </Typography>
+                <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis', mb: -1 }}>
+                    <strong>Khời hành từ:</strong> {tour.duration}
                 </Typography>
                 <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis' }}>
-                    Thời lượng: {tour.duration}
+                    <strong>Phương tiện:</strong> {tour.transportation}
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 'auto', pt: 1 }}>
 

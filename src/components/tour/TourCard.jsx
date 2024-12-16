@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardMedia, CardContent, CardActions, Typography, Chip, Button, Stack, Box } from '@mui/material';
-import { CalendarToday, AccessTime, Launch, LocationOn, Group, Subtitles } from '@mui/icons-material';
+import { CalendarToday, AccessTime, Launch, LocationOn, Group, Subtitles, AirlineSeatReclineNormal } from '@mui/icons-material';
 import { getTourStatusInfo } from '@services/StatusService';
 import { Link,useNavigate } from 'react-router-dom';
 import { getCookie } from '@services/AuthenService';
@@ -64,6 +64,7 @@ const TourCard = ({ tour, onViewDetails }) => {
 
           />
           <InfoItem icon={<Group />} text={`Số lượng khách: ${tour.minParticipant} - ${tour.maxParticipant}`} />
+          <InfoItem icon={<AirlineSeatReclineNormal />} text={`Số khách hiện tại: ${tour.currentParticipant}`} />
         </Stack>
 
         <Typography
@@ -85,11 +86,6 @@ const TourCard = ({ tour, onViewDetails }) => {
           Chi tiết
         </Button>
       </Box>
-      {/* <CardActions sx={{ p: 2, pt: 0, justifyContent: 'center' }}>
-        {tour.status === TourStatus.Completed && (
-          <Button variant="outlined" size="small" sx={{ borderRadius: 2 }}>Xem đánh giá</Button>
-        )}
-      </CardActions> */}
     </Card >
   );
 };

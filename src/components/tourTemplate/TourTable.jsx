@@ -37,7 +37,7 @@ const TourRow = ({ tour }) => {
           {new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND'
-          }).format(tour.price)}
+          }).format(tour.defaultTouristPrice)}
         </TableCell>
         <TableCell>
           {`${tour.currentParticipant}/${tour.maxParticipant}`}

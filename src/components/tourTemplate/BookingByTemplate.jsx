@@ -6,6 +6,7 @@ import {
 import { Link } from 'react-router-dom';
 import { getBookingStatusInfo } from '@services/StatusService';
 import { getBookings } from '@services/BookingService';
+import { getCookie } from '@services/AuthenService';
 
 const BookingByTemplate = ({ tourId }) => {
   const [bookings, setBookings] = useState([]);
@@ -53,12 +54,12 @@ const BookingByTemplate = ({ tourId }) => {
   return (
     <Box>
       <TableContainer>
-        <Table stickyHeader aria-label="sticky table">
+        <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Mã booking</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f', maxWidth: '120px' }}>Mã booking</TableCell>
               <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Ngày tạo</TableCell>
-              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Người liên hệ</TableCell>
+              <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Người đặt</TableCell>
               <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Email</TableCell>
               <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Số điện thoại</TableCell>
               <TableCell sx={{ fontWeight: 700, color: '#3b485f' }}>Số người</TableCell>
@@ -79,11 +80,7 @@ const BookingByTemplate = ({ tourId }) => {
             ) : (
               bookings.map((booking) => (
                 <TableRow hover key={booking.bookingId}>
-                  <TableCell>
-                    <Link to={`/quan-ly/booking/chi-tiet/${booking.bookingId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      {booking.bookingId}
-                    </Link>
-                  </TableCell>
+                  <TableCell sx={{ wordWrap: 'break-word', maxWidth: '120px' }}>{booking.bookingId}</TableCell>
                   <TableCell>
                     {`${new Date(booking.createdAt).toLocaleString('vi-VN', {
                       day: '2-digit',
@@ -125,7 +122,7 @@ const BookingByTemplate = ({ tourId }) => {
                     <Button
                       variant="contained" size="small" component={Link}
                       sx={{ backgroundColor: '#7e8593', fontSize: '0.75rem' }}
-                      to={`/quan-ly/booking/chi-tiet/${booking.bookingId}`}
+                      to={`/${getCookie('role')}/booking/chi-tiet/${booking.bookingId}`}
                     >
                       Chi tiết
                     </Button>
