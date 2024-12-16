@@ -10,22 +10,18 @@ import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import TourCalendar from '@components/tour/TourCalendar';
 import TourTemplateInfo from '@components/tour/TourTemplateInfo';
 import { getTourStatusInfo } from '@services/StatusService';
 import { TourStatus } from '@hooks/Statuses';
-import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Helmet } from 'react-helmet';
 import BookingByTemplate from '@components/tourTemplate/BookingByTemplate';
 import TourUpdateForm from '@components/tour/TourUpdateForm';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
-import ToggleButton from '@mui/material/ToggleButton';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { Collapse } from '@mui/material';
+import TourDeletePopup from '@components/tour/TourDeletePopup';
 
 const TourDetail = () => {
   const { id } = useParams();
@@ -37,15 +33,11 @@ const TourDetail = () => {
   const [tour, setTour] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
   const [isEditing, setIsEditing] = useState(false);
   const [editTourData, setEditTourData] = useState(null);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [view, setView] = useState('details'); // 'details' or 'edit'
+  const [view, setView] = useState('details');
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -118,15 +110,17 @@ const TourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Xóa tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 1500
       });
-      navigate('/nhan-vien/tour-du-lich');
+      setTimeout(() => {
+        navigate('/nhan-vien/tour-du-lich');
+      }, 1500);
     } catch (error) {
       console.error('Error deleting tour:', error);
       setSnackbar({
         open: true,
         message: error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
       setOpenDeleteDialog(false);
     } finally {
@@ -155,14 +149,14 @@ const TourDetail = () => {
       setSnackbar({
         open: true,
         message: 'Cập nhật tour thành công',
-        severity: 'success'
+        severity: 'success', hide: 5000
       });
     } catch (error) {
       console.error('Error fetching updated tour:', error);
       setSnackbar({
         open: true,
         message: 'Có lỗi xảy ra khi cập nhật tour',
-        severity: 'error'
+        severity: 'error', hide: 5000
       });
     }
   };
@@ -396,38 +390,17 @@ const TourDetail = () => {
       </Box>
 
       <CancelConfirmationDialog />
-
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle sx={{ fontWeight: 600 }}>
-          Xác nhận xóa tour
-        </DialogTitle>
-        <DialogContent>
-          <Typography>
-            Bạn có chắc chắn muốn xóa tour này? Hành động này không thể hoàn tác.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button
-            onClick={handleCloseDeleteDialog}
-            sx={{ color: '#666666' }}
-            disabled={isDeleting}
-          >
-            Không
-          </Button>
-          <Button
-            onClick={handleConfirmDelete}
-            variant="contained"
-            sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
-            disabled={isDeleting}
-          >
-            {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <TourDeletePopup
+        open={openDeleteDialog} onClose={handleCloseDeleteDialog}
+        onDelete={handleConfirmDelete} tour={{
+          tourId: id,
+          tourName: tourTemplate?.tourName,
+          startDate: tour?.startDate
+        }} />
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={snackbar.hide}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >

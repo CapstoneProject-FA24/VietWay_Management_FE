@@ -40,31 +40,20 @@ const CreateTour = () => {
     depositPercent: '', tourPrices: [], refundPolicies: [{ cancelBefore: null, refundRate: '' }], paymentDeadline: null,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
   const [errors, setErrors] = useState({});
   const [startAddressError, setStartAddressError] = useState("");
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const fetchedTourTemplate = await fetchTourTemplateById(id);
-        setTourTemplate(fetchedTourTemplate);
-      } catch (error) {
-        console.error('Error fetching tour template:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
-
-  useEffect(() => {
     const fetchTours = async () => {
+      setIsLoading(true);
       try {
         const fetchedTours = await fetchToursByTemplateId(id);
         setTours(fetchedTours);
+        const fetchedTourTemplate = await fetchTourTemplateById(id);
+        setTourTemplate(fetchedTourTemplate);
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching tours:', error);
       }
@@ -316,10 +305,12 @@ const CreateTour = () => {
       };
 
       await createTour(formData);
-      setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success' });
-      navigate('/nhan-vien/tour-du-lich');
+      setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success', hide: 1500 });
+      setTimeout(() => {
+        navigate('/nhan-vien/tour-du-lich');
+      }, 1500);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error' });
+      setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error', hide: 5000  });
       console.error('Error creating tour:', error);
     }
   };
@@ -340,57 +331,54 @@ const CreateTour = () => {
   };
 
   const handleSelectLocation = (placeData) => {
+    console.log(tourTemplate);
+    if (!placeData || !placeData.address) {
+      return;
+    }
+  
+    const fullAddress = placeData.name === placeData.address 
+      ? placeData.address 
+      : `${placeData.name} - ${placeData.address}`;
+  
+    handleNewTourChange('startAddress', fullAddress);
+    handleNewTourChange('startLocationPlaceId', placeData.place_id);
+  
+    const isValid = validateAddress(fullAddress);
+    setStartAddressError(isValid ? '' : 
+      `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
+    );
+  };
 
-    const normalizeText = (text) => {
+  const validateAddress = (address) => {
+    console.log(tourTemplate);
+    if (!address || !tourTemplate?.startingProvince?.provinceName) {
+      return false;
+    }
+    
+    const normalize = (text) => {
       return text.toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/đ/g, 'd')
-        .replace(/d\./g, "duong")
-        .replace(/p\./g, "pho")
-        .replace(/\s+/g, "")
-        .replace(/\,/g, "");
+        .replace(/\s+/g, '')
+        .replace(/[,\.]/g, '');
     };
-
-    const newName = normalizeText(placeData.name);
-    const newAddress = normalizeText(placeData.address);
-
-    if (newAddress.includes(newName)) {
-      handleNewTourChange('startAddress', placeData.address);
-    }
-    else {
-      handleNewTourChange('startAddress', `${placeData.name} - ${placeData.address}`);
-    }
-
-    handleNewTourChange('startLocationPlaceId', placeData.place_id);
-
-    if (!validateAddress(`${placeData.name} - ${placeData.address}`)) {
-      console.log(startAddressError);
-      setStartAddressError(`Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
-    } else {
-      setStartAddressError("");
-    }
-  };
-
-  const validateAddress = (address) => {
-    if (!address || !tourTemplate?.startingProvince?.provinceName) return true;
-
-    const normalizedAddress = address.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const normalizedProvince = tourTemplate.startingProvince.provinceName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
+  
+    const normalizedAddress = normalize(address);
+    const normalizedProvince = normalize(tourTemplate.startingProvince.provinceName);
+  
     return normalizedAddress.includes(normalizedProvince);
   };
 
   const handleAddressChange = (e) => {
     const newAddress = e.target.value;
     handleNewTourChange('startAddress', newAddress);
-
-    // Validate address when changed
-    if (!validateAddress(newAddress)) {
-      setStartAddressError(`Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`);
-    } else {
-      setStartAddressError("");
-    }
+  
+    // Validate the new address
+    const isValid = validateAddress(newAddress);
+    setStartAddressError(isValid ? '' : 
+      `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
+    );
   };
 
   return (
@@ -436,7 +424,7 @@ const CreateTour = () => {
                   Tour phải khởi hành từ {tourTemplate?.startingProvince?.provinceName}
                 </Typography>
                 <TextField
-                  label="Khởi hành từ (có thể chọn từ bản đồ)" fullWidth variant="outlined"
+                  label="Khởi hành từ * (có thể chọn từ bản đồ)" fullWidth variant="outlined"
                   value={tourData.startAddress} onChange={handleAddressChange}
                   error={!!errors.startAddress} helperText={errors.startAddress}
                   sx={{ mb: 2, mt: 1.5 }} inputProps={{ style: { height: '15px' } }}
@@ -456,7 +444,7 @@ const CreateTour = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Box sx={{ mb: 2 }}>
                     <DatePicker
-                      label="Ngày khởi hành" value={tourData.startDate}
+                      label="Ngày khởi hành *" value={tourData.startDate}
                       onChange={(value) => handleNewTourChange('startDate', value)}
                       format={DATE_FORMAT} minDate={dayjs()}
                       slotProps={{
@@ -469,7 +457,7 @@ const CreateTour = () => {
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <TimePicker
-                      label="Giờ khởi hành" value={tourData.startTime}
+                      label="Giờ khởi hành *" value={tourData.startTime}
                       onChange={(value) => handleNewTourChange('startTime', value)}
                       slotProps={{
                         textField: {
@@ -484,7 +472,7 @@ const CreateTour = () => {
                     <Typography variant="body2" sx={{ fontWeight: 700, mt: 2 }}>Thời gian đăng ký</Typography>
                     <Box sx={{ mb: 2, mt: 1.5 }}>
                       <DatePicker
-                        label="Ngày mở đăng ký" value={tourData.registerOpenDate} format={DATE_FORMAT}
+                        label="Ngày mở đăng ký *" value={tourData.registerOpenDate} format={DATE_FORMAT}
                         onChange={(value) => handleNewTourChange('registerOpenDate', value)}
                         minDate={dayjs()} maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                         slotProps={{
@@ -497,7 +485,7 @@ const CreateTour = () => {
                     </Box>
                     <Box sx={{ mb: 1 }}>
                       <DatePicker
-                        label="Ngày đóng đăng ký" value={tourData.registerCloseDate}
+                        label="Ngày đóng đăng ký *" value={tourData.registerCloseDate}
                         format={DATE_FORMAT} onChange={(value) => handleNewTourChange('registerCloseDate', value)}
                         minDate={tourData.registerOpenDate || dayjs()} maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                         slotProps={{
@@ -514,13 +502,13 @@ const CreateTour = () => {
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
                 <TextField
-                  label="Số khách tối đa" fullWidth type="number"
+                  label="Số khách tối đa *" fullWidth type="number"
                   variant="outlined" sx={{ mb: 2, mt: 1.5 }} value={tourData.maxParticipants}
                   onChange={handleMaxParticipantsChange} error={!!errors.maxParticipants}
                   helperText={errors.maxParticipants} inputProps={{ style: { height: '15px' } }}
                 />
                 <TextField
-                  label="Số khách tối thiểu" fullWidth type="number"
+                  label="Số khách tối thiểu *" fullWidth type="number"
                   variant="outlined" sx={{ mb: 1 }} value={tourData.minParticipants}
                   onChange={handleMinParticipantsChange} error={!!errors.minParticipants}
                   helperText={errors.minParticipants} inputProps={{ style: { height: '15px' } }}
@@ -532,7 +520,7 @@ const CreateTour = () => {
                   Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND
                 </Typography>
                 <TextField
-                  fullWidth type="number" label="Người lớn (từ 12 tuổi trở lên)" variant="outlined"
+                  fullWidth type="number" label="Người lớn (từ 12 tuổi trở lên) *" variant="outlined"
                   value={tourData.adultPrice} onChange={handlePriceChange}
                   onBlur={(e) => {
                     if (e.target.value) {
@@ -550,7 +538,7 @@ const CreateTour = () => {
                   Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND và nhỏ hơn hoặc bằng giá người lớn.
                 </Typography>
                 <TextField
-                  fullWidth type="number" label="Trẻ em (từ 5-11 tuổi)" variant="outlined" value={tourData.childPrice}
+                  fullWidth type="number" label="Trẻ em (từ 5-11 tuổi) *" variant="outlined" value={tourData.childPrice}
                   onChange={(e) => handleNewTourChange('childPrice', e.target.value)}
                   onBlur={(e) => {
                     if (e.target.value) {
@@ -568,7 +556,7 @@ const CreateTour = () => {
                   Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND và nhỏ hơn hoặc bằng giá trẻ em.
                 </Typography>
                 <TextField
-                  fullWidth type="number" label="Em bé (dưới 5 tuổi)" variant="outlined" value={tourData.infantPrice}
+                  fullWidth type="number" label="Em bé (dưới 5 tuổi) *" variant="outlined" value={tourData.infantPrice}
                   onChange={(e) => handleNewTourChange('infantPrice', e.target.value)}
                   onBlur={(e) => {
                     if (e.target.value) {
@@ -589,7 +577,7 @@ const CreateTour = () => {
                   Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc
                 </Typography>
                 <TextField
-                  label="Yêu cầu cọc (%) - tính trên tổng tiền booking"
+                  label="Yêu cầu cọc (%) * - tính trên tổng tiền booking"
                   type="number" sx={{ width: '100%', mt: 1.5, mb: 2 }}
                   value={tourData.depositPercent}
                   onChange={(e) => {
@@ -604,7 +592,7 @@ const CreateTour = () => {
                 {Number(tourData.depositPercent) < 100 && (
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
-                      label="Thời hạn thanh toán toàn bộ tổng tiền booking" value={tourData.paymentDeadline}
+                      label="Thời hạn thanh toán toàn bộ tổng tiền booking *" value={tourData.paymentDeadline}
                       onChange={(value) => handleNewTourChange('paymentDeadline', value)} format="DD/MM/YYYY"
                       minDate={tourData.registerOpenDate} maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                       slotProps={{
@@ -623,7 +611,7 @@ const CreateTour = () => {
                   <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <DatePicker
-                        label="Hủy trước ngày" value={policy.cancelBefore}
+                        label="Hủy trước ngày *" value={policy.cancelBefore}
                         onChange={(value) => handlePolicyChange(index, 'cancelBefore', value)} format={DATE_FORMAT}
                         minDate={tourData.registerOpenDate} maxDate={tourData.startDate}
                         slotProps={{
@@ -634,7 +622,7 @@ const CreateTour = () => {
                       />
                     </LocalizationProvider>
                     <TextField
-                      label="Tỷ lệ phạt hủy tour (%) - tính trên tổng tiền booking" type="number" value={policy.refundRate}
+                      label="Tỷ lệ phạt hủy tour (%) * - tính trên tổng tiền booking" type="number" value={policy.refundRate}
                       onChange={(e) => handlePolicyChange(index, 'refundRate', e.target.value)}
                       error={!!errors[`policy${index}Rate`]} helperText={errors[`policy${index}Rate`]}
                       fullWidth inputProps={{ min: 0, max: 100 }}
@@ -661,7 +649,7 @@ const CreateTour = () => {
           <Button variant="contained" color="primary" onClick={handleSubmit}> Gửi </Button>
         </Box>
       </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} >
+      <Snackbar open={snackbar.open} autoHideDuration={snackbar.hide} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
