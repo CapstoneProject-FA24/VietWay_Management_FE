@@ -633,7 +633,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Box sx={{ mt: 1, width: '32rem' }}>
                     <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
-                    <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+                    <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm đầy đủ hình ảnh.</Typography>
                 </Box>
             </Box>
             <TemplateAddAttractionPopup

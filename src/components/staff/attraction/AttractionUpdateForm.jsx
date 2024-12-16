@@ -311,7 +311,7 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
             </Typography>
           )}
           <Box>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Giới thiệu *</Typography>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết *</Typography>
             <FormControl sx={{ width: '100%' }}>
               <ReactQuill
                 value={editableFields.description.value} style={{ height: '250px' }}

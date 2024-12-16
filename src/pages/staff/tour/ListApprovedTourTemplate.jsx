@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SidebarStaff from "@layouts/SidebarStaff";
 import { Helmet } from "react-helmet";
 import { Box, Grid, Typography, Button, MenuItem, Select, TextField, InputAdornment, Pagination } from '@mui/material';
-import ApprovedTourTemplateCard from "@components/staff/tourTemplate/ApprovedTourTemplateCard";
+import TourTemplateCard from "@components/tourTemplate/TourTemplateCard";
 import ReactSelect from "react-select";
 import makeAnimated from "react-select/animated";
 import SearchIcon from "@mui/icons-material/Search";
@@ -25,7 +25,6 @@ const ListApprovedTourTemplate = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState([]);
-  //const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
@@ -247,8 +246,8 @@ const ListApprovedTourTemplate = () => {
         </Grid>
         <Grid container spacing={2}>
           {sortedTourTemplates.map(tourTemplate => (
-            <Grid item xs={12} sm={6} md={isSidebarOpen ? 12 : 6} key={tourTemplate.tourTemplateId}>
-              <ApprovedTourTemplateCard
+            <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
+              <TourTemplateCard
                 tour={tourTemplate}
                 isOpen={isSidebarOpen}
               />

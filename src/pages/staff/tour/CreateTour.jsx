@@ -22,9 +22,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
-
 const DATE_FORMAT = "DD/MM/YYYY";
-
 const roundToThousand = (price) => {
   return Math.round(price / 1000) * 1000;
 };
@@ -37,22 +35,9 @@ const CreateTour = () => {
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const [tours, setTours] = useState([]);
   const [tourData, setTourData] = useState({
-    tourTemplateId: id,
-    startAddress: '',
-    startLocationPlaceId: '',
-    startDate: null,
-    startTime: null,
-    adultPrice: '',
-    registerOpenDate: null,
-    registerCloseDate: null,
-    maxParticipants: '',
-    minParticipants: '',
-    depositPercent: '',
-    tourPrices: [],
-    refundPolicies: [
-      { cancelBefore: null, refundRate: '' }
-    ],
-    paymentDeadline: null,
+    tourTemplateId: id, startAddress: '', startLocationPlaceId: '', startDate: null, startTime: null,
+    adultPrice: '', registerOpenDate: null, registerCloseDate: null, maxParticipants: '', minParticipants: '',
+    depositPercent: '', tourPrices: [], refundPolicies: [{ cancelBefore: null, refundRate: '' }], paymentDeadline: null,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
@@ -322,7 +307,7 @@ const CreateTour = () => {
         { name: "Trẻ em", price: Number(tourData.childPrice), ageFrom: 5, ageTo: 11 },
         { name: "Em bé", price: Number(tourData.infantPrice), ageFrom: 0, ageTo: 4 }
       ];
-      
+
       const formData = {
         tourTemplateId: id, ...tourData, defaultTouristPrice: Number(tourData.adultPrice),
         tourPrices: tourPrices, refundPolicies: formattedPolicies,
@@ -410,9 +395,7 @@ const CreateTour = () => {
 
   return (
     <Box sx={{ display: 'flex', width: '98vw' }}>
-      <Helmet>
-        <title>Tạo tour mới</title>
-      </Helmet>
+      <Helmet><title>Tạo tour mới</title></Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box component="main" sx={{ flexGrow: 1, pl: 6, pr: 8, pt: 4, pb: 4, marginLeft: isSidebarOpen ? '280px' : 3, transition: 'margin 0.3s', mt: 1 }}>
         <Grid container spacing={2}>
@@ -422,9 +405,7 @@ const CreateTour = () => {
               <Typography variant="h4" sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', alignSelf: 'center', marginBottom: '1rem' }}>Tạo tour mới</Typography>
             </Box>
           </Grid>
-          <Grid item xs={12} md={12}>
-            <TourTemplateInfo tourTemplate={tourTemplate} isLoading={isLoading} />
-          </Grid>
+          <Grid item xs={12} md={12}><TourTemplateInfo tourTemplate={tourTemplate} isLoading={isLoading} /></Grid>
           <Grid item xs={12} md={12}>
             <Paper elevation={2} sx={{ p: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -440,12 +421,7 @@ const CreateTour = () => {
               </Box>
 
               <Collapse in={isCalendarExpanded}>
-                <TourCalendar
-                  tourId={null}
-                  tours={tours}
-                  selectedMonth={selectedMonth}
-                  handleMonthChange={handleMonthChange}
-                />
+                <TourCalendar tourId={null} tours={tours} selectedMonth={selectedMonth} handleMonthChange={handleMonthChange} />
               </Collapse>
             </Paper>
           </Grid>
@@ -460,15 +436,10 @@ const CreateTour = () => {
                   Tour phải khởi hành từ {tourTemplate?.startingProvince?.provinceName}
                 </Typography>
                 <TextField
-                  label="Khởi hành từ (có thể chọn từ bản đồ)"
-                  fullWidth
-                  variant="outlined"
-                  value={tourData.startAddress}
-                  onChange={handleAddressChange}
-                  error={!!errors.startAddress}
-                  helperText={errors.startAddress}
-                  sx={{ mb: 2, mt: 1.5 }}
-                  inputProps={{ style: { height: '15px' } }}
+                  label="Khởi hành từ (có thể chọn từ bản đồ)" fullWidth variant="outlined"
+                  value={tourData.startAddress} onChange={handleAddressChange}
+                  error={!!errors.startAddress} helperText={errors.startAddress}
+                  sx={{ mb: 2, mt: 1.5 }} inputProps={{ style: { height: '15px' } }}
                 />
                 <Typography sx={{ fontSize: '0.75rem', color: 'red', mt: -2, mb: 2 }} >
                   {startAddressError}
@@ -485,32 +456,25 @@ const CreateTour = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <Box sx={{ mb: 2 }}>
                     <DatePicker
-                      label="Ngày khởi hành"
-                      value={tourData.startDate}
+                      label="Ngày khởi hành" value={tourData.startDate}
                       onChange={(value) => handleNewTourChange('startDate', value)}
-                      format={DATE_FORMAT}
-                      minDate={dayjs()}
+                      format={DATE_FORMAT} minDate={dayjs()}
                       slotProps={{
                         textField: {
-                          fullWidth: true,
-                          error: !!errors.startDate,
-                          helperText: errors.startDate,
-                          inputProps: { style: { height: '15px' } }
+                          fullWidth: true, error: !!errors.startDate,
+                          helperText: errors.startDate, inputProps: { style: { height: '15px' } }
                         }
                       }}
                     />
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <TimePicker
-                      label="Giờ khởi hành"
-                      value={tourData.startTime}
+                      label="Giờ khởi hành" value={tourData.startTime}
                       onChange={(value) => handleNewTourChange('startTime', value)}
                       slotProps={{
                         textField: {
-                          fullWidth: true,
-                          error: !!errors.startTime,
-                          helperText: errors.startTime,
-                          inputProps: { style: { height: '15px' } }
+                          fullWidth: true, error: !!errors.startTime,
+                          helperText: errors.startTime, inputProps: { style: { height: '15px' } }
                         }
                       }}
                     />
@@ -520,36 +484,26 @@ const CreateTour = () => {
                     <Typography variant="body2" sx={{ fontWeight: 700, mt: 2 }}>Thời gian đăng ký</Typography>
                     <Box sx={{ mb: 2, mt: 1.5 }}>
                       <DatePicker
-                        label="Ngày mở đăng ký"
-                        value={tourData.registerOpenDate}
-                        format={DATE_FORMAT}
+                        label="Ngày mở đăng ký" value={tourData.registerOpenDate} format={DATE_FORMAT}
                         onChange={(value) => handleNewTourChange('registerOpenDate', value)}
-                        minDate={dayjs()}
-                        maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
+                        minDate={dayjs()} maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                         slotProps={{
                           textField: {
-                            fullWidth: true,
-                            inputProps: { style: { height: '15px' } },
-                            error: !!errors.registerOpenDate,
-                            helperText: errors.registerOpenDate
+                            fullWidth: true, inputProps: { style: { height: '15px' } },
+                            error: !!errors.registerOpenDate, helperText: errors.registerOpenDate
                           }
                         }}
                       />
                     </Box>
                     <Box sx={{ mb: 1 }}>
                       <DatePicker
-                        label="Ngày đóng đăng ký"
-                        value={tourData.registerCloseDate}
-                        format={DATE_FORMAT}
-                        onChange={(value) => handleNewTourChange('registerCloseDate', value)}
-                        minDate={tourData.registerOpenDate || dayjs()}
-                        maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
+                        label="Ngày đóng đăng ký" value={tourData.registerCloseDate}
+                        format={DATE_FORMAT} onChange={(value) => handleNewTourChange('registerCloseDate', value)}
+                        minDate={tourData.registerOpenDate || dayjs()} maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                         slotProps={{
                           textField: {
-                            fullWidth: true,
-                            inputProps: { style: { height: '15px' } },
-                            error: !!errors.registerCloseDate,
-                            helperText: errors.registerCloseDate
+                            fullWidth: true, inputProps: { style: { height: '15px' } },
+                            error: !!errors.registerCloseDate, helperText: errors.registerCloseDate
                           }
                         }}
                       />
@@ -560,28 +514,16 @@ const CreateTour = () => {
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>Số lượng khách</Typography>
                 <TextField
-                  label="Số khách tối đa"
-                  fullWidth
-                  type="number"
-                  variant="outlined"
-                  sx={{ mb: 2, mt: 1.5 }}
-                  value={tourData.maxParticipants}
-                  onChange={handleMaxParticipantsChange}
-                  error={!!errors.maxParticipants}
-                  helperText={errors.maxParticipants}
-                  inputProps={{ style: { height: '15px' } }}
+                  label="Số khách tối đa" fullWidth type="number"
+                  variant="outlined" sx={{ mb: 2, mt: 1.5 }} value={tourData.maxParticipants}
+                  onChange={handleMaxParticipantsChange} error={!!errors.maxParticipants}
+                  helperText={errors.maxParticipants} inputProps={{ style: { height: '15px' } }}
                 />
                 <TextField
-                  label="Số khách tối thiểu"
-                  fullWidth
-                  type="number"
-                  variant="outlined"
-                  sx={{ mb: 1 }}
-                  value={tourData.minParticipants}
-                  onChange={handleMinParticipantsChange}
-                  error={!!errors.minParticipants}
-                  helperText={errors.minParticipants}
-                  inputProps={{ style: { height: '15px' } }}
+                  label="Số khách tối thiểu" fullWidth type="number"
+                  variant="outlined" sx={{ mb: 1 }} value={tourData.minParticipants}
+                  onChange={handleMinParticipantsChange} error={!!errors.minParticipants}
+                  helperText={errors.minParticipants} inputProps={{ style: { height: '15px' } }}
                 />
               </Box>
               <Box sx={{ mb: 2 }}>
@@ -590,21 +532,15 @@ const CreateTour = () => {
                   Giá phải từ {tourTemplate?.minPrice?.toLocaleString()} đến {tourTemplate?.maxPrice?.toLocaleString()} VND
                 </Typography>
                 <TextField
-                  fullWidth
-                  type="number"
-                  label="Người lớn (từ 12 tuổi trở lên)"
-                  variant="outlined"
-                  value={tourData.adultPrice}
-                  onChange={handlePriceChange}
+                  fullWidth type="number" label="Người lớn (từ 12 tuổi trở lên)" variant="outlined"
+                  value={tourData.adultPrice} onChange={handlePriceChange}
                   onBlur={(e) => {
                     if (e.target.value) {
                       const roundedPrice = roundToThousand(Number(e.target.value));
                       handleNewTourChange('adultPrice', roundedPrice.toString());
                     }
                   }}
-                  error={!!errors.adultPrice}
-                  helperText={errors.adultPrice}
-                  sx={{ mb: 2, mt: 1.5 }}
+                  error={!!errors.adultPrice} helperText={errors.adultPrice} sx={{ mb: 2, mt: 1.5 }}
                   inputProps={{ min: 0, style: { height: '15px' } }}
                   InputProps={{
                     endAdornment: <InputAdornment position="end">VND</InputAdornment>
@@ -654,8 +590,7 @@ const CreateTour = () => {
                 </Typography>
                 <TextField
                   label="Yêu cầu cọc (%) - tính trên tổng tiền booking"
-                  type="number"
-                  sx={{ width: '100%', mt: 1.5, mb: 2 }}
+                  type="number" sx={{ width: '100%', mt: 1.5, mb: 2 }}
                   value={tourData.depositPercent}
                   onChange={(e) => {
                     handleNewTourChange('depositPercent', e.target.value);
@@ -663,12 +598,8 @@ const CreateTour = () => {
                       handleNewTourChange('paymentDeadline', null);
                     }
                   }}
-                  error={!!errors.depositPercent}
-                  helperText={errors.depositPercent}
-                  InputProps={{
-                    style: { height: '50px' },
-                    endAdornment: <InputAdornment position="end">%</InputAdornment>
-                  }}
+                  error={!!errors.depositPercent} helperText={errors.depositPercent}
+                  InputProps={{ style: { height: '50px' }, endAdornment: <InputAdornment position="end">%</InputAdornment> }}
                 />
                 {Number(tourData.depositPercent) < 100 && (
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -703,25 +634,21 @@ const CreateTour = () => {
                       />
                     </LocalizationProvider>
                     <TextField
-                      label="Tỷ lệ phạt hủy tour (%) - tính trên tổng tiền booking"
-                      type="number" value={policy.refundRate}
+                      label="Tỷ lệ phạt hủy tour (%) - tính trên tổng tiền booking" type="number" value={policy.refundRate}
                       onChange={(e) => handlePolicyChange(index, 'refundRate', e.target.value)}
                       error={!!errors[`policy${index}Rate`]} helperText={errors[`policy${index}Rate`]}
                       fullWidth inputProps={{ min: 0, max: 100 }}
                     />
                     <Button
                       variant="outlined" color="error" sx={{ height: '2.5rem', mt: 1 }}
-                      onClick={() => handleRemovePolicy(index)}
-                      disabled={tourData.refundPolicies.length === 1}
+                      onClick={() => handleRemovePolicy(index)} disabled={tourData.refundPolicies.length === 1}
                     >
                       Xóa
                     </Button>
                   </Box>
                 ))}
                 {errors.refundPolicies && (
-                  <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
-                    {errors.refundPolicies}
-                  </Typography>
+                  <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>  {errors.refundPolicies} </Typography>
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'right', mt: 2 }}>
                   <Button variant="outlined" onClick={handleAddPolicy} startIcon={<AddIcon />} >Thêm chính sách</Button>

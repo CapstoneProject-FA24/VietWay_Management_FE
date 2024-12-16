@@ -242,7 +242,6 @@ const CreateTourTemplate = () => {
         const invalidSchedules = tourTemplateData.schedules.filter(s =>
           !s.title && !s.description && !s.attractionIds && s.attractionIds.length === 0
         );
-        console.log(invalidSchedules);
         if (!hasAnyField || invalidSchedules.length > 0) {
           setSnackbar({
             open: true, severity: 'error', hide: 5000,
@@ -680,9 +679,9 @@ const CreateTourTemplate = () => {
             <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >Gửi duyệt</Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Box sx={{ mt: 1, width: '32rem' }}>
+            <Box sx={{ mt: 1, width: '35rem' }}>
               <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
-              <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+              <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm đầy đủ hình ảnh.</Typography>
             </Box>
           </Box>
         </Box>

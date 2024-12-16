@@ -105,7 +105,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             ))}
           </Box>
           <Box sx={{ mt: 3 }}>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
             <Box dangerouslySetInnerHTML={{ __html: attraction.description }} sx={{
               '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
               '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
@@ -129,14 +129,8 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             {attraction.googlePlaceId && (
               <Box sx={{ mt: 4 }}>
                 <Typography variant="h4" sx={{
-                  fontWeight: '700',
-                  fontFamily: 'Inter, sans-serif',
-                  color: '#05073C',
-                  fontSize: '27px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  mb: 2
+                  fontWeight: '700', fontFamily: 'Inter, sans-serif', color: '#05073C',
+                  fontSize: '27px', display: 'flex', alignItems: 'center', gap: 1, mb: 2
                 }}>
                   <AccessTimeIcon /> Giờ mở cửa
                 </Typography>
@@ -146,10 +140,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
                 ) : openingHours ? (
                   <Box>
                     <Box sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      mb: 2,
+                      display: 'flex', alignItems: 'center', gap: 1, mb: 2,
                       color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
                     }}>
                       {openingHours.opening_hours ? (
@@ -171,13 +162,8 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
 
                         return (
                           <Typography key={index} sx={{
-                            py: 1,
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid #eee',
-                            '&:last-child': {
-                              borderBottom: 'none'
-                            }
+                            py: 1, display: 'flex', justifyContent: 'space-between',
+                            borderBottom: '1px solid #eee', '&:last-child': { borderBottom: 'none' }
                           }}>
                             <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
                               {days[period.open.day]}
@@ -217,13 +203,8 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             <strong>Google Place ID:</strong> {attraction.googlePlaceId}
           </Typography>
           <Box sx={{
-            height: '500px',
-            width: '100%',
-            position: 'relative',
-            mb: 3,
-            overflow: 'hidden',
-            borderRadius: '10px',
-            border: '1px solid #e0e0e0'
+            height: '500px', width: '100%', position: 'relative', mb: 3,
+            overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
           }}>
             <Map placeId={attraction.googlePlaceId} />
           </Box>
