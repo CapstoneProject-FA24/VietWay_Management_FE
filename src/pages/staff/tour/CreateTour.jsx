@@ -330,8 +330,8 @@ const CreateTour = () => {
     handleNewTourChange('adultPrice', newAdultPrice);
   };
 
-  const handleSelectLocation = (placeData) => {
-    console.log(tourTemplate);
+  const handleSelectLocation = async (placeData) => {
+    const template = await fetchTourTemplateById(id);
     if (!placeData || !placeData.address) {
       return;
     }
@@ -343,15 +343,14 @@ const CreateTour = () => {
     handleNewTourChange('startAddress', fullAddress);
     handleNewTourChange('startLocationPlaceId', placeData.place_id);
   
-    const isValid = validateAddress(fullAddress);
+    const isValid = validateAddress(fullAddress, template);
     setStartAddressError(isValid ? '' : 
-      `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
+      `Địa điểm phải thuộc ${template?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
     );
   };
 
-  const validateAddress = (address) => {
-    console.log(tourTemplate);
-    if (!address || !tourTemplate?.startingProvince?.provinceName) {
+  const validateAddress = (address, template) => {
+    if (!address || !template?.startingProvince?.provinceName) {
       return false;
     }
     
@@ -365,7 +364,7 @@ const CreateTour = () => {
     };
   
     const normalizedAddress = normalize(address);
-    const normalizedProvince = normalize(tourTemplate.startingProvince.provinceName);
+    const normalizedProvince = normalize(template.startingProvince.provinceName);
   
     return normalizedAddress.includes(normalizedProvince);
   };
@@ -375,7 +374,7 @@ const CreateTour = () => {
     handleNewTourChange('startAddress', newAddress);
   
     // Validate the new address
-    const isValid = validateAddress(newAddress);
+    const isValid = validateAddress(newAddress, tourTemplate);
     setStartAddressError(isValid ? '' : 
       `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
     );
