@@ -207,7 +207,7 @@ const TourDetail = () => {
             <Box>
               <Button
                 startIcon={<ArrowBackIcon />}
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/nhan-vien/tour-du-lich')}
                 sx={{ color: 'grey' }}
               >
                 Quay lại

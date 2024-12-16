@@ -208,7 +208,7 @@ const AttractionDetail = () => {
     }
     setSnackbar(prev => ({ ...prev, open: false }));
     if (snackbar.message === 'Xóa điểm tham quan thành công') {
-      navigate(-1);
+      navigate('/nhan-vien/diem-tham-quan');
     }
   };
 

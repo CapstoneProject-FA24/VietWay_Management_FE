@@ -150,7 +150,7 @@ const TourTemplateDetails = () => {
     }
     setSnackbar(prev => ({ ...prev, open: false }));
     if (snackbar.message === 'Xóa tour mẫu thành công') {
-      navigate(-1);
+      navigate('/nhan-vien/tour-mau');
     }
   };
 

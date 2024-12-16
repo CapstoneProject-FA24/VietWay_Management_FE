@@ -135,7 +135,7 @@ const ListApprovedTourTemplate = () => {
   };
 
   const handleBack = () => {
-    navigate('/staff/tour');
+    navigate(-1);
   };
 
   return (

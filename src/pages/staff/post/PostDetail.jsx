@@ -434,7 +434,7 @@ const PostDetail = () => {
               </Box>
               <Box elevation={2} sx={{ p: 1, mb: 10, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2 }} >Quay lại</Button>
+                  <Button startIcon={<ArrowBack />} onClick={() => navigate('/nhan-vien/bai-viet')} sx={{ mb: 2 }} >Quay lại</Button>
                   {renderActionButtons()}
                 </Box>
                 {isEditMode ? (

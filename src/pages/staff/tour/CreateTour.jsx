@@ -304,10 +304,10 @@ const CreateTour = () => {
         paymentDeadline: Number(tourData.depositPercent) === 100 ? null : tourData.paymentDeadline
       };
 
-      await createTour(formData);
+      const response = await createTour(formData);
       setSnackbar({ open: true, message: 'Tạo tour thành công', severity: 'success', hide: 1500 });
       setTimeout(() => {
-        navigate('/nhan-vien/tour-du-lich');
+        navigate('/nhan-vien/tour-du-lich/chi-tiet/' + response.data);
       }, 1500);
     } catch (error) {
       setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error', hide: 5000  });
