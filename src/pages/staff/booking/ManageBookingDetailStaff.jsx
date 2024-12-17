@@ -9,7 +9,7 @@ import BookingDetail from '@components/manager/booking/BookingDetail';
 import Participant from '@components/manager/booking/Participant';
 import PaymentDetail from '@components/manager/booking/PaymentDetail';
 
-const ManageBookingDetail = () => {
+const ManageBookingDetailStaff = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -36,6 +36,15 @@ const ManageBookingDetail = () => {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const data = await fetchBookingById(id);
+      setBooking(data);
+    } catch (error) {
+      setError('Không thể tải thông tin đặt tour');
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>
@@ -45,7 +54,7 @@ const ManageBookingDetail = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }} ref={pageTopRef}>
       <Helmet><title>Chi tiết đặt tour</title></Helmet>
-      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}/>
+      <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
       <Box sx={{
         flexGrow: 1, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : 0,
         width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw'
@@ -84,7 +93,7 @@ const ManageBookingDetail = () => {
               <Tab icon={<Person />} label="Danh sách khách" iconPosition="start" />
               <Tab icon={<Payment />} label="Lịch sử thanh toán" iconPosition="start" />
             </Tabs>
-            {activeTab === 0 && <BookingDetail booking={booking} />}
+            {activeTab === 0 && <BookingDetail booking={booking} onRefresh={fetchData} />}
             {activeTab === 1 && <Participant participants={booking.tourists} />}
             {activeTab === 2 && <PaymentDetail payments={booking.payments} />}
           </Box>
@@ -94,4 +103,4 @@ const ManageBookingDetail = () => {
   );
 };
 
-export default ManageBookingDetail;
+export default ManageBookingDetailStaff;

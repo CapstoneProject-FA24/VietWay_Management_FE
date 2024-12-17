@@ -18,9 +18,16 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
-const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
+const ChangeBooking = ({ open, onClose, onTourSelect, booking, onRefresh }) => {
     const [tours, setTours] = useState([]);
-    const [filters, setFilters] = useState({ tourType: [], duration: [], location: [] });
+    const [filters, setFilters] = useState({
+        searchTerm: "",
+        provinceIds: [],
+        templateCategoryIds: [],
+        numberOfDay: [],
+        startDateFrom: null,
+        startDateTo: null
+    });
     const [searchTerm, setSearchTerm] = useState("");
     const [searchCode, setSearchCode] = useState("");
     const [tempSearchTerm, setTempSearchTerm] = useState("");
@@ -58,11 +65,34 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
 
     const fetchTours = async () => {
         try {
-            const response = await fetchTourTemplatesWithTourInfo({
+            const params = {
                 pageSize: pagination.pageSize,
                 pageIndex: pagination.pageIndex,
-                tourId: booking.tourId,
-            });
+                tourId: booking?.tourId,
+                searchTerm: filters.searchTerm,
+            };
+
+            if (filters.provinceIds && filters.provinceIds.length > 0) {
+                params.provinceIds = filters.provinceIds;
+            }
+
+            if (filters.templateCategoryIds && filters.templateCategoryIds.length > 0) {
+                params.templateCategoryIds = filters.templateCategoryIds;
+            }
+
+            if (filters.numberOfDay && filters.numberOfDay.length > 0) {
+                params.numberOfDay = filters.numberOfDay;
+            }
+
+            if (filters.startDateFrom) {
+                params.startDateFrom = filters.startDateFrom;
+            }
+
+            if (filters.startDateTo) {
+                params.startDateTo = filters.startDateTo;
+            }
+
+            const response = await fetchTourTemplatesWithTourInfo(params);
             setTours(response.data);
             setPagination(prev => ({
                 ...prev,
@@ -76,19 +106,12 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const [
-                    fetchedProvinces,
-                    categories,
-                    duration,
-                ] = await Promise.all([
-                    fetchProvinces({ pageSize: 63, pageIndex: 1 }),
-                    fetchTourCategory(),
-                    fetchTourDuration(),
-                ]);
-
+                const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });      
+                const fetchedCategories = await fetchTourCategory();
+                const fetchedDuration = await fetchTourDuration();
                 setProvinces(fetchedProvinces.items);
-                setTourCategories(categories);
-                setTourDurations(duration);
+                setTourCategories(fetchedCategories);
+                setTourDurations(fetchedDuration);
             } catch (error) {
                 console.error('Error fetching initial data:', error);
             }
@@ -98,12 +121,14 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
             fetchInitialData();
             fetchTours();
         }
-    }, [open, pagination.pageIndex, pagination.pageSize]);
+    }, [open, pagination.pageIndex, pagination.pageSize, filters]);
 
     const handleSearchByName = () => {
-        setSearchTerm(tempSearchTerm);
+        setFilters(prev => ({
+            ...prev,
+            searchTerm: tempSearchTerm
+        }));
         setPagination(prev => ({ ...prev, pageIndex: 1 }));
-        fetchTours();
     };
 
     const handleSearchByCode = () => {
@@ -123,10 +148,51 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
     };
 
     const handleTempFilterChange = (selectedOptions, filterType) => {
-        setTempFilters(prev => ({
-            ...prev,
-            [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
-        }));
+        if (filterType === 'duration') {
+            setTempFilters(prev => ({
+                ...prev,
+                [filterType]: selectedOptions ? selectedOptions.map(option => Number(option.value)) : []
+            }));
+        } else {
+            setTempFilters(prev => ({
+                ...prev,
+                [filterType]: selectedOptions ? selectedOptions.map(option => option.value) : []
+            }));
+        }
+    };
+
+    const handleApplyFilters = () => {
+        const newFilters = {
+            searchTerm: tempSearchTerm,
+            provinceIds: tempFilters.location.length > 0 ? tempFilters.location : [],
+            templateCategoryIds: tempFilters.tourType.length > 0 ? tempFilters.tourType : [],
+            numberOfDay: tempFilters.duration.length > 0 ? tempFilters.duration : [],
+            startDateFrom: tempDateRange.from ? tempDateRange.from.format('YYYY-MM-DD') : null,
+            startDateTo: tempDateRange.to ? tempDateRange.to.format('YYYY-MM-DD') : null
+        };
+
+        setFilters(newFilters);
+        setPagination(prev => ({ ...prev, pageIndex: 1 }));
+    };
+
+    const handleClearFilters = () => {
+        setTempSearchTerm("");
+        setTempSearchCode("");
+        setTempFilters({
+            tourType: [],
+            duration: [],
+            location: [],
+        });
+        setTempDateRange({ from: null, to: null });
+        setFilters({
+            searchTerm: "",
+            provinceIds: [],
+            templateCategoryIds: [],
+            numberOfDay: [],
+            startDateFrom: null,
+            startDateTo: null
+        });
+        setPagination(prev => ({ ...prev, pageIndex: 1 }));
     };
 
     return (
@@ -172,32 +238,6 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                                     Tìm kiếm
                                 </Button>
                             </Box>
-
-                            <Box sx={{ display: 'flex', width: '100%' }}>
-                                <TextField
-                                    variant="outlined"
-                                    placeholder="Tìm kiếm tour theo mã..."
-                                    size="small"
-                                    sx={{ mr: 1, width: '70%' }}
-                                    value={tempSearchCode}
-                                    onChange={(e) => setTempSearchCode(e.target.value)}
-                                    onKeyPress={(e) => handleKeyPress(e, 'code')}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <SearchIcon />
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-                                <Button 
-                                    variant="contained" 
-                                    onClick={handleSearchByCode}
-                                    sx={{ backgroundColor: 'lightGray', color: 'black' }}
-                                >
-                                    Tìm kiếm
-                                </Button>
-                            </Box>
                         </Box>
                     </Grid>
 
@@ -212,13 +252,13 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                                         isMulti
                                         options={tourCategories.map(cat => ({
                                             value: cat.tourCategoryId,
-                                            label: cat.name
+                                            label: cat.tourCategoryName
                                         }))}
                                         value={tourCategories
                                             .filter(cat => tempFilters.tourType.includes(cat.tourCategoryId))
                                             .map(cat => ({
                                                 value: cat.tourCategoryId,
-                                                label: cat.name
+                                                label: cat.tourCategoryName
                                             }))}
                                         onChange={(selected) => handleTempFilterChange(selected, 'tourType')}
                                         styles={customSelectStyles}
@@ -233,13 +273,13 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                                         isMulti
                                         options={provinces.map(prov => ({
                                             value: prov.provinceId,
-                                            label: prov.name
+                                            label: prov.provinceName
                                         }))}
                                         value={provinces
                                             .filter(prov => tempFilters.location.includes(prov.provinceId))
                                             .map(prov => ({
                                                 value: prov.provinceId,
-                                                label: prov.name
+                                                label: prov.provinceName
                                             }))}
                                         onChange={(selected) => handleTempFilterChange(selected, 'location')}
                                         styles={customSelectStyles}
@@ -265,6 +305,25 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                                         </Box>
                                     </LocalizationProvider>
                                 </Grid>
+
+                                <Grid item xs={12}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={handleClearFilters}
+                                            startIcon={<FilterListIcon />}
+                                        >
+                                            Xóa bộ lọc
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            onClick={handleApplyFilters}
+                                            startIcon={<FilterListIcon />}
+                                        >
+                                            Áp dụng bộ lọc
+                                        </Button>
+                                    </Box>
+                                </Grid>
                             </Grid>
                         </Box>
                     </Grid>
@@ -279,6 +338,7 @@ const ChangeBooking = ({ open, onClose, onTourSelect, booking }) => {
                                                 tour={tour}
                                                 onSelect={onTourSelect}
                                                 booking={booking}
+                                                onRefresh={onRefresh}
                                             />
                                         </Grid>
                                     ))}

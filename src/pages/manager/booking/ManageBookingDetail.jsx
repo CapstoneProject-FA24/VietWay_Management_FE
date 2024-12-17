@@ -28,12 +28,20 @@ const ManageBookingDetail = () => {
       setLoading(true);
       setError(null);
       const data = await fetchBookingById(id);
-      console.log(data);
       setBooking(data);
     } catch (error) {
       setError('Không thể tải thông tin đặt tour');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const data = await fetchBookingById(id);
+      setBooking(data);
+    } catch (error) {
+      setError('Không thể tải thông tin đặt tour');
     }
   };
 
@@ -85,7 +93,7 @@ const ManageBookingDetail = () => {
               <Tab icon={<Person />} label="Danh sách khách" iconPosition="start" />
               <Tab icon={<Payment />} label="Lịch sử thanh toán" iconPosition="start" />
             </Tabs>
-            {activeTab === 0 && <BookingDetail booking={booking} />}
+            {activeTab === 0 && <BookingDetail booking={booking} onRefresh={fetchData} />}
             {activeTab === 1 && <Participant participants={booking.tourists} />}
             {activeTab === 2 && <PaymentDetail payments={booking.payments} />}
           </Box>

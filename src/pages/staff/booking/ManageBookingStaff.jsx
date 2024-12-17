@@ -10,20 +10,20 @@ import { Helmet } from 'react-helmet';
 import { BookingStatus } from '@hooks/Statuses';
 import { getBookingStatusInfo } from '@services/StatusService';
 
-const ManageBooking = () => {
+const ManageBookingStaff = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [searchByCode, setSearchByCode] = useState('');
   const [tempSearchText, setTempSearchText] = useState('');
-  const [tempSearchByCode, setTempSearchByCode] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [sortOrder, setSortOrder] = useState('newest');
+  const [searchByCode, setSearchByCode] = useState('');
+  const [tempSearchByCode, setTempSearchByCode] = useState('');
   const navigate = useNavigate();
 
   const statusDisplay = {
@@ -61,15 +61,14 @@ const ManageBooking = () => {
     try {
       setLoading(true);
 
-      // Determine if the search text is a number
       const isNumber = /^\d+$/.test(searchText);
 
       const response = await getBookings(
         pageSize,
         page,
-        searchByCode, // bookingIdSearch
-        isNumber ? undefined : searchText, // Use searchText for name if not a number
-        isNumber ? searchText : undefined, // Use searchText for phone if it's a number
+        searchByCode,
+        isNumber ? undefined : searchText,
+        isNumber ? searchText : undefined,
         statusFilter !== 'ALL' ? parseInt(statusFilter) : undefined
       );
 
@@ -85,13 +84,11 @@ const ManageBooking = () => {
   };
 
   const handleDelete = async (id) => {
-    /* try {
-      await deleteBooking(id);
-      showSnackbar('Xóa đặt tour thành công', 'success');
-      fetchBookings();
-    } catch (error) {
-      showSnackbar('Không thể xóa đặt tour', 'error');
-    } */
+    setCancelDialog({
+      open: true,
+      bookingId: id,
+      reason: ''
+    });
   };
 
   const handleViewDetails = (id) => {
@@ -115,11 +112,6 @@ const ManageBooking = () => {
     setPage(1);
   };
 
-  const handleSearchByCode = () => {
-    setSearchByCode(tempSearchByCode);
-    setPage(1);
-  };
-
   const handleSearch = () => {
     setSearchText(tempSearchText);
     setPage(1);
@@ -130,33 +122,12 @@ const ManageBooking = () => {
     setPage(1);
   };
 
-  const handleRefund = async (id, refundData) => {
-    try {
-      await createRefundTransaction(id, {
-        note: refundData.note,
-        bankCode: refundData.bankCode,
-        bankTransactionNumber: refundData.bankTransactionNumber,
-        payTime: refundData.payTime.format()
-      });
-      showSnackbar('Hoàn tiền thành công', 'success');
-      fetchBookings();
-    } catch (error) {
-      console.error('Error creating refund transaction:', error);
-      if (error.response?.data?.error?.includes('Refund policy not found')) {
-        showSnackbar('Không thể tìm thấy chính sách hoàn tiền.', 'error');
-      } else {
-        showSnackbar('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'error');
-      }
-    }
+  const handleSearchByCode = () => {
+    setSearchByCode(tempSearchByCode);
+    setPage(1);
   };
 
-  const sortedAndFilteredBookings = bookings
-    .filter(booking =>
-      (statusFilter === 'ALL' || booking.status === parseInt(statusFilter)) &&
-      (booking.bookingId.toLowerCase().includes(searchText.toLowerCase()) ||
-        booking.contactFullName.toLowerCase().includes(searchText.toLowerCase()) ||
-        booking.contactPhoneNumber.includes(searchText))
-    )
+  const sortedBookings = bookings
     .sort((a, b) => {
       switch (sortOrder) {
         case 'newest':
@@ -170,14 +141,12 @@ const ManageBooking = () => {
         default:
           return 0;
       }
-    })
-    .slice((page - 1) * pageSize, page * pageSize);
+    });
 
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet> <title>Quản lý đặt tour</title> </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-
       <Box sx={{
         flexGrow: 1,
         p: 4,
@@ -242,21 +211,19 @@ const ManageBooking = () => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-              <Typography>Sắp xếp theo</Typography>
-              <Select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                variant="outlined"
-                sx={{ width: '200px', ml: 2, height: '40px' }}
-              >
-                <MenuItem value="newest">Mới nhất</MenuItem>
-                <MenuItem value="oldest">Cũ nhất</MenuItem>
-                <MenuItem value="priceHighToLow">Giá cao - thấp</MenuItem>
-                <MenuItem value="priceLowToHigh">Giá thấp - cao</MenuItem>
-              </Select>
-            </Box>
+          <Grid item xs={12} md={5} sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+            <Typography>Sắp xếp theo</Typography>
+            <Select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              variant="outlined"
+              sx={{ width: '200px', ml: 2, height: '40px' }}
+            >
+              <MenuItem value="newest">Mới nhất</MenuItem>
+              <MenuItem value="oldest">Cũ nhất</MenuItem>
+              <MenuItem value="priceHighToLow">Giá cao - thấp</MenuItem>
+              <MenuItem value="priceLowToHigh">Giá thấp - cao</MenuItem>
+            </Select>
           </Grid>
 
           <Grid item xs={12}>
@@ -297,18 +264,18 @@ const ManageBooking = () => {
         </Grid>
 
         <Grid container spacing={2}>
-          {sortedAndFilteredBookings.map((booking) => (
+          {sortedBookings.map((booking) => (
             <Grid item xs={12} md={12} key={booking.bookingId}>
               <BookingCard
                 booking={booking}
                 onDelete={handleDelete}
                 onViewDetails={handleViewDetails}
-                onRefund={handleRefund}
                 onRefresh={fetchBookings}
+                onShowSnackbar={showSnackbar}
               />
             </Grid>
           ))}
-          {sortedAndFilteredBookings.length === 0 && (
+          {sortedBookings.length === 0 && (
             <Grid item xs={12}>
               <Typography variant="body1" align="center" color="error">
                 Không tìm thấy đặt tour phù hợp.
@@ -356,4 +323,4 @@ const ManageBooking = () => {
   );
 };
 
-export default ManageBooking;
+export default ManageBookingStaff;

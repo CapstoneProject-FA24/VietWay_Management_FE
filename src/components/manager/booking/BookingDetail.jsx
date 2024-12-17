@@ -3,7 +3,6 @@ import {
     Box, Grid, Typography, Button, Paper, Dialog, DialogTitle, DialogContent,
     DialogContentText, DialogActions, TextField, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem, FormHelperText
 } from '@mui/material';
-import { CalendarToday } from '@mui/icons-material';
 import { getBookingStatusInfo, getRefundStatusInfo, getEntityModifyActionInfo, getRoleName } from '@services/StatusService';
 import { BookingStatus, RefundStatus, EntityModifyAction } from '@hooks/Statuses';
 import { cancelBooking, createRefundTransaction, getBookingHistory } from '@services/BookingService';
@@ -29,7 +28,7 @@ const formatDateTime = (dateString) => {
     return `${formattedDate} ${formattedTime}`;
 };
 
-const BookingDetail = ({ booking }) => {
+const BookingDetail = ({ booking, onRefresh }) => {
     const [openCancelDialog, setOpenCancelDialog] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
     const [snackbar, setSnackbar] = useState({
@@ -82,7 +81,7 @@ const BookingDetail = ({ booking }) => {
                 message: 'Hủy booking thành công',
                 severity: 'success'
             });
-            // Optionally refresh the booking data here
+            onRefresh();
         } catch (error) {
             setSnackbar({
                 open: true,
@@ -158,7 +157,7 @@ const BookingDetail = ({ booking }) => {
                 message: 'Hoàn tiền thành công',
                 severity: 'success'
             });
-            window.location.reload();
+            onRefresh();
         } catch (error) {
             setSnackbar({
                 open: true,
@@ -174,7 +173,6 @@ const BookingDetail = ({ booking }) => {
 
     const handleTourSelect = (selectedTour) => {
         console.log('Selected new tour:', selectedTour);
-        // Here you would implement the logic to change the tour
         setIsChangeBookingOpen(false);
     };
 
@@ -273,7 +271,16 @@ const BookingDetail = ({ booking }) => {
                         <Typography variant="h5" sx={{ mt: 1 }}>{booking.tourName}</Typography>
                         <Typography variant="body1" sx={{ mt: 1 }}><strong>Mã tour:</strong> {booking.tourCode}</Typography>
                         <Typography variant="body1" sx={{ mt: 1 }}>
-                            <strong>Ngày đi:</strong> {formatDateTime(booking.startDate)}
+                            <strong>Thời lượng:</strong> {booking.duration}
+                        </Typography>
+                        <Typography variant="body1" sx={{ mt: 1 }}>
+                            <strong>Thời gian khởi hành:</strong> {formatDateTime(booking.startDate)}
+                        </Typography>
+                        <Typography variant="body1" sx={{ mt: 1 }}>
+                            <strong>Địa điểm khởi hành:</strong> {booking.startLocation}
+                        </Typography>
+                        <Typography variant="body1" sx={{ mt: 1 }}>
+                            <strong>Phương tiện:</strong> {booking.transportation}
                         </Typography><hr />
                         {booking.tourPolicies && booking.tourPolicies.length > 0 && (
                             <>
@@ -405,7 +412,6 @@ const BookingDetail = ({ booking }) => {
                 </DialogActions>
             </Dialog>
 
-            {/* Refund Dialog */}
             <Dialog
                 open={openRefundDialog}
                 onClose={() => {
@@ -437,7 +443,7 @@ const BookingDetail = ({ booking }) => {
                                 id="bank-select"
                                 value={refundData.bankCode}
                                 onChange={(e) => handleRefundDataChange('bankCode', e.target.value)}
-                                label="Ngân hàng"
+                                label="Ngân hàng *"
                             >
                                 <MenuItem value="" disabled>Chọn ngân hàng *</MenuItem>
                                 {bankData.map((bank) => (
@@ -519,6 +525,7 @@ const BookingDetail = ({ booking }) => {
                 open={isChangeBookingOpen}
                 onClose={() => setIsChangeBookingOpen(false)}
                 onTourSelect={handleTourSelect}
+                onRefresh={onRefresh}
                 booking={booking}
             />
         </>

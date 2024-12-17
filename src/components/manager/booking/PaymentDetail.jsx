@@ -42,7 +42,7 @@ const PaymentDetail = ({ payments }) => {
               </TableCell>
               <TableCell>{payment.bankCode}</TableCell>
               <TableCell>{payment.bankTransactionNumber}</TableCell>
-              <TableCell>{payment.note || 'Không có ghi chú'}</TableCell>
+              <TableCell>{payment.note}</TableCell>
               <TableCell>{new Date(payment.createAt).toLocaleString('vi-VN')}</TableCell>
               <TableCell>
                 <Chip

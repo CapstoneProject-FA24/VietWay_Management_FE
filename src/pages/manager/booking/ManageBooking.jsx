@@ -22,11 +22,6 @@ const ManageBooking = () => {
   const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [sortOrder, setSortOrder] = useState('newest');
-  const [cancelDialog, setCancelDialog] = useState({
-    open: false,
-    bookingId: null,
-    reason: ''
-  });
   const [searchByCode, setSearchByCode] = useState('');
   const [tempSearchByCode, setTempSearchByCode] = useState('');
   const navigate = useNavigate();
@@ -125,44 +120,6 @@ const ManageBooking = () => {
   const handleStatusChange = (event, newValue) => {
     setStatusFilter(newValue);
     setPage(1);
-  };
-
-  const handleRefund = async (id, refundData) => {
-    try {
-      await createRefundTransaction(id, {
-        note: refundData.note,
-        bankCode: refundData.bankCode,
-        bankTransactionNumber: refundData.bankTransactionNumber,
-        payTime: refundData.payTime.format() // Convert dayjs to ISO string
-      });
-      showSnackbar('Hoàn tiền thành công', 'success');
-      fetchBookings(); // Refresh the booking list
-    } catch (error) {
-      console.error('Error creating refund transaction:', error);
-      if(error.response?.data?.error?.includes('Refund policy not found')){
-        showSnackbar('Không thể tìm thấy chính sách hoàn tiền.', 'error');
-      }
-      else{
-        showSnackbar('Đã xảy ra lỗi. Vui lòng thử lại sau.', 'error');
-      }
-    }
-  };
-
-  const handleConfirmCancel = async () => {
-    try {
-      await cancelBooking(cancelDialog.bookingId, cancelDialog.reason);
-      showSnackbar('Hủy booking thành công', 'success');
-      fetchBookings(); // Refresh the list
-    } catch (error) {
-      console.error('Error canceling booking:', error);
-      showSnackbar(error.response?.data?.message || 'Có lỗi xảy ra khi hủy booking', 'error');
-    } finally {
-      setCancelDialog({
-        open: false,
-        bookingId: null,
-        reason: ''
-      });
-    }
   };
 
   const handleSearchByCode = () => {
@@ -314,8 +271,8 @@ const ManageBooking = () => {
                 booking={booking}
                 onDelete={handleDelete}
                 onViewDetails={handleViewDetails}
-                onRefund={handleRefund}
                 onRefresh={fetchBookings}
+                onShowSnackbar={showSnackbar}
               />
             </Grid>
           ))}
