@@ -43,14 +43,15 @@ const PostDetail = () => {
   const [editablePost, setEditablePost] = useState(null);
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [editableFields, setEditableFields] = useState({
-    title: { value: '', isEditing: false }, content: { value: '', isEditing: false }, description: { value: '', isEditing: false },
+    content: { value: '', isEditing: false },
+    title: { value: '', isEditing: false }, description: { value: '', isEditing: false },
     category: { value: '', isEditing: false }, provinceId: { value: '', isEditing: false },
     provinceName: { value: '', isEditing: false }, reateDate: { value: '', isEditing: false },
     image: { value: '', isEditing: false }, status: { value: '', isEditing: false }
   });
   const [categoryOptions, setCategoryOptions] = useState([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [snackbar, setSnackbar] = useState({
     open: false, message: '', severity: 'success' | 'error' | 'warning' | 'info', hide: 5000
   });
@@ -206,38 +207,35 @@ const PostDetail = () => {
       };
       const createdPost = await updatePost(id, updatedPost);
       if (createdPost.status === 200) {
-        if (editablePost.image) {
-          const response = await fetch(editablePost.image);
-          const blob = await response.blob();
-          const imageFile = new File([blob], 'post-image.jpg', { type: 'image/jpeg' });
-          const imagesResponse = await updatePostImages(createdPost.data, [imageFile]);
-          if (imagesResponse.statusCode !== 200) {
-            console.error('Error uploading images:', imagesResponse);
+        if (editablePost.image && !editablePost.image.startsWith('data:')) {
+          try {
+            const imageFile = await fetch(editablePost.image)
+              .then(res => res.blob())
+              .then(blob => new File([blob], 'post-image.jpg', { type: 'image/jpeg' }));
+            const imagesResponse = await updatePostImages(id, [imageFile]);
+            if (imagesResponse.statusCode !== 200) {
+              console.error('Error uploading images:', imagesResponse);
+              setSnackbar({
+                open: true, severity: 'error', hide: 5000, message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+              });
+            }
+          } catch (error) {
+            console.error('Error processing image:', error);
             setSnackbar({
-              open: true, severity: 'error', hide: 5000, message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+              open: true, severity: 'error', hide: 5000, message: 'Đã xảy ra lỗi khi xử lý ảnh. Vui lòng thử lại sau.',
             });
-          } else {
-            setPost(prevPost => ({
-              ...prevPost,
-              ...updatedPost,
-              postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
-              provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
-            }));
-            setIsEditMode(false);
-            setSnackbar({ open: true, severity: 'success', hide: 1500, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.', });
-            loadPost();
           }
-        } else {
-          setPost(prevPost => ({
-            ...prevPost,
-            ...updatedPost,
-            postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
-            provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
-          }));
-          setIsEditMode(false);
-          setSnackbar({ open: true, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi bài viết thành công.', severity: 'success', hide: 1500 });
-          loadPost();
         }
+        
+        setPost(prevPost => ({
+          ...prevPost,
+          ...updatedPost,
+          postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
+          provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
+        }));
+        setIsEditMode(false);
+        setSnackbar({ open: true, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi bài viết thành công.', severity: 'success', hide: 1500 });
+        loadPost();
       } else {
         console.error('Error creating tour template:', createdPost);
         setSnackbar({ open: true, severity: 'error', message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.', hide: 5000 });
@@ -297,8 +295,11 @@ const PostDetail = () => {
   const handleFieldChange = (field, value) => {
     setEditablePost(prev => ({ ...prev, [field]: value }));
 
-    if (editableFields[field]?.isEditing) {
-      setEditableFields(prev => ({ ...prev, [field]: { ...prev[field], value } }));
+    if (field in editableFields) {
+      setEditableFields(prev => ({
+        ...prev,
+        [field]: { ...prev[field], value }
+      }));
     }
   };
 
@@ -440,7 +441,7 @@ const PostDetail = () => {
                         <FormControl fullWidth margin="normal" error={!!fieldErrors.category}>
                           <InputLabel>Danh mục *</InputLabel>
                           <Select
-                            value={editablePost?.postCategoryId || ''} label="Danh mục *"
+                            value={editablePost?.postCategoryId || ''} label="Danh mục *" disabled={isLoadingCategories}
                             onChange={(e) => {
                               const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
                               if (selectedCategory) {
@@ -518,10 +519,10 @@ const PostDetail = () => {
                       <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}>Nội dung *</Typography>
                       <FormControl sx={{ width: '100%' }}>
                         <ReactQuill
-                          value={editableFields.content.value}
+                          value={editableFields.content.value || ''}
                           onChange={(value) => handleFieldChange('content', value)}
                           theme="snow"
-                          className={fieldErrors.content ? "ql-error" : null}
+                          className={fieldErrors.content ? "ql-error" : ""}
                           modules={{
                             toolbar: [
                               [{ 'header': [1, 2, 3, 4, 5, 6, false] }], [{ 'font': [] }],
@@ -529,7 +530,8 @@ const PostDetail = () => {
                               [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
                               [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                               [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
-                            ]
+                            ],
+                            clipboard: { matchVisual: false }
                           }}
                         />
                         {fieldErrors.content && (

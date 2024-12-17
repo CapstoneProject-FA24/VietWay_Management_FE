@@ -203,7 +203,11 @@ const ManagerAttractionDetail = () => {
             removedImageIds.length > 0 ? removedImageIds : null
           );
           if (imagesResponse.statusCode !== 200) {
-            alert('Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.');
+            setSnackbar({
+              open: true,
+              message: 'Có lỗi xảy ra khi cập nhật hình ảnh. Vui lòng thử lại.',
+              severity: 'error', hide: 5000
+            });
             return;
           }
         }
@@ -215,11 +219,19 @@ const ManagerAttractionDetail = () => {
           severity: 'success'
         });
       } else {
-        alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+        setSnackbar({
+          open: true,
+          message: 'Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.',
+          severity: 'error', hide: 5000
+        });
       }
     } catch (error) {
       console.error('Error updating attraction:', error);
-      alert('Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.');
+      setSnackbar({
+        open: true,
+        message: 'Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.',
+        severity: 'error', hide: 5000
+      });
     }
   };
 

@@ -19,7 +19,7 @@ const TourDuration = ({ searchTerm, refreshTrigger }) => {
 
     const loadDurations = async (search = '') => {
         try {
-            const response = await fetchTourDuration(search);  // Pass search term to service
+            const response = await fetchTourDuration(search);
             const data = response.map(item => ({
                 id: item.durationId,
                 name: item.durationName,

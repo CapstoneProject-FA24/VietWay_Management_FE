@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton, Select, MenuItem, FormControl, FormHelperText, InputLabel } from '@mui/material';
 import { ArrowBack, Delete, Edit, Cancel, Save } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -37,7 +37,9 @@ const ManagerPostDetail = () => {
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+
   const loadPost = async () => {
     try {
       const data = await fetchPostById(id);
@@ -120,6 +122,22 @@ const ManagerPostDetail = () => {
     return () => clearInterval(interval);
   }, [post?.postId, post?.facebookPostId]);
 
+  useEffect(() => {
+    if (post) {
+      setEditablePost({
+        ...post,
+        title: post.title || '',
+        content: post.content || '',
+        description: post.description || '',
+        postCategoryId: post.postCategoryId || '',
+        postCategoryName: post.postCategoryName || '',
+        provinceId: post.provinceId || '',
+        provinceName: post.provinceName || '',
+        image: post.imageUrl || '',
+      });
+    }
+  }, [post]);
+
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -159,13 +177,14 @@ const ManagerPostDetail = () => {
   };
 
   const handleSaveChanges = async () => {
+    setIsSubmitting(true);
     try {
       const errors = {};
       if (!editablePost.title?.trim()) errors.title = 'Vui lòng nhập tiêu đề bài viết';
       if (!editablePost.description?.trim()) errors.description = 'Vui lòng nhập mô tả ngắn';
       if (!editablePost.content?.trim()) errors.content = 'Vui lòng nhập nội dung bài viết';
       else if (editablePost.content.length < 50) errors.content = 'Nội dung bài viết phải có ít nhất 50 ký tự';
-      if (!editablePost.category) errors.category = 'Vui lòng chọn danh mục';
+      if (!editablePost.postCategoryId) errors.category = 'Vui lòng chọn danh mục';
       if (!editablePost.provinceId) errors.provinceId = 'Vui lòng chọn tỉnh thành';
       if (!editablePost.image) errors.image = 'Vui lòng chọn ảnh cho bài viết';
 
@@ -173,6 +192,7 @@ const ManagerPostDetail = () => {
         setFieldErrors(errors);
         return;
       }
+
       const updatedPost = {
         title: editablePost.title || null,
         content: editablePost.content || null,
@@ -181,47 +201,55 @@ const ManagerPostDetail = () => {
         provinceId: editablePost.provinceId || null,
         isDraft: false
       };
-      const createdPost = await updatePost(id, updatedPost);
-      if (createdPost.status === 200) {
-        if (editablePost.image) {
-          const response = await fetch(editablePost.image);
-          const blob = await response.blob();
-          const imageFile = new File([blob], 'post-image.jpg', { type: 'image/jpeg' });
-          const imagesResponse = await updatePostImages(createdPost.data, [imageFile]);
-          if (imagesResponse.statusCode !== 200) {
-            console.error('Error uploading images:', imagesResponse);
-            setSnackbar({
-              open: true, severity: 'error', hide: 5000, message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
-            });
-          } else {
-            setPost(prevPost => ({
-              ...prevPost,
-              ...updatedPost,
-              postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
-              provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
-            }));
-            setIsEditMode(false);
-            setSnackbar({ open: true, severity: 'success', hide: 1500, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.', });
-            loadPost();
-          }
-        } else {
-          setPost(prevPost => ({
-            ...prevPost,
-            ...updatedPost,
-            postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
-            provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label
-          }));
-          setIsEditMode(false);
-          setSnackbar({ open: true, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi bài viết thành công.', severity: 'success', hide: 1500 });
-          loadPost();
-        }
-      } else {
-        console.error('Error creating tour template:', createdPost);
-        setSnackbar({ open: true, severity: 'error', message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.', hide: 5000 });
+
+      // First update the post content
+      const response = await updatePost(id, updatedPost);
+
+      if (!response || response.status !== 200) {
+        throw new Error('Failed to update post content');
       }
+
+      // If there's a new image, update it
+      if (editablePost.imageFile) {
+        const formData = new FormData();
+        formData.append('images', editablePost.imageFile);
+
+        const imagesResponse = await updatePostImages(id, formData);
+        if (!imagesResponse || imagesResponse.statusCode !== 200) {
+          throw new Error('Failed to update post image');
+        }
+      }
+
+      // Update local state
+      setPost(prevPost => ({
+        ...prevPost,
+        ...updatedPost,
+        postCategoryName: categoryOptions.find(c => c.postCategoryId === updatedPost.postCategoryId)?.name,
+        provinceName: provinceOptions.find(p => p.value === updatedPost.provinceId)?.label,
+        imageUrl: editablePost.image
+      }));
+
+      setIsEditMode(false);
+      setSnackbar({
+        open: true,
+        message: 'Đã cập nhật bài viết thành công',
+        severity: 'success',
+        hide: 1500
+      });
+
+      // Reload the post to get fresh data
+      await loadPost();
+
     } catch (error) {
-      console.error('Error creating post:', error);
-      setSnackbar({ open: true, message: error.createdPost?.data?.message || 'Có lỗi xảy ra khi lưu bài viết', severity: 'error', hide: 5000 });
+      console.error('Error updating post:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Có lỗi xảy ra khi lưu bài viết',
+        severity: 'error',
+        hide: 5000
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -243,17 +271,9 @@ const ManagerPostDetail = () => {
     if (file) {
       setEditablePost(prev => ({
         ...prev,
-        imageFile: file
+        imageFile: file,
+        image: URL.createObjectURL(file)
       }));
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditablePost(prev => ({
-          ...prev,
-          image: reader.result
-        }));
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -300,14 +320,15 @@ const ManagerPostDetail = () => {
                   >
                     Hủy sửa
                   </Button>
-                  <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveChanges} >
+                  <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}> Xóa </Button>
+                  {/* <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveChanges} >
                     Lưu thay đổi
-                  </Button>
+                  </Button> */}
                 </>
               ) : (
                 <>
-                  <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}> Xóa </Button>
                   <Button variant="contained" color="primary" startIcon={<Edit />} onClick={handleEditPost}> Sửa </Button>
+                  <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}> Xóa </Button>
                 </>
               )}
             </Box>
@@ -371,12 +392,16 @@ const ManagerPostDetail = () => {
   const handleConfirmDelete = async (postId) => {
     try {
       await deletePost(postId);
-      setSnackbar({ open: true, message: 'Bài viết đã được xóa', severity: 'success', hide: 1500 });
+      setSnackbar({
+        open: true, message: 'Xóa bài viết thành công', severity: 'success', hide: 1500
+      });
       setTimeout(() => {
         navigate('/quan-ly/bai-viet/');
       }, 1500);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Lỗi khi xóa bài viết: ' + (error.response?.data?.message || error.message), severity: 'error', hide: 5000 });
+      setSnackbar({
+        open: true, message: 'Lỗi khi xóa bài viết: ' + (error.response?.data?.message || error.message), severity: 'error', hide: 5000
+      });
     }
   };
 
@@ -399,9 +424,8 @@ const ManagerPostDetail = () => {
       setPost(updatedPost);
     } catch (error) {
       setSnackbar({
-        open: true,
+        open: true, severity: 'error', hide: 5000,
         message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
-        severity: 'error'
       });
     } finally {
       setIsPublishing(prev => ({ ...prev, [platform]: false }));
@@ -418,6 +442,13 @@ const ManagerPostDetail = () => {
     if (url) {
       window.open(url, '_blank');
     }
+  };
+
+  const handleFieldChange = (field, value) => {
+    setEditablePost(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const renderSocialMetricsTable = () => (
@@ -491,8 +522,7 @@ const ManagerPostDetail = () => {
       <DialogContent> <Typography> Bạn có chắc chắn muốn hủy cập nhật? Các thay đổi sẽ không được lưu. </Typography> </DialogContent>
       <DialogActions sx={{ p: 2, pt: 0 }}>
         <Button onClick={handleCloseCancelPopup} sx={{ color: '#666666' }}> Không </Button>
-        <Button
-          onClick={handleCancelConfirm} variant="contained"
+        <Button onClick={handleCancelConfirm} variant="contained"
           sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' } }}
         > Có </Button>
       </DialogActions>
@@ -533,111 +563,152 @@ const ManagerPostDetail = () => {
               {isEditMode ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <TextField
-                    label="Tiêu đề" value={editablePost.title}
-                    onChange={(e) => setEditablePost(prev => ({ ...prev, title: e.target.value }))}
-                    variant="outlined" fullWidth sx={{ mb: 2 }}
+                    label="Tiêu đề *"
+                    value={editablePost?.title || ''}
+                    fullWidth
+                    margin="normal"
+                    onChange={(e) => handleFieldChange('title', e.target.value)}
+                    error={!!fieldErrors.title}
+                    helperText={fieldErrors.title}
                   />
-
                   <Box sx={commonStyles.boxContainer}>
                     <Box sx={commonStyles.flexContainer}>
-                      <Typography sx={commonStyles.labelTypography}> Danh mục: </Typography>
-                      <Select
-                        value={editablePost?.postCategoryId || ''}
-                        onChange={(e) => {
-                          const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
-                          if (selectedCategory) {
-                            setEditablePost(prev => ({
-                              ...prev,
-                              postCategoryId: selectedCategory.postCategoryId,
-                              postCategoryName: selectedCategory.name
-                            }));
-                          }
-                        }}
-                        variant="outlined" fullWidth sx={commonStyles.inputField}
-                      >
-                        {categoryOptions.map(category => (
-                          <MenuItem key={category.postCategoryId} value={category.postCategoryId}> {category.name} </MenuItem>
-                        ))}
-                      </Select>
+                      <FormControl fullWidth margin="normal" error={!!fieldErrors.category}>
+                        <InputLabel>Danh mục *</InputLabel>
+                        <Select
+                          value={editablePost?.postCategoryId || ''}
+                          label="Danh mục *"
+                          onChange={(e) => {
+                            const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
+                            if (selectedCategory) {
+                              setEditablePost(prev => ({
+                                ...prev,
+                                postCategoryId: selectedCategory.postCategoryId,
+                                postCategoryName: selectedCategory.name
+                              }));
+                            }
+                          }}
+                        >
+                          {categoryOptions.map(category => (
+                            <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
+                              {category.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {fieldErrors.category && (<FormHelperText>{fieldErrors.category}</FormHelperText>)}
+                      </FormControl>
                     </Box>
-
                     <Box sx={commonStyles.flexContainer}>
-                      <Typography sx={commonStyles.labelTypography}> Tỉnh/Thành phố: </Typography>
-                      <Select
-                        value={editablePost?.provinceId || ''}
-                        onChange={(e) => {
-                          const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
-                          if (selectedProvince) {
-                            setEditablePost(prev => ({
-                              ...prev,
-                              provinceId: selectedProvince.value,
-                              provinceName: selectedProvince.label
-                            }));
-                          }
-                        }}
-                        variant="outlined" fullWidth sx={commonStyles.inputField}
-                      >
-                        {provinceOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}> {option.label} </MenuItem>
-                        ))}
-                      </Select>
+                      <FormControl fullWidth margin="normal" error={!!fieldErrors.provinceId}>
+                        <InputLabel>Tỉnh/Thành phố *</InputLabel>
+                        <Select
+                          value={editablePost?.provinceId || ''}
+                          label="Tỉnh/Thành phố *"
+                          onChange={(e) => {
+                            const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
+                            if (selectedProvince) {
+                              setEditablePost(prev => ({
+                                ...prev,
+                                provinceId: selectedProvince.value,
+                                provinceName: selectedProvince.label
+                              }));
+                            }
+                          }}
+                        >
+                          {provinceOptions.map(option => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {fieldErrors.provinceId && (<FormHelperText>{fieldErrors.provinceId}</FormHelperText>)}
+                      </FormControl>
                     </Box>
                   </Box>
-
                   <TextField
-                    sx={{ mb: 2, fontWeight: 600 }} label="Mô tả" value={editablePost.description}
-                    onChange={(e) => setEditablePost(prev => ({ ...prev, description: e.target.value }))} multiline rows={3}
+                    label="Mô tả *"
+                    value={editablePost?.description || ''}
+                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                    fullWidth
+                    margin="normal"
+                    multiline
+                    rows={3}
+                    error={!!fieldErrors.description}
+                    helperText={fieldErrors.description}
                   />
-
                   <Box sx={commonStyles.imageContainer}>
-                    <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh</Typography>
+                    <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh *</Typography>
+                    {fieldErrors.image && (
+                      <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>
+                        {fieldErrors.image}
+                      </Typography>
+                    )}
                     <Box sx={{
                       position: 'relative', width: '100%', height: '300px',
-                      border: '2px dashed #ccc', borderRadius: '8px', display: 'flex',
+                      border: fieldErrors.image ? '2px dashed red' : '2px dashed #ccc', borderRadius: '8px', display: 'flex',
                       justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
                     }}>
-                      {editablePost.image ? (
+                      {editablePost?.image ? (
                         <img src={editablePost.image} alt={editablePost.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                       ) : (
                         <img src="/add-image.png" alt="Add image" style={{ width: '100px', height: '100px', opacity: 0.5 }} />
                       )}
                       <Button
-                        variant="outlined" component="label"
+                        variant="outlined"
+                        component="label"
                         sx={{
                           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
                           opacity: 0, transition: 'opacity 0.3s ease', '&:hover': { opacity: 1 },
                           backgroundColor: 'rgba(255, 255, 255, 0.8)', color: '#000', border: '1px solid #ccc',
                         }}
                       >
-                        {editablePost.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
+                        {editablePost?.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
                         <input type="file" hidden accept="image/*" onChange={handleImageChange} />
                       </Button>
                     </Box>
                   </Box>
-
                   <Box sx={commonStyles.editorContainer}>
-                    <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}> Nội dung </Typography>
-                    <ReactQuill
-                      value={editablePost.content}
-                      onChange={(content) => setEditablePost(prev => ({ ...prev, content }))}
-                      modules={{
-                        toolbar: [
-                          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                          [{ 'font': [] }], [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
-                          [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
-                          [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                          [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
-                        ]
-                      }}
-                      theme="snow"
-                    />
+                    <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}>Nội dung *</Typography>
+                    <FormControl sx={{ width: '100%' }}>
+                      <ReactQuill
+                        value={editablePost?.content || ''}
+                        onChange={(value) => handleFieldChange('content', value)}
+                        theme="snow"
+                        className={fieldErrors.content ? "ql-error" : ""}
+                        modules={{
+                          toolbar: [
+                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }], [{ 'font': [] }],
+                            [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                            [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
+                          ],
+                          clipboard: { matchVisual: false }
+                        }}
+                      />
+                      {fieldErrors.content && (
+                        <FormHelperText error>{fieldErrors.content}</FormHelperText>
+                      )}
+                    </FormControl>
+                  </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSaveChanges}
+                      disabled={isSubmitting}
+                      startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : ''}
+                    >
+                      {isSubmitting ? 'Đang lưu...' : 'Lưu'}
+                    </Button>
                   </Box>
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
                     <Chip
-                      label={statusInfo.text} size="small"
+                      label={statusInfo.text}
+                      size="small"
                       sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }}
                     />
                     <Box
@@ -670,22 +741,18 @@ const ManagerPostDetail = () => {
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <FontAwesomeIcon icon={faMapLocation} style={{ color: '#666' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {post.provinceName}
-                      </Typography>
+                      <Typography variant="body2" color="text.secondary">{post.provinceName}</Typography>
                     </Box>
                   </Box>
 
-                  <Box
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  <Box dangerouslySetInnerHTML={{ __html: post.content }}
                     sx={{
-                      '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                      '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '90%', margin: '0 auto'
+                      '& h1': { lineHeight: 1.5, mb: -1 }, '& h2': { lineHeight: 1.5, mb: -1 }, '& h3': { lineHeight: 1.5, mb: -1 },
+                      '& h4': { lineHeight: 1.5, mb: -1 }, '& h5': { lineHeight: 1.5, mb: -1 }, '& h6': { lineHeight: 1.5, mb: -1 },
+                      '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 0 },
+                      '& p': { lineHeight: 1.5, mb: 0 }, flexGrow: 1, width: '90%', margin: '0 auto'
                     }}
                   />
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    {renderActionButtons()}
-                  </Box>
                 </Box>
               )}
             </Box>
@@ -694,18 +761,16 @@ const ManagerPostDetail = () => {
       </Box>
 
       <Snackbar
-        open={snackbar.open} autoHideDuration={6000} onClose={handleSnackbarClose}
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert
-          onClose={handleSnackbarClose} severity={snackbar.severity}
-          variant="filled" sx={{ width: '100%' }}
-        > {snackbar.message} </Alert>
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }} > {snackbar.message} </Alert>
       </Snackbar>
       <PostDeleteConfirm
         open={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)}
-        postId={post.postId} onDelete={handleConfirmDelete}
-      />
+        postId={post.postId} onDelete={handleConfirmDelete} />
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>
         <DialogContent> <DialogContentText> Bạn có chắc chắn muốn duyệt bài viết này? </DialogContentText> </DialogContent>

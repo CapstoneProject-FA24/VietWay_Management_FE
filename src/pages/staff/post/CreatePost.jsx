@@ -297,6 +297,7 @@ const CreatePost = () => {
                         [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
                         ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
                       ],
+                      clipboard: { matchVisual: false }
                     }}
                   />
                   {fieldErrors.content && (<FormHelperText error sx={{ mt: 0.5 }}>{fieldErrors.content}</FormHelperText>)}
