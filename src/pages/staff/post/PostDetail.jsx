@@ -187,7 +187,7 @@ const PostDetail = () => {
           (editablePost.image && editablePost.image.length > 0);
         if (!hasAnyField) {
           setSnackbar({
-            open: true, severity: 'error', hide: 5000,
+            open: true, severity: 'warning', hide: 5000,
             message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
           });
           return;
@@ -195,6 +195,10 @@ const PostDetail = () => {
       }
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
+        setSnackbar({
+          open: true, severity: 'warning', hide: 5000,
+          message: 'Vui lòng nhập đầy đủ và chính xác các thông tin',
+        });
         return;
       }
       const updatedPost = {
@@ -226,7 +230,7 @@ const PostDetail = () => {
             });
           }
         }
-        
+
         setPost(prevPost => ({
           ...prevPost,
           ...updatedPost,
@@ -313,7 +317,7 @@ const PostDetail = () => {
           <HistoryIcon color="primary" />
         </IconButton>
 
-        {post.status === PostStatus.Draft || post.status === PostStatus.Rejected ? (
+        {post.status !== PostStatus.Approved ? (
           <>
             {isEditMode ? (
               <Button
@@ -324,7 +328,7 @@ const PostDetail = () => {
               </Button>
             ) : (
               <>
-                <Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>Gửi duyệt</Button>
+                {post.status === PostStatus.Draft && (<Button variant="contained" color="primary" startIcon={<Send />} onClick={handleSendForApproval}>Gửi duyệt</Button>)}
                 <Button variant="contained" sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' } }} startIcon={<Edit />} onClick={handleEditPost}>
                   Chỉnh sửa
                 </Button>
@@ -540,18 +544,20 @@ const PostDetail = () => {
                       </FormControl>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                      <Button
-                        variant="contained" sx={{ backgroundColor: 'grey', mr: 1 }}
-                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <Save />}
-                        onClick={() => handleSaveChanges(true)} disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
-                      </Button>
+                      {(post.status === PostStatus.Draft || post.status === PostStatus.Rejected) && (
+                        <Button
+                          variant="contained" sx={{ backgroundColor: 'grey', mr: 1 }}
+                          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : ''}
+                          onClick={() => handleSaveChanges(true)} disabled={isSubmitting}
+                        >
+                          {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
+                        </Button>
+                      )}
                       <Button
                         variant="contained" color="primary" onClick={() => handleSaveChanges(false)} disabled={isSubmitting}
-                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <Send />}
+                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : ''}
                       >
-                        {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
+                        {isSubmitting ? 'Đang gửi...' : ((post.status === PostStatus.Draft || post.status === PostStatus.Rejected) ? 'Gửi duyệt' : 'Lưu')}
                       </Button>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>

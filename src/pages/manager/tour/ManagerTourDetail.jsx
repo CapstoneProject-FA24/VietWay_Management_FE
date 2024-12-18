@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Tooltip, CircularProgress } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
@@ -50,6 +50,7 @@ const ManagerTourDetail = () => {
       try {
         const fetchedTour = await fetchTourById(id);
         setTour(fetchedTour);
+        console.log(fetchedTour);
         const fetchedTourTemplate = await fetchTourTemplateById(fetchedTour.tourTemplateId);
         setTourTemplate(fetchedTourTemplate);
         const fetchedTours = await fetchToursByTemplateId(fetchedTour.tourTemplateId);
@@ -278,22 +279,37 @@ const ManagerTourDetail = () => {
       <Box sx={{ display: 'flex', gap: 1 }}>
         {tour?.status === TourStatus.Pending && (
           <>
+            <Tooltip title={dayjs(tour.registerCloseDate) < dayjs() ? "Không thể duyệt tour do đã qua ngày đóng đăng ký" : ''} arrow>
+              <span>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleApproveTour()}
+                  sx={{ height: '45px' }}
+                  disabled={dayjs(tour.registerCloseDate) < dayjs()}
+                >
+                  Duyệt
+                </Button>
+              </span>
+            </Tooltip>
+
             <Button
               variant="contained"
-              color="primary"
-              onClick={() => handleApproveTour()}
-              sx={{ height: '45px' }}
-            >
-              Duyệt
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
               onClick={handleOpenRejectDialog}
-              sx={{ height: '45px' }}
+              sx={{ height: '45px', bgcolor: '#ff5d00', '&:hover': { bgcolor: '#b44200' } }}
             >
               Từ chối
             </Button>
+            {dayjs(tour.registerCloseDate) <= dayjs() && (
+              <Button
+                variant="contained"
+                onClick={handleDeleteTour}
+                color="error"
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Đang xóa...' : 'Xóa'}
+              </Button>
+            )}
           </>
         )}
         {canUpdate && (
@@ -455,23 +471,29 @@ const ManagerTourDetail = () => {
 
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
-                      <Typography>Yêu cầu cọc: {tour.depositPercent}% tổng tiền booking</Typography>
-                      <Typography>Thời hạn thanh toán toàn bộ: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
+                      {tour.depositPercent === 100 ? (
+                        <Typography>Yêu cầu thanh toán 100% khi đăng ký</Typography>
+                      ) : (
+                        <>
+                          <Typography>Yêu cầu cọc: {tour.depositPercent}% tổng tiền booking</Typography>
+                          <Typography>Thời hạn thanh toán toàn bộ: {dayjs(tour.paymentDeadline).format('DD/MM/YYYY')}</Typography>
+                        </>
+                      )}
                     </Box>
 
                     {tour.tourPolicies && tour.tourPolicies.length > 0 && (
                       <Box sx={{ mb: 3 }}>
                         <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
                         {tour.tourPolicies.map((policy, index) => (
-                          <Box key={index} sx={{ mt: 1 }}>
-                            <Typography>
+                          <Box key={index} sx={{ mt: 1, mb: 0.5 }}>
+                            <Typography sx={{ lineHeight: 1 }}>
                               Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
                               Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
                             </Typography>
                           </Box>
                         ))}
                         <Typography>
-                          Hủy từ ngày {new Date(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).toLocaleDateString()}: Chi phí hủy tour là 100% tổng giá trị booking
+                          Hủy từ ngày {dayjs(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).format('DD/MM/YYYY')}: Chi phí hủy tour là 100% tổng giá trị booking
                         </Typography>
                       </Box>
                     )}

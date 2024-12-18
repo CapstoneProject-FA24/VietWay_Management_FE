@@ -217,7 +217,7 @@ const TourTemplateDetails = () => {
   };
 
   const ActionButtons = ({ status }) => {
-    const showEditDelete = status === TourTemplateStatus.Draft || status === TourTemplateStatus.Rejected;
+    const showEditDelete = status !== TourTemplateStatus.Approved;
     const showDeleteOnly = status === TourTemplateStatus.Pending;
 
     if (!showEditDelete && !showDeleteOnly) return null;
@@ -255,12 +255,14 @@ const TourTemplateDetails = () => {
               </Button>
             ) : (
               <>
-                <Button
-                  variant="contained" startIcon={<SendIcon />} onClick={handleSend}
-                  sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
-                >
-                  Gửi duyệt
-                </Button>
+                {state.tourTemplate.status === TourTemplateStatus.Draft && (
+                  <Button
+                    variant="contained" startIcon={<SendIcon />} onClick={handleSend}
+                    sx={{ backgroundColor: '#3572EF', '&:hover': { backgroundColor: '#1C4ED8' }, height: '45px' }}
+                  >
+                    Gửi duyệt
+                  </Button>
+                )}
                 <Button
                   variant="contained" startIcon={<EditIcon />} onClick={handleEdit}
                   sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}

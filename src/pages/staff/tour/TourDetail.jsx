@@ -353,15 +353,15 @@ const TourDetail = () => {
                       <Box sx={{ mb: 3 }}>
                         <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
                         {tour.tourPolicies.map((policy, index) => (
-                          <Box key={index} sx={{ mt: 1 }}>
-                            <Typography>
+                          <Box key={index} sx={{ mt: 1, mb: 0.5 }}>
+                            <Typography sx={{ lineHeight: 1 }}>
                               Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
                               Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
                             </Typography>
                           </Box>
                         ))}
                         <Typography>
-                          Hủy từ ngày {new Date(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).toLocaleDateString()}: Chi phí hủy tour là 100% tổng giá trị booking
+                          Hủy từ ngày {dayjs(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).format('DD/MM/YYYY')}: Chi phí hủy tour là 100% tổng giá trị booking
                         </Typography>
                       </Box>
                     )}

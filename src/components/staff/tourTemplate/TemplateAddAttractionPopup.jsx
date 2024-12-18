@@ -3,7 +3,7 @@ import { Modal, Box, Typography, TextField, InputAdornment, Grid, Card, CardMedi
 import ReactSelect from 'react-select';
 import makeAnimated from 'react-select/animated';
 import SearchIcon from '@mui/icons-material/Search';
-import { fetchAttractions } from '@services/AttractionService';
+import { fetchApprovedttractions } from '@services/AttractionService';
 
 const attractionTypes = [
     { AttractionTypeId: 1, Name: 'Công viên giải trí' }, { AttractionTypeId: 10, Name: 'Khu du lịch văn hóa' },
@@ -20,7 +20,7 @@ const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinc
 
     useEffect(() => {
         fetchData();
-    }, [page]);
+    }, [page, open]);
 
     const fetchData = async () => {
         try {
@@ -28,10 +28,11 @@ const TemplateAddAttractionPopup = ({ open, onClose, onSelectAttraction, provinc
                 pageSize: 3, pageIndex: page, nameSearch: searchTerm,
                 attractionTypeIds: selectedTypes.map(c => c.value),
                 provinceIds: selectedProvinces.map(p => p.value),
-                status: 2
+                attractionIds: selectedAttractions.map(attraction => attraction.attractionId)
             };
-            const result = await fetchAttractions(params);
-            setAttractions(result.data.sort((a, b) => a.name.localeCompare(b.name)));
+            const result = await fetchApprovedttractions(params);
+            console.log(selectedAttractions);
+            setAttractions(result.data);
             setTotalPages(Math.ceil(result.total / 3));
         } catch (error) {
             console.error('Error fetching attractions:', error);

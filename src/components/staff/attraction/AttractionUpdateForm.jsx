@@ -115,7 +115,7 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
           images.length > 0;
         if (!hasAnyField) {
           setSnackbar({
-            open: true, severity: 'error', hide: 5000,
+            open: true, severity: 'warning', hide: 5000,
             message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
           });
           return;
@@ -127,8 +127,8 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
       if (Object.keys(errors).length > 0) {
         setSnackbar({
           open: true,
-          message: isDraft ? 'Vui lòng điền các trường bắt buộc để lưu nháp' : 'Vui lòng điền đầy đủ thông tin trước khi gửi duyệt',
-          severity: 'error'
+          message: isDraft ? 'Vui lòng điền các trường bắt buộc để lưu nháp' : 'Vui lòng nhập đầy đủ và chính xác các thông tin',
+          severity: 'warning'
         });
         return;
       }
@@ -391,8 +391,10 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
       {getCookie('role') === 'nhan-vien' && (
         <>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>
+            {(attraction.status !== 1 && attraction.status !== 2) && (
+              <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+            )}
+            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}>{(attraction.status === 0 || attraction.status === 3) ? 'Gửi duyệt' : 'Lưu'}</Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Box sx={{ mt: 1, width: '32rem' }}>

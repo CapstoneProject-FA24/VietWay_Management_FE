@@ -138,7 +138,7 @@ export const fetchTourById = async (id) => {
                 ageTo: price.ageTo
             })),
             depositPercent: item.depositPercent,
-            paymentDeadline: new Date(item.paymentDeadline),
+            paymentDeadline: item.paymentDeadline ? new Date(item.paymentDeadline) : null,
         };
         return tour;
     } catch (error) {

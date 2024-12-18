@@ -263,7 +263,7 @@ const AttractionDetail = () => {
                 <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
                   Quản lý điểm tham quan
                 </Typography>
-                {(attraction.status === AttractionStatus.Draft || attraction.status === AttractionStatus.Rejected) && (
+                {(attraction.status !== AttractionStatus.Approved) && (
                   <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
                     <IconButton
                       onClick={handleHistoryClick}
@@ -297,13 +297,15 @@ const AttractionDetail = () => {
                       </Button>
                     ) : (
                       <>
-                        <Button
-                          variant="contained" color="primary"
-                          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-                          onClick={handleSendForApproval} disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
-                        </Button>
+                        {attraction.status === AttractionStatus.Draft && (
+                          <Button
+                            variant="contained" color="primary"
+                            startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                            onClick={handleSendForApproval} disabled={isSubmitting}
+                          >
+                            {isSubmitting ? 'Đang gửi...' : 'Gửi duyệt'}
+                          </Button>
+                        )}
                         <Button
                           variant="contained" startIcon={<EditIcon />} onClick={handleEdit}
                           sx={{ backgroundColor: '#767676', '&:hover': { backgroundColor: '#575757' }, height: '45px' }}
@@ -320,7 +322,7 @@ const AttractionDetail = () => {
                     </Button>
                   </Box>
                 )}
-                {attraction.status === AttractionStatus.Pending && (
+                {/* {attraction.status === AttractionStatus.Pending && (
                   <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button
                       variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
@@ -329,7 +331,7 @@ const AttractionDetail = () => {
                       Xóa
                     </Button>
                   </Box>
-                )}
+                )} */}
               </Box>
 
               {isEditing ? (

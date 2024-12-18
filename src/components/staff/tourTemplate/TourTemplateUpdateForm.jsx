@@ -228,6 +228,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 })),
                 minPrice: parseFloat(editableFields.minPrice.value) || null,
                 maxPrice: parseFloat(editableFields.maxPrice.value) || null,
+                imageUrls: tourTemplate.imageUrls.filter(img => img instanceof File) || [],
                 isDraft: isDraft
             };
 
@@ -236,7 +237,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
                     errors.provinces = 'Vui lòng chọn ít nhất một tỉnh thành';
                 }
-                if (!tourTemplateData.schedules || tourTemplateData.schedules.length === 0) {
+                if (!tourTemplateData.schedules || tourTemplateData.schedules.length  === 0) {
                     errors.schedules = 'Vui lòng thêm ít nhất một lịch trình';
                 }
                 const invalidSchedules = tourTemplateData.schedules.filter(s =>
@@ -245,7 +246,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 if (invalidSchedules.length > 0) {
                     errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
                 }
-                if (!tourTemplateData.imageUrls || tourTemplateData.imageUrls.length < 4) {
+                if (!tourTemplateData.imageUrls || tourTemplate.imageUrls.length < 4) {
                     errors.imageUrls = 'Vui lòng thêm đủ 4 ảnh';
                 }
                 if (!tourTemplateData.durationId) {
@@ -265,6 +266,11 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 });
                 if (Object.keys(errors).length > 0) {
                     setFieldErrors(errors);
+                    setSnackbar({
+                        open: true, severity: 'warning', hide: 5000,
+                        message: 'Vui lòng nhập đầy đủ và chính xác các thông tin',
+                    });
+                    console.log(errors);
                     return;
                 }
             } else {
@@ -287,7 +293,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 console.log(invalidSchedules);
                 if (!hasAnyField || invalidSchedules.length > 0) {
                     setSnackbar({
-                        open: true, severity: 'error', hide: 5000,
+                        open: true, severity: 'warning', hide: 5000,
                         message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
                     });
                     return;
@@ -542,7 +548,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                         <Button variant="outlined" onClick={() => handleAttractionChange(s.dayNumber)}>Chọn điểm đến</Button>
                                         {s.attractions.length > 0 && (
                                             <Box sx={{ mt: 1 }}>
-                                                <Typography variant="subtitle1" sx>Đã chọn:</Typography>
+                                                <Typography variant="subtitle1">Đã chọn:</Typography>
                                                 <ul style={{ listStyleType: 'none', padding: 0 }}>
                                                     {s.attractions.map((attraction) => (
                                                         <li key={attraction.AttractionId} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
@@ -625,11 +631,13 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 </Grid>
             </Grid >
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                {(tourTemplate.status !== 1 && tourTemplate.status !== 2) && (
                 <Button
                     variant="contained" fullWidth onClick={() => handleSubmit(true)}
                     sx={{ backgroundColor: 'gray', height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }, width: 'fit-content' }}
                 >Lưu bản nháp</Button>
-                <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >Gửi duyệt</Button>
+                )}
+                <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >{(tourTemplate.status === 1) ? 'Lưu' : 'Gửi duyệt'}</Button>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Box sx={{ mt: 1, width: '32rem' }}>

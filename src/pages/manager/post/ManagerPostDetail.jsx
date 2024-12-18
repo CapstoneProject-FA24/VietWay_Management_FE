@@ -44,6 +44,7 @@ const ManagerPostDetail = () => {
     try {
       const data = await fetchPostById(id);
       setPost(data);
+      setFieldErrors({});
       const categories = await fetchPostCategory();
       setCategoryOptions(categories.map(cat => ({
         postCategoryId: cat.postCategoryId,
@@ -190,6 +191,12 @@ const ManagerPostDetail = () => {
 
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
+        setSnackbar({
+          open: true,
+          message: 'Vui lòng nhập đầy đủ và chính xác các thông tin',
+          severity: 'warning',
+          hide: 5000
+        });
         return;
       }
 

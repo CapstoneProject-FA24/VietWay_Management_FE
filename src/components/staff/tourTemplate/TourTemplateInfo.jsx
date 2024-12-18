@@ -10,6 +10,11 @@ import { TourTemplateStatus } from '@hooks/Statuses';
 import ReviewListTour from '@components/review/ReviewListTour';
 import TourTable from '@components/tourTemplate/TourTable';
 import { getTourTemplateStatusInfo } from '@services/StatusService';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import CategoryIcon from '@mui/icons-material/Category';
+import FlightIcon from '@mui/icons-material/Flight';
+import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 
 const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
   return (
@@ -45,20 +50,31 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
           </Box>
         </Grid>
         <Grid item xs={12} md={8}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
-              <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <AccessTimeFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Thời lượng:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.duration.durationName}</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <CategoryIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Loại tour:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.tourCategoryName}</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                {tourTemplate.transportation === 'Máy bay' && (<FlightIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                {tourTemplate.transportation === 'Tàu hỏa' && (<DirectionsTransitIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                {tourTemplate.transportation === 'Xe du lịch' && (<DirectionsCarFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Phương tiện:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.transportation}</Typography>
+                </Box>
+              </Box>
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
-              <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
-              <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
-            </Box>
-          </Box>
 
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>

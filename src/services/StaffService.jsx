@@ -121,3 +121,22 @@ export const changeStaffPassword = async (oldPassword, newPassword) => {
         throw error;
     }
 };
+
+export const adminResetStaffPassword = async (staffId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/staff/admin-reset-staff-password?staffId=${staffId}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error resetting staff password:', error);
+        throw error;
+    }
+};

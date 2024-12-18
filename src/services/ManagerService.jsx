@@ -120,3 +120,22 @@ export const changeManagerPassword = async (oldPassword, newPassword) => {
         throw error;
     }
 };
+
+export const adminResetManagerPassword = async (managerId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/managers/admin-reset-manager-password?managerId=${managerId}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error resetting manager password:', error);
+        throw error;
+    }
+};

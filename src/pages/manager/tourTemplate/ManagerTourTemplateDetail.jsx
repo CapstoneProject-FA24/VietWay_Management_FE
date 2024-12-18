@@ -19,6 +19,11 @@ import dayjs from 'dayjs';
 import TourTable from '@components/tourTemplate/TourTable';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import CategoryIcon from '@mui/icons-material/Category';
+import FlightIcon from '@mui/icons-material/Flight';
+import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -284,19 +289,27 @@ const ManagerTourTemplateDetails = () => {
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-                <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
-                <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
+                <AccessTimeFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Thời lượng:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.duration.durationName}</Typography>
+                </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-                <FontAwesomeIcon icon={faIcons} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
-                <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
+                <CategoryIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Loại tour:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.tourCategoryName}</Typography>
+                </Box>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-                <FontAwesomeIcon icon={faBus} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
-                <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
+                {tourTemplate.transportation === 'Máy bay' && (<FlightIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                {tourTemplate.transportation === 'Tàu hỏa' && (<DirectionsTransitIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                {tourTemplate.transportation === 'Xe du lịch' && (<DirectionsCarFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Phương tiện:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.transportation}</Typography>
+                </Box>
               </Box>
             </Box>
             <Box sx={{ mb: 5 }}>
