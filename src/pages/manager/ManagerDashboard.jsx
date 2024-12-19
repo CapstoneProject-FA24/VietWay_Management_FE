@@ -82,8 +82,19 @@ const ManagerDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
+      // Get first day of the start month
       const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
-      const endDate = appliedGlobalDateRange.endDate.format('MM/DD/YYYY');
+      
+      // Get end date based on whether it's current month
+      let endDate;
+      if (appliedGlobalDateRange.endDate.month() === dayjs().month() && 
+          appliedGlobalDateRange.endDate.year() === dayjs().year()) {
+        // If current month, use current date
+        endDate = dayjs().format('MM/DD/YYYY');
+      } else {
+        // If not current month, use last day of that month
+        endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
+      }
 
       // Fetch all reports in parallel
       const [summaryData, bookingData, ratingData, revenueData] = await Promise.all([
