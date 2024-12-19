@@ -169,20 +169,26 @@ const CreateTourTemplate = () => {
         return;
       }
 
+      const isEmptyHtml = (html) => {
+        if (!html) return true;
+        const strippedHtml = html.replace(/<[^>]*>/g, '').trim();
+        return !strippedHtml || html === '<p><br></p>';
+      };
+
       const tourTemplateData = {
-        code: tourTemplate.code || null,
-        tourName: tourTemplate.tourName || null,
-        description: tourTemplate.description || '',
+        code: tourTemplate.code?.trim() || null,
+        tourName: tourTemplate.tourName?.trim() || null,
+        description: isEmptyHtml(tourTemplate.description) ? '' : tourTemplate.description,
         durationId: tourTemplate.duration || null,
         tourCategoryId: tourTemplate.tourCategory || null,
-        transportation: tourTemplate.transportation || null,
-        note: tourTemplate.note || null,
+        transportation: tourTemplate.transportation?.trim() || null,
+        note: isEmptyHtml(tourTemplate.note) ? '' : tourTemplate.note,
         provinceIds: tourTemplate.provinces?.map(province => province.value) || [],
         startingProvinceId: tourTemplate.startingProvinceId || null,
         schedules: tourTemplate.schedule?.map(s => ({
           dayNumber: s.dayNumber,
-          title: s.title || null,
-          description: s.description || null,
+          title: s.title?.trim() || '',
+          description: isEmptyHtml(s.description) ? '' : s.description,
           attractionIds: s.attractions?.map(attr => attr.attractionId) || []
         })) || [],
         isDraft: isDraft,
@@ -200,7 +206,7 @@ const CreateTourTemplate = () => {
           errors.schedules = 'Vui lòng thêm ít nhất một lịch trình';
         }
         const invalidSchedules = tourTemplateData.schedules.filter(s =>
-          !s.title || !s.description || !s.attractionIds || s.attractionIds.length === 0
+          !s.title?.trim() || isEmptyHtml(s.description) || !s.attractionIds || s.attractionIds.length === 0
         );
         if (invalidSchedules.length > 0) {
           errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
@@ -215,19 +221,33 @@ const CreateTourTemplate = () => {
         if (!tourTemplateData.tourCategoryId) {
           errors.tourCategory = 'Vui lòng chọn loại tour';
         }
+
         const requiredFields = {
-          tourName: 'tên tour', code: 'mã tour', description: 'mô tả', transportation: 'phương tiện',
-          startingProvinceId: 'điểm khởi hành', minPrice: 'giá thấp nhất', maxPrice: 'giá cao nhất'
+          tourName: 'tên tour',
+          code: 'mã tour',
+          description: 'mô tả',
+          transportation: 'phương tiện',
+          startingProvinceId: 'điểm khởi hành',
+          minPrice: 'giá thấp nhất',
+          maxPrice: 'giá cao nhất'
         };
+
         Object.entries(requiredFields).forEach(([key, label]) => {
-          if (!tourTemplateData[key]) {
+          if (key === 'description') {
+            if (isEmptyHtml(tourTemplateData[key])) {
+              errors[key] = `Vui lòng nhập ${label}`;
+            }
+          } else if (!tourTemplateData[key]) {
             errors[key] = `Vui lòng nhập ${label}`;
           }
         });
+
         if (Object.keys(errors).length > 0) {
           setFieldErrors(errors);
           setSnackbar({
-            open: true, severity: 'warning', hide: 5000,
+            open: true,
+            severity: 'warning',
+            hide: 5000,
             message: 'Vui lòng nhập đầy đủ thông tin và hình ảnh',
           });
           return;
@@ -257,7 +277,7 @@ const CreateTourTemplate = () => {
         if (!hasAnyField && !hasAnyImages) {
           setSnackbar({
             open: true,
-            severity: 'error',
+            severity: 'warning',
             hide: 5000,
             message: 'Vui lòng nhập ít nhất một thông tin hoặc thêm ít nhất một ảnh để lưu nháp',
           });
