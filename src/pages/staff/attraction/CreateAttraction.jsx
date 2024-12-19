@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Button, IconButton, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Grid, Paper, Snackbar, Alert, TextField, Button, IconButton, Select, MenuItem, FormControl, FormHelperText } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,8 +7,6 @@ import { Helmet } from 'react-helmet';
 import '@styles/AttractionDetails.css'
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,7 +15,8 @@ import { createAttraction, updateAttractionImages } from '@services/AttractionSe
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import SidebarStaff from '@layouts/SidebarStaff';
-import Map from '@components/staff/attraction/Map';
+import TourMap from '@components/tour/TourMap';
+import '@styles/ReactQuill.css';
 
 const AddAttraction = () => {
   const navigate = useNavigate();
@@ -27,19 +26,17 @@ const AddAttraction = () => {
   const fileInputRef = useRef(null);
   const [provinces, setProvinces] = useState([]);
   const [attractionTypes, setAttractionTypes] = useState([]);
-
   const [selectedProvince, setSelectedProvince] = useState('');
   const [editableFields, setEditableFields] = useState({
-    name: { value: '', isEditing: true },
-    contactInfo: { value: '', isEditing: true },
-    description: { value: '', isEditing: true },
-    address: { value: '', isEditing: true },
-    website: { value: '', isEditing: true },
-    type: { value: '', isEditing: true },
-    placeId: { value: '', isEditing: true }
+    name: { value: '', isEditing: true }, contactInfo: { value: '', isEditing: true },
+    description: { value: '', isEditing: true }, address: { value: '', isEditing: true },
+    website: { value: '', isEditing: true }, type: { value: '', isEditing: true }, placeId: { value: '', isEditing: true }
   });
-
+  const [snackbar, setSnackbar] = useState({
+    open: false, message: '', severity: 'success', hide: 5000
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -60,42 +57,16 @@ const AddAttraction = () => {
   }, []);
 
   const handleFieldChange = (field, value) => {
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], value }
-    }));
-  };
-
-  const handleFieldSubmit = (field) => {
-    if (!editableFields[field].value) {
-      alert(`${field} cannot be blank or empty.`);
-      return;
-    }
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], isEditing: false }
-    }));
-  };
-
-  const handleFieldEdit = (field) => {
-    setEditableFields(prev => ({
-      ...prev,
-      [field]: { ...prev[field], isEditing: true }
-    }));
+    setEditableFields(prev => ({ ...prev, [field]: { ...prev[field], value } }));
   };
 
   const settings = {
-    dots: true,
-    dotsClass: 'slick-dots custom-dots slider-dots',
+    dots: true, dotsClass: 'slick-dots custom-dots slider-dots',
     customPaging: i => (
       <div className="custom-dot"></div>
     ),
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    className: 'attraction-slider',
+    infinite: true, speed: 500, slidesToShow: 1,
+    slidesToScroll: 1, autoplay: true, className: 'attraction-slider',
   };
 
   const handleThumbnailClick = (index) => {
@@ -120,13 +91,9 @@ const AddAttraction = () => {
 
   const modules = {
     toolbar: [
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'font': [] }],
-      [{ 'color': [] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-      ['link', 'image'],
-      ['clean']  // remove formatting button
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }], [{ 'font': [] }],
+      [{ 'color': [] }], ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link', 'image'], ['clean']
     ],
     clipboard: {
       matchVisual: false
@@ -139,40 +106,58 @@ const AddAttraction = () => {
 
   const handleSave = async (isDraft) => {
     try {
+      const errors = {};
+
+      if (isDraft) {
+        const hasAnyField =
+          editableFields.name.value ||
+          editableFields.address.value ||
+          editableFields.description.value ||
+          editableFields.contactInfo.value ||
+          editableFields.website.value ||
+          selectedProvince ||
+          editableFields.type.value ||
+          editableFields.placeId.value ||
+          images.length > 0;
+        if (!hasAnyField) {
+          setSnackbar({
+            open: true, severity: 'error', hide: 5000,
+            message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+          });
+          return;
+        }
+      } else {
+        if (!editableFields.name.value) errors.name = 'Vui lòng nhập tên điểm tham quan';
+        if (!editableFields.address.value) errors.address = 'Vui lòng nhập địa chỉ';
+        if (!editableFields.description.value) errors.description = 'Vui lòng nhập mô tả';
+        if (!selectedProvince) errors.provinceId = 'Vui lòng chọn Tỉnh/Thành phố';
+        if (!editableFields.type.value) errors.attractionTypeId = 'Vui lòng chọn Loại điểm tham quan';
+        if (images.length === 0) errors.images = 'Vui lòng thêm ít nhất một hình ảnh';
+      }
+      setFieldErrors(errors);
+
+      if (Object.keys(errors).length > 0) {
+        setSnackbar({
+          open: true,
+          message: isDraft ? 'Vui lòng điền các trường bắt buộc để lưu nháp' : 'Vui lòng điền đầy đủ thông tin trước khi gửi duyệt',
+          severity: 'error'
+        });
+        return;
+      }
+
       const attractionData = {
-        name: editableFields.name.value,
-        address: editableFields.address.value,
-        description: editableFields.description.value,
-        contactInfo: editableFields.contactInfo.value,
-        website: editableFields.website.value,
-        provinceId: selectedProvince,
-        attractionTypeId: editableFields.type.value,
+        name: editableFields.name.value || null,
+        address: editableFields.address.value || null,
+        description: editableFields.description.value || null,
+        contactInfo: editableFields.contactInfo.value || null,
+        website: editableFields.website.value || null,
+        provinceId: selectedProvince || null,
+        attractionTypeId: editableFields.type.value || null,
         isDraft: isDraft,
         googlePlaceId: editableFields.placeId.value || null
       };
-      if (!isDraft) {
-        const requiredFields = ['name', 'address', 'description', 'contactInfo', 'provinceId', 'attractionTypeId'];
-        const missingFields = requiredFields.filter(field => !attractionData[field]);
-        if (missingFields.length > 0) {
-          alert(`Vui lòng điền đy đủ thông tin trước khi tạo mới.`);
-          return;
-        }
-        if (images.length === 0) {
-          alert('Vui lòng thêm ít nhất một hình ảnh cho điểm tham quan.');
-          return;
-        }
-      }
-      else {
-        const requiredFields = ['provinceId', 'attractionTypeId'];
-        const missingFields = requiredFields.filter(field => !attractionData[field]);
-        if (missingFields.length > 0) {
-          alert(`Vui lòng điền thông tin "Tỉnh/Thành phố" và "Loại điểm tham quan" để lưu nháp.`);
-          return;
-        }
-      }
 
       const response = await createAttraction(attractionData);
-      console.log(response);
       if (response.statusCode === 200) {
         if (images.length > 0) {
           const imagesResponse = await updateAttractionImages(
@@ -180,30 +165,68 @@ const AddAttraction = () => {
             images.length > 0 ? images : null
           );
           if (imagesResponse.statusCode === 200) {
-            navigate('/nhan-vien/diem-tham-quan');
+            setSnackbar({
+              open: true,
+              message: 'Tạo điểm tham quan thành công',
+              severity: 'success',
+              hide: 1500
+            });
+            setTimeout(() => {
+              navigate('/nhan-vien/diem-tham-quan/chi-tiet/' + response.data);
+            }, 1500);
           }
+          else {
+            console.error('Error uploading images:', imagesResponse);
+            setSnackbar({
+              open: true, severity: 'error',
+              message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+            });
+          }
+        } else {
+          setSnackbar({
+            open: true,
+            message: isDraft ? 'Lưu nháp điểm tham quan thành công' : 'Gửi duyệt điểm tham quan thành công',
+            severity: 'success',
+            hide: 1500
+          });
+          setTimeout(() => {
+            navigate('/nhan-vien/diem-tham-quan/chi-tiet/' + response.data);
+          }, 1500);
         }
-        navigate('/nhan-vien/diem-tham-quan');
       }
     } catch (error) {
       if (error.response && error.response.data.message === 'Incomplete attraction information') {
-        alert('Vui lòng điền đầy đủ thông tin trước khi tạo mới.');
+        setSnackbar({
+          open: true, severity: 'error', hide: 5000,
+          message: 'Vui lòng điền đầy đủ thông tin trước khi tạo mới.',
+        });
       } else {
-        alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+        setSnackbar({
+          open: true, severity: 'error', hide: 5000,
+          message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+        });
       }
       console.error('Error creating attraction:', error);
     }
   };
 
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const handleSelectLocation = (placeData) => {
+    handleFieldChange('placeId', placeData.place_id);
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
 
       <Box sx={{
-        flexGrow: 1,
-        p: 3,
-        transition: 'margin-left 0.3s',
+        flexGrow: 1, p: 3, transition: 'margin-left 0.3s',
         marginLeft: isSidebarOpen ? '260px' : '20px',
         width: `calc(100% - ${isSidebarOpen ? '260px' : '20px'})`,
         maxWidth: '100vw'
@@ -216,8 +239,7 @@ const AddAttraction = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
             <Button
               startIcon={<ArrowBackIosNewOutlinedIcon />}
-              onClick={() => navigate(-1)}
-              sx={{ width: 'fit-content' }}
+              onClick={() => navigate(-1)} sx={{ width: 'fit-content' }}
             >
               Quay lại
             </Button>
@@ -225,47 +247,63 @@ const AddAttraction = () => {
             <Typography
               variant="h4"
               sx={{
-                fontSize: '2.7rem',
-                fontWeight: 600,
-                color: 'primary.main',
-                alignSelf: 'center',
-                alignItems: 'center',
-                marginBottom: '1rem'
+                fontSize: '2.7rem', fontWeight: 600, color: 'primary.main',
+                alignSelf: 'center', alignItems: 'center', marginBottom: '1rem'
               }}
             >
               Tạo điểm tham quan
             </Typography>
           </Box>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', width: '35%' }}>
-            <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
-              Loại điểm tham quan
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Select
-                value={editableFields.type.value}
-                onChange={(e) => handleFieldChange('type', e.target.value)}
-                variant="outlined"
-                fullWidth
-                sx={{ mr: 2 }}
-              >
-                {attractionTypes.map((type) => (
-                  <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
-                ))}
-              </Select>
+          <Box sx={{ display: 'flex', gap: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
+              <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+                Loại điểm tham quan *
+              </Typography>
+              <FormControl sx={{ width: '100%' }}>
+                <Select
+                  value={editableFields.type.value}
+                  onChange={(e) => handleFieldChange('type', e.target.value)}
+                  variant="outlined" fullWidth sx={{ mr: 2 }} error={!!fieldErrors.attractionTypeId}
+                >
+                  {attractionTypes.map((type) => (
+                    <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
+                  ))}
+                </Select>
+                {fieldErrors.attractionTypeId && (
+                  <FormHelperText error>{fieldErrors.attractionTypeId}</FormHelperText>
+                )}
+              </FormControl>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
+              <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+                Tỉnh/Thành phố *
+              </Typography>
+              <FormControl sx={{ width: '100%' }}>
+                <Select
+                  value={selectedProvince} onChange={handleProvinceChange}
+                  variant="outlined" fullWidth sx={{ mr: 2, mb: 2 }}
+                  error={!!fieldErrors.provinceId}
+                >
+                  {provinces.map((province) => (
+                    <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
+                  ))}
+                </Select>
+                {fieldErrors.provinceId && (
+                  <FormHelperText error sx={{ mt: -2 }}>{fieldErrors.provinceId}</FormHelperText>
+                )}
+              </FormControl>
             </Box>
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, color: 'grey', ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
-              Tên điểm tham quan
+            <Typography gutterBottom sx={{ backgroundColor: 'white', pl: 1, pr: 1, ml: 2, mb: -1.5, zIndex: 1, width: 'fit-content' }}>
+              Tên điểm tham quan *
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TextField
                 value={editableFields.name.value}
                 onChange={(e) => handleFieldChange('name', e.target.value)}
-                variant="outlined"
-                fullWidth
-                sx={{ mr: 2 }}
+                variant="outlined" fullWidth sx={{ mr: 2 }}
+                error={!!fieldErrors.name} helperText={fieldErrors.name}
               />
             </Box>
           </Box>
@@ -288,8 +326,7 @@ const AddAttraction = () => {
                       <div>
                         <img
                           src="https://doc.cerp.ideria.co/assets/images/image-a5238aed7050a0691758858b2569566d.jpg"
-                          alt="Default"
-                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                          alt="Default" style={{ width: '100%', height: '450px', objectFit: 'cover' }}
                         />
                       </div>
                     )}
@@ -299,9 +336,8 @@ const AddAttraction = () => {
               <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3, maxWidth: '100%' }}>
                 {images.map((image, index) => (
                   <Box
-                    key={index}
+                    key={index} onClick={() => handleThumbnailClick(index)}
                     sx={{ maxWidth: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none', position: 'relative' }}
-                    onClick={() => handleThumbnailClick(index)}
                   >
                     <img
                       src={image instanceof File ? URL.createObjectURL(image) : image}
@@ -309,18 +345,11 @@ const AddAttraction = () => {
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                     <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveImage(index);
-                      }}
+                      onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }}
                       sx={{
-                        position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        padding: '4px',
-                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' },
-                        color: 'white'
+                        position: 'absolute', top: 2,
+                        right: 2, padding: '4px', backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.7)' }, color: 'white'
                       }}
                     >
                       <CloseIcon sx={{ fontSize: 16 }} />
@@ -330,97 +359,102 @@ const AddAttraction = () => {
                 <Box
                   sx={{
                     width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden',
-                    cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', border: '2px dashed #3572EF'
+                    cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', border: fieldErrors.images ? '2px dashed red' : '2px dashed #3572EF'
                   }}
                   onClick={handleAddImage}
                 >
-                  <AddPhotoAlternateIcon sx={{ fontSize: 40, color: '#3572EF' }} />
+                  <AddPhotoAlternateIcon sx={{ fontSize: 40, color: fieldErrors.images ? 'red' : '#3572EF' }} />
                 </Box>
                 <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  multiple
+                  type="file" ref={fileInputRef} style={{ display: 'none' }}
+                  onChange={handleFileChange} accept="image/*" multiple
                 />
               </Box>
+              {fieldErrors.images && (
+                <Typography color="error" sx={{ marginTop: -2, fontSize: '0.8rem', mb: 3 }}>
+                  {fieldErrors.images}
+                </Typography>
+              )}
               <Box>
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
-                <ReactQuill
-                  value={editableFields.description.value}
-                  onChange={(value) => handleFieldChange('description', value)}
-                  theme="snow"
-                  modules={modules}
-                />
+                <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết *</Typography>
+                <FormControl sx={{ width: '100%' }}>
+                  <ReactQuill
+                    value={editableFields.description.value} style={{ height: '250px' }}
+                    onChange={(value) => handleFieldChange('description', value)}
+                    theme="snow" modules={modules} className={fieldErrors.description ? "ql-error" : null}
+                  />
+                  {fieldErrors.description && (
+                    <FormHelperText error sx={{ mt: 6 }}>{fieldErrors.description}</FormHelperText>
+                  )}
+                </FormControl>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
               <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Tỉnh/Thành phố: </Typography>
-                <Select
-                  value={selectedProvince}
-                  onChange={handleProvinceChange}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ mr: 2, mb: 2 }}
-                >
-                  {provinces.map((province) => (
-                    <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
-                  ))}
-                </Select>
+                <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
+                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ * </Typography>
                   <TextField
                     value={editableFields.address.value}
                     onChange={(e) => handleFieldChange('address', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
+                    variant="outlined" fullWidth sx={{ mb: 2 }}
+                    error={!!fieldErrors.address} helperText={fieldErrors.address}
                   />
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
+                  <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website </Typography>
                   <TextField
                     value={editableFields.website.value}
                     onChange={(e) => handleFieldChange('website', e.target.value)}
-                    variant="outlined"
-                    fullWidth
-                    sx={{ mb: 2 }}
+                    variant="outlined" fullWidth sx={{ mb: 2 }}
                   />
                 </Box>
-                <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
+                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Các thông tin liên hệ khác </Typography>
                 <ReactQuill
                   value={editableFields.contactInfo.value}
                   onChange={(value) => handleFieldChange('contactInfo', value)}
-                  theme="snow"
-                  modules={modules}
-                  style={{ width: '100%' }}
+                  theme="snow" modules={modules} style={{ width: '100%' }}
                 />
               </Paper>
             </Grid>
           </Grid>
-          <Typography sx={{ fontWeight: 700, minWidth: '4rem', mt: 5 }}>Google ID: </Typography>
+          <Typography sx={{ fontWeight: 700, minWidth: '4rem', mt: 10 }}>Google ID (Tìm địa điểm từ bản đồ) </Typography>
           <TextField
             value={editableFields.placeId?.value || ''}
             onChange={(e) => handleFieldChange('placeId', e.target.value)}
-            variant="outlined"
-            fullWidth
+            variant="outlined" fullWidth disabled
             sx={{ mb: 2, width: '35%', '& .MuiInputBase-root': { height: '40px' } }}
-            placeholder="Nhập Place ID từ Google Places"
           />
           <Box sx={{
             height: '500px', width: '100%', position: 'relative', mb: 3,
             overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
           }}>
-            <Map />
+            <TourMap
+              onPlaceSelect={handleSelectLocation}
+            />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
             <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
             <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>
           </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ mt: 1, width: '32rem' }}>
+              <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
+              <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={snackbar.hide}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

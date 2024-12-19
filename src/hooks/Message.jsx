@@ -1,4 +1,5 @@
 export const messages = [
+    // HTTP Status codes
     {
         code: '',
         httpStatus: 404,
@@ -7,12 +8,12 @@ export const messages = [
     {
         code: '',
         httpStatus: 401,
-        message: `Vui lòng đăng nhập để {object}.`
+        message: `Lỗi quyền truy cập. Vui lòng kiểm tra lại thông tin đăng nhập của bạn.`
     },
     {
         code: '',
         httpStatus: 403,
-        message: `Bạn không thể sử dụng chức năng này.`
+        message: `Truy cập bị từ chối. Bạn không thể sử dụng chức năng này.`
     },
     {
         code: '',
@@ -20,29 +21,16 @@ export const messages = [
         message: `Bạn đã gửi yêu cầu quá nhiều lần. Xin hãy thử lại sau.`
     },
     {
-        code: '01',
-        httpStatus: 401,
-        message: `Email/Số điện thoại hoặc mật khẩu không chính xác. Vui lòng kiểm tra lại.`
-    },
-    {
-        code: '02',
-        httpStatus: 500,
-        message: `Email hoặc Số điện thoại đã được sử dụng. Vui lòng kiểm tra lại.`
-    },
-    {
-        code: '',
-        httpStatus: 200,
-        message: `Tạo {object} thành công`
-    },
-    {
         code: '',
         httpStatus: 500,
         message: `Đã có lỗi xảy ra. Vui lòng thử lại sau.`
     },
+
+    // Success messages
     {
         code: '',
         httpStatus: 200,
-        message: `Đăng ký thành công`
+        message: `Tạo {object} thành công`
     },
     {
         code: '',
@@ -54,65 +42,186 @@ export const messages = [
         httpStatus: 200,
         message: `Xóa {object} thành công.`
     },
+
     {
-        code: '',
-        httpStatus: 200,
-        message: `Đặt tour thành công.`
+        code: 'UNAUTHORIZED',
+        httpStatus: 401,
+        message: `Bạn không có quyền thực hiện thao tác này.`
     },
     {
-        code: '08',
+        code: 'NOT_EXIST_REVIEW',
+        httpStatus: 404,
+        message: `Không tìm thấy đánh giá.`
+    },
+    {
+        code: 'NOT_EXIST_ATTRACTION',
+        httpStatus: 404,
+        message: `Không tìm thấy điểm tham quan.`
+    },
+    {
+        code: 'EXISTED_CATEGORY',
         httpStatus: 400,
-        message: `Bạn đã đặt tour này. Vui lòng chọn ngày hoặc tour khác.`
+        message: `Danh mục đã tồn tại.`
     },
     {
-        code: '',
-        httpStatus: 200,
-        message: `Hủy tour thành công.`
+        code: 'NOT_EXIST_CATEGORY',
+        httpStatus: 404,
+        message: `Không tìm thấy danh mục.`
     },
     {
-        code: '09',
+        code: 'NOT_EXIST_BOOKING_REFUND',
+        httpStatus: 404,
+        message: `Không tìm thấy yêu cầu hoàn tiền.`
+    },
+    {
+        code: 'NOT_EXIST_BOOKING',
+        httpStatus: 404,
+        message: `Không tìm thấy đơn đặt tour.`
+    },
+    {
+        code: 'INVALID_ACTION_BOOKING_CANCEL',
         httpStatus: 400,
-        message: `Bạn không thể hủy booking này.`
+        message: `Không thể hủy đơn đặt tour này.`
     },
     {
-        code: '10',
-        httpStatus: 200,
-        message: `Gửi đánh giá thành công. Cảm ơn bạn đã chia sẻ ý kiến của mình!`
-    },
-    {
-        code: '11',
+        code: 'INVALID_ACTION_BOOKING_CHANGE',
         httpStatus: 400,
-        message: `Bạn không thể gửi đánh giá vì tour chưa kết thúc. Vui lòng thử lại sau khi tour kết thúc.`
+        message: `Không thể thay đổi đơn đặt tour này.`
     },
     {
-        code: '',
-        httpStatus: 200,
-        message: `Đăng bài lên {object} thành công.`
+        code: 'NOT_EXIST_TOUR',
+        httpStatus: 404,
+        message: `Không tìm thấy tour.`
     },
     {
-        code: '12',
-        httpStatus: 500,
-        message: `Không thể lấy thông tin tương tác do bài viết này chưa được đăng lên {object}.`
+        code: 'INVALID_ACTION_BOOKED_TOUR',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do tour này đã được đặt trước đó.`
     },
     {
-        code: '13',
-        httpStatus: 500,
-        message: `Không thể đăng bài viết do bài viết này chưa được duyệt.`
+        code: 'INVALID_ACTION_TOUR_FULL',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do tour đã đủ số lượng người.`
     },
     {
-        code: '14',
-        httpStatus: 500,
-        message: `Bài viết này đã được đăng lên {object} trước đó.`
+        code: 'NOT_EXIST_CUSTOMER',
+        httpStatus: 404,
+        message: `Không tìm thấy khách hàng.`
     },
     {
-        code: '15',
-        httpStatus: 500,
-        message: `Bạn không thể thực hiện thao tác này.`
+        code: 'NOT_EXIST_MANAGER',
+        httpStatus: 404,
+        message: `Không tìm thấy quản lý.`
     },
     {
-        code: '16',
-        httpStatus: 500,
-        message: `Không thể tạo tour dựa trên tour mẫu này do tour mẫu này chưa được duyệt.`
+        code: 'INVALID_INFO_PASSWORD',
+        httpStatus: 400,
+        message: `Mật khẩu không chính xác.`
+    },
+    {
+        code: 'INVALID_INFO_SAME_PASSWORD',
+        httpStatus: 400,
+        message: `Mật khẩu mới không được trùng với mật khẩu cũ.`
+    },
+    {
+        code: 'NOT_EXISTED_POST',
+        httpStatus: 404,
+        message: `Không tìm thấy bài viết.`
+    },
+    {
+        code: 'NOT_EXISTED_PROVINCE',
+        httpStatus: 404,
+        message: `Không tìm thấy tỉnh thành.`
+    },
+    {
+        code: 'INVALID_ACTION_POST_NOT_PUBLISHED',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do bài viết chưa được đăng.`
+    },
+    {
+        code: 'POST_NOT_PUBLISHED',
+        httpStatus: 400,
+        message: `Bài viết chưa được đăng.`
+    },
+    {
+        code: 'INVALID_ACTION_POST_NOT_APPROVED',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do bài viết chưa được duyệt.`
+    },
+    {
+        code: 'INVALID_ACTION_POST_PUBLISHED',
+        httpStatus: 400,
+        message: `Bài viết đã được đăng.`
+    },
+    {
+        code: 'NOT_EXIST_STAFF',
+        httpStatus: 404,
+        message: `Không tìm thấy nhân viên.`
+    },
+    {
+        code: 'NOT_EXIST_DURATION',
+        httpStatus: 404,
+        message: `Không tìm thấy thời lượng.`
+    },
+    {
+        code: 'INVALID_ACTION_EDIT_TOUR_HAS_BOOKING',
+        httpStatus: 400,
+        message: `Không thể chỉnh sửa tour đã có người đặt.`
+    },
+    {
+        code: 'INVALID_ACTION_EDIT_CLOSED_TOUR',
+        httpStatus: 400,
+        message: `Không thể chỉnh sửa tour đã đóng.`
+    },
+    {
+        code: 'INVALID_ACTION_EDIT_COMPLETED_TOUR',
+        httpStatus: 400,
+        message: `Không thể chỉnh sửa tour đã hoàn thành.`
+    },
+    {
+        code: 'INVALID_ACTION_EDIT_CANCELLED_TOUR',
+        httpStatus: 400,
+        message: `Không thể chỉnh sửa tour đã hủy.`
+    },
+    {
+        code: 'INVALID_ACTION_TOUR_CANCEL',
+        httpStatus: 400,
+        message: `Không thể hủy tour này.`
+    },
+    {
+        code: 'EXISTED_TOUR_TEMPLATE_CODE',
+        httpStatus: 400,
+        message: `Mã tour mẫu đã tồn tại. Vui lòng nhập mã khác.`
+    },
+    {
+        code: 'INVALID_INFO_PRICE',
+        httpStatus: 400,
+        message: `Giá không hợp lệ.`
+    },
+    {
+        code: 'NOT_EXIST_TOUR_TEMPLATE',
+        httpStatus: 404,
+        message: `Không tìm thấy tour mẫu.`
+    },
+    {
+        code: 'INVALID_ACTION_DELETE_PENDING_TOUR_TEMPLATE',
+        httpStatus: 400,
+        message: `Không thể xóa tour mẫu đang chờ duyệt.`
+    },
+    {
+        code: 'INVALID_ACTION_DELETE_TOUR_TEMPLATE_HAS_TOUR',
+        httpStatus: 400,
+        message: `Không thể xóa tour mẫu đã có tour.`
+    },
+    {
+        code: 'INVALID_ACTION_TOUR_TEMPLATE_ALREADY_APPROVED',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do tour mẫu đã được duyệt.`
+    },
+    {
+        code: 'EXISTED_PHONE_OR_EMAIL',
+        httpStatus: 400,
+        message: `Email hoặc số điện thoại đã được sử dụng. Vui lòng kiểm tra lại.`
     },
 ];
 
@@ -121,4 +230,17 @@ export const getMessages = (object) => {
         ...msg,
         message: msg.message.replace(/\{object}/g, object)
     }));
+};
+
+export const getErrorMessage = (error) => {
+    const errorCode = error.response.data.message;
+    let messageObj = messages.find(msg => msg.code === errorCode);
+    
+    if (!messageObj && error.response?.status) {
+        messageObj = messages.find(msg => 
+            msg.code === '' && msg.httpStatus === error.response.status
+        );
+    }
+    
+    return messageObj ? messageObj.message : 'Đã xảy ra lỗi. Vui lòng thử lại sau.';
 };

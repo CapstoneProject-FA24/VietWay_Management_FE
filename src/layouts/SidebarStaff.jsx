@@ -178,9 +178,9 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
             <MenuItemPaper elevation={1}>
               <MenuItemBox>
                 <ListItemIcon sx={{ minWidth: '40px' }}>
-                  <Badge color="error" variant="dot" invisible={!unreadNotifications}>
+                  {/* <Badge color="error" variant="dot" invisible={!unreadNotifications}> */}
                     <SettingsIcon sx={{ color: '#2196f3' }} />
-                  </Badge>
+                  {/* </Badge> */}
                 </ListItemIcon>
                 <ListItemText
                   primary={getCookie('username')}
@@ -206,7 +206,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
               handleClose();
               navigate('/nhan-vien/thong-tin-tai-khoan');
             }}>Thông tin tài khoản</MenuItem>
-            <MenuItem onClick={handleOpenNotification}>
+            {/* <MenuItem onClick={handleOpenNotification}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <span>Thông báo</span>
                 {unreadNotifications > 0 && (
@@ -219,7 +219,7 @@ const SidebarStaff = ({ isOpen, toggleSidebar }) => {
                   />
                 )}
               </Box>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem sx={{ color: 'red' }} onClick={() => {
               handleClose();
               handleLogout();

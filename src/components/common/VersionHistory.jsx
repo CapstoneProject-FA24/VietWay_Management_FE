@@ -1,9 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Badge } from '@mui/material';
 import VersionCard from '@components/common/VersionCard';
-import { mockVersionHistory } from '@hooks/MockVersionHistory';
+import { fetchEntityHistory } from '@services/EntityHistory';
 
-const VersionHistory = () => {
+const VersionHistory = ({ entityId, entityType }) => {
+  console.log(entityId);
+  console.log(entityType);
+  const [versions, setVersions] = useState([]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const historyData = await fetchEntityHistory(entityId, entityType);
+        setVersions(historyData);
+        console.log(historyData);
+      } catch (error) {
+        console.error('Error fetching history:', error);
+      }
+    };
+
+    if (entityId && entityType !== undefined) {
+      fetchHistory();
+    }
+  }, [entityId, entityType]);
+
   return (
     <Box
       sx={{
@@ -30,7 +50,7 @@ const VersionHistory = () => {
           Lịch sử thay đổi
         </Typography>
         <Badge sx={{ position: 'relative', right: '12px' }}
-          badgeContent={mockVersionHistory.length} 
+          badgeContent={versions.length} 
           color="primary" 
         />
       </Box>
@@ -59,9 +79,19 @@ const VersionHistory = () => {
           },
         }}
       >
-        {mockVersionHistory.map((version) => (
-          <VersionCard key={version.id} version={version} />
-        ))}
+        {versions && versions.length > 0 ? (
+          versions.map((version, index) => (
+            <VersionCard 
+              key={index} 
+              version={version} 
+              entityType={entityType}
+            />
+          ))
+        ) : (
+          <Typography sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+            Không có lịch sử thay đổi
+          </Typography>
+        )}
       </Box>
     </Box>
   );

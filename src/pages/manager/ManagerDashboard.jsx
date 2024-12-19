@@ -4,29 +4,66 @@ import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
 import AttractionsOutlinedIcon from '@mui/icons-material/AttractionsOutlined';
-import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import LocalAtmIcon from '@mui/icons-material/LocalAtm';
+import StarHalfIcon from '@mui/icons-material/StarHalf';
 import TourOutlinedIcon from '@mui/icons-material/TourOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AirplaneTicketOutlinedIcon from '@mui/icons-material/AirplaneTicketOutlined';
-import AttractionReviewByProvinceChart from '@components/manager/attraction/AttractionReviewByProvinceChart';
+import AttractionReviewChart from '@components/manager/attraction/AttractionReviewChart';
 import BookingChart from '@components/manager/tour/BookingChart';
-import CustomerStatisticsChart from '@components/manager/tour/CustomerStatisticsChart';
 import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateChart';
-import BookingAndReviewFromTourTemplate from '@components/manager/tour/BookingAndReviewFromTourTemplate';
+import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReviewChart';
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
 import TourTemplateChart from '@components/manager/tour/TourTemplateChart';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport } from '@services/ReportService';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [stats, setStats] = useState({
-    totalTours: 0,
-    totalPosts: 0,
-    totalAttractions: 0,
-    totalStaff: 0
+  const [summaryStats, setSummaryStats] = useState({
+    newCustomer: 0,
+    newBooking: 0,
+    newTour: 0,
+    revenue: 0,
+    newAttraction: 0,
+    newPost: 0,
+    averageTourRating: 0
+  });
+
+  const [bookingStats, setBookingStats] = useState({
+    totalBooking: 0,
+    bookingByDay: {
+      dates: [],
+      pendingBookings: [],
+      depositedBookings: [],
+      paidBookings: [],
+      completedBookings: [],
+      cancelledBookings: []
+    },
+    bookingByTourTemplate: [],
+    bookingByTourCategory: [],
+    bookingByParticipantCount: []
+  });
+
+  const [ratingStats, setRatingStats] = useState({
+    attractionRatingInPeriod: [],
+    tourTemplateRatingInPeriod: [],
+    attractionRatingTotal: [],
+    tourTemplateRatingTotal: []
+  });
+
+  const [revenueStats, setRevenueStats] = useState({
+    totalRevenue: 0,
+    revenueByPeriod: {
+      periods: [],
+      revenue: [],
+      refund: []
+    },
+    revenueByTourTemplate: [],
+    revenueByTourCategory: []
   });
 
   const [globalDateRange, setGlobalDateRange] = useState({
@@ -40,18 +77,41 @@ const ManagerDashboard = () => {
   });
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    setStats({
-      totalProvince: 63,
-      totalPosts: 45,
-      totalAttractions: 89,
-      totalToursSample: 32,
-      totalTours: 150,
-      totalCustomers: 1000,
-      totalBookings: 592,
-      totalStaff: 12
-    });
-  }, []);
+    loadDashboardData();
+  }, [appliedGlobalDateRange]);
+
+  const loadDashboardData = async () => {
+    try {
+      // Get first day of the start month
+      const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
+      
+      // Get end date based on whether it's current month
+      let endDate;
+      if (appliedGlobalDateRange.endDate.month() === dayjs().month() && 
+          appliedGlobalDateRange.endDate.year() === dayjs().year()) {
+        // If current month, use current date
+        endDate = dayjs().format('MM/DD/YYYY');
+      } else {
+        // If not current month, use last day of that month
+        endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
+      }
+
+      // Fetch all reports in parallel
+      const [summaryData, bookingData, ratingData, revenueData] = await Promise.all([
+        fetchReportSummary(startDate, endDate),
+        fetchBookingReport(startDate, endDate),
+        fetchRatingReport(startDate, endDate),
+        fetchRevenueReport(startDate, endDate)
+      ]);
+
+      setSummaryStats(summaryData);
+      setBookingStats(bookingData);
+      setRatingStats(ratingData);
+      setRevenueStats(revenueData);
+    } catch (error) {
+      console.error('Error loading dashboard data:', getErrorMessage(error));
+    }
+  };
 
   const handleGlobalStartDateChange = (newValue) => {
     setGlobalDateRange(prev => ({
@@ -73,14 +133,13 @@ const ManagerDashboard = () => {
   };
 
   const statCards = [
-    { title: 'Khách hàng', value: stats.totalCustomers, icon: <PersonOutlineOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Booking', value: stats.totalBookings, icon: <AirplaneTicketOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Tour mẫu', value: stats.totalToursSample, icon: <ContentCopyOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Tour du lịch', value: stats.totalTours, icon: <TourOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Tỉnh thành', value: stats.totalTours, icon: <LocationOnOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Điểm tham quan', value: stats.totalAttractions, icon: <AttractionsOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Bài viết', value: stats.totalPosts, icon: <ArticleOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
-    { title: 'Nhân viên', value: stats.totalStaff, icon: <GroupOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Doanh thu', value: `${summaryStats.revenue.toLocaleString()} đ`, icon: <LocalAtmIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Khách hàng mới', value: summaryStats.newCustomer, icon: <PersonOutlineOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Booking mới', value: summaryStats.newBooking, icon: <AirplaneTicketOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Tour mới', value: summaryStats.newTour, icon: <TourOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Điểm tham quan mới', value: summaryStats.newAttraction, icon: <AttractionsOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Bài viết mới', value: summaryStats.newPost, icon: <ArticleOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
+    { title: 'Đánh giá trung bình', value: summaryStats.averageTourRating.toFixed(1), icon: <StarHalfIcon sx={{ fontSize: 42, color: 'grey' }} /> },
   ];
 
   const chartHeight = '500px';
@@ -104,34 +163,6 @@ const ManagerDashboard = () => {
       }}>
         <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', mb: 2, textAlign: 'center' }}> Dashboard - Thống kê </Typography>
 
-        <Grid container spacing={2}>
-          {statCards.map((stat, index) => (
-            <Grid item xs={12} sm={3} md={3} key={index}>
-              <Paper elevation={3}
-                sx={{
-                  p: 2, height: '100%', display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderRadius: 2
-                }}
-              >
-                <Box sx={{ display: 'flex', width: '100%' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {stat.icon}
-                  </Box>
-                  <Box color="primary.main" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', ml: 1 }}>
-                    <Typography variant="h5" sx={{ fontSize: '1.43rem', fontWeight: 'bold', textAlign: 'left', width: '100%', mb: -0.5 }}>
-                      {stat.value}
-                    </Typography>
-                    <Typography color="textSecondary"
-                      sx={{ fontSize: '1rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', lineHeight: '1.2', width: '100%' }}>
-                      {stat.title}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-
         <Box sx={{ mb: 1, mt: 5, display: 'flex', justifyContent: 'center' }}>
           <DateRangeSelector
             startDate={globalDateRange.startDate}
@@ -142,38 +173,86 @@ const ManagerDashboard = () => {
           />
         </Box>
 
+        <Grid container spacing={1}>
+          <Grid item xs={12} sm={3} md={3}>
+            <Paper elevation={3}
+              sx={{
+                p: 3, height: '100%', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderRadius: 2
+              }}
+            >
+              <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column' }}>
+                <Box color="primary.main" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {statCards[0].icon}
+                  </Box>
+                  <Typography color="textSecondary"
+                    sx={{ fontSize: '1.2rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%', ml: 1, fontWeight: 700 }}>
+                    {statCards[0].title}
+                  </Typography>
+                </Box>
+                <Typography variant="h5" sx={{ fontSize: '1.7rem', fontWeight: 'bold', textAlign: 'left', width: '100%', color: 'primary.main', ml: 0.5 }}>
+                  {statCards[0].value}
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={9}>
+            <Grid container spacing={1}>
+              {statCards.slice(1).map((stat, index) => (
+                <Grid item xs={12} md={4} key={index}>
+                  <Paper elevation={3}
+                    sx={{
+                      p: 2, height: '100%', display: 'flex', flexDirection: 'column',
+                      alignItems: 'center', justifyContent: 'center', textAlign: 'center', borderRadius: 2
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', width: '100%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {stat.icon}
+                      </Box>
+                      <Box color="primary.main" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', ml: 1 }}>
+                        <Typography color="textSecondary"
+                          sx={{ fontSize: '1rem', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', lineHeight: '1.2', width: '100%' }}>
+                          {stat.title}
+                        </Typography>
+                        <Typography variant="h5" sx={{ fontSize: '1.43rem', fontWeight: 'bold', textAlign: 'left', width: '100%', mb: -0.5 }}>
+                          {stat.value}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+
+        </Grid>
+
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={6}>
-            <BookingChart dateRange={appliedGlobalDateRange} />
+          <Grid item xs={12}>
+            <BookingChart
+              dateRange={appliedGlobalDateRange}
+              bookingData={bookingStats.bookingByDay}
+            />
           </Grid>
-          <Grid item xs={6}>
-            <CustomerStatisticsChart dateRange={appliedGlobalDateRange} />
+          <Grid item xs={12}>
+            <TourTemplateRevenue
+              revenueData={revenueStats.revenueByTourTemplate}
+              periodData={revenueStats.revenueByPeriod}
+            />
           </Grid>
-        </Grid>
+          <Grid item xs={12}>
+            <TourTemplateReviewChart
+              bookingData={bookingStats.bookingByTourTemplate}
+              ratingData={ratingStats.tourTemplateRatingInPeriod}
+            />
+          </Grid>
 
-        <Typography sx={{ fontSize: '2rem', fontWeight: 600, color: '#30529c', mt: 10 }}> Tour du lịch </Typography>
-        <Grid container spacing={2}>
           <Grid item xs={12}>
-            <TourTemplateRevenue/>
-          </Grid>
-          {/* <Grid item xs={6}>
-            <Box sx={{ height: chartHeight }}>
-              <TourTemplateChart fixedHeight={chartHeight} />
-            </Box>
-          </Grid> */}
-
-          <Grid item xs={12}>
-            <BookingAndReviewFromTourTemplate />
-          </Grid>
-          <Grid item xs={12}>
-            <TourUsingTemplateChart />
-          </Grid>
-        </Grid>
-
-        <Typography sx={{ fontSize: '2rem', fontWeight: 600, color: '#30529c', mt: 10 }}> Điểm tham quan </Typography>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <AttractionReviewByProvinceChart />
+            <AttractionReviewChart
+              ratingData={ratingStats.attractionRatingInPeriod}
+            />
           </Grid>
         </Grid>
       </Box>

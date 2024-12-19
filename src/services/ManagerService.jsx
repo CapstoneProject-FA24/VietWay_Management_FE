@@ -120,3 +120,43 @@ export const changeManagerPassword = async (oldPassword, newPassword) => {
         throw error;
     }
 };
+
+export const adminResetManagerPassword = async (managerId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.patch(
+            `${baseURL}/api/managers/admin-reset-manager-password?managerId=${managerId}`,
+            null,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error resetting manager password:', error);
+        throw error;
+    }
+};
+
+export const getManagerProfile = async () => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/managers/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const { data } = response.data;
+        return {
+            phoneNumber: data.phoneNumber,
+            email: data.email,
+            fullName: data.fullName
+        };
+    } catch (error) {
+        console.error('Error fetching manager profile:', error);
+        throw error;
+    }
+};

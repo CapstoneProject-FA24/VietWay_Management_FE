@@ -21,9 +21,9 @@ const PostsCard = ({ post }) => {
       <Chip label={getPostStatusInfo(post.status).text} color={getPostStatusInfo(post.status).color} size="small"
         sx={{ position: 'absolute', top: 10, left: 10 }}
       />
-      <Chip label={getPostStatusInfo(post.status).text} size="small" sx={{ mb: 1, color: `${getPostStatusInfo(post.status).color}`, bgcolor: `${getPostStatusInfo(post.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
+      <Chip label={getPostStatusInfo(post.status).text} size="small" sx={{ mb: 1, color: `${getPostStatusInfo(post.status).color}`, bgcolor: `${getPostStatusInfo(post.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600, boxShadow: '1px 1px 4px 1px rgb(0, 0, 0, 0.2)', }} />
 
-      <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image === null ? '/no-image-available.png' : post.image}
+      <CardMedia component="img" height={isMobile ? "140" : "180"} image={post.image ? post.image : '/no-image.jpg'}
         alt={post.title} sx={{ objectFit: 'cover', }} />
 
       <CardContent sx={{ flexGrow: 1, p: isMobile ? 1.5 : 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -36,18 +36,19 @@ const PostsCard = ({ post }) => {
             sx={{ height: '25px', '& .MuiChip-label': { fontSize: '0.75rem' }, p: 0.5 }}
           />
         </Box>
-
+        <Typography color="text.secondary" sx={{ fontSize: '0.95rem', mb: -1 }}>
+          {post.province}
+        </Typography>
         <Typography
-          variant={isMobile ? "h6" : "h5"}
           sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.35rem' }, overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', }}
           color="text.primary"
         >
-          {post.title}
+          {post.title ? post.title : 'Không có tên'}
         </Typography>
         <Typography color="text.secondary"
           sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', mb: 1 }}
         >
-          {post.description}
+          {post.description ? post.description : 'Không có mô tả'}
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>

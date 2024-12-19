@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { GoogleMap, useJsApiLoader, InfoWindow, Marker } from '@react-google-maps/api';
 
 const containerStyle = {
@@ -117,23 +117,29 @@ function TourMap({ onPlaceSelect, startingProvince }) {
     language: 'vi'
   });
 
+  const startingProvinceRef = useRef(startingProvince);
+  useEffect(() => {
+    startingProvinceRef.current = startingProvince;
+  }, [startingProvince]);
+
   const [map, setMap] = useState(null);
   const [searchBox, setSearchBox] = useState(null);
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [marker, setMarker] = useState(null);
 
-  const validateProvince = (addressComponents) => {
-    if (!startingProvince || !addressComponents) return true;
-    
+  const validateProvince = useCallback((addressComponents) => {
+    const currentProvince = startingProvinceRef.current;
+    if (!currentProvince || !addressComponents) return true;
+
     // Find province/city component from address
-    const provinceComponent = addressComponents.find(component => 
-      component.types.includes('administrative_area_level_1') || 
+    const provinceComponent = addressComponents.find(component =>
+      component.types.includes('administrative_area_level_1') ||
       component.types.includes('locality')
     );
 
     if (!provinceComponent) return false;
 
-    // Normalize province names for comparison by removing diacritics and converting to lowercase
+    // Normalize province names for comparison
     const normalizeText = (text) => {
       return text.toLowerCase()
         .normalize('NFD')
@@ -144,21 +150,21 @@ function TourMap({ onPlaceSelect, startingProvince }) {
     };
 
     const selectedProvince = normalizeText(provinceComponent.long_name);
-    const requiredProvince = normalizeText(startingProvince);
+    const requiredProvince = normalizeText(currentProvince);
 
-    return selectedProvince.includes(requiredProvince) || 
-           requiredProvince.includes(selectedProvince);
-  };
+    return selectedProvince.includes(requiredProvince) ||
+      requiredProvince.includes(selectedProvince);
+  }, [startingProvince]);
 
   const onLoad = useCallback((map) => {
+    const currentProvince = startingProvinceRef.current;
+    console.l
     const placesService = new window.google.maps.places.PlacesService(map);
-
     const handlePlaceSelection = (place) => {
       if (!place.geometry || !place.geometry.location) {
         console.log("Returned place contains no geometry");
         return;
       }
-
       const isValidProvince = validateProvince(place.address_components);
       // Create marker with all necessary data
       const newMarker = {
@@ -180,8 +186,8 @@ function TourMap({ onPlaceSelect, startingProvince }) {
         const formattedAddress = place.address_components
           ?.map(component => component.long_name)
           .join(', ');
-
         onPlaceSelect({
+          startingProvince: currentProvince,
           address: formattedAddress,
           place_id: place.place_id,
           name: place.name,

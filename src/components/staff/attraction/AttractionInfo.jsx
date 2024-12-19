@@ -57,10 +57,14 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
 
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-      <Chip label={getAttractionStatusInfo(attraction.status).text} size="small" sx={{ mb: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-          {attraction.attractionTypeName}
+          Thuộc tỉnh/thành phố: {attraction.provinceName}
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+          Loại điểm tham quan: {attraction.attractionTypeName}
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -101,7 +105,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             ))}
           </Box>
           <Box sx={{ mt: 3 }}>
-            <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin</Typography>
+            <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
             <Box dangerouslySetInnerHTML={{ __html: attraction.description }} sx={{
               '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
               '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
@@ -110,30 +114,23 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
         </Grid>
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
             <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
             <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
-
             <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
             <Box sx={{ mb: 3 }}>
               <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
                 {attraction.website}
               </a>
             </Box>
-
-            <Typography variant="h4" sx={{ mt: 4, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
-            <div dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+            <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Các thông tin liên hệ khác: </Typography>
+            <div style={{ marginTop: -15, marginBottom: 15 }} dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
 
             {attraction.googlePlaceId && (
               <Box sx={{ mt: 4 }}>
                 <Typography variant="h4" sx={{
-                  fontWeight: '700',
-                  fontFamily: 'Inter, sans-serif',
-                  color: '#05073C',
-                  fontSize: '27px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  mb: 2
+                  fontWeight: '700', fontFamily: 'Inter, sans-serif', color: '#05073C',
+                  fontSize: '27px', display: 'flex', alignItems: 'center', gap: 1, mb: 2
                 }}>
                   <AccessTimeIcon /> Giờ mở cửa
                 </Typography>
@@ -143,10 +140,7 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
                 ) : openingHours ? (
                   <Box>
                     <Box sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      mb: 2,
+                      display: 'flex', alignItems: 'center', gap: 1, mb: 2,
                       color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
                     }}>
                       {openingHours.opening_hours ? (
@@ -168,13 +162,8 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
 
                         return (
                           <Typography key={index} sx={{
-                            py: 1,
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            borderBottom: '1px solid #eee',
-                            '&:last-child': {
-                              borderBottom: 'none'
-                            }
+                            py: 1, display: 'flex', justifyContent: 'space-between',
+                            borderBottom: '1px solid #eee', '&:last-child': { borderBottom: 'none' }
                           }}>
                             <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
                               {days[period.open.day]}
@@ -203,6 +192,10 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
               <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
               <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
             </Box>
+            <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+              <Typography sx={{ fontWeight: 700 }}>Trạng thái: </Typography>
+              <Chip label={getAttractionStatusInfo(attraction.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
+              </Box>
           </Paper>
         </Grid>
         <Grid item xs={12} md={12}>
@@ -210,13 +203,8 @@ const AttractionInfo = ({ attraction, currentSlide, setCurrentSlide, sliderRef, 
             <strong>Google Place ID:</strong> {attraction.googlePlaceId}
           </Typography>
           <Box sx={{
-            height: '500px',
-            width: '100%',
-            position: 'relative',
-            mb: 3,
-            overflow: 'hidden',
-            borderRadius: '10px',
-            border: '1px solid #e0e0e0'
+            height: '500px', width: '100%', position: 'relative', mb: 3,
+            overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
           }}>
             <Map placeId={attraction.googlePlaceId} />
           </Box>

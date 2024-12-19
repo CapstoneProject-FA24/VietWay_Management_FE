@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Pagination } from '@mui/material';
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Box, InputAdornment, MenuItem, Select, Typography, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Pagination, Snackbar, Alert } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import StaffUpdatePopup from '@components/manager/staff/StaffUpdatePopup';
 import StaffCreatePopup from '@components/manager/staff/StaffCreatePopup';
 import AddIcon from '@mui/icons-material/Add';
 import Sidebar from '@layouts/Sidebar';
 import { Helmet } from 'react-helmet';
-import { fetchStaff, changeStaffStatus } from '@services/StaffService';
+import { fetchStaff, changeStaffStatus, adminResetStaffPassword } from '@services/StaffService';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('name-asc');
-  const [openUpdatePopup, setOpenUpdatePopup] = useState(false);
   const [openCreatePopup, setOpenCreatePopup] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -29,49 +27,55 @@ const ManageStaff = () => {
     message: ''
   });
   const [searchInput, setSearchInput] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+  const [resetPasswordDialog, setResetPasswordDialog] = useState({
+    open: false,
+    staffId: null,
+    staffName: ''
+  });
+
+  const loadStaff = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchStaff({
+        pageSize,
+        pageIndex: page,
+        nameSearch: searchTerm,
+      });
+      setStaff(result.data);
+      setTotalPages(Math.ceil(result.total / pageSize));
+    } catch (error) {
+      console.error('Failed to fetch staff:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadStaff = async () => {
-      setLoading(true);
-      try {
-        const result = await fetchStaff({
-          pageSize,
-          pageIndex: page,
-          nameSearch: searchTerm,
-        });
-        setStaff(result.data);
-        setTotalPages(Math.ceil(result.total / pageSize));
-      } catch (error) {
-        console.error('Failed to fetch staff:', error);
-        // Consider adding error handling UI here
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadStaff();
   }, [page, pageSize, searchTerm]);
 
   const sortedStaff = [...staff].sort((a, b) => {
-    if (sortOrder === 'name-asc') {
-      return a.fullName.localeCompare(b.fullName);
-    } else if (sortOrder === 'name-desc') {
-      return b.fullName.localeCompare(a.fullName);
+    switch (sortOrder) {
+      case 'name-asc':
+        return a.fullName.localeCompare(b.fullName);
+      case 'name-desc':
+        return b.fullName.localeCompare(a.fullName);
+      case 'date-asc':
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      case 'date-desc':
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      default:
+        return 0;
     }
-    return 0;
   });
-
-  const handleOpenUpdatePopup = (staff) => {
-    setSelectedStaff(staff);
-    setOpenUpdatePopup(true);
-  };
 
   const handleOpenCreatePopup = () => {
     setOpenCreatePopup(true);
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
   };
 
   const handleStatusChange = (staff) => {
@@ -90,16 +94,19 @@ const ManageStaff = () => {
     try {
       await changeStaffStatus(confirmDialog.staffId, confirmDialog.isDeleted);
       // Refresh the staff list
-      const result = await fetchStaff({
-        pageSize,
-        pageIndex: page - 1,
-        nameSearch: searchTerm,
+      await loadStaff();
+      setSnackbar({
+        open: true,
+        message: confirmDialog.isDeleted ? 'Khóa tài khoản thành công' : 'Kích hoạt tài khoản thành công',
+        severity: 'success'
       });
-      setStaff(result.data);
-      setTotalPages(Math.ceil(result.total / pageSize));
     } catch (error) {
       console.error('Error changing staff status:', error);
-      // Consider adding error handling UI here
+      setSnackbar({
+        open: true,
+        message: getErrorMessage(error),
+        severity: 'error'
+      });
     } finally {
       setConfirmDialog(prev => ({ ...prev, open: false }));
     }
@@ -117,6 +124,48 @@ const ManageStaff = () => {
   const handlePageSizeChange = (event) => {
     setPageSize(parseInt(event.target.value));
     setPage(1);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const handleResetPasswordClick = (staff) => {
+    setResetPasswordDialog({
+      open: true,
+      staffId: staff.staffId,
+      staffName: staff.fullName
+    });
+  };
+
+  const handleConfirmResetPassword = async () => {
+    try {
+      await adminResetStaffPassword(resetPasswordDialog.staffId);
+      setSnackbar({
+        open: true,
+        message: 'Đặt lại mật khẩu thành công',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      setSnackbar({
+        open: true,
+        message: getErrorMessage(error),
+        severity: 'error'
+      });
+    } finally {
+      setResetPasswordDialog(prev => ({ ...prev, open: false }));
+    }
+  };
+
+  const handleCreateSuccess = (newStaff) => {
+    setOpenCreatePopup(false);
+    setPage(1);
+    setSortOrder('date-desc');
+    setSearchTerm('');
+    setSearchInput('');
+    loadStaff();
   };
 
   return (
@@ -165,6 +214,8 @@ const ManageStaff = () => {
             >
               <MenuItem value="name-asc">Tên A-Z</MenuItem>
               <MenuItem value="name-desc">Tên Z-A</MenuItem>
+              <MenuItem value="date-asc">Ngày tạo cũ nhất</MenuItem>
+              <MenuItem value="date-desc">Ngày tạo mới nhất</MenuItem>
             </Select>
           </Box>
         </Box>
@@ -172,12 +223,12 @@ const ManageStaff = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ width: '1rem', fontWeight: 700, textAlign: 'left', padding: '10px' }}>ID</TableCell>
-                <TableCell sx={{ width: '10rem', fontWeight: 700, padding: '10px' }}>Họ tên</TableCell>
-                <TableCell sx={{ width: '10rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
-                <TableCell sx={{ width: '13rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Email</TableCell>
-                <TableCell sx={{ width: '9rem', fontWeight: 700, textAlign: !isSidebarOpen ? 'left' : 'center', padding: '7px', pl: !isSidebarOpen ? '2%' : 0 }}>Trạng thái</TableCell>
-                <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}>Ngày tạo</TableCell>
+                <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'left', padding: '10px' }}>ID</TableCell>
+                <TableCell sx={{ fontWeight: 700, padding: '10px' }}>Họ tên</TableCell>
+                <TableCell sx={{ fontWeight: 700, textAlign: 'center', padding: '10px' }}>Số điện thoại</TableCell>
+                <TableCell sx={{ width: '14rem', fontWeight: 700, textAlign: 'left', padding: '10px' }}>Email</TableCell>
+                <TableCell sx={{ width: '7rem', fontWeight: 700, textAlign: 'left', padding: '10px' }}>Trạng thái</TableCell>
+                <TableCell sx={{ fontWeight: 700, textAlign: 'center', padding: '10px' }}>Ngày tạo</TableCell>
                 <TableCell sx={{ width: '5rem', fontWeight: 700, textAlign: 'center', padding: '10px' }}></TableCell>
               </TableRow>
             </TableHead>
@@ -191,7 +242,7 @@ const ManageStaff = () => {
                   <TableCell colSpan={7} align="center">No staff found</TableCell>
                 </TableRow>
               ) : (
-                staff.map((staff) => (
+                sortedStaff.map((staff) => (
                   <TableRow key={staff.staffId}>
                     <TableCell sx={{ padding: '10px', textAlign: 'left' }}>{staff.staffId}</TableCell>
                     <TableCell noWrap sx={{ padding: '10px' }}>{staff.fullName}</TableCell>
@@ -208,21 +259,31 @@ const ManageStaff = () => {
                       {staff.isDeleted ? (
                         <Button
                           variant="contained"
-                          color="primary"
+                          color="success"
                           onClick={() => handleStatusChange(staff)}
-                          sx={{ width: '8rem' }}
+                          sx={{ width: '9.3rem', fontSize: '0.75rem' }}
                         >
                           Kích hoạt
                         </Button>
                       ) : (
-                        <Button
-                          variant="contained"
-                          color="error"
-                          onClick={() => handleStatusChange(staff)}
-                          sx={{ width: '9rem', fontSize: '0.75rem' }}
-                        >
-                          Khóa tài khoản
-                        </Button>
+                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => handleStatusChange(staff)}
+                            sx={{ width: '9.3rem', fontSize: '0.75rem' }}
+                          >
+                            Khóa tài khoản
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleResetPasswordClick(staff)}
+                            sx={{ width: '9.3rem', fontSize: '0.75rem' }}
+                          >
+                            Đặt lại mật khẩu
+                          </Button>
+                        </Box>
                       )}
                     </TableCell>
                   </TableRow>
@@ -255,30 +316,8 @@ const ManageStaff = () => {
         <StaffCreatePopup
           open={openCreatePopup}
           onClose={() => setOpenCreatePopup(false)}
-          onCreate={(newStaff) => {
-            console.log('Created Staff:', newStaff);
-            setOpenCreatePopup(false);
-          }}
-          onRefresh={() => {
-            // Reload the staff list
-            fetchStaff({
-              pageSize,
-              pageIndex: page - 1,
-              nameSearch: searchTerm,
-            }).then(result => {
-              setStaff(result.data);
-              setTotalPages(Math.ceil(result.total / pageSize));
-            });
-          }}
-        />
-        <StaffUpdatePopup
-          open={openUpdatePopup}
-          onClose={() => setOpenUpdatePopup(false)}
-          staff={selectedStaff}
-          onUpdate={(updatedStaff) => {
-            console.log('Updated Staff:', updatedStaff);
-            setOpenUpdatePopup(false);
-          }}
+          onCreate={handleCreateSuccess}
+          onRefresh={loadStaff}
         />
         <Dialog
           open={confirmDialog.open}
@@ -304,6 +343,44 @@ const ManageStaff = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+          open={resetPasswordDialog.open}
+          onClose={() => setResetPasswordDialog(prev => ({ ...prev, open: false }))}
+        >
+          <DialogTitle>Đặt lại mật khẩu</DialogTitle>
+          <DialogContent>
+            Bạn có chắc chắn muốn đặt lại mật khẩu cho nhân viên {resetPasswordDialog.staffName}?
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setResetPasswordDialog(prev => ({ ...prev, open: false }))}
+              color="inherit"
+            >
+              Hủy
+            </Button>
+            <Button
+              onClick={handleConfirmResetPassword}
+              color="primary"
+              variant="contained"
+            >
+              Xác nhận
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbar.severity}
+            variant="filled"
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </Box>
   );

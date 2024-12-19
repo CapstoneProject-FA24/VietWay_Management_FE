@@ -23,6 +23,9 @@ const PostDeleteConfirm = ({ open, onClose, postId, onDelete }) => {
                 <Typography variant="body1" gutterBottom>
                     Bạn có xác nhận xóa bài viết này không?
                 </Typography>
+                <Typography variant="body2" sx={{ color: 'red', fontStyle: 'italic' }} gutterBottom>
+                    Lưu ý: Hành động này không thể hoàn tác.
+                </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                     <Button onClick={onClose} variant="outlined" color="primary" sx={{ mr: 1 }}>
                         Hủy

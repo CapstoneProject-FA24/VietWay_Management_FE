@@ -4,6 +4,7 @@ import { createTourCategory } from '@services/TourCategoryService';
 import { createPostCategory } from '@services/PostCategoryService';
 import { createAttractionType } from '@services/AttractionTypeService';
 import { createTourDuration } from '@services/DurationService';
+import { getErrorMessage } from '@hooks/Message';
 
 const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration }) => {
   const [formData, setFormData] = useState({
@@ -74,7 +75,7 @@ const CreateCategory = ({ open, onClose, onSuccess, categoryType, isTourDuration
       console.error('Error creating category:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi thêm mới',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     }

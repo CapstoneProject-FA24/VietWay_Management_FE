@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
+import { faInfoCircle, faIcons, faClock, faMoneyBill1, faCalendarAlt, faQrcode, faBus } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -19,6 +19,11 @@ import dayjs from 'dayjs';
 import TourTable from '@components/tourTemplate/TourTable';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import CategoryIcon from '@mui/icons-material/Category';
+import FlightIcon from '@mui/icons-material/Flight';
+import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -187,6 +192,19 @@ const ManagerTourTemplateDetails = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
           Chi tiết tour mẫu
         </Typography>
+        <IconButton onClick={handleHistoryClick}
+          sx={{
+            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            '&:hover': { backgroundColor: '#f5f5f5' }, mr: 2
+          }}
+        > <HistoryIcon color="primary" /> </IconButton>
+        <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+          sx={{ position: 'absolute', top: 120, right: 30, width: '400px', zIndex: 1000 }}
+        >
+          <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+            <VersionHistory entityId={id} entityType={13} />
+          </Paper>
+        </Collapse>
         {tourTemplate?.status === TourTemplateStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
             <Button
@@ -207,39 +225,6 @@ const ManagerTourTemplateDetails = () => {
         )}
         {tourTemplate?.status === TourTemplateStatus.Approved && (
           <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
-            <IconButton
-              onClick={handleHistoryClick}
-              sx={{
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                height: '45px',
-                width: '45px',
-                '&:hover': {
-                  backgroundColor: '#f5f5f5'
-                }
-              }}
-            >
-              <HistoryIcon color="primary" />
-            </IconButton>
-
-            {/* Version History Dropdown */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                width: '400px',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                borderRadius: '4px',
-                display: isHistoryOpen ? 'block' : 'none',
-                zIndex: 1000,
-                marginTop: '8px'
-              }}
-            >
-              <VersionHistory />
-            </Box>
-
             <Button
               variant="contained"
               sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}
@@ -251,9 +236,11 @@ const ManagerTourTemplateDetails = () => {
         )}
       </Box>
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-        <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="small" sx={{ mb: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
-        <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.15rem' }}>
-          {tourTemplate.provinces.map(province => province.provinceName).join(' - ')}
+        <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.1rem' }}>
+          Tour đi: <strong>{tourTemplate.provinces.map(province => province.provinceName).join(' - ')}</strong>
+        </Typography>
+        <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.1rem' }}>
+          Khởi hành từ: <strong>{tourTemplate.startingProvince?.provinceName}</strong>
         </Typography>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
           {tourTemplate.tourName}
@@ -281,25 +268,27 @@ const ManagerTourTemplateDetails = () => {
           </Grid>
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Thời lượng:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <AccessTimeFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Thời lượng:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.duration.durationName}</Typography>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Loại tour:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                <CategoryIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Loại tour:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.tourCategoryName}</Typography>
                 </Box>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', width: '33%' }}>
-                <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexDirection: 'column', ml: 2 }}>
-                  <Typography sx={{ color: '#05073C', fontWeight: 600 }}>Phương tiện:</Typography>
-                  <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
+                {tourTemplate.transportation === 'Máy bay' && (<FlightIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                {tourTemplate.transportation === 'Tàu hỏa' && (<DirectionsTransitIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                {tourTemplate.transportation === 'Xe du lịch' && (<DirectionsCarFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                  <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Phương tiện:</Typography>
+                  <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.transportation}</Typography>
                 </Box>
               </Box>
             </Box>
@@ -380,7 +369,7 @@ const ManagerTourTemplateDetails = () => {
                       ))}
                     </ul>
                     <Typography>Chi tiết:</Typography>
-                    <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' }}}/>
+                    <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' } }} />
                   </Collapse>
                 </Box>
               ))}
@@ -423,8 +412,8 @@ const ManagerTourTemplateDetails = () => {
                 <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
                 <Typography sx={{ color: '#05073C', display: 'flex' }}>
                   Trạng thái:
-                  <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                 </Typography>
+                <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
               </Box>
             </Paper>
           </Grid>

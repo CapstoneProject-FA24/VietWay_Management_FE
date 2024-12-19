@@ -3,7 +3,6 @@ const baseURL = import.meta.env.VITE_API_URL;
 import { getCookie } from '@services/AuthenService';
 
 export const fetchAttractions = async (params) => {
-    console.log(params);
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
@@ -241,6 +240,52 @@ export const deleteAttraction = async (attractionId) => {
         return response.data;
     } catch (error) {
         console.error('Error deleting attraction:', error.response);
+        throw error;
+    }
+};
+
+export const fetchApprovedttractions = async (params) => {
+    console.log(params);
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        queryParams.append('pageSize', params.pageSize);
+        queryParams.append('pageIndex', params.pageIndex);
+        if (params.nameSearch) queryParams.append('nameSearch', params.nameSearch);
+        if (params.attractionTypeIds) params.attractionTypeIds.forEach(id => queryParams.append('attractionTypeIds', id));
+        if (params.provinceIds) params.provinceIds.forEach(id => queryParams.append('provinceIds', id));
+        if (params.attractionIds) params.attractionIds.forEach(attractionId => queryParams.append('attractionIds', attractionId));
+        const response = await axios.get(`${baseURL}/api/attractions/approved-attraction?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const items = response.data?.data?.items;
+
+        if (!items || !Array.isArray(items)) {
+            throw new Error('Invalid response structure: items not found or not an array');
+        }
+
+        const attractions = items.map(item => ({
+            attractionId: item.attractionId,
+            name: item.name,
+            address: item.address,
+            status: item.status,
+            attractionType: item.attractionType,
+            createdDate: item.createdAt,
+            creatorName: item.creatorName,
+            province: item.province,
+            imageUrl: item.imageUrl
+        }));
+        return ({
+            data: attractions,
+            pageIndex: response.data?.data?.pageIndex,
+            pageSize: response.data?.data?.pageSize,
+            total: response.data?.data?.total
+        })
+
+    } catch (error) {
+        console.error('Error fetching tour attractions:', error);
         throw error;
     }
 };

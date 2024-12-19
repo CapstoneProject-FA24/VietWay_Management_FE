@@ -108,7 +108,7 @@ export const updatePost = async (id, postData) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-        return response.data;
+        return response;
     } catch (error) {
         console.error('Error updating post:', error);
         throw error;

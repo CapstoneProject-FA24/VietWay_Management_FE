@@ -70,13 +70,6 @@ export const EntityType = {
   BookingRefund: 14
 };
 
-export const EventStatus = {
-  Draft: 0,
-  Pending: 1,
-  Approved: 2,
-  Rejected: 3
-};
-
 export const PostStatus = {
   Draft: 0,
   Pending: 1,

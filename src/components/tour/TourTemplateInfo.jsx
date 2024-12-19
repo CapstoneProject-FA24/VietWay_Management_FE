@@ -59,11 +59,11 @@ const TourTemplateInfo = ({ tourTemplate, isLoading }) => {
 
             <Collapse in={expanded}>
                 <Box sx={{ mt: 2 }}>
-                    <Typography sx={{ fontWeight: 700, mb: -2 }}>Tổng quan:</Typography>
+                    <Typography sx={{ fontWeight: 700 }}>Tổng quan:</Typography>
                     <Typography paragraph sx={{ textAlign: 'justify' }}>
                         <Box dangerouslySetInnerHTML={{ __html: tourTemplate.description }} sx={{
                             '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                            '& p': { lineHeight: 1.2, mb: 1 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                            '& p': { lineHeight: 1.2, mb: 1, mt: 0.5 }, flexGrow: 1, width: '100%', margin: '0 auto'
                         }} />
                     </Typography>
 

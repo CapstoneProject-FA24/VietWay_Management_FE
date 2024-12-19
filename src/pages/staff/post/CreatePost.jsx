@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, TextField, Select, MenuItem, Snackbar, Alert } from '@mui/material';
-import { ArrowBack, Create } from '@mui/icons-material';
+import { Box, Typography, Button, TextField, Select, MenuItem, Snackbar, Alert, FormControl, InputLabel, FormHelperText } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import SidebarStaff from '@layouts/SidebarStaff';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchPostCategory } from '@services/PostCategoryService';
@@ -10,45 +10,25 @@ import 'react-quill/dist/quill.snow.css';
 import dayjs from 'dayjs';
 import { createPost, updatePostImages } from '@services/PostService';
 import { Helmet } from 'react-helmet';
+import '@styles/ReactQuill.css';
+import { getErrorMessage } from '@hooks/Message';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
-
   flexContainer: { display: 'flex', alignItems: 'center', flex: 1, width: '80%' },
-
-  labelTypography: {
-    color: '#05073C',
-    fontWeight: 600,
-    whiteSpace: 'nowrap',
-    marginRight: '1rem'
-  },
-
+  labelTypography: { color: '#05073C', fontWeight: 600, whiteSpace: 'nowrap', marginRight: '1rem' },
   inputField: {
-    '& .MuiOutlinedInput-root': {
-      height: '40px',
-    },
-    '& .MuiOutlinedInput-input': {
-      padding: '8px 14px'
-    }
+    '& .MuiOutlinedInput-root': { height: '40px', },
+    '& .MuiOutlinedInput-input': { padding: '8px 14px' }
   },
-
   imageContainer: {
-    mb: 2,
-    flexGrow: 1,
-    position: 'relative',
+    mb: 2, flexGrow: 1, position: 'relative',
     '&:hover .overlay': { opacity: 1 },
     '&:hover .change-image-btn': { opacity: 1 }
   },
-
   editorContainer: {
-    '& .ql-container': {
-      minHeight: '200px',
-      fontSize: '1.1rem'
-    },
-    '& .ql-editor': {
-      minHeight: '200px',
-      fontSize: '1.1rem'
-    }
+    '& .ql-container': { minHeight: '200px', fontSize: '1.1rem' },
+    '& .ql-editor': { minHeight: '200px', fontSize: '1.1rem' }
   }
 };
 
@@ -58,22 +38,12 @@ const CreatePost = () => {
   const [provinceOptions, setProvinceOptions] = useState([]);
   const [postCategoryOptions, setPostCategoryOptions] = useState([]);
   const [isLoadingProvinces, setIsLoadingProvinces] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
   const [newPost, setNewPost] = useState({
-    title: '',
-    content: '',
-    description: '',
-    category: '',
-    provinceId: '',
-    provinceName: '',
-    createDate: new Date().toISOString().split('T')[0],
-    image: null,
-    status: '0' // Mặc định là bản nháp
+    title: '', content: '', description: '', category: '', provinceId: '',
+    provinceName: '', createDate: new Date().toISOString().split('T')[0], image: null
   });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     const loadProvinces = async () => {
@@ -93,11 +63,7 @@ const CreatePost = () => {
         setPostCategoryOptions(formattedPostCategories);
       } catch (error) {
         console.error('Error loading provinces:', error);
-        setSnackbar({
-          open: true,
-          message: 'Lỗi khi tải danh sách tỉnh thành',
-          severity: 'error'
-        });
+        setSnackbar({ open: true, message: 'Lỗi khi tải danh sách tỉnh thành', severity: 'error', hide: 5000 });
       } finally {
         setIsLoadingProvinces(false);
       }
@@ -110,10 +76,7 @@ const CreatePost = () => {
   };
 
   const handleFieldChange = (field, value) => {
-    setNewPost(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setNewPost(prev => ({ ...prev, [field]: value }));
   };
 
   const handleProvinceChange = (event) => {
@@ -139,72 +102,79 @@ const CreatePost = () => {
 
   const handleCreatePost = async (isDraft = false) => {
     try {
-      if (isDraft && (!newPost.category || !newPost.provinceId)) {
-        setSnackbar({
-          open: true,
-          message: 'Vui lòng chọn danh mục và tỉnh thành',
-          severity: 'error'
-        });
+      const errors = {};
+
+      if (!isDraft) {
+        if (!newPost.title?.trim()) errors.title = 'Vui lòng nhập tiêu đề bài viết';
+        if (!newPost.description?.trim()) errors.description = 'Vui lòng nhập mô tả ngắn';
+        if (!newPost.content?.trim()) errors.content = 'Vui lòng nhập nội dung bài viết';
+        else if (newPost.content.length < 50) errors.content = 'Nội dung bài viết phải có ít nhất 50 ký tự';
+        if (!newPost.category) errors.category = 'Vui lòng chọn danh mục';
+        if (!newPost.provinceId) errors.provinceId = 'Vui lòng chọn tỉnh thành';
+        if (!newPost.image) errors.image = 'Vui lòng chọn ảnh cho bài viết';
+      } else {
+        const hasAnyField =
+          newPost.title || newPost.description || newPost.content ||
+          newPost.category || newPost.provinceId ||
+          (newPost.image && newPost.image.length > 0);
+        if (!hasAnyField) {
+          setSnackbar({
+            open: true, severity: 'error', hide: 5000,
+            message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+          });
+          return;
+        }
+      }
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
         return;
       }
-      // Additional validation for sending (not draft)
-      if (!isDraft) {
-        if (!newPost.title || !newPost.content || !newPost.description || !newPost.category || !newPost.provinceId || !newPost.image) {
-          setSnackbar({
-            open: true,
-            message: 'Vui lòng điền đầy đủ thông tin bắt buộc',
-            severity: 'error'
-          });
-          return;
-        }
-        if (newPost.content.length < 50) {
-          setSnackbar({
-            open: true,
-            message: 'Nội dung bài viết phải có ít nhất 50 ký tự',
-            severity: 'error'
-          });
-          return;
-        }
-      }
       const postData = {
-        title: newPost.title.trim(),
-        content: newPost.content,
-        description: newPost.description.trim(),
-        postCategoryId: newPost.category,
-        provinceId: newPost.provinceId,
-        createdAt: dayjs(newPost.createDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+        title: newPost.title || null,
+        content: newPost.content || null,
+        description: newPost.description || null,
+        postCategoryId: newPost.category || null,
+        provinceId: newPost.provinceId || null,
         isDraft: isDraft
       };
       const createdPost = await createPost(postData);
-      if (newPost.image) {
-        // Convert base64 to blob
-        const response = await fetch(newPost.image);
-        const blob = await response.blob();
-        const imageFile = new File([blob], 'post-image.jpg', { type: 'image/jpeg' });
-
-        // Upload image
-        await updatePostImages(createdPost.data, [imageFile]);
+      if (createdPost.statusCode === 200) {
+        if (newPost.image) {
+          const response = await fetch(newPost.image);
+          const blob = await response.blob();
+          const imageFile = new File([blob], 'post-image.jpg', { type: 'image/jpeg' });
+          const imagesResponse = await updatePostImages(createdPost.data, [imageFile]);
+          if (imagesResponse.statusCode !== 200) {
+            console.error('Error uploading images:', imagesResponse);
+            setSnackbar({
+              open: true, severity: 'error', hide: 5000,
+              message: 'Đã xảy ra lỗi khi lưu ảnh. Vui lòng thử lại sau.',
+            });
+          } else {
+            setSnackbar({
+              open: true, severity: 'success', hide: 1500,
+              message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi tour mẫu thành công.',
+            });
+            setTimeout(() => {
+              navigate('/nhan-vien/bai-viet/chi-tiet/' + createdPost.data);
+            }, 1500);
+          }
+        } else {
+          setSnackbar({ open: true, message: isDraft ? 'Đã lưu bản nháp thành công.' : 'Đã tạo và gửi bài viết thành công.', severity: 'success', hide: 1500 });
+          setTimeout(() => {
+            navigate('/nhan-vien/bai-viet/chi-tiet/' + createdPost.data);
+          }, 1500);
+        }
+      } else {
+        console.error('Error creating tour template:', response);
+        setSnackbar({
+          open: true, severity: 'error',
+          message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+        });
       }
-
-      // Show success message
-      setSnackbar({
-        open: true,
-        message: `Bài viết đã được ${isDraft ? 'lưu nháp' : 'gửi duyệt'} thành công`,
-        severity: 'success'
-      });
-
-      // Navigate back after successful creation
-      setTimeout(() => {
-        navigate('/nhan-vien/bai-viet');
-      }, 1500);
-
     } catch (error) {
       console.error('Error creating post:', error);
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo bài viết',
-        severity: 'error'
-      });
+      setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error', hide: 5000 });
     }
   };
 
@@ -213,230 +183,146 @@ const CreatePost = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '89vw', minHeight: '100vh' }}>
-      <Helmet>
-        <title>Tạo bài viết mới</title>
-      </Helmet>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh', width: '98vw' }}>
+      <Helmet><title>Tạo bài viết mới</title></Helmet>
       <Box sx={{ display: 'flex' }}>
         <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
-
         <Box sx={{
-          flexGrow: 1,
-          p: 3,
-          transition: 'margin-left 0.3s',
-          marginLeft: isSidebarOpen ? '260px' : '25px',
-          width: '100%',
-          maxWidth: '100vw'
+          flexGrow: 1, p: 7, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '250px' : '30px',
+          width: `calc(100% - ${isSidebarOpen ? '250px' : '30px'})`, maxWidth: '98vw'
         }}>
-          <Box maxWidth="100vw">
-            <Paper elevation={2} sx={{
-              p: 3,
-              mb: 3,
-              height: '100%',
-              width: isSidebarOpen ? 'calc(95vw - 260px)' : '92vw'
-            }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-                <Button
-                  startIcon={<ArrowBack />}
-                  onClick={() => navigate(-1)}
-                  sx={{ width: 'fit-content' }}
-                >
-                  Quay lại
-                </Button>
-
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontSize: '2.7rem',
-                    fontWeight: 600,
-                    color: 'primary.main',
-                    alignSelf: 'center',
-                    marginBottom: '1rem'
-                  }}
-                >
-                  Tạo bài viết mới
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <TextField
-                  label="Tiêu đề"
-                  value={newPost.title}
-                  onChange={(e) => handleFieldChange('title', e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  sx={{ mb: 2 }}
-                />
-
-                <Box sx={commonStyles.boxContainer}>
-                  <Box sx={commonStyles.flexContainer}>
-                    <Typography sx={commonStyles.labelTypography}>
-                      Danh mục:
-                    </Typography>
+          <Box maxWidth="98vw">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+              <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ width: 'fit-content' }}>Quay lại</Button>
+              <Typography variant="h4"
+                sx={{
+                  fontSize: '2.7rem', fontWeight: 600, color: 'primary.main',
+                  alignSelf: 'center', marginBottom: '1rem'
+                }}
+              >Tạo bài viết mới</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <TextField
+                label="Tiêu đề *" fullWidth margin="normal" value={newPost.title}
+                onChange={(e) => handleFieldChange('title', e.target.value)}
+                error={!!fieldErrors.title} helperText={fieldErrors.title}
+              />
+              <Box sx={commonStyles.boxContainer}>
+                <Box sx={commonStyles.flexContainer}>
+                  <FormControl fullWidth margin="normal" error={!!fieldErrors.category}>
+                    <InputLabel>Danh mục *</InputLabel>
                     <Select
                       value={newPost.category}
                       onChange={(e) => handleFieldChange('category', e.target.value)}
-                      variant="outlined"
-                      fullWidth
-                      required
-                      sx={commonStyles.inputField}
+                      label="Danh mục *"
                     >
-                      {postCategoryOptions.map(option => (
+                      {postCategoryOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
                           {option.label}
                         </MenuItem>
                       ))}
                     </Select>
-                  </Box>
-
-                  <Box sx={commonStyles.flexContainer}>
-                    <Typography sx={commonStyles.labelTypography}>
-                      Tỉnh/Thành phố:
-                    </Typography>
+                    {fieldErrors.category && (
+                      <FormHelperText>{fieldErrors.category}</FormHelperText>
+                    )}
+                  </FormControl>
+                </Box>
+                <Box sx={commonStyles.flexContainer}>
+                  <FormControl fullWidth margin="normal" error={!!fieldErrors.provinceId}>
+                    <InputLabel>Tỉnh/Thành phố *</InputLabel>
                     <Select
-                      value={newPost.provinceId}
-                      onChange={handleProvinceChange}
-                      variant="outlined"
-                      fullWidth
-                      required
-                      sx={commonStyles.inputField}
-                      disabled={isLoadingProvinces}
+                      value={newPost.provinceId} onChange={handleProvinceChange}
+                      label="Tỉnh/Thành phố *"
                     >
                       {provinceOptions.map(option => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
+                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
                       ))}
                     </Select>
-                  </Box>
-                </Box>
-
-                <TextField
-                  label="Mô tả"
-                  value={newPost.description}
-                  onChange={(e) => handleFieldChange('description', e.target.value)}
-                  variant="outlined"
-                  fullWidth
-                  multiline
-                  rows={3}
-                  sx={{ mb: 2 }}
-                />
-
-                <Box sx={commonStyles.imageContainer}>
-                  <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>
-                    Ảnh
-                  </Typography>
-                  <Box sx={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '300px',
-                    border: '2px dashed #ccc',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    overflow: 'hidden'
-                  }}>
-                    {newPost.image ? (
-                      <img
-                        src={newPost.image}
-                        alt="Preview"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain'
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src="/add-image.png"
-                        alt="Add image"
-                        style={{
-                          width: '100px',
-                          height: '100px',
-                          opacity: 0.5
-                        }}
-                      />
+                    {fieldErrors.provinceId && (
+                      <FormHelperText>{fieldErrors.provinceId}</FormHelperText>
                     )}
-                    <Button
-                      variant="outlined"
-                      component="label"
-                      sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease',
-                        '&:hover': { opacity: 1 },
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                        color: '#000',
-                        border: '1px solid #ccc',
-                      }}
-                    >
-                      Chọn ảnh cho bài viết
-                      <input
-                        type="file"
-                        hidden
-                        accept="image/*"
-                        onChange={handleImageChange}
-                      />
-                    </Button>
-                  </Box>
+                  </FormControl>
                 </Box>
-
-                <Box sx={commonStyles.editorContainer}>
-                  <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}>
-                    Nội dung
+              </Box>
+              <TextField
+                label="Mô tả" value={newPost.description} required
+                onChange={(e) => handleFieldChange('description', e.target.value)}
+                variant="outlined" fullWidth multiline rows={3} sx={{ mb: 2 }}
+                error={!!fieldErrors.description} helperText={fieldErrors.description}
+              />
+              <Box sx={commonStyles.imageContainer}>
+                <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh *</Typography>
+                {fieldErrors.image && (
+                  <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>
+                    {fieldErrors.image}
                   </Typography>
-                  <ReactQuill
-                    value={newPost.content}
-                    onChange={(value) => handleFieldChange('content', value)}
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'font': [] }],
-                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'script': 'sub'}, { 'script': 'super' }],
-                        [{ 'align': [] }],
-                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                        [{ 'direction': 'rtl' }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image', 'video', 'formula'],
-                        ['clean']
-                      ],
+                )}
+                <Box sx={{
+                  position: 'relative', width: '100%', height: '300px',
+                  border: fieldErrors.image ? '2px dashed red' : '2px dashed #ccc', borderRadius: '8px', display: 'flex',
+                  justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
+                }}>
+                  {newPost.image ? (
+                    <img src={newPost.image} alt="Preview"
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <img src="/add-image.png" alt="Add image"
+                      style={{ width: '100px', height: '100px', opacity: 0.5 }}
+                    />
+                  )}
+                  <Button
+                    variant="outlined" component="label"
+                    sx={{
+                      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                      opacity: 0, transition: 'opacity 0.3s ease', '&:hover': { opacity: 1 },
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)', color: '#000', border: '1px solid #ccc',
                     }}
-                    theme="snow"
-                  />
-                </Box>
-
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-                  <Button
-                    variant="contained"
-                    onClick={() => handleCreatePost(true)}
-                    sx={{ mr: 1, backgroundColor: 'grey' }}
                   >
-                    Lưu nháp
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleCreatePost(false)}
-                  >
-                    Gửi duyệt
+                    Chọn ảnh cho bài viết
+                    <input type="file" hidden accept="image/*" onChange={handleImageChange} />
                   </Button>
                 </Box>
               </Box>
-            </Paper>
+              <Box sx={commonStyles.editorContainer}>
+                <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}>Nội dung *</Typography>
+                <FormControl sx={{ width: '100%' }}>
+                  <ReactQuill
+                    value={newPost.content} theme="snow" className={fieldErrors.content ? "ql-error" : null}
+                    onChange={(value) => handleFieldChange('content', value)}
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }], [{ 'font': [] }], [{ 'size': ['small', false, 'large', 'huge'] }],
+                        ['bold', 'italic', 'underline', 'strike'], [{ 'color': [] }, { 'background': [] }],
+                        [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }], [{ 'direction': 'rtl' }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                        ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
+                      ],
+                      clipboard: { matchVisual: false }
+                    }}
+                  />
+                  {fieldErrors.content && (<FormHelperText error sx={{ mt: 0.5 }}>{fieldErrors.content}</FormHelperText>)}
+                </FormControl>
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+                <Button
+                  variant="contained" onClick={() => handleCreatePost(true)}
+                  sx={{ mr: 1, backgroundColor: 'grey' }}
+                >Lưu nháp</Button>
+                <Button variant="contained" color="primary" onClick={() => handleCreatePost(false)}>Gửi duyệt</Button>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Box sx={{ mt: 1, width: '32rem' }}>
+                <Typography sx={{ color: 'red' }}>- Nếu lưu nháp: Vui lòng nhập ít nhất 1 thông tin để lưu nháp.</Typography>
+                <Typography sx={{ color: 'red' }}>- Nếu gửi duyệt: Vui lòng nhập các trường có dấu * và thêm hình ảnh.</Typography>
+              </Box>
+            </Box>
           </Box>
         </Box>
       </Box>
       <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
+        open={snackbar.open} autoHideDuration={snackbar.hide} onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} variant="filled">

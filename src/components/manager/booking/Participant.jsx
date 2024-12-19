@@ -4,6 +4,7 @@ const touristColumns = [
   { id: 'fullName', label: 'Họ tên' },
   { id: 'phoneNumber', label: 'Số điện thoại' },
   { id: 'gender', label: 'Giới tính' },
+  { id: 'pin', label: 'CCCD' },
   { id: 'dateOfBirth', label: 'Ngày sinh' },
   { id: 'price', label: 'Giá vé' }
 ];
@@ -33,6 +34,7 @@ const Participant = ({ participants }) => {
               <TableCell>{participant.fullName}</TableCell>
               <TableCell>{participant.phoneNumber}</TableCell>
               <TableCell>{participant.gender === 'MALE' ? 'Nam' : 'Nữ'}</TableCell>
+              <TableCell>{participant.pin}</TableCell>
               <TableCell>{new Date(participant.dateOfBirth).toLocaleDateString('vi-VN')}</TableCell>
               <TableCell>
                 {new Intl.NumberFormat('vi-VN', { 

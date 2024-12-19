@@ -95,6 +95,8 @@ export const fetchBookingById = async (bookingId) => {
             bookingId: booking.bookingId,
             tourId: booking.tourId,
             tourName: booking.tourName,
+            duration: booking.duration,
+            transportation: booking.transportation,
             tourCode: booking.tourCode,
             startDate: booking.startDate,
             startLocation: booking.startLocation,

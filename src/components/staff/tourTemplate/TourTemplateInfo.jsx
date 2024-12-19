@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Typography, Grid, Paper, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Paper, IconButton, Chip } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faUser, faClock, faMoneyBill1, faCalendarAlt, faQrcode } from '@fortawesome/free-solid-svg-icons';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -9,6 +9,12 @@ import { Collapse, Button } from '@mui/material';
 import { TourTemplateStatus } from '@hooks/Statuses';
 import ReviewListTour from '@components/review/ReviewListTour';
 import TourTable from '@components/tourTemplate/TourTable';
+import { getTourTemplateStatusInfo } from '@services/StatusService';
+import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
+import CategoryIcon from '@mui/icons-material/Category';
+import FlightIcon from '@mui/icons-material/Flight';
+import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 
 const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) => {
   return (
@@ -26,18 +32,18 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
         <Grid item xs={12}>
           <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>
             <Box sx={{ flex: '0 0 59.5%', mr: '1%', position: 'relative' }}>
-              <img src={tourTemplate.imageUrls[0]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
+              <img src={tourTemplate.imageUrls[0]?.imageUrl || "/no-image.jpg"} alt={tourTemplate.tourName} style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
             </Box>
             <Box sx={{ flex: '0 0 39.5%', display: 'flex', flexDirection: 'column' }}>
               <Box sx={{ flex: '0 0 50%', mb: 1.2, position: 'relative' }}>
-                <img src={tourTemplate.imageUrls[1]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
+                <img src={tourTemplate.imageUrls[1]?.imageUrl || "/no-image.jpg"} alt={tourTemplate.tourName} style={{ width: '100%', height: '219px', objectFit: 'cover' }} />
               </Box>
               <Box sx={{ flex: '0 0 50%', display: 'flex' }}>
                 <Box sx={{ flex: '0 0 48.5%', mr: '3%', position: 'relative' }}>
-                  <img src={tourTemplate.imageUrls[2]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[2]?.imageUrl || "/no-image.jpg"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                 </Box>
                 <Box sx={{ flex: '0 0 48.5%', position: 'relative' }}>
-                  <img src={tourTemplate.imageUrls[3]?.imageUrl || "/no-image-available.png"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
+                  <img src={tourTemplate.imageUrls[3]?.imageUrl || "/no-image.jpg"} alt={tourTemplate.tourName} style={{ width: '100%', height: '214px', objectFit: 'cover' }} />
                 </Box>
               </Box>
             </Box>
@@ -46,23 +52,30 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
         <Grid item xs={12} md={8}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              {/* <FontAwesomeIcon icon={faClock} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Thời lượng:</Typography>
-              <Typography sx={{ color: '#05073C' }}>{tourTemplate.duration.durationName}</Typography>
+              <AccessTimeFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Thời lượng:</Typography>
+                <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.duration.durationName}</Typography>
+              </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Loại tour:</Typography>
-              <Typography sx={{ color: '#05073C' }}>{tourTemplate.tourCategoryName}</Typography>
+              <CategoryIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Loại tour:</Typography>
+                <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.tourCategoryName}</Typography>
+              </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', width: '50%' }}>
-              {/* <FontAwesomeIcon icon={faMoneyBill1} style={{ fontSize: '1.6rem', color: '#3572EF' }} /> */}
-              <Typography sx={{ color: '#05073C', fontWeight: 600, mr: 1, ml: 1 }}>Phương tiện:</Typography>
-              <Typography sx={{ color: '#05073C' }}>{tourTemplate.transportation}</Typography>
+              {tourTemplate.transportation === 'Máy bay' && (<FlightIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+              {tourTemplate.transportation === 'Tàu hỏa' && (<DirectionsTransitIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+              {tourTemplate.transportation === 'Xe du lịch' && (<DirectionsCarFilledIcon sx={{ fontSize: '2rem', color: '#3572EF' }} />)}
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', flexDirection: 'column', ml: 2 }}>
+                <Typography sx={{ color: '#05073C', fontWeight: 600, fontSize: '1.1rem' }}>Phương tiện:</Typography>
+                <Typography sx={{ color: '#05073C', fontSize: '1.1rem' }}>{tourTemplate.transportation}</Typography>
+              </Box>
             </Box>
           </Box>
 
-          {/* Overview section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
               Tổng quan
@@ -75,12 +88,10 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
             </Box>
           </Box>
 
-          {/* Schedule section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 3 }}>Lịch trình</Typography>
             {tourTemplate.schedule.map((s, index, array) => (
               <Box key={s.dayNumber} sx={{ pl: 6, position: 'relative' }}>
-                {/* Timeline dots and lines */}
                 {(index === 0 || index === array.length - 1) && (
                   <Box
                     sx={{
@@ -143,22 +154,20 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
                     ))}
                   </ul>
                   <Typography>Chi tiết:</Typography>
-                  <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' }}}/>
+                  <Box dangerouslySetInnerHTML={{ __html: s.description }} sx={{ '& p': { lineHeight: 1.2, mt: 1, textAlign: 'justify' } }} />
                 </Collapse>
               </Box>
             ))}
           </Box>
 
-          {/* Note section */}
           <Box sx={{ mb: 5 }}>
             <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
               Lưu ý
             </Typography>
-            <Box dangerouslySetInnerHTML={{ __html: tourTemplate.note }}/>
+            <Box dangerouslySetInnerHTML={{ __html: tourTemplate.note }} />
           </Box>
         </Grid>
 
-        {/* Sidebar */}
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
             <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
@@ -173,6 +182,14 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
               <FontAwesomeIcon icon={faCalendarAlt} style={{ marginRight: '10px', color: '#3572EF' }} />
               <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
             </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
+              <Typography sx={{ color: '#05073C', display: 'flex' }}>
+                Trạng thái:
+                <Chip label={getTourTemplateStatusInfo(tourTemplate.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getTourTemplateStatusInfo(tourTemplate.status).color}`, bgcolor: `${getTourTemplateStatusInfo(tourTemplate.status).backgroundColor}` }} />
+              </Typography>
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Giá tour</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
               <Typography sx={{ color: '#05073C' }}>
@@ -183,13 +200,6 @@ const TourTemplateInfo = ({ tours, tourTemplate, expandedDay, handleDayClick }) 
               <FontAwesomeIcon icon={faMoneyBill1} style={{ marginRight: '10px', color: '#3572EF' }} />
               <Typography sx={{ color: '#05073C' }}>
                 Đến: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(tourTemplate.maxPrice)}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <FontAwesomeIcon icon={faInfoCircle} style={{ marginRight: '10px', color: '#3572EF' }} />
-              <Typography sx={{ color: '#05073C', display: 'flex' }}>
-                Trạng thái:
-                <Typography sx={{ ml: 1, color: tourTemplate.status === 0 ? 'gray' : tourTemplate.status === 1 ? 'primary.main' : tourTemplate.status === 2 ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
               </Typography>
             </Box>
             {tourTemplate.status === 2 && (

@@ -27,8 +27,7 @@ const ExpandButton = styled((props) => {
     }),
 }));
 
-const CBTemplateCard = ({ tour, onSelect, booking }) => {
-    console.log(tour);
+const CBTemplateCard = ({ tour, onSelect, booking, onRefresh }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
     const [selectedTab, setSelectedTab] = useState(0);
@@ -410,6 +409,7 @@ const CBTemplateCard = ({ tour, onSelect, booking }) => {
                 open={isConfirmChangeOpen}
                 onClose={() => setIsConfirmChangeOpen(false)}
                 currentBooking={booking}
+                onRefresh={onRefresh}
                 newTour={{
                     tourId: selectedDate,
                     duration: tour.duration,

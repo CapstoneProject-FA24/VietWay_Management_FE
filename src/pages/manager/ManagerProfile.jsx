@@ -8,10 +8,10 @@ import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SidebarManager from '@layouts/SidebarManager';
-import { mockManager } from '@hooks/MockAccount';
 import TodayIcon from '@mui/icons-material/Today';
 import { Helmet } from 'react-helmet';
-import { changeManagerPassword } from '@services/ManagerService';
+import { changeManagerPassword, getManagerProfile } from '@services/ManagerService';
+import { getErrorMessage } from '@hooks/Message';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -35,15 +35,30 @@ const ManagerProfile = () => {
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        const managerProfile = mockManager[0];
-        setProfile(managerProfile);
+        const fetchProfile = async () => {
+            try {
+                const profileData = await getManagerProfile();
+                setProfile({
+                    fullname: profileData.fullName,
+                    email: profileData.email,
+                    phone: profileData.phoneNumber
+                });
+            } catch (error) {
+                setSnackbar({
+                    open: true,
+                    message: getErrorMessage(error),
+                    severity: 'error'
+                });
+            }
+        };
+
+        fetchProfile();
     }, []);
 
     const fields = [
         { key: 'fullname', label: 'Tên', icon: <PersonIcon /> },
         { key: 'email', label: 'Email', icon: <EmailIcon /> },
         { key: 'phone', label: 'Số điện thoại', icon: <PhoneIcon /> },
-        { key: 'createDate', label: 'Ngày đăng ký', icon: <TodayIcon /> },
     ];
 
     const handlePasswordChange = (field) => (event) => {
@@ -100,7 +115,7 @@ const ManagerProfile = () => {
             } catch (error) {
                 setSnackbar({
                     open: true,
-                    message: error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật mật khẩu',
+                    message: getErrorMessage(error),
                     severity: 'error'
                 });
             }

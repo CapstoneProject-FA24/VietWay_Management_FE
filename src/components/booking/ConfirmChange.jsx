@@ -4,8 +4,9 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import OldTourInfo from '@components/booking/OldTourInfo';
 import NewTourInfo from '@components/booking/NewTourInfo';
 import { changeBookingTour } from '@services/BookingService';
+import { getErrorMessage } from '@hooks/Message';
 
-const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) => {
+const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm, onRefresh }) => {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -41,11 +42,13 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
       setSnackbarMessage('Thay đổi tour thành công');
       setSnackbarSeverity('success');
       setOpenSnackbar(true);
-      onConfirm();
       onClose();
-      window.location.reload();
+      setTimeout(() => {
+        onConfirm();
+        onRefresh();
+      }, 2000);
     } catch (error) {
-      setSnackbarMessage('Có lỗi xảy ra khi thay đổi tour');
+      setSnackbarMessage(getErrorMessage(error));
       setSnackbarSeverity('error');
       setOpenSnackbar(true);
     } finally {
@@ -55,10 +58,10 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
 
   return (
     <>
-      <Dialog 
-        open={open} 
-        onClose={onClose} 
-        maxWidth="md" 
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
         fullWidth
         PaperProps={{
           sx: {
@@ -67,8 +70,8 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
           }
         }}
       >
-        <DialogTitle sx={{ 
-          bgcolor: 'primary.main', 
+        <DialogTitle sx={{
+          bgcolor: 'primary.main',
           color: 'white',
           py: 2,
           fontSize: '1.4rem'
@@ -80,8 +83,8 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
           <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Box sx={{ 
-                  display: 'flex', 
+                <Box sx={{
+                  display: 'flex',
                   mb: 2,
                   pb: 1,
                   borderBottom: '2px solid',
@@ -90,20 +93,20 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
                   <Typography sx={{ fontWeight: 'bold', fontSize: '1.3rem', mr: 1 }}>
                     Booking:
                   </Typography>
-                  <Typography sx={{ 
-                    fontWeight: 'bold', 
-                    fontSize: '1.3rem', 
+                  <Typography sx={{
+                    fontWeight: 'bold',
+                    fontSize: '1.3rem',
                     color: 'primary.main'
                   }}>
                     {currentBooking?.bookingId}
                   </Typography>
                 </Box>
               </Grid>
-              
+
               {/* Customer Info Section */}
               <Grid item xs={12}>
-                <Typography sx={{ 
-                  fontWeight: 'bold', 
+                <Typography sx={{
+                  fontWeight: 'bold',
                   fontSize: '1.4rem',
                   color: 'text.secondary',
                   textAlign: 'center'
@@ -138,16 +141,16 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
           </Paper>
 
           {/* Old Tour Info */}
-          <OldTourInfo 
+          <OldTourInfo
             currentBooking={currentBooking}
             formatDateTime={formatDateTime}
             formatPrice={formatPrice}
           />
 
           {/* Arrow Down */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
             my: 2,
             position: 'relative'
           }}>
@@ -160,8 +163,8 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
               bgcolor: 'primary.main',
               opacity: 0.3
             }} />
-            <KeyboardArrowDownIcon sx={{ 
-              fontSize: 40, 
+            <KeyboardArrowDownIcon sx={{
+              fontSize: 40,
               color: 'primary.main',
               bgcolor: 'white',
               borderRadius: '50%',
@@ -172,7 +175,7 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
           </Box>
 
           {/* New Tour Info */}
-          <NewTourInfo 
+          <NewTourInfo
             newTour={newTour}
             formatDateTime={formatDateTime}
             formatPrice={formatPrice}
@@ -194,7 +197,7 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
-          <Button 
+          <Button
             onClick={onClose}
             variant="outlined"
             sx={{ minWidth: 100 }}
@@ -202,9 +205,9 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
           >
             Hủy
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            variant="contained" 
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
             color="primary"
             sx={{ minWidth: 100 }}
             disabled={isSubmitting}
@@ -214,16 +217,16 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm }) =>
         </DialogActions>
       </Dialog>
 
-      <Snackbar 
-        open={openSnackbar} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
         onClose={() => setOpenSnackbar(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <Alert 
-          onClose={() => setOpenSnackbar(false)} 
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
           severity={snackbarSeverity}
-          sx={{ width: '100%' }}
+          sx={{ width: '100%' }} variant="filled"
         >
           {snackbarMessage}
         </Alert>
