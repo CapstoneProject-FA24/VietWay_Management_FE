@@ -200,9 +200,12 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
 
     if (!tourData.registerCloseDate) {
       newErrors.registerCloseDate = "Vui lòng chọn ngày đóng đăng ký";
-    } else if (dayjs(tourData.registerCloseDate).isAfter(tourData.startDate) ||
-      dayjs(tourData.registerOpenDate).isAfter(tourData.registerCloseDate)) {
-      newErrors.registerCloseDate = "Ngày đóng đăng ký phải sau ngày mở đăng ký và trước ngày khởi hành";
+    } else if (dayjs(tourData.registerCloseDate).isAfter(tourData.startDate)) {
+      newErrors.registerCloseDate = "Ngày đóng đăng ký phải trước ngày khởi hành";
+    } else if (dayjs(tourData.registerCloseDate).isBefore(dayjs())) {
+      newErrors.registerCloseDate = "Ngày đóng đăng ký phải sau ngày hiện tại";
+    } else if (dayjs(tourData.registerOpenDate).isAfter(tourData.registerCloseDate)) {
+      newErrors.registerCloseDate = "Ngày đóng đăng ký phải sau ngày mở đăng ký";
     }
 
     if (!tourData.depositPercent) {
@@ -528,7 +531,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
                 value={tourData.registerCloseDate}
                 format="DD/MM/YYYY"
                 onChange={(value) => setTourData(prev => ({ ...prev, registerCloseDate: value }))}
-                minDate={tourData.registerOpenDate || dayjs()}
+                minDate={dayjs().isAfter(tourData.registerOpenDate) ? dayjs() : tourData.registerOpenDate}
                 maxDate={dayjs(tourData.startDate).subtract(1, 'day')}
                 slotProps={{
                   textField: {
