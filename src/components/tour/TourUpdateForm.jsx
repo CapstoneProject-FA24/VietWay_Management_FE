@@ -631,7 +631,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
+        <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách thanh toán</Typography>
         <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem', mb: -1.2 }}>
           Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc
         </Typography>
