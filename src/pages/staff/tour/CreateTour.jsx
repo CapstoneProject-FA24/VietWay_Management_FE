@@ -272,6 +272,14 @@ const CreateTour = () => {
     }
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setSnackbar({
+        open: true,
+        severity: 'warning',
+        hide: 5000,
+        message: 'Vui lòng nhập đầy đủ và chính xác thông tin để lưu',
+      });
+    }
     return Object.keys(newErrors).length === 0;
   };
 
