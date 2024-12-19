@@ -2,67 +2,67 @@ export const bankData = [
   {
     code: "VCB",
     name: "VietcomBank",
-    imageUrl: "/bank/VCB.png"
+    imageUrl: "/Bank/VCB.png"
   },
   {
     code: "CTG",
     name: "VietinBank",
-    imageUrl: "/bank/CTG.png"
+    imageUrl: "/Bank/CTG.png"
   },
   {
     code: "TCB",
     name: "Techcombank",
-    imageUrl: "/bank/TCB.png"
+    imageUrl: "/Bank/TCB.png"
   },
   {
     code: "BIDV",
     name: "BIDV",
-    imageUrl: "/bank/BIDV.png"
+    imageUrl: "/Bank/BIDV.png"
   },
   {
     code: "VARB",
     name: "AgriBank",
-    imageUrl: "/bank/VARB.png"
+    imageUrl: "/Bank/VARB.png"
   },
   {
     code: "STB",
     name: "Sacombank",
-    imageUrl: "/bank/STB.png"
+    imageUrl: "/Bank/STB.png"
   },
   {
     code: "ACB",
     name: "ACB",
-    imageUrl: "/bank/ACB.png"
+    imageUrl: "/Bank/ACB.png"
   },
   {
     code: "MB",
     name: "MBBank",
-    imageUrl: "/bank/MB.png"
+    imageUrl: "/Bank/MB.png"
   },
   {
     code: "TPB",
     name: "TPBank",
-    imageUrl: "/bank/TPB.png"
+    imageUrl: "/Bank/TPB.png"
   },
   {
     code: "VIB",
     name: "VIB Bank",
-    imageUrl: "/bank/VIB.png"
+    imageUrl: "/Bank/VIB.png"
   },
   {
     code: "VPB",
     name: "VPBank",
-    imageUrl: "/bank/VPB.png"
+    imageUrl: "/Bank/VPB.png"
   },
   {
     code: "EIB",
     name: "Eximbank",
-    imageUrl: "/bank/EIB.png"
+    imageUrl: "/Bank/EIB.png"
   },
   {
     code: "SCB",
     name: "SCB",
-    imageUrl: "/bank/SCB.png"
+    imageUrl: "/Bank/SCB.png"
   }
 ];
 
@@ -71,301 +71,301 @@ export const bankData = [
     {
       code: "VCB",
       name: "VietcomBank",
-      imageUrl: "/bank/VCB.png"
+      imageUrl: "/Bank/VCB.png"
     },
     {
       code: "CTG",
       name: "VietinBank",
-      imageUrl: "/bank/CTG.png"
+      imageUrl: "/Bank/CTG.png"
     },
     {
       code: "TCB",
       name: "Techcombank",
-      imageUrl: "/bank/TCB.png"
+      imageUrl: "/Bank/TCB.png"
     },
     {
       code: "BIDV",
       name: "BIDV",
-      imageUrl: "/bank/BIDV.png"
+      imageUrl: "/Bank/BIDV.png"
     },
     {
       code: "VARB",
       name: "AgriBank",
-      imageUrl: "/bank/VARB.png"
+      imageUrl: "/Bank/VARB.png"
     },
     {
       code: "NVB",
       name: "Navibank",
-      imageUrl: "/bank/NVB.png"
+      imageUrl: "/Bank/NVB.png"
     },
     {
       code: "STB",
       name: "Sacombank",
-      imageUrl: "/bank/STB.png"
+      imageUrl: "/Bank/STB.png"
     },
     {
       code: "ACB",
       name: "ACB",
-      imageUrl: "/bank/ACB.png"
+      imageUrl: "/Bank/ACB.png"
     },
     {
       code: "MB",
       name: "MBBank",
-      imageUrl: "/bank/MB.png"
+      imageUrl: "/Bank/MB.png"
     },
     {
       code: "TPB",
       name: "TPBank",
-      imageUrl: "/bank/TPB.png"
+      imageUrl: "/Bank/TPB.png"
     },
     {
       code: "SVB",
       name: "Shinhan Bank",
-      imageUrl: "/bank/SVB.png"
+      imageUrl: "/Bank/SVB.png"
     },
     {
       code: "VIB",
       name: "VIB Bank",
-      imageUrl: "/bank/VIB.png"
+      imageUrl: "/Bank/VIB.png"
     },
     {
       code: "VPB",
       name: "VPBank",
-      imageUrl: "/bank/VPB.png"
+      imageUrl: "/Bank/VPB.png"
     },
     {
       code: "SHB",
       name: "SHB",
-      imageUrl: "/bank/SHB.png"
+      imageUrl: "/Bank/SHB.png"
     },
     {
       code: "EIB",
       name: "Eximbank",
-      imageUrl: "/bank/EIB.png"
+      imageUrl: "/Bank/EIB.png"
     },
     {
       code: "BVB",
       name: "BaoVietBank",
-      imageUrl: "/bank/BVB.png"
+      imageUrl: "/Bank/BVB.png"
     },
     {
       code: "VCCB",
       name: "VietcapitalBank",
-      imageUrl: "/bank/VCCB.png"
+      imageUrl: "/Bank/VCCB.png"
     },
     {
       code: "SCB",
       name: "SCB",
-      imageUrl: "/bank/SCB.png"
+      imageUrl: "/Bank/SCB.png"
     },
     {
       code: "VRB",
       name: "VietNam - Russia Bank",
-      imageUrl: "/bank/VRB.png"
+      imageUrl: "/Bank/VRB.png"
     },
     {
       code: "ABB",
       name: "ABBank",
-      imageUrl: "/bank/ABB.png"
+      imageUrl: "/Bank/ABB.png"
     },
     {
       code: "PVCB",
       name: "PVCombank",
-      imageUrl: "/bank/PVCB.png"
+      imageUrl: "/Bank/PVCB.png"
     },
     {
       code: "OJB",
       name: "OceanBank",
-      imageUrl: "/bank/OJB.png"
+      imageUrl: "/Bank/OJB.png"
     },
     {
       code: "NAB",
       name: "NamA bank",
-      imageUrl: "/bank/NAB.png"
+      imageUrl: "/Bank/NAB.png"
     },
     {
       code: "HDB",
       name: "HDBank",
-      imageUrl: "/bank/HDB.png"
+      imageUrl: "/Bank/HDB.png"
     },
     {
       code: "VB",
       name: "VietBank",
-      imageUrl: "/bank/VB.png"
+      imageUrl: "/Bank/VB.png"
     },
     {
       code: "CFC",
       name: "VietCredit",
-      imageUrl: "/bank/CFC.png"
+      imageUrl: "/Bank/CFC.png"
     },
     {
       code: "PBVN",
       name: "Public bank",
-      imageUrl: "/bank/PBVN.png"
+      imageUrl: "/Bank/PBVN.png"
     },
     {
       code: "HLB",
       name: "Hongleong Bank",
-      imageUrl: "/bank/HLB.png"
+      imageUrl: "/Bank/HLB.png"
     },
     {
       code: "PGB",
       name: "PG Bank",
-      imageUrl: "/bank/PGB.png"
+      imageUrl: "/Bank/PGB.png"
     },
     {
       code: "COB",
       name: "Co.op Bank",
-      imageUrl: "/bank/COB.png"
+      imageUrl: "/Bank/COB.png"
     },
     {
       code: "CIMB",
       name: "CIMB",
-      imageUrl: "/bank/CIMB.png"
+      imageUrl: "/Bank/CIMB.png"
     },
     {
       code: "IVB",
       name: "Indovina",
-      imageUrl: "/bank/IVB.png"
+      imageUrl: "/Bank/IVB.png"
     },
     {
       code: "DAB",
       name: "DongABank",
-      imageUrl: "/bank/DAB.png"
+      imageUrl: "/Bank/DAB.png"
     },
     {
       code: "GPB",
       name: "GPBank",
-      imageUrl: "/bank/GPB.png"
+      imageUrl: "/Bank/GPB.png"
     },
     {
       code: "NASB",
       name: "BacABank",
-      imageUrl: "/bank/NASB.png"
+      imageUrl: "/Bank/NASB.png"
     },
     {
       code: "VAB",
       name: "VietABank",
-      imageUrl: "/bank/VAB.png"
+      imageUrl: "/Bank/VAB.png"
     },
     {
       code: "SGB",
       name: "SaigonBank",
-      imageUrl: "/bank/SGB.png"
+      imageUrl: "/Bank/SGB.png"
     },
     {
       code: "MSB",
       name: "Maritime Bank",
-      imageUrl: "/bank/MSB.png"
+      imageUrl: "/Bank/MSB.png"
     },
     {
       code: "LPB",
       name: "LienVietPostBank",
-      imageUrl: "/bank/LPB.png"
+      imageUrl: "/Bank/LPB.png"
     },
     {
       code: "KLB",
       name: "KienLongBank",
-      imageUrl: "/bank/KLB.png"
+      imageUrl: "/Bank/KLB.png"
     },
     {
       code: "IBKHN",
       name: "IBK - Ha Noi",
-      imageUrl: "/bank/IBKHN.png"
+      imageUrl: "/Bank/IBKHN.png"
     },
     {
       code: "IBKHCM",
       name: "IBK - TP.HCM",
-      imageUrl: "/bank/IBKHCM.png"
+      imageUrl: "/Bank/IBKHCM.png"
     },
     {
       code: "WOO",
       name: "Woori bank",
-      imageUrl: "/bank/WOO.png"
+      imageUrl: "/Bank/WOO.png"
     },
     {
       code: "SEAB",
       name: "SeABank",
-      imageUrl: "/bank/SEAB.png"
+      imageUrl: "/Bank/SEAB.png"
     },
     {
       code: "UOB",
       name: "UOB",
-      imageUrl: "/bank/UOB.png"
+      imageUrl: "/Bank/UOB.png"
     },
     {
       code: "OCB",
       name: "OCB",
-      imageUrl: "/bank/OCB.png"
+      imageUrl: "/Bank/OCB.png"
     },
     {
       code: "MAFC",
       name: "Mirae Asset",
-      imageUrl: "/bank/MAFC.png"
+      imageUrl: "/Bank/MAFC.png"
     },
     {
       code: "KEBHANAHCM",
       name: "Keb Hana - Ho Chi Minh",
-      imageUrl: "/bank/KEBHANAHCM.png"
+      imageUrl: "/Bank/KEBHANAHCM.png"
     },
     {
       code: "KEBHANAHN",
       name: "Keb Hana - Ha Noi",
-      imageUrl: "/bank/KEBHANAHN.png"
+      imageUrl: "/Bank/KEBHANAHN.png"
     },
     {
       code: "STANDARD",
       name: "Standard Chartered",
-      imageUrl: "/bank/STANDARD.png"
+      imageUrl: "/Bank/STANDARD.png"
     },
     {
       code: "CAKE",
       name: "CAKE",
-      imageUrl: "/bank/CAKE.png"
+      imageUrl: "/Bank/CAKE.png"
     },
     {
       code: "Ubank",
       name: "Ubank",
-      imageUrl: "/bank/Ubank.png"
+      imageUrl: "/Bank/Ubank.png"
     },
     {
       code: "NonghyupBankHN",
       name: "Nonghyup Bank - HN",
-      imageUrl: "/bank/NonghyupBankHN.png"
+      imageUrl: "/Bank/NonghyupBankHN.png"
     },
     {
       code: "KBHN",
       name: "Kookmin - HN",
-      imageUrl: "/bank/KBHN.png"
+      imageUrl: "/Bank/KBHN.png"
     },
     {
       code: "KBHCM",
       name: "Kookmin - HCM",
-      imageUrl: "/bank/KBHCM.png"
+      imageUrl: "/Bank/KBHCM.png"
     },
     {
       code: "DBS",
       name: "DBS - HCM",
-      imageUrl: "/bank/DBS.png"
+      imageUrl: "/Bank/DBS.png"
     },
     {
       code: "CBB",
       name: "CBBank",
-      imageUrl: "/bank/CBB.png"
+      imageUrl: "/Bank/CBB.png"
     },
     {
       code: "KBankHCM",
       name: "KBank - HCM",
-      imageUrl: "/bank/KBankHCM.png"
+      imageUrl: "/Bank/KBankHCM.png"
     },
     {
       code: "HSBC",
       name: "HSBC",
-      imageUrl: "/bank/HSBC.png"
+      imageUrl: "/Bank/HSBC.png"
     },
     {
       code: "TIMO",
       name: "Timo",
-      imageUrl: "/bank/TIMO.png"
+      imageUrl: "/Bank/TIMO.png"
     }
   ];  */ 
