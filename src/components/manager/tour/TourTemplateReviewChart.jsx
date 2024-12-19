@@ -1,16 +1,20 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+    BarChart, Bar, XAxis, YAxis,
+    CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+} from 'recharts';
 import { Box, Paper, Typography } from '@mui/material';
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <Paper sx={{ p: 2, backgroundColor: 'white' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                    <strong>{label}</strong>
+            <Paper sx={{ p: 2 }}>
+                <Typography variant="subtitle2">{label}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                    Đánh giá trung bình: {payload[0]?.payload.averageRating.toFixed(1)}
                 </Typography>
-                <Typography variant="body2" color="primary">
-                    Doanh thu: {payload[0].value.toLocaleString('vi-VN')}đ
+                <Typography variant="body2" sx={{ mt: 1, fontWeight: 'bold' }}>
+                    Tổng số đánh giá: {payload[0]?.payload.totalRating}
                 </Typography>
             </Paper>
         );
@@ -18,46 +22,57 @@ const CustomTooltip = ({ active, payload, label }) => {
     return null;
 };
 
-const TourTemplateRevenue = ({ revenueData }) => {
-    // Filter out tours with zero revenue and sort by revenue
-    const filteredData = revenueData
-        .filter(item => item.totalRevenue > 0)
-        .sort((a, b) => b.totalRevenue - a.totalRevenue);
+const TourTemplateReviewChart = ({ ratingData }) => {
+    // Filter and sort data
+    const filteredData = ratingData
+        .filter(item => item.totalRating > 0)
+        .sort((a, b) => {
+            // Primary sort by average rating (descending)
+            if (b.averageRating !== a.averageRating) {
+                return b.averageRating - a.averageRating;
+            }
+            // Secondary sort by total ratings if average ratings are equal
+            return b.totalRating - a.totalRating;
+        });
+
+    // Custom colors for the bars
+    const barColor = '#4caf50'; // Different color from attraction chart
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
                     <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-                        Thống kê doanh thu theo tour
+                        Thông kê đánh giá của các tour
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        Sắp xếp theo tổng doanh thu
+                        Sắp xếp theo đánh giá trung bình và số lượng đánh giá
                     </Typography>
                 </Box>
             </Box>
 
-            <Box sx={{ height: '400px' }}>
+            <Box sx={{ height: filteredData.length > 0 ? (filteredData.length > 10 ? (filteredData.length > 20 ? '800px' : '550px') : '300px') : '100px' }}>
                 {filteredData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                             data={filteredData}
                             layout="vertical"
-                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis 
                                 type="number" 
-                                tickFormatter={(value) => `${(value / 1000000).toFixed(1)} triệu`}
+                                domain={[0, 5]}
+                                tickCount={6}
                             />
                             <YAxis
                                 dataKey="tourTemplateName"
                                 type="category"
-                                width={350}
+                                width={400}
                                 tick={props => {
                                     const { x, y, payload } = props;
                                     const text = payload.value;
-                                    const maxLength = 50;
+                                    const maxLength = 55;
                                     const displayText = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
                                     
                                     return (
@@ -78,17 +93,17 @@ const TourTemplateRevenue = ({ revenueData }) => {
                             />
                             <Tooltip content={<CustomTooltip />} />
                             <Legend />
-                            <Bar 
-                                dataKey="totalRevenue" 
-                                name="Doanh thu" 
-                                fill="#2196f3" 
+                            <Bar
+                                dataKey="averageRating"
+                                fill={barColor}
+                                name="Đánh giá trung bình"
                             />
                         </BarChart>
                     </ResponsiveContainer>
                 ) : (
                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                         <Typography color="text.secondary">
-                            Không có dữ liệu doanh thu trong khoảng thời gian này
+                            Không có dữ liệu đánh giá trong khoảng thời gian này
                         </Typography>
                     </Box>
                 )}
@@ -97,4 +112,4 @@ const TourTemplateRevenue = ({ revenueData }) => {
     );
 };
 
-export default TourTemplateRevenue;
+export default TourTemplateReviewChart;

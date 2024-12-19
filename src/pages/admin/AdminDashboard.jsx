@@ -10,11 +10,11 @@ import TourOutlinedIcon from '@mui/icons-material/TourOutlined';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AirplaneTicketOutlinedIcon from '@mui/icons-material/AirplaneTicketOutlined';
-import AttractionReviewByProvinceChart from '@components/manager/attraction/AttractionReviewByProvinceChart';
+import AttractionReviewChart from '@components/manager/attraction/AttractionReviewChart';
 import BookingChart from '@components/manager/tour/BookingChart';
 import CustomerStatisticsChart from '@components/manager/tour/CustomerStatisticsChart';
 import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateChart';
-import BookingAndReviewFromTourTemplate from '@components/manager/tour/BookingAndReviewFromTourTemplate';
+import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReviewChart';
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
 import TourTemplateChart from '@components/manager/tour/TourTemplateChart';
 import DateRangeSelector from '@components/common/DateRangeSelector';
@@ -163,7 +163,7 @@ const ManagerDashboard = () => {
           </Grid> */}
 
           <Grid item xs={12}>
-            <BookingAndReviewFromTourTemplate />
+            <TourTemplateReviewChart />
           </Grid>
           <Grid item xs={12}>
             <TourUsingTemplateChart />
@@ -173,7 +173,7 @@ const ManagerDashboard = () => {
         <Typography sx={{ fontSize: '2rem', fontWeight: 600, color: '#30529c', mt: 10 }}> Điểm tham quan </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <AttractionReviewByProvinceChart />
+            <AttractionReviewChart />
           </Grid>
         </Grid>
       </Box>
