@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, FormControl, FormHelperText, InputLabel } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Select, MenuItem, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, FormControl, FormHelperText, InputLabel, Paper, Collapse } from '@mui/material';
 import { ArrowBack, Edit, Delete, Save, Send, Cancel as CancelIcon } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -17,6 +17,7 @@ import { fetchPostById, updatePost, deletePost, updatePostImages } from '@servic
 import { Helmet } from 'react-helmet';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
+import { getErrorMessage } from '@hooks/Message';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -246,7 +247,7 @@ const PostDetail = () => {
       }
     } catch (error) {
       console.error('Error creating post:', error);
-      setSnackbar({ open: true, message: error.createdPost?.data?.message || 'Có lỗi xảy ra khi lưu bài viết', severity: 'error', hide: 5000 });
+      setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error', hide: 5000 });
     } finally {
       setIsSubmitting(false);
     }
@@ -420,14 +421,13 @@ const PostDetail = () => {
         <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', mt: 5 }}>
           <Box maxWidth="89vw">
             <Box sx={{ position: 'relative' }}>
-              <Box
-                sx={{
-                  position: 'fixed', top: '120px', right: isSidebarOpen ? '280px' : '40px', width: '400px', backgroundColor: 'white',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)', borderRadius: '4px', display: isHistoryOpen ? 'block' : 'none', zIndex: 1000
-                }}
+              <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+                sx={{ position: 'absolute', top: 90, right: 30, width: '400px', zIndex: 1000 }}
               >
-                <VersionHistory />
-              </Box>
+                <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+                  <VersionHistory entityId={id} entityType={9} />
+                </Paper>
+              </Collapse>
               <Box elevation={2} sx={{ p: 1, mb: 10, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Button startIcon={<ArrowBack />} onClick={() => navigate('/nhan-vien/bai-viet')} sx={{ mb: 2 }} >Quay lại</Button>

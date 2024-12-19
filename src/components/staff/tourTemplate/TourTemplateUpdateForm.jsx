@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '@styles/ReactQuill.css';
+import { getErrorMessage } from '@hooks/Message';
 
 const quillModules = {
     toolbar: [
@@ -237,7 +238,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
                     errors.provinces = 'Vui lòng chọn ít nhất một tỉnh thành';
                 }
-                if (!tourTemplateData.schedules || tourTemplateData.schedules.length  === 0) {
+                if (!tourTemplateData.schedules || tourTemplateData.schedules.length === 0) {
                     errors.schedules = 'Vui lòng thêm ít nhất một lịch trình';
                 }
                 const invalidSchedules = tourTemplateData.schedules.filter(s =>
@@ -310,7 +311,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         } catch (error) {
             console.error('Error updating tour template:', error);
             setSnackbar({
-                open: true, severity: 'error', message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+                open: true, severity: 'error', message: getErrorMessage(error),
             });
         }
     };
@@ -584,7 +585,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 <Grid item xs={12} md={4} >
                     <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        {/* <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -592,7 +593,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 Trạng thái:
                                 <Typography sx={{ ml: 1, color: tourTemplate.statusName === 'Bản nháp' ? 'gray' : tourTemplate.statusName === 'Chờ duyệt' ? 'primary.main' : tourTemplate.statusName === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
                             </Typography>
-                        </Box>
+                        </Box> */}
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                             <Typography sx={{ color: '#05073C', display: 'flex', width: '6rem' }}> Mã mẫu: </Typography>
                             <TextField
@@ -600,6 +601,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 fullWidth error={!!fieldErrors.code} helperText={fieldErrors.code}
                             />
                         </Box>
+                        <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C', mt: 1 }}>Giá tour</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                             <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá từ: </Typography>
                             <TextField
@@ -632,10 +634,10 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             </Grid >
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                 {(tourTemplate.status !== 1 && tourTemplate.status !== 2) && (
-                <Button
-                    variant="contained" fullWidth onClick={() => handleSubmit(true)}
-                    sx={{ backgroundColor: 'gray', height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }, width: 'fit-content' }}
-                >Lưu bản nháp</Button>
+                    <Button
+                        variant="contained" fullWidth onClick={() => handleSubmit(true)}
+                        sx={{ backgroundColor: 'gray', height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }, width: 'fit-content' }}
+                    >Lưu bản nháp</Button>
                 )}
                 <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >{(tourTemplate.status === 1) ? 'Lưu' : 'Gửi duyệt'}</Button>
             </Box>

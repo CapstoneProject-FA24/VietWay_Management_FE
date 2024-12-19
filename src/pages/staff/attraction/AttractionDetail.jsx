@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress, Collapse, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, CircularProgress, Collapse, Snackbar, Alert, Paper } from '@mui/material';
 import { Helmet } from 'react-helmet';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
 import SendIcon from '@mui/icons-material/Send';
 import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
+import { getErrorMessage } from '@hooks/Message';
 
 const AttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -47,7 +48,7 @@ const AttractionDetail = () => {
       setAttraction(fetchedAttraction);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError(error.message || 'An error occurred while fetching data');
+      setError(getErrorMessage(error));
     }
   };
 
@@ -104,7 +105,7 @@ const AttractionDetail = () => {
       console.error('Error sending for approval:', error);
       setSnackbar({
         open: true, severity: 'error', hide: 5000,
-        message: 'Lỗi khi gửi duyệt: ' + (error.response?.data?.message || error.message),
+        message: getErrorMessage(error),
       });
     } finally {
       setIsSubmitting(false);
@@ -147,7 +148,7 @@ const AttractionDetail = () => {
       console.error('Error updating attraction:', error);
       setSnackbar({
         open: true, severity: 'error', hide: 5000,
-        message: 'Có lỗi xảy ra khi cập nhật điểm tham quan. Vui lòng thử lại.'
+        message: getErrorMessage(error),
       });
     } finally {
       setIsSubmitting(false);
@@ -197,7 +198,7 @@ const AttractionDetail = () => {
     } catch (error) {
       console.error('Error deleting attraction:', error);
       setSnackbar({
-        open: true, message: 'Có lỗi xảy ra khi xóa điểm tham quan', severity: 'error', hide: 5000,
+        open: true, message: getErrorMessage(error), severity: 'error', hide: 5000,
       });
     }
   };
@@ -231,7 +232,39 @@ const AttractionDetail = () => {
   );
 
   if (error) {
-    return <Typography color="error">Error: {error}</Typography>;
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
+        <Helmet> <title>Chi tiết điểm tham quan</title> </Helmet>
+        <Box sx={{ display: 'flex' }}>
+          <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
+
+          <Box sx={{
+            flexGrow: 1, p: 3, transition: 'margin-left 0.3s',
+            marginLeft: isSidebarOpen ? '260px' : '20px', mt: 5
+          }}>
+            <Box maxWidth="89vw">
+              <Box elevation={2} sx={{
+                p: 1, mb: 3, marginTop: -1.5, height: '100%',
+                width: isSidebarOpen ? 'calc(93vw - 260px)' : 'calc(93vw - 20px)'
+              }}>
+                <Box sx={{ m: '-60px -60px 0px -60px', boxShadow: 2, pt: 3, pl: 4, pr: 4, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Button
+                    component={Link} to="/nhan-vien/diem-tham-quan" variant="contained"
+                    startIcon={<ArrowBackIosNewOutlinedIcon />}
+                    sx={{ height: '55px', backgroundColor: 'transparent', boxShadow: 0, color: 'gray', ":hover": { backgroundColor: 'transparent', boxShadow: 0, color: 'black', fontWeight: 700 } }}>
+                    Quay lại
+                  </Button>
+                  <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
+                    Quản lý điểm tham quan
+                  </Typography>
+                </Box>
+                <Typography sx={{ textAlign: 'center', mt: 5 }} color="error">{error}</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
   }
 
   if (!attraction) {
@@ -251,7 +284,7 @@ const AttractionDetail = () => {
           <Box maxWidth="89vw">
             <Box elevation={2} sx={{
               p: 1, mb: 3, marginTop: -1.5, height: '100%',
-              width: isSidebarOpen ? 'calc(93vw - 260px)' : 'calc(93vw - 20px)'
+              width: isSidebarOpen ? 'calc(93vw - 250px)' : 'calc(93vw - 10px)'
             }}>
               <Box sx={{ m: '-60px -60px 0px -60px', boxShadow: 2, pt: 3, pl: 4, pr: 4, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Button
@@ -263,31 +296,21 @@ const AttractionDetail = () => {
                 <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
                   Quản lý điểm tham quan
                 </Typography>
+                <IconButton onClick={handleHistoryClick}
+                  sx={{
+                    backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    '&:hover': { backgroundColor: '#f5f5f5' }, height: '40px', mr: 2
+                  }}
+                > <HistoryIcon color="primary" /> </IconButton>
+                <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+                  sx={{ position: 'absolute', top: 80, right: 30, width: '400px', zIndex: 1000 }}
+                >
+                  <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+                    <VersionHistory entityId={id} entityType={0} />
+                  </Paper>
+                </Collapse>
                 {(attraction.status !== AttractionStatus.Approved) && (
                   <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
-                    <IconButton
-                      onClick={handleHistoryClick}
-                      sx={{
-                        backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: '45px',
-                        '&:hover': { backgroundColor: '#f5f5f5' }
-                      }}
-                    >
-                      <HistoryIcon color="primary" />
-                    </IconButton>
-
-                    <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit>
-                      <Box
-                        sx={{
-                          position: 'absolute', top: '100%',
-                          right: 0, width: '400px', backgroundColor: 'white',
-                          boxShadow: '0 4px 6px rgba(0,0,0,0.1)', borderRadius: '4px',
-                          display: isHistoryOpen ? 'block' : 'none', zIndex: 1000, marginTop: '8px'
-                        }}
-                      >
-                        <VersionHistory />
-                      </Box>
-                    </Collapse>
-
                     {isEditing ? (
                       <Button
                         variant="contained" startIcon={<CancelIcon />} onClick={handleCancelClick}
@@ -322,16 +345,6 @@ const AttractionDetail = () => {
                     </Button>
                   </Box>
                 )}
-                {/* {attraction.status === AttractionStatus.Pending && (
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Button
-                      variant="contained" startIcon={<DeleteIcon />} onClick={handleDelete}
-                      sx={{ backgroundColor: '#DC2626', '&:hover': { backgroundColor: '#B91C1C' }, height: '45px' }}
-                    >
-                      Xóa
-                    </Button>
-                  </Box>
-                )} */}
               </Box>
 
               {isEditing ? (

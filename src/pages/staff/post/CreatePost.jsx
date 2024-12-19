@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import { createPost, updatePostImages } from '@services/PostService';
 import { Helmet } from 'react-helmet';
 import '@styles/ReactQuill.css';
+import { getErrorMessage } from '@hooks/Message';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -173,7 +174,7 @@ const CreatePost = () => {
       }
     } catch (error) {
       console.error('Error creating post:', error);
-      setSnackbar({ open: true, message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo bài viết', severity: 'error', hide: 5000 });
+      setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error', hide: 5000 });
     }
   };
 

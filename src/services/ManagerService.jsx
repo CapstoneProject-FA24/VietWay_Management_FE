@@ -139,3 +139,24 @@ export const adminResetManagerPassword = async (managerId) => {
         throw error;
     }
 };
+
+export const getManagerProfile = async () => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/managers/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const { data } = response.data;
+        return {
+            phoneNumber: data.phoneNumber,
+            email: data.email,
+            fullName: data.fullName
+        };
+    } catch (error) {
+        console.error('Error fetching manager profile:', error);
+        throw error;
+    }
+};

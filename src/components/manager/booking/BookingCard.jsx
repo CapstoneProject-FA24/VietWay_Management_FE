@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/vi';
 import { cancelBooking } from '@services/BookingService';
 import ChangeBooking from '@components/booking/ChangeBooking';
+import { getErrorMessage } from '@hooks/Message';
 
 const BookingCard = ({ booking, onDelete, onViewDetails, onRefresh, onShowSnackbar }) => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -31,11 +32,7 @@ const BookingCard = ({ booking, onDelete, onViewDetails, onRefresh, onShowSnackb
       onShowSnackbar('Hủy booking thành công', 'success');
     } catch (error) {
       console.error('Error canceling booking:', error);
-      if (error.response?.data?.message) {
-        onDelete(booking.bookingId, error.response.data.message);
-      } else {
-        onDelete(booking.bookingId, 'Có lỗi xảy ra khi hủy booking');
-      }
+      onDelete(booking.bookingId, getErrorMessage(error));
     }
   };
 

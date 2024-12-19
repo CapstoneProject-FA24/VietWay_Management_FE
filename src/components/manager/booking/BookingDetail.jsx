@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import { bankData } from '@hooks/Bank';
 import 'dayjs/locale/vi';
 import ChangeBooking from '@components/booking/ChangeBooking';
+import { getErrorMessage } from '@hooks/Message';
 
 const formatDateTime = (dateString) => {
     const date = new Date(dateString);
@@ -85,7 +86,7 @@ const BookingDetail = ({ booking, onRefresh }) => {
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: error.response?.data?.message || 'Có lỗi xảy ra khi hủy booking',
+                message: getErrorMessage(error),
                 severity: 'error'
             });
         }
@@ -161,7 +162,7 @@ const BookingDetail = ({ booking, onRefresh }) => {
         } catch (error) {
             setSnackbar({
                 open: true,
-                message: error.response?.data?.message || 'Có lỗi xảy ra khi hoàn tiền',
+                message: getErrorMessage(error),
                 severity: 'error'
             });
         }

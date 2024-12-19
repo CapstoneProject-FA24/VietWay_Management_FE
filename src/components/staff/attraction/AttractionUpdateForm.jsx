@@ -9,6 +9,7 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import CloseIcon from '@mui/icons-material/Close';
 import TourMap from '@components/tour/TourMap';
 import { getCookie } from '@services/AuthenService';
+import { getErrorMessage } from '@hooks/Message';
 
 const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const [images, setImages] = useState([]);
@@ -150,17 +151,10 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
       console.log(removedImageIds);
       onSave(attractionData, newImages, removedImageIds);
     } catch (error) {
-      if (error.response && error.response.data.message === 'Incomplete attraction information') {
-        setSnackbar({
-          open: true, severity: 'error', hide: 5000,
-          message: 'Vui lòng điền đầy đủ thông tin trước khi tạo mới.',
-        });
-      } else {
-        setSnackbar({
-          open: true, severity: 'error', hide: 5000,
-          message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
-        });
-      }
+      setSnackbar({
+        open: true, severity: 'error', hide: 5000,
+        message: getErrorMessage(error),
+      });
       console.error('Error creating attraction:', error);
     }
   };

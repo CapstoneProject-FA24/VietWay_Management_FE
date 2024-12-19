@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchTourCategory, deleteTourCategory } from '@services/TourCategoryService';
+import { getErrorMessage } from '@hooks/Message';
 
 const TourCategory = ({ searchTerm, refreshTrigger }) => {
     const [tourCategories, setTourCategories] = useState([]);
@@ -92,7 +93,7 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
             console.error('Error deleting tour category:', error);
             setSnackbar({
                 open: true,
-                message: 'Có lỗi xảy ra khi xóa loại tour',
+                message: getErrorMessage(error),
                 severity: 'error'
             });
         } finally {

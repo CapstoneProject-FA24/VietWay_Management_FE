@@ -14,6 +14,7 @@ import { fetchToursByTemplateId } from '@services/TourService';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
 import SendIcon from '@mui/icons-material/Send';
+import { getErrorMessage } from '@hooks/Message';
 
 const TourTemplateDetails = () => {
   const [state, setState] = useState({
@@ -107,14 +108,14 @@ const TourTemplateDetails = () => {
       } else {
         setSnackbar({
           open: true, severity: 'error', hide: 5000,
-          message: 'Có lỗi xảy ra khi cập nhật tour mẫu. Vui lòng thử lại.'
+          message: 'Đã xảy ra lỗi. Vui lòng thử lại sau'
         });
       }
     } catch (error) {
       console.error('Error updating template:', error);
       setSnackbar({
         open: true, severity: 'error', hide: 5000,
-        message: 'Có lỗi xảy ra khi cập nhật tour mẫu. Vui lòng thử lại.'
+        message: getErrorMessage(error),
       });
     } finally {
       setIsSubmitting(false);
@@ -132,15 +133,11 @@ const TourTemplateDetails = () => {
       if (response.statusCode === 200) {
         setSnackbar({ open: true, message: 'Xóa tour mẫu thành công', severity: 'success', hide: 1000 });
       } else {
-        setSnackbar({ open: true, message: 'Có lỗi xảy ra khi xóa tour mẫu', severity: 'error', hide: 5000 });
+        setSnackbar({ open: true, message: 'Đã xảy ra lỗi. Vui lòng thử lại sau', severity: 'error', hide: 5000 });
       }
     } catch (error) {
       console.error('Error deleting tour template:', error);
-      if (error.response?.status === 400) {
-        setSnackbar({ open: true, message: 'Không thể xóa tour mẫu này vì đã có tour được tạo từ mẫu', severity: 'error', hide: 5000 });
-      } else {
-        setSnackbar({ open: true, message: 'Có lỗi xảy ra khi xóa tour mẫu', severity: 'error', hide: 5000 });
-      }
+      setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error', hide: 5000 });
     }
   };
 
@@ -212,7 +209,7 @@ const TourTemplateDetails = () => {
       setSnackbar({ open: true, message: 'Gửi duyệt tour mẫu thành công', severity: 'success', hide: 5000 });
     } catch (error) {
       console.error('Error sending tour template for approval:', error);
-      setSnackbar({ open: true, message: 'Có lỗi xảy ra khi gửi duyệt tour mẫu', severity: 'error', hide: 5000 });
+      setSnackbar({ open: true, message: 'Đã xảy ra lỗi. Vui lòng thử lại sau', severity: 'error', hide: 5000 });
     }
   };
 
@@ -220,14 +217,35 @@ const TourTemplateDetails = () => {
     const showEditDelete = status !== TourTemplateStatus.Approved;
     const showDeleteOnly = status === TourTemplateStatus.Pending;
 
-    if (!showEditDelete && !showDeleteOnly) return null;
+    if (!showEditDelete && !showDeleteOnly) return (
+      <>
+        <IconButton
+          onClick={handleHistoryClick}
+          sx={{
+            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: '40px',
+            '&:hover': { backgroundColor: '#f5f5f5' }
+          }}
+        >
+          <HistoryIcon color="primary" />
+        </IconButton>
+        <Box
+          sx={{
+            position: 'absolute', top: '100%', right: 0, width: '400px', backgroundColor: 'white',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)', borderRadius: '4px',
+            display: isHistoryOpen ? 'block' : 'none', zIndex: 1000, marginTop: '8px'
+          }}
+        >
+          <VersionHistory />
+        </Box>
+      </>
+    );
 
     return (
       <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
         <IconButton
           onClick={handleHistoryClick}
           sx={{
-            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: '45px',
+            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: '40px',
             '&:hover': { backgroundColor: '#f5f5f5' }
           }}
         >

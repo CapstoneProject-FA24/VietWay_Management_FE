@@ -192,6 +192,19 @@ const ManagerTourTemplateDetails = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
           Chi tiết tour mẫu
         </Typography>
+        <IconButton onClick={handleHistoryClick}
+          sx={{
+            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            '&:hover': { backgroundColor: '#f5f5f5' }, mr: 2
+          }}
+        > <HistoryIcon color="primary" /> </IconButton>
+        <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+          sx={{ position: 'absolute', top: 120, right: 30, width: '400px', zIndex: 1000 }}
+        >
+          <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+            <VersionHistory entityId={id} entityType={13} />
+          </Paper>
+        </Collapse>
         {tourTemplate?.status === TourTemplateStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
             <Button
@@ -212,39 +225,6 @@ const ManagerTourTemplateDetails = () => {
         )}
         {tourTemplate?.status === TourTemplateStatus.Approved && (
           <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
-            <IconButton
-              onClick={handleHistoryClick}
-              sx={{
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                height: '45px',
-                width: '45px',
-                '&:hover': {
-                  backgroundColor: '#f5f5f5'
-                }
-              }}
-            >
-              <HistoryIcon color="primary" />
-            </IconButton>
-
-            {/* Version History Dropdown */}
-            <Box
-              sx={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                width: '400px',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                borderRadius: '4px',
-                display: isHistoryOpen ? 'block' : 'none',
-                zIndex: 1000,
-                marginTop: '8px'
-              }}
-            >
-              <VersionHistory />
-            </Box>
-
             <Button
               variant="contained"
               sx={{ width: 'fit-content', p: 1.1, backgroundColor: 'red' }}

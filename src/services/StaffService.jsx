@@ -140,3 +140,24 @@ export const adminResetStaffPassword = async (staffId) => {
         throw error;
     }
 };
+
+export const getStaffProfile = async () => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/staff/profile`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        const { data } = response.data;
+        return {
+            phoneNumber: data.phoneNumber,
+            email: data.email,
+            fullName: data.fullName
+        };
+    } catch (error) {
+        console.error('Error fetching staff profile:', error);
+        throw error;
+    }
+};

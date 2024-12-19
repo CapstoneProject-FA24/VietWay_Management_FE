@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Snackbar, Alert } from '@mui/material';
 import { createStaff } from '@services/StaffService';
+import { getErrorMessage } from '@hooks/Message';
 
 const StaffCreatePopup = ({ open, onClose, onCreate, onRefresh }) => {
   const [staffData, setStaffData] = useState({
@@ -96,7 +97,7 @@ const StaffCreatePopup = ({ open, onClose, onCreate, onRefresh }) => {
       console.error('Error creating staff:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo nhân viên mới',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton, Select, MenuItem, FormControl, FormHelperText, InputLabel } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton, Select, MenuItem, FormControl, FormHelperText, InputLabel, Collapse, Paper } from '@mui/material';
 import { ArrowBack, Delete, Edit, Cancel, Save } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -288,13 +288,13 @@ const ManagerPostDetail = () => {
     switch (post.status) {
       case PostStatus.Pending:
         return (
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
-            <IconButton
-              onClick={handleHistoryClick}
-              sx={{ mb: 1, backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
-            >
-              <HistoryIcon color="primary" />
-            </IconButton>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
+            <IconButton onClick={handleHistoryClick}
+              sx={{
+                backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                '&:hover': { backgroundColor: '#f5f5f5' }, mr: 2, height: '40px'
+              }}
+            > <HistoryIcon color="primary" /> </IconButton>
             <Button
               variant="contained" sx={{ width: 'fit-content', pl: 2, pr: 2, backgroundColor: 'primary.main' }}
               onClick={() => setIsApprovePopupOpen(true)}
@@ -313,12 +313,12 @@ const ManagerPostDetail = () => {
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <IconButton
-                onClick={handleHistoryClick}
-                sx={{ mb: 1, backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', '&:hover': { backgroundColor: '#f5f5f5' } }}
-              >
-                <HistoryIcon color="primary" />
-              </IconButton>
+              <IconButton onClick={handleHistoryClick}
+                sx={{
+                  backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  '&:hover': { backgroundColor: '#f5f5f5' }, mr: 2, height: '40px'
+                }}
+              > <HistoryIcon color="primary" /> </IconButton>
               {isEditMode ? (
                 <>
                   <Button
@@ -328,9 +328,6 @@ const ManagerPostDetail = () => {
                     Hủy sửa
                   </Button>
                   <Button variant="contained" color="error" startIcon={<Delete />} onClick={handleDeletePost}> Xóa </Button>
-                  {/* <Button variant="contained" color="primary" startIcon={<Save />} onClick={handleSaveChanges} >
-                    Lưu thay đổi
-                  </Button> */}
                 </>
               ) : (
                 <>
@@ -388,7 +385,16 @@ const ManagerPostDetail = () => {
           </Box>
         );
       default:
-        return null;
+        return (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <IconButton onClick={handleHistoryClick}
+              sx={{
+                backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                '&:hover': { backgroundColor: '#f5f5f5' }, mr: 2, height: '40px'
+              }}
+            > <HistoryIcon color="primary" /> </IconButton>
+          </Box>
+        );
     }
   };
 
@@ -564,7 +570,16 @@ const ManagerPostDetail = () => {
             <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2, height: 'fit-content' }} > Quay lại </Button>
-                {renderActionButtons()}
+                <Box sx={{ display: 'flex' }}>
+                  <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+                    sx={{ position: 'absolute', top: 100, right: 30, width: '400px', zIndex: 1000 }}
+                  >
+                    <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+                      <VersionHistory entityId={id} entityType={6} />
+                    </Paper>
+                  </Collapse>
+                  {renderActionButtons()}
+                </Box>
               </Box>
               {((post.xTweetId || post.facebookPostId) && !isEditMode) && renderSocialMetricsTable()}
               {isEditMode ? (
@@ -718,15 +733,6 @@ const ManagerPostDetail = () => {
                       size="small"
                       sx={{ mb: 1, color: `${statusInfo.color}`, bgcolor: `${statusInfo.backgroundColor}`, fontWeight: 600 }}
                     />
-                    <Box
-                      sx={{
-                        position: 'absolute', top: '100%', right: 0,
-                        width: '400px', backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        borderRadius: '4px', display: isHistoryOpen ? 'block' : 'none', zIndex: 1000
-                      }}
-                    >
-                      <VersionHistory />
-                    </Box>
                   </Box>
                   <img src={post.imageUrl} alt={post.title}
                     style={{ width: '100%', height: '25rem', objectFit: 'cover' }} />

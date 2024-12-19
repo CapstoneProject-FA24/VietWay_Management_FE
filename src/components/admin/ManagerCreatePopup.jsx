@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Snackbar, Alert } from '@mui/material';
 import { createManager } from '@services/ManagerService';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManagerCreatePopup = ({ open, onClose, onCreate, onRefresh }) => {
   const [managerData, setManagerData] = useState({
@@ -96,7 +97,7 @@ const ManagerCreatePopup = ({ open, onClose, onCreate, onRefresh }) => {
       console.error('Error creating manager:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi tạo quản lý mới',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     }

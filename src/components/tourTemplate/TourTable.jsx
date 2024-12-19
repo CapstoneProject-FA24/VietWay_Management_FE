@@ -8,6 +8,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { getTourStatusInfo } from '@services/StatusService';
 import BookingByTemplate from '@components/tourTemplate/BookingByTemplate';
+import { getCookie } from '@services/AuthenService';
 
 const TourRow = ({ tour }) => {
   const [open, setOpen] = useState(false);
@@ -57,7 +58,7 @@ const TourRow = ({ tour }) => {
           <Button
             variant="contained" size="small" component={Link}
             sx={{ fontSize: '0.75rem', minWidth: '75px' }}
-            to={`/quan-ly/tour-du-lich/chi-tiet/${tour.id}`}
+            to={`/${getCookie('role')}/tour-du-lich/chi-tiet/${tour.id}`}
           >
             Chi tiết
           </Button>

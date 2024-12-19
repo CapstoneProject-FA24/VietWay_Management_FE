@@ -8,12 +8,9 @@ import { updateTour } from '@services/TourService';
 import { InputAdornment } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import TourMap from '@components/tour/TourMap';
+import { getErrorMessage } from '@hooks/Message';
 
 const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
-  if (policies.length === 0) {
-    return { isValid: false, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền' };
-  }
-
   const errors = {};
 
   for (let i = 0; i < policies.length; i++) {
@@ -30,8 +27,8 @@ const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDe
     // Separate validation for refundRate
     if (policy.refundPercent === '') {
       errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
-    } else if (Number(policy.refundPercent) < 0 || Number(policy.refundPercent) > 100) {
-      errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 100%';
+    } else if (Number(policy.refundPercent) < 0 || Number(policy.refundPercent) >= 100) {
+      errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 99%';
     } else if (paymentDeadline && Number(depositPercent) < 100) {
       const refundPercent = Number(policy.refundPercent);
       const deposit = Number(depositPercent);
@@ -338,7 +335,7 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
 
       if (onUpdateSuccess) { onUpdateSuccess(); }
     } catch (error) {
-      setSnackbar({ open: true, message: error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật tour', severity: 'error' });
+      setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error' });
     }
   };
 
@@ -677,7 +674,14 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
       </Box>
 
       <Box sx={{ mt: 3 }}>
-        <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>Chính sách hoàn tiền</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+          {tourData.tourPolicies.length === 0 && (
+            <Typography variant="body2" sx={{ color: 'warning.main', fontStyle: 'italic' }}>
+              * Nếu không thêm chính sách hoàn tiền, khách hàng sẽ không được hoàn tiền khi hủy booking
+            </Typography>
+          )}
+        </Box>
         {tourData.tourPolicies.map((policy, index) => (
           <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -699,18 +703,14 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
             </LocalizationProvider>
             <TextField
               label="Tỷ lệ phạt hủy tour (%) - tính trên tổng tiền booking"
-              type="number"
-              value={policy.refundPercent}
+              type="number" value={policy.refundPercent}
               onChange={(e) => handlePolicyChange(index, 'refundPercent', e.target.value)}
-              error={!!errors[`policy${index}Rate`]}
-              helperText={errors[`policy${index}Rate`]}
-              fullWidth
+              error={!!errors[`policy${index}Rate`]} helperText={errors[`policy${index}Rate`]} fullWidth
             />
             <Button
               variant="outlined"
-              color="error"
+              color="error" sx={{ height: '55px'}}
               onClick={() => handleRemovePolicy(index)}
-              disabled={tourData.tourPolicies.length === 1}
             >
               Xóa
             </Button>

@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Sidebar from '@layouts/Sidebar';
 import { Helmet } from 'react-helmet';
 import { fetchManager, changeManagerStatus, adminResetManagerPassword } from '@services/ManagerService';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManageManager = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,7 +51,7 @@ const ManageManager = () => {
       console.error('Failed to fetch managers:', error);
       setSnackbar({
         open: true,
-        message: 'Có lỗi xảy ra khi tải danh sách quản lý',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     } finally {
@@ -117,7 +118,7 @@ const ManageManager = () => {
       console.error('Error changing manager status:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi thay đổi trạng thái quản lý',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     } finally {
@@ -145,7 +146,7 @@ const ManageManager = () => {
       console.error('Error resetting password:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     } finally {

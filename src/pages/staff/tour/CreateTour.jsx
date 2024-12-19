@@ -37,7 +37,7 @@ const CreateTour = () => {
   const [tourData, setTourData] = useState({
     tourTemplateId: id, startAddress: '', startLocationPlaceId: '', startDate: null, startTime: null,
     adultPrice: '', registerOpenDate: null, registerCloseDate: null, maxParticipants: '', minParticipants: '',
-    depositPercent: '', tourPrices: [], refundPolicies: [{ cancelBefore: null, refundRate: '' }], paymentDeadline: null,
+    depositPercent: '', tourPrices: [], refundPolicies: [], paymentDeadline: null,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
@@ -115,10 +115,6 @@ const CreateTour = () => {
   };
 
   const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
-    if (policies.length === 0) {
-      return { isValid: false, message: 'Vui lòng thêm ít nhất một chính sách hoàn tiền' };
-    }
-
     const errors = {};
 
     for (let i = 0; i < policies.length; i++) {
@@ -133,8 +129,8 @@ const CreateTour = () => {
 
       if (policy.refundRate === '') {
         errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
-      } else if (Number(policy.refundRate) < 0 || Number(policy.refundRate) > 100) {
-        errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 100%';
+      } else if (Number(policy.refundRate) < 0 || Number(policy.refundRate) >= 100) {
+        errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 99%';
       } else if (paymentDeadline && Number(depositPercent) < 100) {
         const refundPercent = Number(policy.refundRate);
         const deposit = Number(depositPercent);
@@ -310,7 +306,7 @@ const CreateTour = () => {
         navigate('/nhan-vien/tour-du-lich/chi-tiet/' + response.data);
       }, 1500);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error', hide: 5000  });
+      setSnackbar({ open: true, message: 'Có lỗi xảy ra khi tạo tour', severity: 'error', hide: 5000 });
       console.error('Error creating tour:', error);
     }
   };
@@ -335,16 +331,16 @@ const CreateTour = () => {
     if (!placeData || !placeData.address) {
       return;
     }
-  
-    const fullAddress = placeData.name === placeData.address 
-      ? placeData.address 
+
+    const fullAddress = placeData.name === placeData.address
+      ? placeData.address
       : `${placeData.name} - ${placeData.address}`;
-  
+
     handleNewTourChange('startAddress', fullAddress);
     handleNewTourChange('startLocationPlaceId', placeData.place_id);
-  
+
     const isValid = validateAddress(fullAddress, template);
-    setStartAddressError(isValid ? '' : 
+    setStartAddressError(isValid ? '' :
       `Địa điểm phải thuộc ${template?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
     );
   };
@@ -353,7 +349,7 @@ const CreateTour = () => {
     if (!address || !template?.startingProvince?.provinceName) {
       return false;
     }
-    
+
     const normalize = (text) => {
       return text.toLowerCase()
         .normalize('NFD')
@@ -362,20 +358,20 @@ const CreateTour = () => {
         .replace(/\s+/g, '')
         .replace(/[,\.]/g, '');
     };
-  
+
     const normalizedAddress = normalize(address);
     const normalizedProvince = normalize(template.startingProvince.provinceName);
-  
+
     return normalizedAddress.includes(normalizedProvince);
   };
 
   const handleAddressChange = (e) => {
     const newAddress = e.target.value;
     handleNewTourChange('startAddress', newAddress);
-  
+
     // Validate the new address
     const isValid = validateAddress(newAddress, tourTemplate);
-    setStartAddressError(isValid ? '' : 
+    setStartAddressError(isValid ? '' :
       `Địa điểm phải thuộc ${tourTemplate?.startingProvince?.provinceName}. Nếu bạn chắc chắn đúng địa điểm vui lòng bỏ qua thông báo này.`
     );
   };
@@ -605,7 +601,14 @@ const CreateTour = () => {
                 )}
               </Box>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>Chính sách hoàn tiền</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                  {tourData.refundPolicies.length === 0 && (
+                    <Typography variant="body2" sx={{ color: 'warning.main', fontStyle: 'italic' }}>
+                      * Nếu không thêm chính sách hoàn tiền, tour này không hỗ trợ hoàn tiền khi khách hàng hủy tour
+                    </Typography>
+                  )}
+                </Box>
                 {tourData.refundPolicies.map((policy, index) => (
                   <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -623,12 +626,11 @@ const CreateTour = () => {
                     <TextField
                       label="Tỷ lệ phạt hủy tour (%) * - tính trên tổng tiền booking" type="number" value={policy.refundRate}
                       onChange={(e) => handlePolicyChange(index, 'refundRate', e.target.value)}
-                      error={!!errors[`policy${index}Rate`]} helperText={errors[`policy${index}Rate`]}
-                      fullWidth inputProps={{ min: 0, max: 100 }}
+                      error={!!errors[`policy${index}Rate`]} helperText={errors[`policy${index}Rate`]} fullWidth
                     />
                     <Button
                       variant="outlined" color="error" sx={{ height: '2.5rem', mt: 1 }}
-                      onClick={() => handleRemovePolicy(index)} disabled={tourData.refundPolicies.length === 1}
+                      onClick={() => handleRemovePolicy(index)}
                     >
                       Xóa
                     </Button>

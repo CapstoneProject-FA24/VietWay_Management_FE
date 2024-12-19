@@ -8,12 +8,12 @@ export const messages = [
     {
         code: '',
         httpStatus: 401,
-        message: `Vui lòng đăng nhập để {object}.`
+        message: `Lỗi quyền truy cập. Vui lòng kiểm tra lại thông tin đăng nhập của bạn.`
     },
     {
         code: '',
         httpStatus: 403,
-        message: `Bạn không thể sử dụng chức năng này.`
+        message: `Truy cập bị từ chối. Bạn không thể sử dụng chức năng này.`
     },
     {
         code: '',
@@ -189,9 +189,9 @@ export const messages = [
         message: `Không thể hủy tour này.`
     },
     {
-        code: 'INVALID_INFO_EXISTED_TOUR_TEMPLATE_CODE',
+        code: 'EXISTED_TOUR_TEMPLATE_CODE',
         httpStatus: 400,
-        message: `Mã tour mẫu đã tồn tại.`
+        message: `Mã tour mẫu đã tồn tại. Vui lòng nhập mã khác.`
     },
     {
         code: 'INVALID_INFO_PRICE',
@@ -217,7 +217,12 @@ export const messages = [
         code: 'INVALID_ACTION_TOUR_TEMPLATE_ALREADY_APPROVED',
         httpStatus: 400,
         message: `Không thể thực hiện thao tác này do tour mẫu đã được duyệt.`
-    }
+    },
+    {
+        code: 'EXISTED_PHONE_OR_EMAIL',
+        httpStatus: 400,
+        message: `Email hoặc số điện thoại đã được sử dụng. Vui lòng kiểm tra lại.`
+    },
 ];
 
 export const getMessages = (object) => {
@@ -225,4 +230,17 @@ export const getMessages = (object) => {
         ...msg,
         message: msg.message.replace(/\{object}/g, object)
     }));
+};
+
+export const getErrorMessage = (error) => {
+    const errorCode = error.response.data.message;
+    let messageObj = messages.find(msg => msg.code === errorCode);
+    
+    if (!messageObj && error.response?.status) {
+        messageObj = messages.find(msg => 
+            msg.code === '' && msg.httpStatus === error.response.status
+        );
+    }
+    
+    return messageObj ? messageObj.message : 'Đã xảy ra lỗi. Vui lòng thử lại sau.';
 };

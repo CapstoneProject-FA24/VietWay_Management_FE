@@ -15,6 +15,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '@styles/ReactQuill.css';
 import CloseIcon from '@mui/icons-material/Close';
+import { getErrorMessage } from '@hooks/Message';
 
 const quillModules = {
   toolbar: [
@@ -293,7 +294,7 @@ const CreateTourTemplate = () => {
       console.error('Error creating tour template:', error);
       setSnackbar({
         open: true, severity: 'error',
-        message: 'Đã xảy ra lỗi. Vui lòng thử lại sau.',
+        message: getErrorMessage(error),
       });
     }
   };

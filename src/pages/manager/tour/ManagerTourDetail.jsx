@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Tooltip, CircularProgress } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid, Chip, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Snackbar, Tooltip, Collapse, IconButton, Alert } from '@mui/material';
 import dayjs from 'dayjs';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchTourTemplateById } from '@services/TourTemplateService';
-import { fetchToursByTemplateId, fetchTourById, calculateEndDate, updateTourStatus, cancelTour, deleteTour } from '@services/TourService';
+import { fetchToursByTemplateId, fetchTourById, updateTourStatus, cancelTour, deleteTour } from '@services/TourService';
 import '@styles/Calendar.css';
 import 'react-calendar/dist/Calendar.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -19,9 +19,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import Collapse from '@mui/material/Collapse';
-import MuiAlert from '@mui/material/Alert';
 import TourDeletePopup from '@components/tour/TourDeletePopup';
+import HistoryIcon from '@mui/icons-material/History';
+import VersionHistory from '@components/common/VersionHistory';
 
 const ManagerTourDetail = () => {
   const { id } = useParams();
@@ -43,14 +43,15 @@ const ManagerTourDetail = () => {
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
   const [openApproveDialog, setOpenApproveDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const fetchedTour = await fetchTourById(id);
-        setTour(fetchedTour);
         console.log(fetchedTour);
+        setTour(fetchedTour);
         const fetchedTourTemplate = await fetchTourTemplateById(fetchedTour.tourTemplateId);
         setTourTemplate(fetchedTourTemplate);
         const fetchedTours = await fetchToursByTemplateId(fetchedTour.tourTemplateId);
@@ -274,9 +275,27 @@ const ManagerTourDetail = () => {
     await approveTour();
   };
 
+  const handleHistoryClick = () => {
+    setIsHistoryOpen(!isHistoryOpen);
+  };
+
   const ActionButtons = () => {
     return (
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{ display: 'flex', gap: 1, position: 'relative' }}>
+        <IconButton onClick={handleHistoryClick}
+          sx={{
+            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            '&:hover': { backgroundColor: '#f5f5f5' }
+          }}
+        > <HistoryIcon color="primary" /> </IconButton>
+        <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+          sx={{ position: 'absolute', top: '55px', right: 0, width: '400px', zIndex: 1000 }}
+        >
+          <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+            <VersionHistory entityId={id} entityType={0} />
+          </Paper>
+        </Collapse>
+
         {tour?.status === TourStatus.Pending && (
           <>
             <Tooltip title={dayjs(tour.registerCloseDate) < dayjs() ? "Không thể duyệt tour do đã qua ngày đóng đăng ký" : ''} arrow>
@@ -480,25 +499,29 @@ const ManagerTourDetail = () => {
                         </>
                       )}
                     </Box>
-
-                    {tour.tourPolicies && tour.tourPolicies.length > 0 && (
-                      <Box sx={{ mb: 3 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
-                        {tour.tourPolicies.map((policy, index) => (
-                          <Box key={index} sx={{ mt: 1, mb: 0.5 }}>
-                            <Typography sx={{ lineHeight: 1 }}>
-                              Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
-                              Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
-                            </Typography>
-                          </Box>
-                        ))}
-                        <Typography>
-                          Hủy từ ngày {dayjs(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).format('DD/MM/YYYY')}: Chi phí hủy tour là 100% tổng giá trị booking
-                        </Typography>
-                      </Box>
-                    )}
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                      {(tour.tourPolicies && tour.tourPolicies.length > 0) ? (
+                        <>
+                          {tour.tourPolicies.map((policy, index) => (
+                            <Box key={index} sx={{ mt: 1, mb: 0.5 }}>
+                              <Typography sx={{ lineHeight: 1 }}>
+                                Hủy trước {dayjs(policy.cancelBefore).format('DD/MM/YYYY')}:
+                                Chi phí hủy tour là {policy.refundPercent}% tổng tiền booking
+                              </Typography>
+                            </Box>
+                          ))}
+                          <Typography>
+                            Hủy từ ngày {dayjs(tour.tourPolicies[tour.tourPolicies.length - 1].cancelBefore).format('DD/MM/YYYY')}: Chi phí hủy tour là 100% tổng giá trị booking
+                          </Typography>
+                        </>
+                      ) : (
+                        <>
+                          <Typography>Tour này không hỗ trợ hoàn tiền khi khách hàng hủy tour.</Typography>
+                        </>
+                      )}
+                    </Box>
                   </>
-
                 )}
               </Paper>
             ) : (
@@ -588,9 +611,9 @@ const ManagerTourDetail = () => {
         open={snackbar.open} autoHideDuration={snackbar.hide}
         onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MuiAlert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity={snackbar.severity} >
+        <Alert elevation={6} variant="filled" onClose={handleCloseSnackbar} severity={snackbar.severity} >
           {snackbar.message}
-        </MuiAlert>
+        </Alert>
       </Snackbar>
 
       <CancelConfirmationDialog />

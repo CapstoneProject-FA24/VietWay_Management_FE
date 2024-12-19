@@ -4,6 +4,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import OldTourInfo from '@components/booking/OldTourInfo';
 import NewTourInfo from '@components/booking/NewTourInfo';
 import { changeBookingTour } from '@services/BookingService';
+import { getErrorMessage } from '@hooks/Message';
 
 const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm, onRefresh }) => {
   const [reason, setReason] = useState('');
@@ -47,7 +48,7 @@ const ConfirmChange = ({ open, onClose, currentBooking, newTour, onConfirm, onRe
         onRefresh();
       }, 2000);
     } catch (error) {
-      setSnackbarMessage('Có lỗi xảy ra khi thay đổi tour');
+      setSnackbarMessage(getErrorMessage(error));
       setSnackbarSeverity('error');
       setOpenSnackbar(true);
     } finally {

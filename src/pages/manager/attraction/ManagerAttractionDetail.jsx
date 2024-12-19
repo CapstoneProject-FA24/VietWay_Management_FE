@@ -37,7 +37,7 @@ const ManagerAttractionDetail = () => {
   const [isApprovePopupOpen, setIsApprovePopupOpen] = useState(false);
   const [isRejectPopupOpen, setIsRejectPopupOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-  const [snackbar, setSnackbar] = useState({  open: false, message: '', severity: 'success', hide: 5000 });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [provinces, setProvinces] = useState([]);
@@ -272,6 +272,19 @@ const ManagerAttractionDetail = () => {
         <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
           Chi tiết điểm tham quan
         </Typography>
+        <IconButton onClick={handleHistoryClick}
+          sx={{
+            backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            '&:hover': { backgroundColor: '#f5f5f5' }, mr: 2
+          }}
+        > <HistoryIcon color="primary" /> </IconButton>
+        <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+          sx={{ position: 'absolute', top: 120, right: 30, width: '400px', zIndex: 1000 }}
+        >
+          <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+            <VersionHistory entityId={id} entityType={0} />
+          </Paper>
+        </Collapse>
         {attraction?.status === AttractionStatus.Pending && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1 }}>
             <Button
@@ -292,27 +305,6 @@ const ManagerAttractionDetail = () => {
         )}
         {attraction?.status === AttractionStatus.Approved && (
           <Box sx={{ display: 'flex', gap: 2, position: 'relative' }}>
-            <IconButton
-              onClick={handleHistoryClick}
-              sx={{
-                backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', height: '45px',
-                '&:hover': { backgroundColor: '#f5f5f5' }
-              }}
-            >
-              <HistoryIcon color="primary" />
-            </IconButton>
-            <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit>
-              <Box
-                sx={{
-                  position: 'absolute', top: '100%',
-                  right: 0, width: '400px', backgroundColor: 'white',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)', borderRadius: '4px',
-                  display: isHistoryOpen ? 'block' : 'none', zIndex: 1000, marginTop: '8px'
-                }}
-              >
-                <VersionHistory />
-              </Box>
-            </Collapse>
             {!isEditing ? (
               <Button
                 variant="contained"

@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Sidebar from '@layouts/Sidebar';
 import { Helmet } from 'react-helmet';
 import { fetchStaff, changeStaffStatus, adminResetStaffPassword } from '@services/StaffService';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManageStaff = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,7 +104,7 @@ const ManageStaff = () => {
       console.error('Error changing staff status:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi thay đổi trạng thái nhân viên',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     } finally {
@@ -150,7 +151,7 @@ const ManageStaff = () => {
       console.error('Error resetting password:', error);
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu',
+        message: getErrorMessage(error),
         severity: 'error'
       });
     } finally {
