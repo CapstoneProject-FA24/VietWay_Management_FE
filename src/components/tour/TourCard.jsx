@@ -4,6 +4,7 @@ import { CalendarToday, AccessTime, Launch, LocationOn, Group, Subtitles, Airlin
 import { getTourStatusInfo } from '@services/StatusService';
 import { Link,useNavigate } from 'react-router-dom';
 import { getCookie } from '@services/AuthenService';
+import { TourStatus } from '@hooks/Statuses';
 
 const InfoItem = ({ icon, text }) => (
   <Stack
@@ -20,9 +21,8 @@ const TourCard = ({ tour, onViewDetails }) => {
     const now = new Date();
     const closeDate = new Date(tour.registerCloseDate);
     const oneDayBefore = new Date(closeDate.setDate(closeDate.getDate() - 1));
-    console.log(now >= oneDayBefore && tour.currentParticipant < tour.minParticipant);
-    console.log(tour.registerCloseDate);
-    return now >= oneDayBefore && tour.currentParticipant < tour.minParticipant;
+    return now >= oneDayBefore && tour.currentParticipant < tour.minParticipant && 
+    (tour.status == TourStatus.Opened || tour.status == TourStatus.Closed);
   };
 
   return (
