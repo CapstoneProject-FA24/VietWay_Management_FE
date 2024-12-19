@@ -70,7 +70,7 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                     <strong>Tour đi:</strong> {tour.provinces?.join(' - ')}
                 </Typography>
                 <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis', mb: -1 }}>
-                    <strong>Khời hành từ:</strong> {tour.duration}
+                    <strong>Khời hành từ:</strong> {tour.startingProvince}
                 </Typography>
                 <Typography noWrap variant="body1" color="text.secondary" sx={{ textOverflow: 'ellipsis' }}>
                     <strong>Phương tiện:</strong> {tour.transportation}

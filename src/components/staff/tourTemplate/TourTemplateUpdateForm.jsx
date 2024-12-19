@@ -210,6 +210,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             if (!validatePrice(editableFields.minPrice.value, editableFields.maxPrice.value)) {
                 return;
             }
+
             const tourTemplateData = {
                 tourTemplateId: initialTourTemplate.tourTemplateId,
                 code: editableFields.code.value,
@@ -232,6 +233,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 imageUrls: tourTemplate.imageUrls.filter(img => img instanceof File) || [],
                 isDraft: isDraft
             };
+            console.log(tourTemplateData);
 
             if (!isDraft) {
                 const errors = {};
@@ -247,9 +249,13 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 if (invalidSchedules.length > 0) {
                     errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
                 }
-                if (!tourTemplateData.imageUrls || tourTemplate.imageUrls.length < 4) {
+
+                // Modified image validation for non-draft
+                const nonNullImages = tourTemplate.imageUrls.filter(img => img !== null);
+                if (nonNullImages.length < 4) {
                     errors.imageUrls = 'Vui lòng thêm đủ 4 ảnh';
                 }
+
                 if (!tourTemplateData.durationId) {
                     errors.duration = 'Vui lòng chọn thời lượng';
                 }
@@ -271,31 +277,38 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         open: true, severity: 'warning', hide: 5000,
                         message: 'Vui lòng nhập đầy đủ và chính xác các thông tin',
                     });
-                    console.log(errors);
                     return;
                 }
             } else {
-                const hasAnyField =
-                    tourTemplate.code ||
-                    tourTemplate.tourName ||
-                    tourTemplate.description ||
-                    tourTemplate.duration ||
-                    tourTemplate.tourCategory ||
-                    tourTemplate.transportation ||
-                    tourTemplate.note ||
-                    (tourTemplate.provinces && tourTemplate.provinces.length > 0) ||
-                    tourTemplate.startingProvinceId ||
-                    tourTemplate.minPrice ||
-                    tourTemplate.maxPrice ||
-                    (tourTemplate.imageUrls && tourTemplate.imageUrls.length > 0);
-                const invalidSchedules = tourTemplateData.schedules.filter(s =>
-                    !s.title && !s.description && !s.attractionIds && s.attractionIds.length === 0
+                const hasAnyField = !!(
+                    editableFields.code.value ||
+                    editableFields.tourName.value ||
+                    editableFields.description.value ||
+                    editableFields.duration.value ||
+                    editableFields.tourCategory.value ||
+                    editableFields.note.value ||
+                    editableFields.minPrice.value ||
+                    editableFields.maxPrice.value ||
+                    (editableFields.provinces.value && editableFields.provinces.value.length > 0) ||
+                    editableFields.startingProvinceId.value ||
+                    editableFields.transportation.value ||
+                    tourTemplate.schedule.some(s => 
+                        s.title || 
+                        s.description || 
+                        (s.attractions && s.attractions.length > 0)
+                    )
                 );
-                console.log(invalidSchedules);
-                if (!hasAnyField || invalidSchedules.length > 0) {
+
+                const hasAnyImages = tourTemplate.imageUrls.some(img => 
+                    img !== null || (img instanceof File)
+                );
+
+                if (!hasAnyField && !hasAnyImages) {
                     setSnackbar({
-                        open: true, severity: 'warning', hide: 5000,
-                        message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+                        open: true,
+                        severity: 'warning',
+                        hide: 5000,
+                        message: 'Vui lòng nhập ít nhất một thông tin hoặc thêm ít nhất một ảnh để lưu nháp',
                     });
                     return;
                 }
@@ -311,7 +324,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         } catch (error) {
             console.error('Error updating tour template:', error);
             setSnackbar({
-                open: true, severity: 'error', message: getErrorMessage(error),
+                open: true,
+                severity: 'error',
+                message: getErrorMessage(error),
             });
         }
     };

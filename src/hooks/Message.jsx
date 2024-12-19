@@ -233,7 +233,7 @@ export const getMessages = (object) => {
 };
 
 export const getErrorMessage = (error) => {
-    const errorCode = error.response.data.message;
+    const errorCode = error?.response?.data?.message;
     let messageObj = messages.find(msg => msg.code === errorCode);
     
     if (!messageObj && error.response?.status) {

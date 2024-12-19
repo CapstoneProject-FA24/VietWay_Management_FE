@@ -168,6 +168,7 @@ const CreateTourTemplate = () => {
       if (!validatePrice(tourTemplate.minPrice || null, tourTemplate.maxPrice || null)) {
         return;
       }
+
       const tourTemplateData = {
         code: tourTemplate.code || null,
         tourName: tourTemplate.tourName || null,
@@ -180,8 +181,8 @@ const CreateTourTemplate = () => {
         startingProvinceId: tourTemplate.startingProvinceId || null,
         schedules: tourTemplate.schedule?.map(s => ({
           dayNumber: s.dayNumber,
-          title: s.title || '',
-          description: s.description || '',
+          title: s.title || null,
+          description: s.description || null,
           attractionIds: s.attractions?.map(attr => attr.attractionId) || []
         })) || [],
         isDraft: isDraft,
@@ -189,7 +190,7 @@ const CreateTourTemplate = () => {
         maxPrice: roundToThousand(parseFloat(tourTemplate.maxPrice || '0')) || null,
         imageUrls: tourTemplate.imageUrls.filter(img => img instanceof File) || []
       };
-      console.log(tourTemplateData);
+
       if (!isDraft) {
         const errors = {};
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
@@ -204,7 +205,8 @@ const CreateTourTemplate = () => {
         if (invalidSchedules.length > 0) {
           errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
         }
-        if (!tourTemplateData.imageUrls || tourTemplateData.imageUrls.length < 4) {
+        const nonNullImages = tourTemplate.imageUrls.filter(img => img !== null);
+        if (nonNullImages.length < 4) {
           errors.imageUrls = 'Vui lòng thêm đủ 4 ảnh';
         }
         if (!tourTemplateData.durationId) {
@@ -224,29 +226,40 @@ const CreateTourTemplate = () => {
         });
         if (Object.keys(errors).length > 0) {
           setFieldErrors(errors);
+          setSnackbar({
+            open: true, severity: 'warning', hide: 5000,
+            message: 'Vui lòng nhập đầy đủ thông tin và hình ảnh',
+          });
           return;
         }
       } else {
-        const hasAnyField =
-          tourTemplate.code ||
-          tourTemplate.tourName ||
-          tourTemplate.description ||
-          tourTemplate.duration ||
-          tourTemplate.tourCategory ||
-          tourTemplate.transportation ||
-          tourTemplate.note ||
-          (tourTemplate.provinces && tourTemplate.provinces.length > 0) ||
-          tourTemplate.startingProvinceId ||
-          tourTemplate.minPrice ||
-          tourTemplate.maxPrice ||
-          (tourTemplate.imageUrls && tourTemplate.imageUrls.length > 0);
-        const invalidSchedules = tourTemplateData.schedules.filter(s =>
-          !s.title && !s.description && !s.attractionIds && s.attractionIds.length === 0
+        const hasAnyField = !!(
+          tourTemplateData.code ||
+          tourTemplateData.tourName ||
+          tourTemplateData.description ||
+          tourTemplateData.duration ||
+          tourTemplateData.tourCategory ||
+          tourTemplateData.note ||
+          tourTemplateData.minPrice ||
+          tourTemplateData.maxPrice ||
+          (tourTemplateData.provinces && tourTemplateData.provinces.length > 0) ||
+          tourTemplateData.startingProvinceId ||
+          tourTemplateData.transportation ||
+          tourTemplateData.schedules.some(s => 
+            s.title || 
+            s.description || 
+            (s.attractionIds && s.attractionIds.length > 0)
+          )
         );
-        if (!hasAnyField || invalidSchedules.length > 0) {
+
+        const hasAnyImages = tourTemplate.imageUrls.some(img => img !== null);
+
+        if (!hasAnyField && !hasAnyImages) {
           setSnackbar({
-            open: true, severity: 'error', hide: 5000,
-            message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+            open: true,
+            severity: 'error',
+            hide: 5000,
+            message: 'Vui lòng nhập ít nhất một thông tin hoặc thêm ít nhất một ảnh để lưu nháp',
           });
           return;
         }
