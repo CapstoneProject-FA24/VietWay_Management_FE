@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardMedia, CardContent, CardActions, Typography, Chip, Button, Stack, Box } from '@mui/material';
-import { CalendarToday, AccessTime, Launch, LocationOn, Group, Subtitles, AirlineSeatReclineNormal } from '@mui/icons-material';
+import { Card, CardMedia, CardContent, CardActions, Typography, Chip, Button, Stack, Box, Tooltip } from '@mui/material';
+import { CalendarToday, AccessTime, Launch, LocationOn, Group, Subtitles, AirlineSeatReclineNormal, Report } from '@mui/icons-material';
 import { getTourStatusInfo } from '@services/StatusService';
 import { Link,useNavigate } from 'react-router-dom';
 import { getCookie } from '@services/AuthenService';
@@ -16,6 +16,15 @@ const InfoItem = ({ icon, text }) => (
 );
 
 const TourCard = ({ tour, onViewDetails }) => {
+  const isNearCloseDateAndInsufficient = () => {
+    const now = new Date();
+    const closeDate = new Date(tour.registerCloseDate);
+    const oneDayBefore = new Date(closeDate.setDate(closeDate.getDate() - 1));
+    console.log(now >= oneDayBefore && tour.currentParticipant < tour.minParticipant);
+    console.log(tour.registerCloseDate);
+    return now >= oneDayBefore && tour.currentParticipant < tour.minParticipant;
+  };
+
   return (
     <Card
       onClick={onViewDetails}
@@ -32,6 +41,20 @@ const TourCard = ({ tour, onViewDetails }) => {
           sx={{ transition: 'transform 0.3s ease', '&:hover': { transform: 'scale(1.05)' } }}
         />
         <Chip label={getTourStatusInfo(tour.status).text} size="small" sx={{ mb: 1, color: `${getTourStatusInfo(tour.status).textColor}`, bgcolor: `${getTourStatusInfo(tour.status).backgroundColor}`, position: 'absolute', top: 10, left: 10, fontWeight: 600 }} />
+        {isNearCloseDateAndInsufficient() && (
+          <Tooltip title={`Tour ${tour.status === 4 ? "đã đóng" : "sắp đóng"} đăng ký nhưng chưa đủ số lượng khách tối thiểu!`} arrow>
+            <Report 
+              sx={{ 
+                position: 'absolute', 
+                top: 10, 
+                right: 10, 
+                color: 'red',
+                borderRadius: '50%',
+                fontSize: 30
+              }} 
+            />
+          </Tooltip>
+        )}
       </Box>
 
       <CardContent sx={{ flexGrow: 1, p: 2 }}>

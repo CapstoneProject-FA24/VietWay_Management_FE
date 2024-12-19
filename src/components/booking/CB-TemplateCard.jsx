@@ -306,7 +306,7 @@ const CBTemplateCard = ({ tour, onSelect, booking, onRefresh }) => {
                         >
                             <Tab icon={<Description sx={{ mr: 1 }} />} label="Tổng quan" iconPosition="start" />
                             <Tab icon={<Schedule sx={{ mr: 1 }} />} label="Lịch trình" iconPosition="start" />
-                            <Tab icon={<Policy sx={{ mr: 1 }} />} label="Chính sách hoàn tiền" iconPosition="start" />
+                            <Tab icon={<Policy sx={{ mr: 1 }} />} label="Chính sách" iconPosition="start" />
                             <Tab icon={<InfoOutlined sx={{ mr: 1 }} />} label="Lưu ý" iconPosition="start" />
                         </Tabs>
 
@@ -378,16 +378,24 @@ const CBTemplateCard = ({ tour, onSelect, booking, onRefresh }) => {
                                             </>
                                         )}
                                         <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Chính sách hủy tour:</Typography>
-                                        {selectedDateObj?.tourPolicies?.map((policy, index) => (
-                                            <Box key={index} sx={{ display: 'flex' }}>
+                                        {(selectedDateObj?.tourPolicies && selectedDateObj?.tourPolicies?.length > 0) ? (
+                                            <>
+                                                {selectedDateObj?.tourPolicies?.map((policy, index) => (
+                                                    <Box key={index} sx={{ display: 'flex' }}>
+                                                        <Typography variant="subtitle1">
+                                                            - Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN')} - Chi phí hủy tour {policy.refundPercent}% giá trị booking
+                                                        </Typography>
+                                                    </Box>
+                                                ))}
                                                 <Typography variant="subtitle1">
-                                                    - Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN')} - Chi phí hủy tour {policy.refundPercent}% giá trị booking
+                                                    - Hủy từ ngày {new Date(selectedDateObj?.tourPolicies?.[selectedDateObj.tourPolicies.length - 1]?.cancelBefore).toLocaleDateString('vi-VN')} - Chi phí hủy tour 100% giá trị booking
                                                 </Typography>
-                                            </Box>
-                                        ))}
-                                        <Typography variant="subtitle1">
-                                            - Hủy từ ngày {new Date(selectedDateObj?.tourPolicies?.[selectedDateObj.tourPolicies.length - 1]?.cancelBefore).toLocaleDateString('vi-VN')} - Chi phí hủy tour 100% giá trị booking
-                                        </Typography>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Typography>- Tour này không hỗ trợ hoàn tiền khi khách hàng hủy tour.</Typography>
+                                            </>
+                                        )}
                                     </>
                                 ) : (
                                     <Typography variant="subtitle1">Vui lòng chọn ngày khởi hành để xem chính sách</Typography>

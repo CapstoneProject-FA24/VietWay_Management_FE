@@ -122,6 +122,7 @@ const ManagerManageTour = () => {
         };
 
         const response = await fetchTours({ params });
+        console.log(response);
         setTours(response.data);
         setPagination(prev => ({
           ...prev,

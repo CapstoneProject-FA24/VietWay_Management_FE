@@ -20,6 +20,7 @@ import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
 import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
+import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -103,7 +104,7 @@ const ManagerDashboard = () => {
         fetchRatingReport(startDate, endDate),
         fetchRevenueReport(startDate, endDate)
       ]);
-
+      console.log(bookingData);
       setSummaryStats(summaryData);
       setBookingStats(bookingData);
       setRatingStats(ratingData);
@@ -231,10 +232,11 @@ const ManagerDashboard = () => {
 
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>
-            <BookingChart
-              dateRange={appliedGlobalDateRange}
-              bookingData={bookingStats.bookingByDay}
-            />
+            {bookingStats.bookingByDay.dates[0]?.includes('Q') ? (
+              <BookingQuarterChart bookingData={bookingStats.bookingByDay} />
+            ) : (
+              <BookingChart bookingData={bookingStats.bookingByDay} />
+            )}
           </Grid>
           <Grid item xs={12}>
             <TourTemplateRevenue

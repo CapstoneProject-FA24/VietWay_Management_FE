@@ -678,10 +678,10 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
 
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hủy tour</Typography>
           {tourData.tourPolicies.length === 0 && (
             <Typography variant="body2" sx={{ color: 'warning.main', fontStyle: 'italic' }}>
-              * Nếu không thêm chính sách hoàn tiền, khách hàng sẽ không được hoàn tiền khi hủy booking
+              * Nếu không thêm chính sách hủy tour, tour này sẽ không hỗ trợ hoàn tiền khi khách hàng hủy tour
             </Typography>
           )}
         </Box>

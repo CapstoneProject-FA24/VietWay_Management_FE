@@ -356,7 +356,7 @@ const TourDetail = () => {
                     </Box>
 
                     <Box sx={{ mb: 3 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách thanh toán</Typography>
                       {tour.depositPercent === 100 ? (
                         <Typography>Yêu cầu thanh toán 100% khi đăng ký</Typography>
                       ) : (
@@ -367,7 +367,7 @@ const TourDetail = () => {
                       )}
                     </Box>
                     <Box sx={{ mb: 3 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hủy tour</Typography>
                       {(tour.tourPolicies && tour.tourPolicies.length > 0) ? (
                         <>
                           {tour.tourPolicies.map((policy, index) => (
