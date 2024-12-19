@@ -147,7 +147,9 @@ export const fetchBookingById = async (bookingId) => {
             tourPolicies: booking.tourPolicies.map(policy => ({
                 cancelBefore: policy.cancelBefore,
                 refundPercent: policy.refundPercent
-            }))
+            })),
+            depositPercent: booking.depositPercent,
+            paymentDeadline: booking.paymentDeadline ? new Date(booking.paymentDeadline) : null,
         };
     } catch (error) {
         console.error('Error fetching booking:', error.response);

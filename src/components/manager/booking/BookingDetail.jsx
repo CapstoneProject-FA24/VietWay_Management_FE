@@ -283,18 +283,45 @@ const BookingDetail = ({ booking, onRefresh }) => {
                         <Typography variant="body1" sx={{ mt: 1 }}>
                             <strong>Phương tiện:</strong> {booking.transportation}
                         </Typography><hr />
-                        {booking.tourPolicies && booking.tourPolicies.length > 0 && (
-                            <>
-                                <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 'bold' }}>
-                                    Chính sách hủy tour
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                                Chính sách thanh toán
+                            </Typography>
+                            {booking?.depositPercent === 100 ? (
+                                <Typography variant="body2">
+                                    Thanh toán hết toàn bộ khi đăng ký
                                 </Typography>
-                                {booking.tourPolicies.map((policy, index) => (
-                                    <Typography key={index} variant="body2">
-                                        Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}: Chi phí hủy là {policy.refundPercent}% tổng tiền booking
+                            ) : (
+                                <>
+                                    <Typography variant="body2">
+                                        Thanh toán {booking?.depositPercent}% khi đăng ký
                                     </Typography>
-                                ))}<hr />
-                            </>
-                        )}
+                                    <Typography variant="body2">
+                                        Thanh toán hết toàn bộ trước {new Date(booking?.paymentDeadline).toLocaleDateString('vi-VN')}
+                                    </Typography>
+                                </>
+                            )}
+                        </Box>
+                        <hr />
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                                Chính sách hủy tour
+                            </Typography>
+                            {(booking.tourPolicies && booking.tourPolicies.length > 0) ? (
+                                <>
+                                    {booking.tourPolicies.map((policy, index) => (
+                                        <Typography key={index} variant="body2">
+                                            Hủy trước ngày {new Date(policy.cancelBefore).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}: Chi phí hủy là {policy.refundPercent}% tổng tiền booking
+                                        </Typography>
+                                    ))}
+                                </>
+                            ) : (
+                                <>
+                                    <Typography>Tour này không hỗ trợ hoàn tiền khi khách hàng hủy tour.</Typography>
+                                </>
+                            )}
+                        </Box>
+                        <hr />
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
                             <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold' }}>Tổng tiền:</Typography>
                             <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold', color: 'primary.main' }}>{booking.totalPrice.toLocaleString()} đ</Typography>
@@ -309,9 +336,9 @@ const BookingDetail = ({ booking, onRefresh }) => {
                                 >
                                     Hủy booking
                                 </Button>
-                                <Button 
-                                    variant="contained" 
-                                    color="primary" 
+                                <Button
+                                    variant="contained"
+                                    color="primary"
                                     sx={{ width: '48%' }}
                                     onClick={handleChangeTour}
                                 >

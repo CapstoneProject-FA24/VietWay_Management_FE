@@ -85,7 +85,9 @@ export const fetchTours = async ({ params }) => {
             minParticipant: item.minParticipant,
             currentParticipant: item.currentParticipant,
             status: item.status,
-            createdAt: new Date(item.createdAt)
+            createdAt: new Date(item.createdAt),
+            registerOpenDate: new Date(item.registerOpenDate),
+            registerCloseDate: new Date(item.registerCloseDate),
         }));
 
         return {

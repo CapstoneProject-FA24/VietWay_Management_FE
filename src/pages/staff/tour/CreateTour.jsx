@@ -567,7 +567,7 @@ const CreateTour = () => {
                 />
               </Box>
               <Box sx={{ mt: 3 }}>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>Yêu cầu thanh toán</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách thanh toán</Typography>
                 <Typography sx={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.77rem', mb: -1.2 }}>
                   Nhập 100 nếu tour yêu cầu thanh toán 100% và không đặt cọc
                 </Typography>
@@ -602,10 +602,10 @@ const CreateTour = () => {
               </Box>
               <Box sx={{ mt: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hoàn tiền</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>Chính sách hủy tour</Typography>
                   {tourData.refundPolicies.length === 0 && (
                     <Typography variant="body2" sx={{ color: 'warning.main', fontStyle: 'italic' }}>
-                      * Nếu không thêm chính sách hoàn tiền, tour này không hỗ trợ hoàn tiền khi khách hàng hủy tour
+                      * Nếu không thêm chính sách hủy tour, tour này sẽ không hỗ trợ hoàn tiền khi khách hàng hủy tour
                     </Typography>
                   )}
                 </Box>
