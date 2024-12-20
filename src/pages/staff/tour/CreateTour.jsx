@@ -117,25 +117,49 @@ const CreateTour = () => {
   const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
     const errors = {};
 
+    // Check for duplicates
     for (let i = 0; i < policies.length; i++) {
-      const policy = policies[i];
+      const currentPolicy = policies[i];
+      
+      for (let j = i + 1; j < policies.length; j++) {
+        const otherPolicy = policies[j];
+        
+        // Skip if either policy is incomplete
+        if (!currentPolicy.cancelBefore || !otherPolicy.cancelBefore || 
+            currentPolicy.refundRate === '' || otherPolicy.refundRate === '') {
+          continue;
+        }
 
-      if (!policy.cancelBefore) {
+        // Check for same date
+        if (dayjs(currentPolicy.cancelBefore).isSame(otherPolicy.cancelBefore, 'day')) {
+          errors[`policy${i}Date`] = 'Không được trùng ngày với chính sách khác';
+          errors[`policy${j}Date`] = 'Không được trùng ngày với chính sách khác';
+        }
+
+        // Check for same refund rate
+        if (Number(currentPolicy.refundRate) === Number(otherPolicy.refundRate)) {
+          errors[`policy${i}Rate`] = 'Không được trùng tỷ lệ hoàn tiền với chính sách khác';
+          errors[`policy${j}Rate`] = 'Không được trùng tỷ lệ hoàn tiền với chính sách khác';
+        }
+      }
+
+      // Existing validations
+      if (!currentPolicy.cancelBefore) {
         errors[`policy${i}Date`] = 'Vui lòng nhập ngày hủy tour';
-      } else if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
-        !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
+      } else if (!dayjs(currentPolicy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
+        !dayjs(currentPolicy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
         errors[`policy${i}Date`] = 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành';
       }
 
-      if (policy.refundRate === '') {
+      if (currentPolicy.refundRate === '') {
         errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
-      } else if (Number(policy.refundRate) < 0 || Number(policy.refundRate) >= 100) {
+      } else if (Number(currentPolicy.refundRate) < 0 || Number(currentPolicy.refundRate) >= 100) {
         errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 99%';
       } else if (paymentDeadline && Number(depositPercent) < 100) {
-        const refundPercent = Number(policy.refundRate);
+        const refundPercent = Number(currentPolicy.refundRate);
         const deposit = Number(depositPercent);
 
-        if (dayjs(policy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
+        if (dayjs(currentPolicy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
           if (refundPercent > deposit) {
             errors[`policy${i}Rate`] = `Trước hạn thanh toán, tỷ lệ hoàn tiền không được vượt quá tỷ lệ đặt cọc (${deposit}%)`;
           }
@@ -155,15 +179,14 @@ const CreateTour = () => {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!tourData.startAddress) {
       newErrors.startAddress = "Vui lòng nhập địa điểm khởi hành";
     }
 
     if (!tourData.startDate) {
       newErrors.startDate = "Vui lòng chọn ngày khởi hành";
-    } else if (dayjs(tourData.startDate).isBefore(dayjs(), 'day')) {
-      newErrors.startDate = "Ngày khởi hành phải sau ngày hiện tại";
+    } else if (!dayjs(tourData.startDate).isAfter(dayjs(), 'day')) {
+      newErrors.startDate = "Ngày khởi hành phải sau ngày hiện tại ít nhất 1 ngày";
     }
 
     if (!tourData.startTime) {
@@ -172,8 +195,10 @@ const CreateTour = () => {
 
     if (!tourData.registerOpenDate) {
       newErrors.registerOpenDate = "Vui lòng chọn ngày mở đăng ký";
+    } else if (dayjs(tourData.registerOpenDate).isAfter(tourData.startDate)) {
+      newErrors.registerOpenDate = "Ngày mở đăng ký phải trước ngày khởi hành";
     } else if (dayjs(tourData.registerOpenDate).isBefore(dayjs(), 'day')) {
-      newErrors.registerOpenDate = "Ngày mở đăng ký phải sau ngày hiện tại";
+      newErrors.registerOpenDate = "Ngày mở đăng ký không được là ngày trong quá khứ";
     }
 
     if (!tourData.registerCloseDate) {
@@ -272,12 +297,19 @@ const CreateTour = () => {
     }
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setSnackbar({
+        open: true,
+        severity: 'warning',
+        hide: 5000,
+        message: 'Vui lòng nhập đầy đủ và chính xác thông tin để lưu',
+      });
+    }
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(validateForm());
     if (!validateForm()) {
       return;
     }
@@ -293,9 +325,17 @@ const CreateTour = () => {
         { name: "Em bé", price: Number(tourData.infantPrice), ageFrom: 0, ageTo: 4 }
       ];
 
+      const registerOpenDate = dayjs(tourData.registerOpenDate).startOf('day');
+      const registerCloseDate = dayjs(tourData.registerCloseDate).endOf('day');
+
       const formData = {
-        tourTemplateId: id, ...tourData, defaultTouristPrice: Number(tourData.adultPrice),
-        tourPrices: tourPrices, refundPolicies: formattedPolicies,
+        tourTemplateId: id,
+        ...tourData,
+        registerOpenDate: registerOpenDate.toDate(),
+        registerCloseDate: registerCloseDate.toDate(),
+        defaultTouristPrice: Number(tourData.adultPrice),
+        tourPrices: tourPrices,
+        refundPolicies: formattedPolicies,
         depositPercent: Number(tourData.depositPercent),
         paymentDeadline: Number(tourData.depositPercent) === 100 ? null : tourData.paymentDeadline
       };

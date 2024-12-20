@@ -48,6 +48,7 @@ export const fetchTourTemplates = async (params) => {
             provinces: item.provinces,
             imageUrl: item.imageUrl,
             transportation: item.transportation,
+            startingProvince: item.startingProvince,
         }));
         return ({
             data: templates,

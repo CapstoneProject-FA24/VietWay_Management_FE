@@ -168,20 +168,27 @@ const CreateTourTemplate = () => {
       if (!validatePrice(tourTemplate.minPrice || null, tourTemplate.maxPrice || null)) {
         return;
       }
+
+      const isEmptyHtml = (html) => {
+        if (!html) return true;
+        const strippedHtml = html.replace(/<[^>]*>/g, '').trim();
+        return !strippedHtml || html === '<p><br></p>';
+      };
+
       const tourTemplateData = {
-        code: tourTemplate.code || null,
-        tourName: tourTemplate.tourName || null,
-        description: tourTemplate.description || '',
+        code: tourTemplate.code?.trim() || null,
+        tourName: tourTemplate.tourName?.trim() || null,
+        description: isEmptyHtml(tourTemplate.description) ? '' : tourTemplate.description,
         durationId: tourTemplate.duration || null,
         tourCategoryId: tourTemplate.tourCategory || null,
-        transportation: tourTemplate.transportation || null,
-        note: tourTemplate.note || null,
+        transportation: tourTemplate.transportation?.trim() || null,
+        note: isEmptyHtml(tourTemplate.note) ? '' : tourTemplate.note,
         provinceIds: tourTemplate.provinces?.map(province => province.value) || [],
         startingProvinceId: tourTemplate.startingProvinceId || null,
         schedules: tourTemplate.schedule?.map(s => ({
           dayNumber: s.dayNumber,
-          title: s.title || '',
-          description: s.description || '',
+          title: s.title?.trim() || '',
+          description: isEmptyHtml(s.description) ? '' : s.description,
           attractionIds: s.attractions?.map(attr => attr.attractionId) || []
         })) || [],
         isDraft: isDraft,
@@ -189,7 +196,7 @@ const CreateTourTemplate = () => {
         maxPrice: roundToThousand(parseFloat(tourTemplate.maxPrice || '0')) || null,
         imageUrls: tourTemplate.imageUrls.filter(img => img instanceof File) || []
       };
-      console.log(tourTemplateData);
+
       if (!isDraft) {
         const errors = {};
         if (!tourTemplateData.provinceIds || tourTemplateData.provinceIds.length === 0) {
@@ -199,12 +206,13 @@ const CreateTourTemplate = () => {
           errors.schedules = 'Vui lòng thêm ít nhất một lịch trình';
         }
         const invalidSchedules = tourTemplateData.schedules.filter(s =>
-          !s.title || !s.description || !s.attractionIds || s.attractionIds.length === 0
+          !s.title?.trim() || isEmptyHtml(s.description) || !s.attractionIds || s.attractionIds.length === 0
         );
         if (invalidSchedules.length > 0) {
           errors.scheduleDetails = 'Vui lòng điền đầy đủ thông tin cho tất cả các ngày trong lịch trình (tiêu đề, mô tả và điểm tham quan)';
         }
-        if (!tourTemplateData.imageUrls || tourTemplateData.imageUrls.length < 4) {
+        const nonNullImages = tourTemplate.imageUrls.filter(img => img !== null);
+        if (nonNullImages.length < 4) {
           errors.imageUrls = 'Vui lòng thêm đủ 4 ảnh';
         }
         if (!tourTemplateData.durationId) {
@@ -213,40 +221,65 @@ const CreateTourTemplate = () => {
         if (!tourTemplateData.tourCategoryId) {
           errors.tourCategory = 'Vui lòng chọn loại tour';
         }
+
         const requiredFields = {
-          tourName: 'tên tour', code: 'mã tour', description: 'mô tả', transportation: 'phương tiện',
-          startingProvinceId: 'điểm khởi hành', minPrice: 'giá thấp nhất', maxPrice: 'giá cao nhất'
+          tourName: 'tên tour',
+          code: 'mã tour',
+          description: 'mô tả',
+          transportation: 'phương tiện',
+          startingProvinceId: 'điểm khởi hành',
+          minPrice: 'giá thấp nhất',
+          maxPrice: 'giá cao nhất'
         };
+
         Object.entries(requiredFields).forEach(([key, label]) => {
-          if (!tourTemplateData[key]) {
+          if (key === 'description') {
+            if (isEmptyHtml(tourTemplateData[key])) {
+              errors[key] = `Vui lòng nhập ${label}`;
+            }
+          } else if (!tourTemplateData[key]) {
             errors[key] = `Vui lòng nhập ${label}`;
           }
         });
+
         if (Object.keys(errors).length > 0) {
           setFieldErrors(errors);
+          setSnackbar({
+            open: true,
+            severity: 'warning',
+            hide: 5000,
+            message: 'Vui lòng nhập đầy đủ thông tin và hình ảnh',
+          });
           return;
         }
       } else {
-        const hasAnyField =
-          tourTemplate.code ||
-          tourTemplate.tourName ||
-          tourTemplate.description ||
-          tourTemplate.duration ||
-          tourTemplate.tourCategory ||
-          tourTemplate.transportation ||
-          tourTemplate.note ||
-          (tourTemplate.provinces && tourTemplate.provinces.length > 0) ||
-          tourTemplate.startingProvinceId ||
-          tourTemplate.minPrice ||
-          tourTemplate.maxPrice ||
-          (tourTemplate.imageUrls && tourTemplate.imageUrls.length > 0);
-        const invalidSchedules = tourTemplateData.schedules.filter(s =>
-          !s.title && !s.description && !s.attractionIds && s.attractionIds.length === 0
+        const hasAnyField = !!(
+          tourTemplateData.code ||
+          tourTemplateData.tourName ||
+          tourTemplateData.description ||
+          tourTemplateData.duration ||
+          tourTemplateData.tourCategory ||
+          tourTemplateData.note ||
+          tourTemplateData.minPrice ||
+          tourTemplateData.maxPrice ||
+          (tourTemplateData.provinces && tourTemplateData.provinces.length > 0) ||
+          tourTemplateData.startingProvinceId ||
+          tourTemplateData.transportation ||
+          tourTemplateData.schedules.some(s =>
+            s.title ||
+            s.description ||
+            (s.attractionIds && s.attractionIds.length > 0)
+          )
         );
-        if (!hasAnyField || invalidSchedules.length > 0) {
+
+        const hasAnyImages = tourTemplate.imageUrls.some(img => img !== null);
+
+        if (!hasAnyField && !hasAnyImages) {
           setSnackbar({
-            open: true, severity: 'error', hide: 5000,
-            message: 'Vui lòng nhập ít nhất một thông tin để lưu nháp',
+            open: true,
+            severity: 'warning',
+            hide: 5000,
+            message: 'Vui lòng nhập ít nhất một thông tin hoặc thêm ít nhất một ảnh để lưu nháp',
           });
           return;
         }
@@ -535,7 +568,7 @@ const CreateTourTemplate = () => {
                   </Box>
                 </Box>
                 <Box sx={{ mb: 5 }}>
-                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
+                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan *</Typography>
                   <FormControl sx={{ width: '100%' }}>
                     <ReactQuill
                       value={tourTemplate.description} onChange={(value) => handleFieldChange('description', value)}
@@ -550,7 +583,7 @@ const CreateTourTemplate = () => {
                 <Box sx={{ mb: 5 }}>
                   <Typography variant="h5" gutterBottom
                     sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-                    Lịch trình
+                    Lịch trình *
                   </Typography>
                   {fieldErrors.scheduleDetails && (
                     <Typography color="error" variant="caption" sx={{ ml: 1 }}>
@@ -640,15 +673,17 @@ const CreateTourTemplate = () => {
               </Grid>
               <Grid item xs={12} md={4} >
                 <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                  <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography sx={{ color: '#05073C', display: 'flex', width: '6rem' }}> Mã mẫu: </Typography>
+                    <Typography sx={{ color: '#05073C', display: 'flex', width: '7rem' }}> Mã mẫu * </Typography>
                     <TextField
                       value={tourTemplate.code} onChange={(e) => handleFieldChange('code', e.target.value)}
                       variant="outlined" fullWidth error={!!fieldErrors.code} helperText={fieldErrors.code}
                     />
                   </Box>
+                  <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C', mt: 1 }}>Giá tour</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá từ: </Typography>
+                    <Typography sx={{ color: '#05073C', width: '7rem' }}> Giá từ * </Typography>
                     <TextField
                       value={tourTemplate.minPrice} onBlur={() => handlePriceBlur('minPrice')}
                       onChange={(e) => handleFieldChange('minPrice', e.target.value)}
@@ -659,7 +694,7 @@ const CreateTourTemplate = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá đến: </Typography>
+                    <Typography sx={{ color: '#05073C', width: '7rem' }}> Giá đến * </Typography>
                     <TextField
                       value={tourTemplate.maxPrice} onBlur={() => handlePriceBlur('maxPrice')}
                       onChange={(e) => handleFieldChange('maxPrice', e.target.value)}

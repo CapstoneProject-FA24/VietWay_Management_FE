@@ -13,33 +13,55 @@ import { getErrorMessage } from '@hooks/Message';
 const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDeadline, depositPercent) => {
   const errors = {};
 
+  // Check for duplicates
   for (let i = 0; i < policies.length; i++) {
-    const policy = policies[i];
+    const currentPolicy = policies[i];
+    
+    for (let j = i + 1; j < policies.length; j++) {
+      const otherPolicy = policies[j];
+      
+      // Skip if either policy is incomplete
+      if (!currentPolicy.cancelBefore || !otherPolicy.cancelBefore || 
+          currentPolicy.refundPercent === '' || otherPolicy.refundPercent === '') {
+        continue;
+      }
 
-    // Separate validation for cancelBefore
-    if (!policy.cancelBefore) {
+      // Check for same date
+      if (dayjs(currentPolicy.cancelBefore).isSame(otherPolicy.cancelBefore, 'day')) {
+        errors[`policy${i}Date`] = 'Không được trùng ngày với chính sách khác';
+        errors[`policy${j}Date`] = 'Không được trùng ngày với chính sách khác';
+      }
+
+      // Check for same refund rate
+      if (Number(currentPolicy.refundPercent) === Number(otherPolicy.refundPercent)) {
+        errors[`policy${i}Rate`] = 'Không được trùng tỷ lệ hoàn tiền với chính sách khác';
+        errors[`policy${j}Rate`] = 'Không được trùng tỷ lệ hoàn tiền với chính sách khác';
+      }
+    }
+
+    // Existing validations
+    if (!currentPolicy.cancelBefore) {
       errors[`policy${i}Date`] = 'Vui lòng nhập ngày hủy tour';
-    } else if (!dayjs(policy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
-      !dayjs(policy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
+    } else if (!dayjs(currentPolicy.cancelBefore).isSameOrAfter(dayjs(registerOpenDate)) ||
+      !dayjs(currentPolicy.cancelBefore).isSameOrBefore(dayjs(startDate))) {
       errors[`policy${i}Date`] = 'Thời gian hủy tour phải nằm sau thời gian mở đăng ký và trước ngày khởi hành';
     }
 
-    // Separate validation for refundRate
-    if (policy.refundPercent === '') {
+    if (currentPolicy.refundPercent === '') {
       errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
-    } else if (Number(policy.refundPercent) < 0 || Number(policy.refundPercent) >= 100) {
-      errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 99%';
+    } else if (Number(currentPolicy.refundPercent) <= 0 || Number(currentPolicy.refundPercent) >= 100) {
+      errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 1 đến 99%';
     } else if (paymentDeadline && Number(depositPercent) < 100) {
-      const refundPercent = Number(policy.refundPercent);
+      const refundPercent = Number(currentPolicy.refundPercent);
       const deposit = Number(depositPercent);
 
-      if (dayjs(policy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
+      if (dayjs(currentPolicy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
         if (refundPercent > deposit) {
           errors[`policy${i}Rate`] = `Trước hạn thanh toán, tỷ lệ hoàn tiền không được vượt quá tỷ lệ đặt cọc (${deposit}%)`;
         }
       } else {
-        if (refundPercent <= deposit) {
-          errors[`policy${i}Rate`] = `Sau hạn thanh toán, tỷ lệ hoàn tiền phải lớn hơn tỷ lệ đặt cọc (${deposit}%)`;
+        if (refundPercent < deposit) {
+          errors[`policy${i}Rate`] = `Sau hạn thanh toán, tỷ lệ hoàn tiền phải lớn hơn hoặc bằng tỷ lệ đặt cọc (${deposit}%)`;
         }
       }
     }
@@ -160,6 +182,8 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
 
     if (!tourData.startDate) {
       newErrors.startDate = "Vui lòng chọn ngày khởi hành";
+    } else if (!dayjs(tourData.startDate).isAfter(dayjs(), 'day')) {
+      newErrors.startDate = "Ngày khởi hành phải sau ngày hiện tại ít nhất 1 ngày";
     }
 
     if (!tourData.startTime) {
@@ -196,16 +220,16 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
       newErrors.registerOpenDate = "Vui lòng chọn ngày mở đăng ký";
     } else if (dayjs(tourData.registerOpenDate).isAfter(tourData.startDate)) {
       newErrors.registerOpenDate = "Ngày mở đăng ký phải trước ngày khởi hành";
-    }
+    } 
 
     if (!tourData.registerCloseDate) {
       newErrors.registerCloseDate = "Vui lòng chọn ngày đóng đăng ký";
     } else if (dayjs(tourData.registerCloseDate).isAfter(tourData.startDate)) {
       newErrors.registerCloseDate = "Ngày đóng đăng ký phải trước ngày khởi hành";
-    } else if (dayjs(tourData.registerCloseDate).isBefore(dayjs())) {
-      newErrors.registerCloseDate = "Ngày đóng đăng ký phải sau ngày hiện tại";
+    } else if (dayjs(tourData.registerCloseDate).isBefore(dayjs(), 'day')) {
+      newErrors.registerCloseDate = "Ngày đóng đăng ký không được là ngày trong quá khứ";
     } else if (dayjs(tourData.registerOpenDate).isAfter(tourData.registerCloseDate)) {
-      newErrors.registerCloseDate = "Ngày đóng đăng ký phải sau ngày mở đăng ký";
+      newErrors.registerCloseDate = "Ngày đóng đăng ký không được trước ngày mở đăng ký";
     }
 
     if (!tourData.depositPercent) {
@@ -313,16 +337,23 @@ const TourUpdateForm = ({ tour, onUpdateSuccess, maxPrice, minPrice, startingPro
         .minute(tourData.startTime.minute())
         .format('YYYY-MM-DDTHH:mm:ss.SSS[Z]');
 
+      // Set specific times for register open/close dates
+      const registerOpenDate = dayjs(tourData.registerOpenDate).startOf('day');
+      const registerCloseDate = dayjs(tourData.registerCloseDate).endOf('day');
+
       const formattedData = {
         startAddress: tourData.startLocation,
         startDate: startDateTime,
         adultPrice: Number(tourData.defaultTouristPrice),
-        registerOpenDate: dayjs(tourData.registerOpenDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
-        registerCloseDate: dayjs(tourData.registerCloseDate).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+        registerOpenDate: registerOpenDate.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+        registerCloseDate: registerCloseDate.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
         maxParticipants: Number(tourData.maxParticipant),
         minParticipants: Number(tourData.minParticipant),
         tourPrices: tourData.tourPrices.map(price => ({
-          name: price.name, price: Number(price.price), ageFrom: price.ageFrom, ageTo: price.ageTo
+          name: price.name,
+          price: Number(price.price),
+          ageFrom: price.ageFrom,
+          ageTo: price.ageTo
         })),
         refundPolicies: tourData.tourPolicies.map(policy => ({
           cancelBefore: dayjs(policy.cancelBefore).format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
