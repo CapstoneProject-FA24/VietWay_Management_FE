@@ -395,7 +395,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-                    <Typography gutterBottom>Tour đi qua tỉnh/thành phố</Typography>
+                    <Typography gutterBottom>Tour đi tham quan tỉnh/thành phố *</Typography>
                     <ReactSelect
                         isMulti name="provinces" onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                         options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
@@ -409,7 +409,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     )}
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-                    <Typography gutterBottom>Khởi hành từ:</Typography>
+                    <Typography gutterBottom>Khởi hành từ *</Typography>
                     <Select
                         value={editableFields.startingProvinceId.value}
                         onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
@@ -423,7 +423,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography gutterBottom>Tên tour</Typography>
+                <Typography gutterBottom>Tên tour *</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <TextField
                         value={editableFields.tourName.value} onChange={(e) => handleFieldChange('tourName', e.target.value)}
@@ -516,7 +516,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
                     </Box>
                     <Box sx={{ mb: 5 }}>
-                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
+                        <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan *</Typography>
                         <FormControl sx={{ width: '100%' }}>
                             <ReactQuill
                                 value={editableFields.description.value} onChange={(value) => handleFieldChange('description', value)}
@@ -530,7 +530,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     </Box>
                     <Box sx={{ mb: 5 }}>
                         <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C', mb: 2, mt: 12 }}>
-                            Lịch trình
+                            Lịch trình *
                         </Typography>
                         {fieldErrors.scheduleDetails && (
                             <Typography color="error" variant="caption" sx={{ ml: 1 }}>
@@ -615,17 +615,8 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 <Grid item xs={12} md={4} >
                     <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
                         <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
-                        {/* <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <Typography sx={{ color: '#05073C' }}>Ngày tạo: {new Date(tourTemplate.createdDate).toLocaleDateString('vi-VN')}</Typography>
-                        </Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <Typography sx={{ color: '#05073C', display: 'flex' }}>
-                                Trạng thái:
-                                <Typography sx={{ ml: 1, color: tourTemplate.statusName === 'Bản nháp' ? 'gray' : tourTemplate.statusName === 'Chờ duyệt' ? 'primary.main' : tourTemplate.statusName === 'Đã duyệt' ? 'green' : 'red', }}>{tourTemplate.statusName}</Typography>
-                            </Typography>
-                        </Box> */}
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <Typography sx={{ color: '#05073C', display: 'flex', width: '6rem' }}> Mã mẫu: </Typography>
+                            <Typography sx={{ color: '#05073C', display: 'flex', width: '7rem' }}> Mã mẫu * </Typography>
                             <TextField
                                 value={editableFields.code.value} onChange={(e) => handleFieldChange('code', e.target.value)} variant="outlined"
                                 fullWidth error={!!fieldErrors.code} helperText={fieldErrors.code}
@@ -633,7 +624,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
                         <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C', mt: 1 }}>Giá tour</Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá từ: </Typography>
+                            <Typography sx={{ color: '#05073C', width: '7rem' }}> Giá từ * </Typography>
                             <TextField
                                 type="number" value={editableFields.minPrice.value} inputProps={{ min: 0 }}
                                 onChange={(e) => {
@@ -647,7 +638,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá đến: </Typography>
+                            <Typography sx={{ color: '#05073C', width: '7rem' }}> Giá đến * </Typography>
                             <TextField
                                 type="number" value={editableFields.maxPrice.value} inputProps={{ min: 0 }}
                                 onChange={(e) => {

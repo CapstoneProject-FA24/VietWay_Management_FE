@@ -265,9 +265,9 @@ const CreateTourTemplate = () => {
           (tourTemplateData.provinces && tourTemplateData.provinces.length > 0) ||
           tourTemplateData.startingProvinceId ||
           tourTemplateData.transportation ||
-          tourTemplateData.schedules.some(s => 
-            s.title || 
-            s.description || 
+          tourTemplateData.schedules.some(s =>
+            s.title ||
+            s.description ||
             (s.attractionIds && s.attractionIds.length > 0)
           )
         );
@@ -568,7 +568,7 @@ const CreateTourTemplate = () => {
                   </Box>
                 </Box>
                 <Box sx={{ mb: 5 }}>
-                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan</Typography>
+                  <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>Tổng quan *</Typography>
                   <FormControl sx={{ width: '100%' }}>
                     <ReactQuill
                       value={tourTemplate.description} onChange={(value) => handleFieldChange('description', value)}
@@ -583,7 +583,7 @@ const CreateTourTemplate = () => {
                 <Box sx={{ mb: 5 }}>
                   <Typography variant="h5" gutterBottom
                     sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-                    Lịch trình
+                    Lịch trình *
                   </Typography>
                   {fieldErrors.scheduleDetails && (
                     <Typography color="error" variant="caption" sx={{ ml: 1 }}>
@@ -673,15 +673,17 @@ const CreateTourTemplate = () => {
               </Grid>
               <Grid item xs={12} md={4} >
                 <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                  <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C' }}>Thông tin tour mẫu</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography sx={{ color: '#05073C', display: 'flex', width: '6rem' }}> Mã mẫu: </Typography>
+                    <Typography sx={{ color: '#05073C', display: 'flex', width: '7rem' }}> Mã mẫu * </Typography>
                     <TextField
                       value={tourTemplate.code} onChange={(e) => handleFieldChange('code', e.target.value)}
                       variant="outlined" fullWidth error={!!fieldErrors.code} helperText={fieldErrors.code}
                     />
                   </Box>
+                  <Typography variant="h6" sx={{ fontWeight: '600', mb: 1, color: '#05073C', mt: 1 }}>Giá tour</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá từ: </Typography>
+                    <Typography sx={{ color: '#05073C', width: '7rem' }}> Giá từ * </Typography>
                     <TextField
                       value={tourTemplate.minPrice} onBlur={() => handlePriceBlur('minPrice')}
                       onChange={(e) => handleFieldChange('minPrice', e.target.value)}
@@ -692,7 +694,7 @@ const CreateTourTemplate = () => {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Typography sx={{ color: '#05073C', width: '6rem' }}> Giá đến: </Typography>
+                    <Typography sx={{ color: '#05073C', width: '7rem' }}> Giá đến * </Typography>
                     <TextField
                       value={tourTemplate.maxPrice} onBlur={() => handlePriceBlur('maxPrice')}
                       onChange={(e) => handleFieldChange('maxPrice', e.target.value)}
