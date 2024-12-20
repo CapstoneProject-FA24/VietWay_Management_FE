@@ -153,8 +153,8 @@ const CreateTour = () => {
 
       if (currentPolicy.refundRate === '') {
         errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
-      } else if (Number(currentPolicy.refundRate) < 0 || Number(currentPolicy.refundRate) >= 100) {
-        errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 0 đến 99%';
+      } else if (Number(currentPolicy.refundRate) <= 0 || Number(currentPolicy.refundRate) >= 100) {
+        errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 1 đến 99%';
       } else if (paymentDeadline && Number(depositPercent) < 100) {
         const refundPercent = Number(currentPolicy.refundRate);
         const deposit = Number(depositPercent);
