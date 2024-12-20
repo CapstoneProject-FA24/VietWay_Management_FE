@@ -34,8 +34,8 @@ const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDe
 
       // Check for same refund rate
       if (Number(currentPolicy.refundPercent) === Number(otherPolicy.refundPercent)) {
-        errors[`policy${i}Rate`] = 'Không được trùng tỷ lệ hoàn tiền với chính sách khác';
-        errors[`policy${j}Rate`] = 'Không được trùng tỷ lệ hoàn tiền với chính sách khác';
+        errors[`policy${i}Rate`] = 'Không được trùng tỷ lệ phạt hủy tour với chính sách khác';
+        errors[`policy${j}Rate`] = 'Không được trùng tỷ lệ phạt hủy tour với chính sách khác';
       }
     }
 
@@ -48,20 +48,20 @@ const validateRefundPolicies = (policies, registerOpenDate, startDate, paymentDe
     }
 
     if (currentPolicy.refundPercent === '') {
-      errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ hoàn tiền';
+      errors[`policy${i}Rate`] = 'Vui lòng nhập tỷ lệ phạt hủy tour';
     } else if (Number(currentPolicy.refundPercent) <= 0 || Number(currentPolicy.refundPercent) >= 100) {
-      errors[`policy${i}Rate`] = 'Tỷ lệ hoàn tiền phải từ 1 đến 99%';
+      errors[`policy${i}Rate`] = 'Tỷ lệ phạt hủy tour phải từ 1 đến 99%';
     } else if (paymentDeadline && Number(depositPercent) < 100) {
       const refundPercent = Number(currentPolicy.refundPercent);
       const deposit = Number(depositPercent);
 
       if (dayjs(currentPolicy.cancelBefore).isSameOrBefore(dayjs(paymentDeadline))) {
         if (refundPercent > deposit) {
-          errors[`policy${i}Rate`] = `Trước hạn thanh toán, tỷ lệ hoàn tiền không được vượt quá tỷ lệ đặt cọc (${deposit}%)`;
+          errors[`policy${i}Rate`] = `Trước hạn thanh toán, tỷ lệ phạt hủy tour không được vượt quá tỷ lệ đặt cọc (${deposit}%)`;
         }
       } else {
         if (refundPercent < deposit) {
-          errors[`policy${i}Rate`] = `Sau hạn thanh toán, tỷ lệ hoàn tiền phải lớn hơn hoặc bằng tỷ lệ đặt cọc (${deposit}%)`;
+          errors[`policy${i}Rate`] = `Sau hạn thanh toán, tỷ lệ phạt hủy tour phải lớn hơn hoặc bằng tỷ lệ đặt cọc (${deposit}%)`;
         }
       }
     }
