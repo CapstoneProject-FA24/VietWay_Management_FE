@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton, Collapse } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton, Collapse, CircularProgress } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -24,6 +24,10 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import EditIcon from '@mui/icons-material/Edit';
 import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import XIcon from '@mui/icons-material/X';
+import { Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from '@mui/material';
+//import { shareAttractionOnFacebook, shareAttractionOnTwitter, fetchSocialMetrics } from '@services/SocialMediaService';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -43,6 +47,14 @@ const ManagerAttractionDetail = () => {
   const [provinces, setProvinces] = useState([]);
   const [attractionTypes, setAttractionTypes] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isPublishing, setIsPublishing] = useState({
+    facebook: false,
+    twitter: false
+  });
+  const [socialMetrics, setSocialMetrics] = useState({
+    twitter: null,
+    facebook: null
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +68,12 @@ const ManagerAttractionDetail = () => {
         setProvinces(fetchedProvinces.items);
         setAttractionTypes(fetchedAttractionTypes);
         setAttraction(fetchedAttraction);
+
+        // Fetch social metrics if attraction has been shared
+        if (fetchedAttraction.xTweetId || fetchedAttraction.facebookPostId) {
+          const metrics = await fetchSocialMetrics(id);
+          setSocialMetrics(metrics);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
         setSnackbar({
@@ -243,6 +261,110 @@ const ManagerAttractionDetail = () => {
     setIsEditing(false);
   };
 
+  const handleShareToSocial = async (platform) => {
+    setIsPublishing(prev => ({ ...prev, [platform]: true }));
+    try {
+      if (platform === 'facebook') {
+        await shareAttractionOnFacebook(attraction.attractionId);
+        setSnackbar({ 
+          open: true, 
+          message: 'Đã đăng điểm tham quan lên Facebook thành công', 
+          severity: 'success'
+        });
+      } else if (platform === 'twitter') {
+        await shareAttractionOnTwitter(attraction.attractionId);
+        setSnackbar({ 
+          open: true, 
+          message: 'Đã đăng điểm tham quan lên Twitter thành công', 
+          severity: 'success'
+        });
+      }
+      const updatedAttraction = await fetchAttractionById(attraction.attractionId);
+      setAttraction(updatedAttraction);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        severity: 'error',
+        message: `Lỗi khi đăng điểm tham quan lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+      });
+    } finally {
+      setIsPublishing(prev => ({ ...prev, [platform]: false }));
+    }
+  };
+
+  const handleViewOnSocial = (platform) => {
+    let url;
+    if (platform === 'facebook') {
+      url = `https://www.facebook.com/${attraction.facebookPostId}`;
+    } else if (platform === 'twitter') {
+      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${attraction.xTweetId}`;
+    }
+    if (url) {
+      window.open(url, '_blank');
+    }
+  };
+
+  const renderSocialMetricsTable = () => (
+    <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
+      <Table size="small">
+        <TableHead>
+          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+            <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+            {attraction?.xTweetId && (
+              <>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+              </>
+            )}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {attraction?.xTweetId && socialMetrics.twitter && (
+            <TableRow>
+              <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <XIcon sx={{ fontSize: 20 }} /> Twitter </Box>
+              </TableCell>
+              <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.replyCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.impressionCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.quoteCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.bookmarkCount || 0}</TableCell>
+            </TableRow>
+          )}
+          {attraction?.facebookPostId && socialMetrics.facebook && (
+            <TableRow>
+              <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <FacebookIcon sx={{ fontSize: 20 }} /> Facebook </Box>
+              </TableCell>
+              <TableCell align="center">
+                <Tooltip title={
+                  <Box>
+                    {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
+                      <Typography key={type} variant="body2"> {type}: {count} </Typography>
+                    ))}
+                  </Box>
+                }>
+                  <span>{socialMetrics.facebook.reactionCount || 0}</span>
+                </Tooltip>
+              </TableCell>
+              <TableCell align="center">{socialMetrics.facebook.shareCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
+              {attraction?.xTweetId && (
+                <> <TableCell align="center">-</TableCell> <TableCell align="center">-</TableCell> </>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Box>
+  );
+
   if (!attraction) {
     return <Typography>Loading...</Typography>;
   }
@@ -350,6 +472,63 @@ const ManagerAttractionDetail = () => {
           </Box>
         )}
       </Box>
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e0e0e0' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {((!attraction?.xTweetId || !attraction?.facebookPostId)) && (
+            <>
+              <Typography>Đăng điểm tham quan:</Typography>
+              {!attraction?.facebookPostId && (
+                <Button
+                  variant="contained"
+                  startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
+                  onClick={() => handleShareToSocial('facebook')}
+                  disabled={isPublishing.facebook}
+                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                >
+                  {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+                </Button>
+              )}
+              {!attraction?.xTweetId && (
+                <Button
+                  variant="contained"
+                  startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
+                  onClick={() => handleShareToSocial('twitter')}
+                  disabled={isPublishing.twitter}
+                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                >
+                  {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+                </Button>
+              )}
+            </>
+          )}
+          {((attraction?.xTweetId || attraction?.facebookPostId)) && (
+            <>
+              <Typography>Xem điểm tham quan đã đăng tại:</Typography>
+              {attraction?.facebookPostId && (
+                <Button
+                  variant="contained"
+                  startIcon={<FacebookIcon />}
+                  onClick={() => handleViewOnSocial('facebook')}
+                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                >
+                  Facebook
+                </Button>
+              )}
+              {attraction?.xTweetId && (
+                <Button
+                  variant="contained"
+                  startIcon={<XIcon />}
+                  onClick={() => handleViewOnSocial('twitter')}
+                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                >
+                  Twitter
+                </Button>
+              )}
+            </>
+          )}
+        </Box>
+      </Box>
+      {((attraction?.xTweetId || attraction?.facebookPostId)) && renderSocialMetricsTable()}
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>
         <DialogContent>

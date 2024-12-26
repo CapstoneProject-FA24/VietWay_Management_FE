@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Collapse, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from '@mui/material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle, faIcons, faClock, faMoneyBill1, faCalendarAlt, faQrcode, faBus } from '@fortawesome/free-solid-svg-icons';
 import { Helmet } from 'react-helmet';
@@ -24,6 +24,8 @@ import CategoryIcon from '@mui/icons-material/Category';
 import FlightIcon from '@mui/icons-material/Flight';
 import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import XIcon from '@mui/icons-material/X';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -45,6 +47,14 @@ const ManagerTourTemplateDetails = () => {
   const [tours, setTours] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState({
+    facebook: false,
+    twitter: false
+  });
+  const [socialMetrics, setSocialMetrics] = useState({
+    twitter: null,
+    facebook: null
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,6 +63,12 @@ const ManagerTourTemplateDetails = () => {
         setTourTemplate(fetchedTourTemplate);
         const fetchedTours = await fetchToursByTemplateId(id);
         setTours(fetchedTours);
+
+        // Fetch social metrics if post has been shared
+        if (fetchedTourTemplate.xTweetId || fetchedTourTemplate.facebookPostId) {
+          const metrics = await fetchSocialMetrics(id);
+          setSocialMetrics(metrics);
+        }
       } catch (error) {
         console.error('Error fetching tour template:', error);
       } finally {
@@ -164,6 +180,113 @@ const ManagerTourTemplateDetails = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
+  const handleShareToSocial = async (platform) => {
+    setIsPublishing(prev => ({ ...prev, [platform]: true }));
+    try {
+      if (platform === 'facebook') {
+        await shareTemplateOnFacebook(tourTemplate.tourTemplateId);
+        setSnackbar({ 
+          open: true, 
+          message: 'Đã đăng tour mẫu lên Facebook thành công', 
+          severity: 'success', 
+          hide: 5000 
+        });
+      } else if (platform === 'twitter') {
+        await shareTemplateOnTwitter(tourTemplate.tourTemplateId);
+        setSnackbar({ 
+          open: true, 
+          message: 'Đã đăng tour mẫu lên Twitter thành công', 
+          severity: 'success', 
+          hide: 5000 
+        });
+      }
+      const updatedTemplate = await fetchTourTemplateById(tourTemplate.tourTemplateId);
+      setTourTemplate(updatedTemplate);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        severity: 'error',
+        hide: 5000,
+        message: `Lỗi khi đăng tour mẫu lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+      });
+    } finally {
+      setIsPublishing(prev => ({ ...prev, [platform]: false }));
+    }
+  };
+
+  const handleViewOnSocial = (platform) => {
+    let url;
+    if (platform === 'facebook') {
+      url = `https://www.facebook.com/${tourTemplate.facebookPostId}`;
+    } else if (platform === 'twitter') {
+      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${tourTemplate.xTweetId}`;
+    }
+    if (url) {
+      window.open(url, '_blank');
+    }
+  };
+
+  const renderSocialMetricsTable = () => (
+    <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
+      <Table size="small">
+        <TableHead>
+          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+            <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
+            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+            {tourTemplate?.xTweetId && (
+              <>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+              </>
+            )}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {tourTemplate?.xTweetId && socialMetrics.twitter && (
+            <TableRow>
+              <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <XIcon sx={{ fontSize: 20 }} /> Twitter </Box>
+              </TableCell>
+              <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.replyCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.impressionCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.quoteCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.twitter.bookmarkCount || 0}</TableCell>
+            </TableRow>
+          )}
+          {tourTemplate?.facebookPostId && socialMetrics.facebook && (
+            <TableRow>
+              <TableCell>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <FacebookIcon sx={{ fontSize: 20 }} /> Facebook </Box>
+              </TableCell>
+              <TableCell align="center">
+                <Tooltip title={
+                  <Box>
+                    {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
+                      <Typography key={type} variant="body2"> {type}: {count} </Typography>
+                    ))}
+                  </Box>
+                }>
+                  <span>{socialMetrics.facebook.reactionCount || 0}</span>
+                </Tooltip>
+              </TableCell>
+              <TableCell align="center">{socialMetrics.facebook.shareCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
+              <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
+              {tourTemplate?.xTweetId && (
+                <> <TableCell align="center">-</TableCell> <TableCell align="center">-</TableCell> </>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Box>
+  );
+
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
   }
@@ -235,6 +358,63 @@ const ManagerTourTemplateDetails = () => {
           </Box>
         )}
       </Box>
+      <Box sx={{ p: 3, display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e0e0e0' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {((!tourTemplate?.xTweetId || !tourTemplate?.facebookPostId)) && (
+            <>
+              <Typography>Đăng tour mẫu:</Typography>
+              {!tourTemplate?.facebookPostId && (
+                <Button
+                  variant="contained"
+                  startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
+                  onClick={() => handleShareToSocial('facebook')}
+                  disabled={isPublishing.facebook}
+                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                >
+                  {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+                </Button>
+              )}
+              {!tourTemplate?.xTweetId && (
+                <Button
+                  variant="contained"
+                  startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
+                  onClick={() => handleShareToSocial('twitter')}
+                  disabled={isPublishing.twitter}
+                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                >
+                  {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+                </Button>
+              )}
+            </>
+          )}
+          {((tourTemplate?.xTweetId || tourTemplate?.facebookPostId)) && (
+            <>
+              <Typography>Xem tour mẫu đã đăng tại:</Typography>
+              {tourTemplate?.facebookPostId && (
+                <Button
+                  variant="contained"
+                  startIcon={<FacebookIcon />}
+                  onClick={() => handleViewOnSocial('facebook')}
+                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                >
+                  Facebook
+                </Button>
+              )}
+              {tourTemplate?.xTweetId && (
+                <Button
+                  variant="contained"
+                  startIcon={<XIcon />}
+                  onClick={() => handleViewOnSocial('twitter')}
+                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                >
+                  Twitter
+                </Button>
+              )}
+            </>
+          )}
+        </Box>
+      </Box>
+      {((tourTemplate?.xTweetId || tourTemplate?.facebookPostId)) && renderSocialMetricsTable()}
       <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
         <Typography gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'grey', fontSize: '1.1rem' }}>
           Tour đi: <strong>{tourTemplate.provinces.map(province => province.provinceName).join(' - ')}</strong>

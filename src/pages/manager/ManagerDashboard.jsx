@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
 import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
 import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
+import ProvinceCategoryPostChart from '@components/promoting/ProvinceCategoryPostChart';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -256,6 +257,15 @@ const ManagerDashboard = () => {
               ratingData={ratingStats.attractionRatingInPeriod}
             />
           </Grid>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Phân bố bài viết theo tỉnh thành
+            </Typography>
+            <ProvinceCategoryPostChart />
+          </Paper>
         </Grid>
       </Box>
     </Box>
