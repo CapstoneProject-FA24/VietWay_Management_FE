@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Select, Spin } from 'antd';
+import { Select, MenuItem, CircularProgress } from '@mui/material';
 import { useProvinceChartData } from '@hooks/ChartData';
 
 const ProvinceCategoryPostChart = () => {
@@ -32,35 +32,34 @@ const ProvinceCategoryPostChart = () => {
 
   if (loading) {
     return (
-      <div style={{ width: '100%', height: '600px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Spin size="large" />
+      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress size="large" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ width: '100%', height: '600px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'red' }}>
+      <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'red' }}>
         Error loading data: {error.message}
       </div>
     );
   }
 
   return (
-    <div style={{ width: '100%', height: '600px' }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <div style={{ marginBottom: '20px' }}>
         <Select
-          defaultValue={10}
-          style={{ width: 120 }}
-          onChange={setTopLimit}
-          options={[
-            { value: 10, label: 'Top 10' },
-            { value: 15, label: 'Top 15' },
-            { value: 20, label: 'Top 20' },
-            { value: 25, label: 'Top 25' },
-            { value: 'all', label: 'Tất cả tỉnh thành' }
-          ]}
-        />
+          value={topLimit}
+          onChange={(e) => setTopLimit(e.target.value)}
+          sx={{ width: 170 }}
+        >
+          <MenuItem value={10}>Top 10</MenuItem>
+          <MenuItem value={15}>Top 15</MenuItem>
+          <MenuItem value={20}>Top 20</MenuItem>
+          <MenuItem value={25}>Top 25</MenuItem>
+          <MenuItem value="all">Tất cả tỉnh thành</MenuItem>
+        </Select>
       </div>
       
       <ResponsiveContainer width="100%" height="100%">

@@ -49,9 +49,6 @@ export const fetchPostById = async (id) => {
         const response = await axios.get(`${baseURL}/api/posts/${id}`);
         const item = response.data.data;
         
-        const facebookPost = item.socialPostDetail?.find(post => post.site === 0);
-        const twitterPost = item.socialPostDetail?.find(post => post.site === 1);
-
         return {
             postId: item.postId,
             title: item.title,
@@ -64,10 +61,7 @@ export const fetchPostById = async (id) => {
             description: item.description,
             createdAt: item.createAt,
             status: item.status,
-            facebookPostId: facebookPost?.socialPostId,
-            xTweetId: twitterPost?.socialPostId,
-            facebookPostCreatedAt: facebookPost?.createdAt,
-            xTweetCreatedAt: twitterPost?.createdAt
+            socialPostDetail: item.socialPostDetail || []
         };
     } catch (error) {
         console.error('Error fetching post:', error);
@@ -155,36 +149,6 @@ export const changePostStatus = async (postId, status, reason) => {
     }
 };
 
-export const sharePostOnTwitter = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.post(`${baseURL}/api/published-posts/post/${postId}/twitter`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error sharing post on Twitter:', error);
-        throw error;
-    }
-};
-
-export const sharePostOnFacebook = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.post(`${baseURL}/api/published-posts/post/${postId}/facebook`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error sharing post on Facebook:', error);
-        throw error;
-    }
-};
-
 export const updatePostImages = async (postId, newImages) => {
     const token = getCookie('token');
     try {
@@ -204,59 +168,6 @@ export const updatePostImages = async (postId, newImages) => {
         return response.data;
     } catch (error) {
         console.error('Error updating post images:', error.response);
-        throw error;
-    }
-};
-
-export const getTwitterReactionsByPostId = async (entityId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.get(`${baseURL}/api/published-posts/${entityId}/twitter/reactions`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const metricsData = JSON.parse(response.data.data);
-        return {
-            retweetCount: metricsData.retweetCount || 0,
-            replyCount: metricsData.replyCount || 0,
-            likeCount: metricsData.likeCount || 0,
-            quoteCount: metricsData.quoteCount || 0,
-            bookmarkCount: metricsData.bookmarkCount || 0,
-            impressionCount: metricsData.impressionCount || 0
-        };
-    } catch (error) {
-        console.error('Error fetching Twitter reactions:', error.response);
-        return {
-            retweetCount: 0,
-            replyCount: 0,
-            likeCount: 0,
-            quoteCount: 0,
-            bookmarkCount: 0,
-            impressionCount: 0
-        };
-    }
-};
-
-export const getFacebookReactionsByPostId = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.get(`${baseURL}/api/published-posts/${postId}/facebook/metrics`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const metrics = response.data.data;
-        
-        return {
-            impressionCount: metrics.impressionCount,
-            shareCount: metrics.shareCount,
-            commentCount: metrics.commentCount,
-            reactionCount: Object.values(metrics.postReactions).reduce((a, b) => a + b, 0),
-            reactionDetails: metrics.postReactions
-        };
-    } catch (error) {
-        console.error('Error fetching Facebook reactions:', error.response);
         throw error;
     }
 };
