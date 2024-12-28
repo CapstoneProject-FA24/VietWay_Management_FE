@@ -71,6 +71,10 @@ export const fetchTourTemplateById = async (id) => {
                 'Authorization': `Bearer ${token}`
             }
         });
+
+        const facebookPost = response.data.data.socialPostDetail?.find(post => post.site === 0);
+        const twitterPost = response.data.data.socialPostDetail?.find(post => post.site === 1);
+
         return {
             tourTemplateId: response.data.data.tourTemplateId,
             code: response.data.data.code,
@@ -91,7 +95,11 @@ export const fetchTourTemplateById = async (id) => {
             transportation: response.data.data.transportation,
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,
-            imageUrls: response.data.data.images
+            imageUrls: response.data.data.images,
+            facebookPostId: facebookPost?.socialPostId,
+            xTweetId: twitterPost?.socialPostId,
+            facebookPostCreatedAt: facebookPost?.createdAt,
+            xTweetCreatedAt: twitterPost?.createdAt
         };
     } catch (error) {
         console.error('Error fetching tour template:', error);
@@ -374,6 +382,89 @@ export const fetchTourTemplatesWithTourInfo = async (params) => {
 
     } catch (error) {
         console.error('Error fetching tour templates with tour info:', error);
+        throw error;
+    }
+};
+
+export const sharePostOnTwitter = async (templateId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/twitter`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing post on Twitter:', error);
+        throw error;
+    }
+};
+
+export const sharePostOnFacebook = async (templateId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/facebook`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing post on Facebook:', error);
+        throw error;
+    }
+};
+
+export const getTwitterReactionsByPostId = async (entityId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/published-posts/${entityId}/twitter/reactions`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const metricsData = JSON.parse(response.data.data);
+        return {
+            retweetCount: metricsData.retweetCount || 0,
+            replyCount: metricsData.replyCount || 0,
+            likeCount: metricsData.likeCount || 0,
+            quoteCount: metricsData.quoteCount || 0,
+            bookmarkCount: metricsData.bookmarkCount || 0,
+            impressionCount: metricsData.impressionCount || 0
+        };
+    } catch (error) {
+        console.error('Error fetching Twitter reactions:', error.response);
+        return {
+            retweetCount: 0,
+            replyCount: 0,
+            likeCount: 0,
+            quoteCount: 0,
+            bookmarkCount: 0,
+            impressionCount: 0
+        };
+    }
+};
+
+export const getFacebookReactionsByPostId = async (postId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/published-posts/${postId}/facebook/metrics`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const metrics = response.data.data;
+        
+        return {
+            impressionCount: metrics.impressionCount,
+            shareCount: metrics.shareCount,
+            commentCount: metrics.commentCount,
+            reactionCount: Object.values(metrics.postReactions).reduce((a, b) => a + b, 0),
+            reactionDetails: metrics.postReactions
+        };
+    } catch (error) {
+        console.error('Error fetching Facebook reactions:', error.response);
         throw error;
     }
 };

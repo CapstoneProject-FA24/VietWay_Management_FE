@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton, Collapse, CircularProgress } from '@mui/material';
+import { Box, Typography, Grid, Paper, Chip, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, TextField, Snackbar, Alert, IconButton, Collapse, CircularProgress, Tabs, Tab } from '@mui/material';
 import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -46,15 +46,16 @@ const ManagerAttractionDetail = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [provinces, setProvinces] = useState([]);
   const [attractionTypes, setAttractionTypes] = useState([]);
+  const [socialMetrics, setSocialMetrics] = useState({
+    twitter: null,
+    facebook: null
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [isPublishing, setIsPublishing] = useState({
     facebook: false,
     twitter: false
   });
-  const [socialMetrics, setSocialMetrics] = useState({
-    twitter: null,
-    facebook: null
-  });
+  const [currentTab, setCurrentTab] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -104,6 +105,74 @@ const ManagerAttractionDetail = () => {
 
     getPlaceDetails();
   }, [attraction?.googlePlaceId]);
+
+  useEffect(() => {
+    const fetchTwitterReactions = async () => {
+      if (attraction?.xTweetId) {
+        try {
+          const data = await getTwitterReactionsByAttractionId(attraction.attractionId);
+          if (data) {
+            setSocialMetrics(prev => ({
+              ...prev,
+              twitter: {
+                likeCount: data.likeCount,
+                retweetCount: data.retweetCount,
+                replyCount: data.replyCount,
+                impressionCount: data.impressionCount,
+                quoteCount: data.quoteCount,
+                bookmarkCount: data.bookmarkCount
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching Twitter reactions:', error);
+          setSocialMetrics(prev => ({
+            ...prev,
+            twitter: {
+              likeCount: 0, retweetCount: 0, replyCount: 0,
+              impressionCount: 0, quoteCount: 0, bookmarkCount: 0
+            }
+          }));
+        }
+      }
+    };
+    fetchTwitterReactions();
+    const interval = setInterval(fetchTwitterReactions, 30000);
+    return () => clearInterval(interval);
+  }, [attraction?.attractionId, attraction?.xTweetId]);
+
+  useEffect(() => {
+    const fetchFacebookReactions = async () => {
+      if (attraction?.facebookPostId) {
+        try {
+          const data = await getFacebookReactionsByAttractionId(attraction.attractionId);
+          if (data) {
+            setSocialMetrics(prev => ({
+              ...prev,
+              facebook: {
+                reactionCount: Object.values(data.postReactions || {}).reduce((a, b) => a + b, 0),
+                reactionDetails: data.postReactions || {},
+                shareCount: data.shareCount,
+                commentCount: data.commentCount,
+                impressionCount: data.impressionCount
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching Facebook reactions:', error);
+          setSnackbar({
+            open: true,
+            message: 'Không thể tải thông tin tương tác Facebook',
+            severity: 'error',
+            hide: 5000
+          });
+        }
+      }
+    };
+    fetchFacebookReactions();
+    const interval = setInterval(fetchFacebookReactions, 30000);
+    return () => clearInterval(interval);
+  }, [attraction?.attractionId, attraction?.facebookPostId]);
 
   const settings = {
     dots: true,
@@ -266,17 +335,19 @@ const ManagerAttractionDetail = () => {
     try {
       if (platform === 'facebook') {
         await shareAttractionOnFacebook(attraction.attractionId);
-        setSnackbar({ 
-          open: true, 
-          message: 'Đã đăng điểm tham quan lên Facebook thành công', 
-          severity: 'success'
+        setSnackbar({
+          open: true,
+          message: 'Đã đăng điểm tham quan lên Facebook thành công',
+          severity: 'success',
+          hide: 5000
         });
       } else if (platform === 'twitter') {
         await shareAttractionOnTwitter(attraction.attractionId);
-        setSnackbar({ 
-          open: true, 
-          message: 'Đã đăng điểm tham quan lên Twitter thành công', 
-          severity: 'success'
+        setSnackbar({
+          open: true,
+          message: 'Đã đăng điểm tham quan lên Twitter thành công',
+          severity: 'success',
+          hide: 5000
         });
       }
       const updatedAttraction = await fetchAttractionById(attraction.attractionId);
@@ -285,6 +356,7 @@ const ManagerAttractionDetail = () => {
       setSnackbar({
         open: true,
         severity: 'error',
+        hide: 5000,
         message: `Lỗi khi đăng điểm tham quan lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
       });
     } finally {
@@ -293,6 +365,8 @@ const ManagerAttractionDetail = () => {
   };
 
   const handleViewOnSocial = (platform) => {
+    if (!attraction) return;
+    
     let url;
     if (platform === 'facebook') {
       url = `https://www.facebook.com/${attraction.facebookPostId}`;
@@ -314,7 +388,7 @@ const ManagerAttractionDetail = () => {
             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-            {attraction?.xTweetId && (
+            {attraction.xTweetId && (
               <>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
@@ -323,10 +397,13 @@ const ManagerAttractionDetail = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {attraction?.xTweetId && socialMetrics.twitter && (
+          {attraction.xTweetId && socialMetrics.twitter && (
             <TableRow>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <XIcon sx={{ fontSize: 20 }} /> Twitter </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <XIcon sx={{ fontSize: 20 }} />
+                  Twitter
+                </Box>
               </TableCell>
               <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
               <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
@@ -336,16 +413,19 @@ const ManagerAttractionDetail = () => {
               <TableCell align="center">{socialMetrics.twitter.bookmarkCount || 0}</TableCell>
             </TableRow>
           )}
-          {attraction?.facebookPostId && socialMetrics.facebook && (
+          {attraction.facebookPostId && socialMetrics.facebook && (
             <TableRow>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <FacebookIcon sx={{ fontSize: 20 }} /> Facebook </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FacebookIcon sx={{ fontSize: 20 }} />
+                  Facebook
+                </Box>
               </TableCell>
               <TableCell align="center">
                 <Tooltip title={
                   <Box>
                     {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
-                      <Typography key={type} variant="body2"> {type}: {count} </Typography>
+                      <Typography key={type} variant="body2">{type}: {count}</Typography>
                     ))}
                   </Box>
                 }>
@@ -355,13 +435,127 @@ const ManagerAttractionDetail = () => {
               <TableCell align="center">{socialMetrics.facebook.shareCount || 0}</TableCell>
               <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
               <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
-              {attraction?.xTweetId && (
-                <> <TableCell align="center">-</TableCell> <TableCell align="center">-</TableCell> </>
+              {attraction.xTweetId && (
+                <><TableCell align="center">-</TableCell><TableCell align="center">-</TableCell></>
               )}
             </TableRow>
           )}
         </TableBody>
       </Table>
+    </Box>
+  );
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
+  const SocialMetricsTab = () => (
+    <Box sx={{ p: 3 }}>
+      {attraction?.xTweetId && (
+        <>
+          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <XIcon /> Twitter Metrics
+          </Typography>
+          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trả lời</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    {new Date(attraction.xTweetCreatedAt).toLocaleDateString('vi-VN')}
+                  </TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.likeCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.retweetCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.replyCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.impressionCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.quoteCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.bookmarkCount || 0}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleViewOnSocial('twitter')}
+                      sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Box>
+        </>
+      )}
+
+      {attraction?.facebookPostId && (
+        <>
+          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FacebookIcon /> Facebook Metrics
+          </Typography>
+          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Chia sẻ</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    {new Date(attraction.facebookPostCreatedAt).toLocaleDateString('vi-VN')}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={
+                      <Box>
+                        {Object.entries(socialMetrics.facebook?.reactionDetails || {}).map(([type, count]) => (
+                          <Typography key={type} variant="body2">{type}: {count}</Typography>
+                        ))}
+                      </Box>
+                    }>
+                      <span>{socialMetrics.facebook?.reactionCount || 0}</span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">{socialMetrics.facebook?.shareCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.facebook?.commentCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.facebook?.impressionCount || 0}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleViewOnSocial('facebook')}
+                      sx={{ backgroundColor: '#1877F2', '&:hover': { backgroundColor: '#0d6efd' } }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Box>
+        </>
+      )}
+
+      {!attraction?.xTweetId && !attraction?.facebookPostId && (
+        <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mt: 3 }}>
+          Chưa có bài đăng trên mạng xã hội
+        </Typography>
+      )}
     </Box>
   );
 
@@ -472,63 +666,231 @@ const ManagerAttractionDetail = () => {
           </Box>
         )}
       </Box>
-      <Box sx={{ p: 3, display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid #e0e0e0' }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          {((!attraction?.xTweetId || !attraction?.facebookPostId)) && (
-            <>
-              <Typography>Đăng điểm tham quan:</Typography>
-              {!attraction?.facebookPostId && (
-                <Button
-                  variant="contained"
-                  startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
-                  onClick={() => handleShareToSocial('facebook')}
-                  disabled={isPublishing.facebook}
-                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
-                >
-                  {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
-                </Button>
-              )}
-              {!attraction?.xTweetId && (
-                <Button
-                  variant="contained"
-                  startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
-                  onClick={() => handleShareToSocial('twitter')}
-                  disabled={isPublishing.twitter}
-                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                >
-                  {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
-                </Button>
-              )}
-            </>
-          )}
-          {((attraction?.xTweetId || attraction?.facebookPostId)) && (
-            <>
-              <Typography>Xem điểm tham quan đã đăng tại:</Typography>
-              {attraction?.facebookPostId && (
-                <Button
-                  variant="contained"
-                  startIcon={<FacebookIcon />}
-                  onClick={() => handleViewOnSocial('facebook')}
-                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
-                >
-                  Facebook
-                </Button>
-              )}
-              {attraction?.xTweetId && (
-                <Button
-                  variant="contained"
-                  startIcon={<XIcon />}
-                  onClick={() => handleViewOnSocial('twitter')}
-                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                >
-                  Twitter
-                </Button>
-              )}
-            </>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tab label="Thông tin chung" />
+          <Tab label="Thống kê mạng xã hội" />
+        </Tabs>
+      </Box>
+
+      {currentTab === 0 && (
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1 }}>
+            <Typography>Đăng điểm tham quan:</Typography>
+            <Button
+              variant="contained"
+              startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
+              onClick={() => handleShareToSocial('facebook')}
+              disabled={isPublishing.facebook || attraction?.facebookPostId}
+              sx={{ 
+                backgroundColor: '#1877F2', 
+                height: 'fit-content', 
+                '&:hover': { backgroundColor: '#0d6efd' },
+                '&.Mui-disabled': {
+                  backgroundColor: '#ccc'
+                }
+              }}
+            >
+              {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
+              onClick={() => handleShareToSocial('twitter')}
+              disabled={isPublishing.twitter || attraction?.xTweetId}
+              sx={{ 
+                backgroundColor: '#000000', 
+                '&:hover': { backgroundColor: '#2c2c2c' },
+                '&.Mui-disabled': {
+                  backgroundColor: '#ccc'
+                }
+              }}
+            >
+              {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+            </Button>
+          </Box>
+          
+          {attraction?.status === AttractionStatus.Approved && isEditing ? (
+            <AttractionUpdateForm
+              attraction={attraction}
+              provinces={provinces}
+              attractionTypes={attractionTypes}
+              onSave={handleSave}
+              currentSlide={currentSlide}
+              setCurrentSlide={setCurrentSlide}
+              sliderRef={sliderRef}
+              setSliderRef={setSliderRef}
+            />
+          ) : (
+            <Box sx={{ p: 3, flexGrow: 1, mt: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+                  Thuộc tỉnh/thành phố: {attraction.provinceName}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+                  Loại điểm tham quan: {attraction.attractionTypeName}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
+                  {attraction.name}
+                </Typography>
+              </Box>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={8}>
+                  <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
+                    <Box className="slick-slider-container" sx={{ height: '450px' }}>
+                      <Slider ref={setSliderRef} {...settings}>
+                        {attraction.images.map((image, index) => (
+                          <div key={index} style={{ position: 'relative' }}>
+                            <img
+                              src={image.url}
+                              alt={`Attraction ${index + 1}`}
+                              style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+                            />
+                          </div>
+                        ))}
+                      </Slider>
+                    </Box>
+                  </Paper>
+                  <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
+                    {attraction.images.map((image, index) => (
+                      <Box
+                        key={index}
+                        sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none' }}
+                        onClick={() => handleThumbnailClick(index)}
+                      >
+                        <img
+                          src={image.url}
+                          alt={`Thumbnail ${index + 1}`}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
+                    <Box dangerouslySetInnerHTML={{ __html: attraction.description }} sx={{
+                      '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
+                      '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
+                    }} />
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                    <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
+                    <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
+                    <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
+                    <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
+                    <Box sx={{ mb: 3 }}>
+                      <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
+                        {attraction.website}
+                      </a>
+                    </Box>
+                    <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Các thông tin liên hệ khác: </Typography>
+                    <div style={{ marginTop: -15, marginBottom: 15 }} dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
+
+                    {attraction.googlePlaceId && (
+                      <Box sx={{ mt: 4 }}>
+                        <Typography variant="h4" sx={{
+                          fontWeight: '700', fontFamily: 'Inter, sans-serif', color: '#05073C',
+                          fontSize: '27px', display: 'flex', alignItems: 'center', gap: 1, mb: 2
+                        }}>
+                          <AccessTimeIcon /> Giờ mở cửa
+                        </Typography>
+
+                        {loading ? (
+                          <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
+                        ) : openingHours ? (
+                          <Box>
+                            <Box sx={{
+                              display: 'flex', alignItems: 'center', gap: 1, mb: 2,
+                              color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
+                            }}>
+                              {openingHours.opening_hours ? (
+                                <>
+                                  {openingHours.opening_hours?.open_now === true ? (
+                                    <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
+                                  ) : (
+                                    <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
+                                  )}</>
+                              ) : (
+                                <Typography>Không có thông tin giờ mở cửa</Typography>
+                              )}
+                            </Box>
+                            <Box>
+                              {openingHours.opening_hours?.periods?.map((period, index) => {
+                                const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+                                const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
+                                const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
+
+                                return (
+                                  <Typography key={index} sx={{
+                                    py: 1, display: 'flex', justifyContent: 'space-between',
+                                    borderBottom: '1px solid #eee', '&:last-child': { borderBottom: 'none' }
+                                  }}>
+                                    <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
+                                      {days[period.open.day]}
+                                    </span>
+                                    <span>{openTime} - {closeTime}</span>
+                                  </Typography>
+                                );
+                              })}
+                            </Box>
+                          </Box>
+                        ) : (
+                          <Typography sx={{ mt: 2 }}>Không có thông tin giờ mở cửa</Typography>
+                        )}
+                      </Box>
+                    )}
+                  </Paper>
+                  <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
+                    <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px', mb: 2 }}>
+                      Thông tin tạo điểm tham quan
+                    </Typography>
+                    <Box sx={{ display: 'flex', width: '100%' }}>
+                      <Typography sx={{ fontWeight: 700 }}>Mã: </Typography>
+                      <Typography sx={{ mb: 1, ml: 1, color: 'primary.main' }}>{attraction.attractionId}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', width: '100%' }}>
+                      <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
+                      <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+                      <Typography sx={{ fontWeight: 700 }}>Trạng thái: </Typography>
+                      <Chip label={getAttractionStatusInfo(attraction.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
+                    </Box>
+                  </Paper>
+                </Grid>
+                <Grid item xs={12} md={12}>
+                  <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}>
+                    <strong>Google Place ID:</strong> {attraction.googlePlaceId}
+                  </Typography>
+                  <Box sx={{
+                    height: '500px', width: '100%', position: 'relative', mb: 3,
+                    overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
+                  }}>
+                    <Map placeId={attraction.googlePlaceId} />
+                  </Box>
+                </Grid>
+                {attraction.status === AttractionStatus.Approved && (
+                  <Grid item xs={12} md={12}>
+                    <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
+                      Đánh giá từ khách hàng
+                    </Typography>
+                    <ReviewList attractionId={attraction.attractionId} />
+                  </Grid>
+                )}
+              </Grid>
+            </Box>
           )}
         </Box>
-      </Box>
-      {((attraction?.xTweetId || attraction?.facebookPostId)) && renderSocialMetricsTable()}
+      )}
+
+      {currentTab === 1 && <SocialMetricsTab />}
+
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>
         <DialogContent>
@@ -591,186 +953,7 @@ const ManagerAttractionDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      {attraction?.status === AttractionStatus.Approved && isEditing ? (
-        <AttractionUpdateForm
-          attraction={attraction}
-          provinces={provinces}
-          attractionTypes={attractionTypes}
-          onSave={(data, newImages, removedImageIds) => {
-            handleSave(data, newImages, removedImageIds);
-            setIsEditing(false);
-          }}
-          currentSlide={currentSlide}
-          setCurrentSlide={setCurrentSlide}
-          sliderRef={sliderRef}
-          setSliderRef={setSliderRef}
-        />
-      ) : (
-        <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-              Thuộc tỉnh/thành phố: {attraction.provinceName}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
-              Loại điểm tham quan: {attraction.attractionTypeName}
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
-              {attraction.name}
-            </Typography>
-          </Box>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
-              <Paper elevation={3} sx={{ mb: 3, overflow: 'hidden', position: 'relative', maxWidth: '1000px' }}>
-                <Box className="slick-slider-container" sx={{ height: '450px' }}>
-                  <Slider ref={setSliderRef} {...settings}>
-                    {attraction.images.map((image, index) => (
-                      <div key={index} style={{ position: 'relative' }}>
-                        <img
-                          src={image.url}
-                          alt={`Attraction ${index + 1}`}
-                          style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-                        />
-                      </div>
-                    ))}
-                  </Slider>
-                </Box>
-              </Paper>
-              <Box sx={{ display: 'flex', overflowX: 'auto', mb: 3 }}>
-                {attraction.images.map((image, index) => (
-                  <Box
-                    key={index}
-                    sx={{ width: 110, height: 110, flexShrink: 0, mr: 3, borderRadius: 1, overflow: 'hidden', cursor: 'pointer', border: currentSlide === index ? '2px solid #3572EF' : 'none' }}
-                    onClick={() => handleThumbnailClick(index)}
-                  >
-                    <img
-                      src={image.url}
-                      alt={`Thumbnail ${index + 1}`}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  </Box>
-                ))}
-              </Box>
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '27px' }}>Thông tin chi tiết</Typography>
-                <Box dangerouslySetInnerHTML={{ __html: attraction.description }} sx={{
-                  '& img': { width: '100%', height: 'auto', borderRadius: '4px', my: 2 },
-                  '& p': { lineHeight: 1.7, mb: 2 }, flexGrow: 1, width: '100%', margin: '0 auto'
-                }} />
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-                <Typography variant="h4" sx={{ mb: 2, fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', fontSize: '27px' }}>Thông tin liên hệ</Typography>
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Địa chỉ: </Typography>
-                <Typography sx={{ mb: 3 }}>{attraction.address}</Typography>
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Website: </Typography>
-                <Box sx={{ mb: 3 }}>
-                  <a href={attraction.website} target="_blank" rel="noopener noreferrer" style={{ wordBreak: 'break-all' }}>
-                    {attraction.website}
-                  </a>
-                </Box>
-                <Typography sx={{ fontWeight: 700, minWidth: '4rem' }}>Các thông tin liên hệ khác: </Typography>
-                <div style={{ marginTop: -15, marginBottom: 15 }} dangerouslySetInnerHTML={{ __html: attraction.contactInfo }} />
-
-                {attraction.googlePlaceId && (
-                  <Box sx={{ mt: 4 }}>
-                    <Typography variant="h4" sx={{
-                      fontWeight: '700', fontFamily: 'Inter, sans-serif', color: '#05073C',
-                      fontSize: '27px', display: 'flex', alignItems: 'center', gap: 1, mb: 2
-                    }}>
-                      <AccessTimeIcon /> Giờ mở cửa
-                    </Typography>
-
-                    {loading ? (
-                      <Typography sx={{ mt: 2 }}>Đang tải...</Typography>
-                    ) : openingHours ? (
-                      <Box>
-                        <Box sx={{
-                          display: 'flex', alignItems: 'center', gap: 1, mb: 2,
-                          color: openingHours.opening_hours?.open_now ? 'success.main' : 'error.main'
-                        }}>
-                          {openingHours.opening_hours ? (
-                            <>
-                              {openingHours.opening_hours?.open_now === true ? (
-                                <><CheckCircleIcon /> <Typography>Đang mở cửa</Typography></>
-                              ) : (
-                                <><CancelIcon /> <Typography>Đã đóng cửa</Typography></>
-                              )}</>
-                          ) : (
-                            <Typography>Không có thông tin giờ mở cửa</Typography>
-                          )}
-                        </Box>
-                        <Box>
-                          {openingHours.opening_hours?.periods?.map((period, index) => {
-                            const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-                            const openTime = period.open.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-                            const closeTime = period.close.time.replace(/(\d{2})(\d{2})/, '$1:$2');
-
-                            return (
-                              <Typography key={index} sx={{
-                                py: 1, display: 'flex', justifyContent: 'space-between',
-                                borderBottom: '1px solid #eee', '&:last-child': { borderBottom: 'none' }
-                              }}>
-                                <span style={{ fontWeight: period.open.day === new Date().getDay() ? 700 : 400 }}>
-                                  {days[period.open.day]}
-                                </span>
-                                <span>{openTime} - {closeTime}</span>
-                              </Typography>
-                            );
-                          })}
-                        </Box>
-                      </Box>
-                    ) : (
-                      <Typography sx={{ mt: 2 }}>Không có thông tin giờ mở cửa</Typography>
-                    )}
-                  </Box>
-                )}
-              </Paper>
-              <Paper elevation={3} sx={{ p: 4, mb: 3, borderRadius: '10px' }}>
-                <Typography variant="h4" sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '20px', mb: 2 }}>
-                  Thông tin tạo điểm tham quan
-                </Typography>
-                <Box sx={{ display: 'flex', width: '100%' }}>
-                  <Typography sx={{ fontWeight: 700 }}>Mã: </Typography>
-                  <Typography sx={{ mb: 1, ml: 1, color: 'primary.main' }}>{attraction.attractionId}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', width: '100%' }}>
-                  <Typography sx={{ fontWeight: 700 }}>Ngày tạo: </Typography>
-                  <Typography sx={{ mb: 1, ml: 1 }}>{new Date(attraction.createdDate).toLocaleDateString('en-GB')}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                  <Typography sx={{ fontWeight: 700 }}>Trạng thái: </Typography>
-                  <Chip label={getAttractionStatusInfo(attraction.status).text} size="medium" sx={{ fontSize: '1rem', ml: 1, color: `${getAttractionStatusInfo(attraction.status).color}`, bgcolor: `${getAttractionStatusInfo(attraction.status).backgroundColor}` }} />
-                </Box>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={12}>
-              <Typography sx={{ minWidth: '4rem', mt: 5, mb: 2 }}>
-                <strong>Google Place ID:</strong> {attraction.googlePlaceId}
-              </Typography>
-              <Box sx={{
-                height: '500px', width: '100%', position: 'relative', mb: 3,
-                overflow: 'hidden', borderRadius: '10px', border: '1px solid #e0e0e0'
-              }}>
-                <Map placeId={attraction.googlePlaceId} />
-              </Box>
-            </Grid>
-            {attraction.status === AttractionStatus.Approved && (
-              <Grid item xs={12} md={12}>
-                <Typography variant="h5" gutterBottom sx={{ textAlign: 'left', fontWeight: '700', fontSize: '1.6rem', color: '#05073C' }}>
-                  Đánh giá từ khách hàng
-                </Typography>
-                <ReviewList attractionId={attraction.attractionId} />
-              </Grid>
-            )}
-          </Grid>
-        </Box>
-      )}
-    </Box >
+    </Box>
   );
 };
 

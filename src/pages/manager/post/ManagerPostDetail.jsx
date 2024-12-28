@@ -437,7 +437,9 @@ const ManagerPostDetail = () => {
       setPost(updatedPost);
     } catch (error) {
       setSnackbar({
-        open: true, severity: 'error', hide: 5000,
+        open: true,
+        severity: 'error',
+        hide: 5000,
         message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
       });
     } finally {
@@ -446,6 +448,8 @@ const ManagerPostDetail = () => {
   };
 
   const handleViewOnSocial = (platform) => {
+    if (!post) return;
+    
     let url;
     if (platform === 'facebook') {
       url = `https://www.facebook.com/${post.facebookPostId}`;
