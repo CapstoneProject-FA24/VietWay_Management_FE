@@ -57,9 +57,6 @@ export const fetchAttractionById = async (id) => {
         });
         const data = response.data.data;
 
-        const twitterPost = data.socialPostDetail?.find(post => post.site === 1);
-        const facebookPost = data.socialPostDetail?.find(post => post.site === 0);
-
         const attraction = {
             attractionId: data.attractionId,
             name: data.name,
@@ -78,10 +75,7 @@ export const fetchAttractionById = async (id) => {
                 imageId: image.imageId,
                 url: image.imageUrl
             })),
-            facebookPostId: facebookPost?.socialPostId || null,
-            xTweetId: twitterPost?.socialPostId || null,
-            facebookPostCreatedAt: facebookPost?.createdAt || null,
-            xTweetCreatedAt: twitterPost?.createdAt || null
+            socialPostDetail: data.socialPostDetail || []
         };
         return attraction;
     } catch (error) {
@@ -252,7 +246,6 @@ export const deleteAttraction = async (attractionId) => {
 };
 
 export const fetchApprovedttractions = async (params) => {
-    console.log(params);
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();

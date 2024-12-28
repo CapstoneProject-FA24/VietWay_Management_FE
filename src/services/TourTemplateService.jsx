@@ -72,9 +72,6 @@ export const fetchTourTemplateById = async (id) => {
             }
         });
 
-        const facebookPost = response.data.data.socialPostDetail?.find(post => post.site === 0);
-        const twitterPost = response.data.data.socialPostDetail?.find(post => post.site === 1);
-
         return {
             tourTemplateId: response.data.data.tourTemplateId,
             code: response.data.data.code,
@@ -96,11 +93,7 @@ export const fetchTourTemplateById = async (id) => {
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,
             imageUrls: response.data.data.images,
-
-            facebookPostId: facebookPost?.socialPostId,
-            xTweetId: twitterPost?.socialPostId,
-            facebookPostCreatedAt: facebookPost?.createdAt,
-            xTweetCreatedAt: twitterPost?.createdAt
+            socialPostDetail: response.data.data.socialPostDetail || []
         };
     } catch (error) {
         console.error('Error fetching tour template:', error);

@@ -27,6 +27,7 @@ import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup'
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import { shareAttractionOnTwitter, getTwitterReactionsByPostId } from '@services/PublishedPostService';
+import SocialMetricsTab from '@components/social/SocialMetricsTab';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -106,30 +107,29 @@ const ManagerAttractionDetail = () => {
 
   useEffect(() => {
     const fetchTwitterReactions = async () => {
-      if (attraction?.xTweetId) {
+      const twitterPost = attraction?.socialPostDetail?.find(post => post.site === 1);
+      if (twitterPost) {
         try {
-          const data = await getTwitterReactionsByAttractionId(attraction.attractionId);
-          if (data) {
+          const data = await getTwitterReactionsByPostId(attraction.attractionId, 0);
+          if (data && data.length > 0) {
             setSocialMetrics(prev => ({
               ...prev,
-              twitter: {
-                likeCount: data.likeCount,
-                retweetCount: data.retweetCount,
-                replyCount: data.replyCount,
-                impressionCount: data.impressionCount,
-                quoteCount: data.quoteCount,
-                bookmarkCount: data.bookmarkCount
-              }
+              twitter: data.map(metrics => ({
+                likeCount: metrics.likeCount || 0,
+                retweetCount: metrics.retweetCount || 0,
+                replyCount: metrics.replyCount || 0,
+                impressionCount: metrics.impressionCount || 0,
+                quoteCount: metrics.quoteCount || 0,
+                bookmarkCount: metrics.bookmarkCount || 0,
+                createdAt: metrics.createdAt
+              }))
             }));
           }
         } catch (error) {
           console.error('Error fetching Twitter reactions:', error);
           setSocialMetrics(prev => ({
             ...prev,
-            twitter: {
-              likeCount: 0, retweetCount: 0, replyCount: 0,
-              impressionCount: 0, quoteCount: 0, bookmarkCount: 0
-            }
+            twitter: []
           }));
         }
       }
@@ -137,18 +137,21 @@ const ManagerAttractionDetail = () => {
     fetchTwitterReactions();
     const interval = setInterval(fetchTwitterReactions, 30000);
     return () => clearInterval(interval);
-  }, [attraction?.attractionId, attraction?.xTweetId]);
+  }, [attraction?.attractionId, attraction?.socialPostDetail]);
 
   useEffect(() => {
     const fetchFacebookReactions = async () => {
-      if (attraction?.facebookPostId) {
+      const facebookPost = attraction?.socialPostDetail?.find(post => post.site === 0);
+      if (facebookPost) {
         try {
-          const data = await getFacebookReactionsByAttractionId(attraction.attractionId);
+          const data = await getFacebookReactionsByPostId(attraction.attractionId);
           if (data) {
+            const totalReactions = data.postReactions ? Object.values(data.postReactions).reduce((sum, count) => sum + count, 0) : 0;
+
             setSocialMetrics(prev => ({
               ...prev,
               facebook: {
-                reactionCount: Object.values(data.postReactions || {}).reduce((a, b) => a + b, 0),
+                reactionCount: totalReactions,
                 reactionDetails: data.postReactions || {},
                 shareCount: data.shareCount,
                 commentCount: data.commentCount,
@@ -170,7 +173,7 @@ const ManagerAttractionDetail = () => {
     fetchFacebookReactions();
     const interval = setInterval(fetchFacebookReactions, 30000);
     return () => clearInterval(interval);
-  }, [attraction?.attractionId, attraction?.facebookPostId]);
+  }, [attraction?.attractionId, attraction?.socialPostDetail]);
 
   const settings = {
     dots: true,
@@ -365,14 +368,20 @@ const ManagerAttractionDetail = () => {
   const handleViewOnSocial = (platform) => {
     if (!attraction) return;
 
-    let url;
-    if (platform === 'facebook') {
-      url = `https://www.facebook.com/${attraction.facebookPostId}`;
-    } else if (platform === 'twitter') {
-      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${attraction.xTweetId}`;
-    }
-    if (url) {
-      window.open(url, '_blank');
+    const socialPost = attraction.socialPostDetail?.find(post =>
+      platform === 'facebook' ? post.site === 0 : post.site === 1
+    );
+
+    if (socialPost) {
+      let url;
+      if (platform === 'facebook') {
+        url = `https://www.facebook.com/${socialPost.socialPostId}`;
+      } else if (platform === 'twitter') {
+        url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${socialPost.socialPostId}`;
+      }
+      if (url) {
+        window.open(url, '_blank');
+      }
     }
   };
 
@@ -696,16 +705,12 @@ const ManagerAttractionDetail = () => {
       )}
 
       {currentTab === 1 && (
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '400px',
-          color: 'text.secondary'
-        }}>
-          <Typography variant="h6">
-            Chưa đăng bài viết nào trên mạng xã hội
-          </Typography>
+        <Box sx={{ p: 3 }}>
+          <SocialMetricsTab
+            post={attraction}
+            socialMetrics={socialMetrics}
+            handleViewOnSocial={handleViewOnSocial}
+          />
         </Box>
       )}
 

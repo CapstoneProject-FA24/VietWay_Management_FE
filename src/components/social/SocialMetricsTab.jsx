@@ -4,12 +4,11 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 
 const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
-    
   <Box sx={{ mt: 3 }}>
     {post?.socialPostDetail?.find(post => post.site === 1) && (
       <>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <XIcon /> Twitter Metrics
+          <XIcon /> Tương tác trên Twitter
         </Typography>
         <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
           <Table size="small">
@@ -70,7 +69,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
     {post?.facebookPostId && (
       <>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <FacebookIcon /> Facebook Metrics
+          <FacebookIcon /> Tương tác trên Facebook
         </Typography>
         <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
           <Table size="small">

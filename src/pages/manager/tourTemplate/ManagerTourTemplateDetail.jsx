@@ -215,21 +215,99 @@ const ManagerTourTemplateDetails = () => {
     }
   };
 
-  const handleViewOnSocial = (platform, postId) => {
-    let url;
-    if (platform === 'facebook') {
-      url = `https://www.facebook.com/${postId}`;
-    } else if (platform === 'twitter') {
-      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${postId}`;
-    }
-    if (url) {
-      window.open(url, '_blank');
+  const handleViewOnSocial = (platform) => {
+    if (!tourTemplate) return;
+
+    const socialPost = tourTemplate.socialPostDetail?.find(post =>
+      platform === 'facebook' ? post.site === 0 : post.site === 1
+    );
+
+    if (socialPost) {
+      let url;
+      if (platform === 'facebook') {
+        url = `https://www.facebook.com/${socialPost.socialPostId}`;
+      } else if (platform === 'twitter') {
+        url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${socialPost.socialPostId}`;
+      }
+      if (url) {
+        window.open(url, '_blank');
+      }
     }
   };
 
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
   };
+
+  useEffect(() => {
+    const fetchTwitterReactions = async () => {
+      const twitterPost = tourTemplate?.socialPostDetail?.find(post => post.site === 1);
+      if (twitterPost) {
+        try {
+          const data = await getTwitterReactionsByPostId(tourTemplate.tourTemplateId, 1);
+          if (data && data.length > 0) {
+            setSocialMetrics(prev => ({
+              ...prev,
+              twitter: data.map(metrics => ({
+                likeCount: metrics.likeCount || 0,
+                retweetCount: metrics.retweetCount || 0,
+                replyCount: metrics.replyCount || 0,
+                impressionCount: metrics.impressionCount || 0,
+                quoteCount: metrics.quoteCount || 0,
+                bookmarkCount: metrics.bookmarkCount || 0,
+                createdAt: metrics.createdAt
+              }))
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching Twitter reactions:', error);
+          setSocialMetrics(prev => ({
+            ...prev,
+            twitter: []
+          }));
+        }
+      }
+    };
+    fetchTwitterReactions();
+    const interval = setInterval(fetchTwitterReactions, 30000);
+    return () => clearInterval(interval);
+  }, [tourTemplate?.tourTemplateId, tourTemplate?.socialPostDetail]);
+
+  useEffect(() => {
+    const fetchFacebookReactions = async () => {
+      const facebookPost = tourTemplate?.socialPostDetail?.find(post => post.site === 0);
+      if (facebookPost) {
+        try {
+          const data = await getFacebookReactionsByPostId(tourTemplate.tourTemplateId);
+          if (data) {
+            const totalReactions = data.postReactions ? Object.values(data.postReactions).reduce((sum, count) => sum + count, 0) : 0;
+
+            setSocialMetrics(prev => ({
+              ...prev,
+              facebook: {
+                reactionCount: totalReactions,
+                reactionDetails: data.postReactions || {},
+                shareCount: data.shareCount,
+                commentCount: data.commentCount,
+                impressionCount: data.impressionCount
+              }
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching Facebook reactions:', error);
+          setSnackbar({
+            open: true,
+            message: 'Không thể tải thông tin tương tác Facebook',
+            severity: 'error',
+            hide: 5000
+          });
+        }
+      }
+    };
+    fetchFacebookReactions();
+    const interval = setInterval(fetchFacebookReactions, 30000);
+    return () => clearInterval(interval);
+  }, [tourTemplate?.tourTemplateId, tourTemplate?.socialPostDetail]);
 
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
@@ -540,16 +618,12 @@ const ManagerTourTemplateDetails = () => {
       )}
 
       {currentTab === 1 && (
-        <Box sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '400px',
-          color: 'text.secondary'
-        }}>
-          <Typography variant="h6">
-            Chưa đăng bài viết nào trên mạng xã hội
-          </Typography>
+        <Box sx={{ p: 3 }}>
+          <SocialMetricsTab
+            post={tourTemplate}
+            socialMetrics={socialMetrics}
+            handleViewOnSocial={handleViewOnSocial}
+          />
         </Box>
       )}
 
