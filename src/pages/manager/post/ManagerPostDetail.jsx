@@ -20,6 +20,7 @@ import ReactQuill from 'react-quill';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -390,7 +391,7 @@ const ManagerPostDetail = () => {
     } catch (error) {
       setSnackbar({
         open: true, severity: 'error', hide: 5000,
-        message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+        message: getErrorMessage(error),
       });
     } finally {
       setIsPublishing(prev => ({ ...prev, [platform]: false }));

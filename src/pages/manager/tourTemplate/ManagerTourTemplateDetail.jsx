@@ -28,7 +28,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
 import { shareTemplateOnTwitter, getTwitterReactionsByPostId, getFacebookReactionsByPostId } from '@services/PublishedPostService';
-
+import { getErrorMessage } from '@hooks/Message';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -208,7 +208,7 @@ const ManagerTourTemplateDetails = () => {
         open: true,
         severity: 'error',
         hide: 5000,
-        message: `Lỗi khi đăng tour mẫu lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+        message: getErrorMessage(error),
       });
     } finally {
       setIsPublishing(prev => ({ ...prev, [platform]: false }));

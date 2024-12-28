@@ -144,9 +144,29 @@ export const messages = [
         message: `Bài viết chưa được đăng.`
     },
     {
+        code: 'ATTRACTION_NOT_PUBLISHED',
+        httpStatus: 400,
+        message: `Điểm tham quan chưa được đăng.`
+    },
+    {
+        code: 'TOURTEMPLATE_NOT_PUBLISHED',
+        httpStatus: 400,
+        message: `Tour chưa được đăng.`
+    },
+    {
         code: 'INVALID_ACTION_POST_NOT_APPROVED',
         httpStatus: 400,
         message: `Không thể thực hiện thao tác này do bài viết chưa được duyệt.`
+    },
+    {
+        code: 'INVALID_ACTION_ATTRACTION_CANNOT_POST',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do điểm tham quan chưa được duyệt.`
+    },
+    {
+        code: 'INVALID_ACTION_TOUR_TEMPLATE_CANNOT_POST',
+        httpStatus: 400,
+        message: `Không thể thực hiện thao tác này do tour mẫu chưa được duyệt hoặc không có tour đang mở đăng ký.`
     },
     {
         code: 'INVALID_ACTION_POST_PUBLISHED',

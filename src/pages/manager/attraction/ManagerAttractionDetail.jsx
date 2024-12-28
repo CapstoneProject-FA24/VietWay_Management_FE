@@ -28,6 +28,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
 import { shareAttractionOnTwitter, getTwitterReactionsByPostId } from '@services/PublishedPostService';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
+import { getErrorMessage } from '@hooks/Message';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -358,7 +359,7 @@ const ManagerAttractionDetail = () => {
         open: true,
         severity: 'error',
         hide: 5000,
-        message: `Lỗi khi đăng điểm tham quan lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
+        message: getErrorMessage(error),
       });
     } finally {
       setIsPublishing(prev => ({ ...prev, [platform]: false }));
