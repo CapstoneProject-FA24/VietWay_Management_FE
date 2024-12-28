@@ -21,7 +21,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -46,7 +46,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                         variant="contained"
                         size="small"
                         onClick={() => handleViewOnSocial('twitter', metrics.xTweetId)}
-                        sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                        sx={{ backgroundColor: '#b9b9b9', '&:hover': { backgroundColor: '#939393' }, color: 'black' }}
                       >
                         Chi tiết
                       </Button>

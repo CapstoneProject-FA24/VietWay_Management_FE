@@ -648,7 +648,7 @@ const ManagerPostDetail = () => {
                         <Button
                           variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
                           onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
-                          sx={{ backgroundColor: '#3b5998', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
+                          sx={{ backgroundColor: '#1877F2', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
                         >
                           {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
                         </Button>
