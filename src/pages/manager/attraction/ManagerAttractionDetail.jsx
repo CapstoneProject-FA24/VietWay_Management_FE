@@ -26,8 +26,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
-import { Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from '@mui/material';
-//import { shareAttractionOnFacebook, shareAttractionOnTwitter, fetchSocialMetrics } from '@services/SocialMediaService';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -378,186 +376,9 @@ const ManagerAttractionDetail = () => {
     }
   };
 
-  const renderSocialMetricsTable = () => (
-    <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-            {attraction.xTweetId && (
-              <>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-              </>
-            )}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {attraction.xTweetId && socialMetrics.twitter && (
-            <TableRow>
-              <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <XIcon sx={{ fontSize: 20 }} />
-                  Twitter
-                </Box>
-              </TableCell>
-              <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.replyCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.impressionCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.quoteCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.bookmarkCount || 0}</TableCell>
-            </TableRow>
-          )}
-          {attraction.facebookPostId && socialMetrics.facebook && (
-            <TableRow>
-              <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FacebookIcon sx={{ fontSize: 20 }} />
-                  Facebook
-                </Box>
-              </TableCell>
-              <TableCell align="center">
-                <Tooltip title={
-                  <Box>
-                    {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
-                      <Typography key={type} variant="body2">{type}: {count}</Typography>
-                    ))}
-                  </Box>
-                }>
-                  <span>{socialMetrics.facebook.reactionCount || 0}</span>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="center">{socialMetrics.facebook.shareCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
-              {attraction.xTweetId && (
-                <><TableCell align="center">-</TableCell><TableCell align="center">-</TableCell></>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </Box>
-  );
-
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
   };
-
-  const SocialMetricsTab = () => (
-    <Box sx={{ p: 3 }}>
-      {attraction?.xTweetId && (
-        <>
-          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <XIcon /> Twitter Metrics
-          </Typography>
-          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trả lời</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    {new Date(attraction.xTweetCreatedAt).toLocaleDateString('vi-VN')}
-                  </TableCell>
-                  <TableCell align="center">{socialMetrics.twitter?.likeCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.twitter?.retweetCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.twitter?.replyCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.twitter?.impressionCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.twitter?.quoteCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.twitter?.bookmarkCount || 0}</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleViewOnSocial('twitter')}
-                      sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                    >
-                      Chi tiết
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Box>
-        </>
-      )}
-
-      {attraction?.facebookPostId && (
-        <>
-          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FacebookIcon /> Facebook Metrics
-          </Typography>
-          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Chia sẻ</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    {new Date(attraction.facebookPostCreatedAt).toLocaleDateString('vi-VN')}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Tooltip title={
-                      <Box>
-                        {Object.entries(socialMetrics.facebook?.reactionDetails || {}).map(([type, count]) => (
-                          <Typography key={type} variant="body2">{type}: {count}</Typography>
-                        ))}
-                      </Box>
-                    }>
-                      <span>{socialMetrics.facebook?.reactionCount || 0}</span>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell align="center">{socialMetrics.facebook?.shareCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.facebook?.commentCount || 0}</TableCell>
-                  <TableCell align="center">{socialMetrics.facebook?.impressionCount || 0}</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleViewOnSocial('facebook')}
-                      sx={{ backgroundColor: '#1877F2', '&:hover': { backgroundColor: '#0d6efd' } }}
-                    >
-                      Chi tiết
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </Box>
-        </>
-      )}
-
-      {!attraction?.xTweetId && !attraction?.facebookPostId && (
-        <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mt: 3 }}>
-          Chưa có bài đăng trên mạng xã hội
-        </Typography>
-      )}
-    </Box>
-  );
 
   if (!attraction) {
     return <Typography>Loading...</Typography>;
@@ -888,7 +709,19 @@ const ManagerAttractionDetail = () => {
         </Box>
       )}
 
-      {currentTab === 1 && <SocialMetricsTab />}
+      {currentTab === 1 && (
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '400px',
+          color: 'text.secondary'
+        }}>
+          <Typography variant="h6">
+            Chưa đăng bài viết nào trên mạng xã hội
+          </Typography>
+        </Box>
+      )}
 
       <Dialog open={isApprovePopupOpen} onClose={() => setIsApprovePopupOpen(false)}>
         <DialogTitle>Xác nhận duyệt</DialogTitle>

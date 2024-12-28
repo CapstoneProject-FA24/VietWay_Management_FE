@@ -8,7 +8,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, changeTourTemplateStatus, deleteTourTemplate } from '@services/TourTemplateService';
+import { fetchTourTemplateById, changeTourTemplateStatus, deleteTourTemplate, shareTemplateOnFacebook, shareTemplateOnTwitter } from '@services/TourTemplateService';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -227,124 +227,6 @@ const ManagerTourTemplateDetails = () => {
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
   };
-
-  const renderSocialMetricsTable = () => (
-    <Box sx={{ p: 3 }}>
-      {tourTemplate?.socialPosts?.some(post => post.site === 0) && (
-        <>
-          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <XIcon /> Twitter Metrics
-          </Typography>
-          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trả lời</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tourTemplate.socialPosts
-                  .filter(post => post.site === 0)
-                  .map((post) => (
-                    <TableRow key={post.socialPostId}>
-                      <TableCell>
-                        {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                      </TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.likeCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.retweetCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.replyCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.impressionCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.quoteCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.bookmarkCount || 0}</TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleViewOnSocial('twitter', post.socialPostId)}
-                          sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                        >
-                          Chi tiết
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </Box>
-        </>
-      )}
-
-      {tourTemplate?.socialPosts?.some(post => post.site === 1) && (
-        <>
-          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <FacebookIcon /> Facebook Metrics
-          </Typography>
-          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
-            <Table size="small">
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Chia sẻ</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {tourTemplate.socialPosts
-                  .filter(post => post.site === 1)
-                  .map((post) => (
-                    <TableRow key={post.socialPostId}>
-                      <TableCell>
-                        {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                      </TableCell>
-                      <TableCell align="center">
-                        <Tooltip title={
-                          <Box>
-                            {Object.entries(socialMetrics[post.socialPostId]?.facebook?.reactionDetails || {}).map(([type, count]) => (
-                              <Typography key={type} variant="body2">{type}: {count}</Typography>
-                            ))}
-                          </Box>
-                        }>
-                          <span>{socialMetrics[post.socialPostId]?.facebook?.reactionCount || 0}</span>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.facebook?.shareCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.facebook?.commentCount || 0}</TableCell>
-                      <TableCell align="center">{socialMetrics[post.socialPostId]?.facebook?.impressionCount || 0}</TableCell>
-                      <TableCell align="center">
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleViewOnSocial('facebook', post.socialPostId)}
-                          sx={{ backgroundColor: '#1877F2', '&:hover': { backgroundColor: '#0d6efd' } }}
-                        >
-                          Chi tiết
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </Box>
-        </>
-      )}
-
-      {!tourTemplate?.socialPosts?.length && (
-        <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mt: 3 }}>
-          Chưa có bài đăng trên mạng xã hội
-        </Typography>
-      )}
-    </Box>
-  );
 
   if (!tourTemplate) {
     return <Typography sx={{ width: '100vw', textAlign: 'center' }}>Loading...</Typography>;
@@ -664,120 +546,16 @@ const ManagerTourTemplateDetails = () => {
       )}
 
       {currentTab === 1 && (
-        <Box sx={{ p: 3 }}>
-          {tourTemplate?.socialPosts?.some(post => post.site === 0) && (
-            <>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <XIcon /> Twitter Posts
-              </Typography>
-              <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trả lời</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {tourTemplate.socialPosts
-                      .filter(post => post.site === 0)
-                      .map((post) => (
-                        <TableRow key={post.socialPostId}>
-                          <TableCell>
-                            {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                          </TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.likeCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.retweetCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.replyCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.impressionCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.quoteCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.twitter?.bookmarkCount || 0}</TableCell>
-                          <TableCell align="center">
-                            <Button
-                              variant="contained"
-                              size="small"
-                              onClick={() => handleViewOnSocial('twitter', post.socialPostId)}
-                              sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                            >
-                              Chi tiết
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </Box>
-            </>
-          )}
-
-          {tourTemplate?.socialPosts?.some(post => post.site === 1) && (
-            <>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <FacebookIcon /> Facebook Posts
-              </Typography>
-              <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Chia sẻ</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {tourTemplate.socialPosts
-                      .filter(post => post.site === 1)
-                      .map((post) => (
-                        <TableRow key={post.socialPostId}>
-                          <TableCell>
-                            {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                          </TableCell>
-                          <TableCell align="center">
-                            <Tooltip title={
-                              <Box>
-                                {Object.entries(socialMetrics[post.socialPostId]?.facebook?.reactionDetails || {}).map(([type, count]) => (
-                                  <Typography key={type} variant="body2">{type}: {count}</Typography>
-                                ))}
-                              </Box>
-                            }>
-                              <span>{socialMetrics[post.socialPostId]?.facebook?.reactionCount || 0}</span>
-                            </Tooltip>
-                          </TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.facebook?.shareCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.facebook?.commentCount || 0}</TableCell>
-                          <TableCell align="center">{socialMetrics[post.socialPostId]?.facebook?.impressionCount || 0}</TableCell>
-                          <TableCell align="center">
-                            <Button
-                              variant="contained"
-                              size="small"
-                              onClick={() => handleViewOnSocial('facebook', post.socialPostId)}
-                              sx={{ backgroundColor: '#1877F2', '&:hover': { backgroundColor: '#0d6efd' } }}
-                            >
-                              Chi tiết
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              </Box>
-            </>
-          )}
-
-          {!tourTemplate?.socialPosts?.length && (
-            <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mt: 3 }}>
-              Chưa có bài đăng trên mạng xã hội
-            </Typography>
-          )}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '400px',
+          color: 'text.secondary'
+        }}>
+          <Typography variant="h6">
+            Chưa đăng bài viết nào trên mạng xã hội
+          </Typography>
         </Box>
       )}
 

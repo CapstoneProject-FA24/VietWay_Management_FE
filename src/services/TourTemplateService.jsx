@@ -96,6 +96,7 @@ export const fetchTourTemplateById = async (id) => {
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,
             imageUrls: response.data.data.images,
+
             facebookPostId: facebookPost?.socialPostId,
             xTweetId: twitterPost?.socialPostId,
             facebookPostCreatedAt: facebookPost?.createdAt,
@@ -386,7 +387,7 @@ export const fetchTourTemplatesWithTourInfo = async (params) => {
     }
 };
 
-export const sharePostOnTwitter = async (templateId) => {
+export const shareTemplateOnTwitter = async (templateId) => {
     const token = getCookie('token');
     try {
         const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/twitter`, {}, {
@@ -401,7 +402,7 @@ export const sharePostOnTwitter = async (templateId) => {
     }
 };
 
-export const sharePostOnFacebook = async (templateId) => {
+export const shareTemplateOnFacebook = async (templateId) => {
     const token = getCookie('token');
     try {
         const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/facebook`, {}, {
