@@ -248,7 +248,7 @@ const ManagerTourTemplateDetails = () => {
       <Helmet>
         <title>Chi tiết tour mẫu</title>
       </Helmet>
-      <Box sx={{ m: '-60px', pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
           component={Link}
           to="/quan-ly/tour-mau"
@@ -303,41 +303,32 @@ const ManagerTourTemplateDetails = () => {
           </Box>
         )}
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1, mt: 3 }}>
-        <Typography>Đăng tour tại:</Typography>
-        <Button
-          variant="contained"
-          startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
-          onClick={() => handleShareToSocial('facebook')}
-          disabled={isPublishing.facebook}
-          sx={{
-            backgroundColor: '#1877F2',
-            height: 'fit-content',
-            '&:hover': { backgroundColor: '#0d6efd' },
-            '&.Mui-disabled': { backgroundColor: '#ccc' }
-          }}
-        >
-          {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
-          onClick={() => handleShareToSocial('twitter')}
-          disabled={isPublishing.twitter}
-          sx={{
-            backgroundColor: '#000000',
-            '&:hover': { backgroundColor: '#2c2c2c' },
-            '&.Mui-disabled': { backgroundColor: '#ccc' }
-          }}
-        >
-          {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
-        </Button>
-      </Box>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label="Thông tin chung" />
-          <Tab label="Thống kê mạng xã hội" />
-        </Tabs>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={currentTab} onChange={handleTabChange}>
+            <Tab label="Nội dung bài viết" />
+            <Tab label="Thống kê mạng xã hội" />
+          </Tabs>
+        </Box>
+        {tourTemplate.status === TourTemplateStatus.Approved && (
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+            <Typography>Đăng bài:</Typography>
+            <Button
+              variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
+              onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
+              sx={{ backgroundColor: '#3b5998', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
+            >
+              {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+            </Button>
+            <Button
+              variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
+              onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
+              sx={{ backgroundColor: '#000000', height: '35px', '&:hover': { backgroundColor: '#2c2c2c' }, fontSize: '13px', p: 1.5 }}
+            >
+              {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+            </Button>
+          </Box>
+        )}
       </Box>
       {currentTab === 0 && (
         <Box sx={{ p: 3 }}>

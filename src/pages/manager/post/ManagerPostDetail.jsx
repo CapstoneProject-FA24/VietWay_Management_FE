@@ -309,7 +309,7 @@ const ManagerPostDetail = () => {
         );
       case PostStatus.Approved:
         return (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <IconButton onClick={handleHistoryClick}
                 sx={{
@@ -334,25 +334,6 @@ const ManagerPostDetail = () => {
                 </>
               )}
             </Box>
-            {!isEditMode && (
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Typography>Đăng bài:</Typography>
-                <Button
-                  variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
-                  onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
-                  sx={{ backgroundColor: '#3b5998', height: '40px', '&:hover': { backgroundColor: '#466bb4' } }}
-                >
-                  {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
-                </Button>
-                <Button
-                  variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
-                  onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
-                  sx={{ backgroundColor: '#000000', height: '40px', '&:hover': { backgroundColor: '#2c2c2c' } }}
-                >
-                  {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
-                </Button>
-              </Box>
-            )}
           </Box>
         );
       default:
@@ -441,8 +422,6 @@ const ManagerPostDetail = () => {
     setCurrentTab(newValue);
   };
 
-
-
   const handleHistoryClick = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
@@ -479,29 +458,36 @@ const ManagerPostDetail = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      width: isSidebarOpen ? 'calc(98.8vw - 250px)' : '98.8vw',
+      ml: isSidebarOpen ? '250px' : 0,
+      transition: 'margin-left 0.3s'
+    }}>
       <Helmet> <title>Chi tiết bài viết</title> </Helmet>
-      <Box sx={{ display: 'flex' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <SidebarManager isOpen={isSidebarOpen} toggleSidebar={handleSidebarToggle} />
-        <Box sx={{ flexGrow: 1, p: 3, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '260px' : '20px', mt: 6 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 3, boxShadow: 2 }}>
+          <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2, height: 'fit-content' }} > Quay lại </Button>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
+            Chi tiết bài viết
+          </Typography>
+          <Box sx={{ display: 'flex' }}>
+            <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
+              sx={{ position: 'absolute', top: 100, right: 30, width: '400px', zIndex: 1000 }}
+            >
+              <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
+                <VersionHistory entityId={id} entityType={6} />
+              </Paper>
+            </Collapse>
+            {renderActionButtons()}
+          </Box>
+        </Box>
+        <Box sx={{ flexGrow: 1, p: 3 }}>
           <Box maxWidth="89vw">
             <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button startIcon={<ArrowBack />} onClick={() => navigate(-1)} sx={{ mb: 2, height: 'fit-content' }} > Quay lại </Button>
-                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'center', color: '#05073C', flexGrow: 1 }}>
-                  Chi tiết bài viết
-                </Typography>
-                <Box sx={{ display: 'flex' }}>
-                  <Collapse in={isHistoryOpen} timeout="auto" unmountOnExit
-                    sx={{ position: 'absolute', top: 100, right: 30, width: '400px', zIndex: 1000 }}
-                  >
-                    <Paper elevation={3} sx={{ backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden' }} >
-                      <VersionHistory entityId={id} entityType={6} />
-                    </Paper>
-                  </Collapse>
-                  {renderActionButtons()}
-                </Box>
-              </Box>
               {isEditMode ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <TextField
@@ -646,12 +632,33 @@ const ManagerPostDetail = () => {
                   </Box>
                 </Box>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-                    <Tabs value={currentTab} onChange={handleTabChange}>
-                      <Tab label="Nội dung bài viết" />
-                      <Tab label="Thống kê mạng xã hội" />
-                    </Tabs>
+                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', mt: 7 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                      <Tabs value={currentTab} onChange={handleTabChange}>
+                        <Tab label="Nội dung bài viết" />
+                        <Tab label="Thống kê mạng xã hội" />
+                      </Tabs>
+                    </Box>
+                    {(!isEditMode && post.status === PostStatus.Approved) && (
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <Typography>Đăng bài:</Typography>
+                        <Button
+                          variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
+                          onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
+                          sx={{ backgroundColor: '#3b5998', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
+                        >
+                          {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+                        </Button>
+                        <Button
+                          variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
+                          onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
+                          sx={{ backgroundColor: '#000000', height: '35px', '&:hover': { backgroundColor: '#2c2c2c' }, fontSize: '13px', p: 1.5 }}
+                        >
+                          {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+                        </Button>
+                      </Box>
+                    )}
                   </Box>
                   {currentTab === 0 && (
                     <Box sx={{ p: 3 }}>

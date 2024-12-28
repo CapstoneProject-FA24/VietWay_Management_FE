@@ -26,6 +26,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
+import { shareAttractionOnTwitter, getTwitterReactionsByPostId } from '@services/PublishedPostService';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -68,7 +69,6 @@ const ManagerAttractionDetail = () => {
         setAttractionTypes(fetchedAttractionTypes);
         setAttraction(fetchedAttraction);
 
-        // Fetch social metrics if attraction has been shared
         if (fetchedAttraction.xTweetId || fetchedAttraction.facebookPostId) {
           const metrics = await fetchSocialMetrics(id);
           setSocialMetrics(metrics);
@@ -364,7 +364,7 @@ const ManagerAttractionDetail = () => {
 
   const handleViewOnSocial = (platform) => {
     if (!attraction) return;
-    
+
     let url;
     if (platform === 'facebook') {
       url = `https://www.facebook.com/${attraction.facebookPostId}`;
@@ -487,46 +487,32 @@ const ManagerAttractionDetail = () => {
           </Box>
         )}
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1, mt: 3 }}>
-            <Typography>Đăng điểm tham quan tại:</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 5 }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={currentTab} onChange={handleTabChange}>
+            <Tab label="Nội dung bài viết" />
+            <Tab label="Thống kê mạng xã hội" />
+          </Tabs>
+        </Box>
+        {(!isEditing && attraction.status === AttractionStatus.Approved) && (
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
+            <Typography>Đăng bài:</Typography>
             <Button
-              variant="contained"
-              startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
-              onClick={() => handleShareToSocial('facebook')}
-              disabled={isPublishing.facebook || attraction?.facebookPostId}
-              sx={{ 
-                backgroundColor: '#1877F2', 
-                height: 'fit-content', 
-                '&:hover': { backgroundColor: '#0d6efd' },
-                '&.Mui-disabled': {
-                  backgroundColor: '#ccc'
-                }
-              }}
+              variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
+              onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
+              sx={{ backgroundColor: '#3b5998', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
             >
               {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
             </Button>
             <Button
-              variant="contained"
-              startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
-              onClick={() => handleShareToSocial('twitter')}
-              disabled={isPublishing.twitter || attraction?.xTweetId}
-              sx={{ 
-                backgroundColor: '#000000', 
-                '&:hover': { backgroundColor: '#2c2c2c' },
-                '&.Mui-disabled': {
-                  backgroundColor: '#ccc'
-                }
-              }}
+              variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
+              onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
+              sx={{ backgroundColor: '#000000', height: '35px', '&:hover': { backgroundColor: '#2c2c2c' }, fontSize: '13px', p: 1.5 }}
             >
               {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
             </Button>
           </Box>
-
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label="Thông tin chung" />
-          <Tab label="Thống kê mạng xã hội" />
-        </Tabs>
+        )}
       </Box>
       {currentTab === 0 && (
         <Box sx={{ p: 3 }}>
@@ -544,17 +530,17 @@ const ManagerAttractionDetail = () => {
           ) : (
             <Box sx={{ p: 3, flexGrow: 1, mt: 1 }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.1rem', mb: -0.5 }}>
                   Thuộc tỉnh/thành phố: {attraction.provinceName}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.2rem' }}>
+                <Typography variant="body1" gutterBottom sx={{ fontFamily: 'Inter, sans-serif', textAlign: 'left', color: 'gray', fontSize: '1.1rem' }}>
                   Loại điểm tham quan: {attraction.attractionTypeName}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h3" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C' }}>
+                <Typography variant="h4" gutterBottom sx={{ fontWeight: '700', fontFamily: 'Inter, sans-serif', textAlign: 'left', color: '#05073C', fontSize: '2.3rem' }}>
                   {attraction.name}
                 </Typography>
               </Box>
@@ -710,10 +696,10 @@ const ManagerAttractionDetail = () => {
       )}
 
       {currentTab === 1 && (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '400px',
           color: 'text.secondary'
         }}>
