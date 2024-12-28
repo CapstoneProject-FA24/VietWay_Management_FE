@@ -666,15 +666,8 @@ const ManagerAttractionDetail = () => {
           </Box>
         )}
       </Box>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label="Thông tin chung" />
-          <Tab label="Thống kê mạng xã hội" />
-        </Tabs>
-      </Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: -6, mt: 3 }}>
-            <Typography>Đăng điểm tham quan:</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1, mt: 3 }}>
+            <Typography>Đăng điểm tham quan tại:</Typography>
             <Button
               variant="contained"
               startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
@@ -708,6 +701,12 @@ const ManagerAttractionDetail = () => {
             </Button>
           </Box>
 
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tab label="Thông tin chung" />
+          <Tab label="Thống kê mạng xã hội" />
+        </Tabs>
+      </Box>
       {currentTab === 0 && (
         <Box sx={{ p: 3 }}>
           {attraction?.status === AttractionStatus.Approved && isEditing ? (

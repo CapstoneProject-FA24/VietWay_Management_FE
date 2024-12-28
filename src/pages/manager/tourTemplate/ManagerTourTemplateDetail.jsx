@@ -418,13 +418,6 @@ const ManagerTourTemplateDetails = () => {
           </Box>
         )}
       </Box>
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label="Thông tin chung" />
-          <Tab label="Thống kê mạng xã hội" />
-        </Tabs>
-      </Box>
-
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1, mt: 3 }}>
             <Typography>Đăng Tour du lịch tại:</Typography>
             <Button
@@ -455,7 +448,12 @@ const ManagerTourTemplateDetails = () => {
               {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
             </Button>
           </Box>
-
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tab label="Thông tin chung" />
+          <Tab label="Thống kê mạng xã hội" />
+        </Tabs>
+      </Box>
       {currentTab === 0 && (
         <Box sx={{ p: 3 }}>
           <Grid container spacing={3}>
