@@ -340,14 +340,14 @@ const ManagerPostDetail = () => {
                 <Button
                   variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
                   onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
-                  sx={{ backgroundColor: '#1877F2', height: 'fit-content', '&:hover': { backgroundColor: '#0d6efd' } }}
+                  sx={{ backgroundColor: '#3b5998', height: '40px', '&:hover': { backgroundColor: '#466bb4' } }}
                 >
                   {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
                 </Button>
                 <Button
                   variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
                   onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
-                  sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                  sx={{ backgroundColor: '#000000', height: '40px', '&:hover': { backgroundColor: '#2c2c2c' } }}
                 >
                   {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
                 </Button>

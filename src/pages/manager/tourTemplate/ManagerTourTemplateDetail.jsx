@@ -8,7 +8,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import '@styles/AttractionDetails.css'
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { fetchTourTemplateById, changeTourTemplateStatus, deleteTourTemplate, shareTemplateOnFacebook, shareTemplateOnTwitter } from '@services/TourTemplateService';
+import { fetchTourTemplateById, changeTourTemplateStatus, deleteTourTemplate } from '@services/TourTemplateService';
 import TourTemplateDeletePopup from '@components/tourTemplate/TourTemplateDeletePopup';
 import SidebarManager from '@layouts/SidebarManager';
 import { TourTemplateStatus } from '@hooks/Statuses';
@@ -26,6 +26,9 @@ import DirectionsTransitIcon from '@mui/icons-material/DirectionsTransit';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
+import SocialMetricsTab from '@components/social/SocialMetricsTab';
+import { shareTemplateOnTwitter, getTwitterReactionsByPostId, getFacebookReactionsByPostId } from '@services/PublishedPostService';
+
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -245,7 +248,7 @@ const ManagerTourTemplateDetails = () => {
       <Helmet>
         <title>Chi tiết tour mẫu</title>
       </Helmet>
-      <Box sx={{ m: '-60px', boxShadow: 2, pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ m: '-60px', pt: 4, pl: 4, pr: 4, pb: 1, mb: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Button
           component={Link}
           to="/quan-ly/tour-mau"
@@ -301,35 +304,35 @@ const ManagerTourTemplateDetails = () => {
         )}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1, mt: 3 }}>
-            <Typography>Đăng Tour du lịch tại:</Typography>
-            <Button
-              variant="contained"
-              startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
-              onClick={() => handleShareToSocial('facebook')}
-              disabled={isPublishing.facebook}
-              sx={{ 
-                backgroundColor: '#1877F2', 
-                height: 'fit-content', 
-                '&:hover': { backgroundColor: '#0d6efd' },
-                '&.Mui-disabled': { backgroundColor: '#ccc' }
-              }}
-            >
-              {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
-              onClick={() => handleShareToSocial('twitter')}
-              disabled={isPublishing.twitter}
-              sx={{ 
-                backgroundColor: '#000000', 
-                '&:hover': { backgroundColor: '#2c2c2c' },
-                '&.Mui-disabled': { backgroundColor: '#ccc' }
-              }}
-            >
-              {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
-            </Button>
-          </Box>
+        <Typography>Đăng tour tại:</Typography>
+        <Button
+          variant="contained"
+          startIcon={isPublishing.facebook ? <CircularProgress size={20} color="inherit" /> : <FacebookIcon />}
+          onClick={() => handleShareToSocial('facebook')}
+          disabled={isPublishing.facebook}
+          sx={{
+            backgroundColor: '#1877F2',
+            height: 'fit-content',
+            '&:hover': { backgroundColor: '#0d6efd' },
+            '&.Mui-disabled': { backgroundColor: '#ccc' }
+          }}
+        >
+          {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={isPublishing.twitter ? <CircularProgress size={20} color="inherit" /> : <XIcon />}
+          onClick={() => handleShareToSocial('twitter')}
+          disabled={isPublishing.twitter}
+          sx={{
+            backgroundColor: '#000000',
+            '&:hover': { backgroundColor: '#2c2c2c' },
+            '&.Mui-disabled': { backgroundColor: '#ccc' }
+          }}
+        >
+          {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
+        </Button>
+      </Box>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
         <Tabs value={currentTab} onChange={handleTabChange}>
           <Tab label="Thông tin chung" />
@@ -546,10 +549,10 @@ const ManagerTourTemplateDetails = () => {
       )}
 
       {currentTab === 1 && (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '400px',
           color: 'text.secondary'
         }}>

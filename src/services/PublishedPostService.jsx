@@ -82,3 +82,33 @@ export const sharePostOnFacebook = async (postId) => {
         throw error;
     }
 };
+
+export const shareAttractionOnTwitter = async (attractionId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.post(`${baseURL}/api/published-posts/attraction/${attractionId}/twitter`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing attraction on Twitter:', error.response);
+        throw error;
+    }
+};
+
+export const shareTemplateOnTwitter = async (templateId) => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/twitter`, {}, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing post on Twitter:', error);
+        throw error;
+    }
+};
