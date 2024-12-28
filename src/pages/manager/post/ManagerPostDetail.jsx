@@ -71,6 +71,7 @@ const ManagerPostDetail = () => {
             setSocialMetrics(prev => ({
               ...prev,
               twitter: data.map(metrics => ({
+                xTweetId: metrics.xTweetId,
                 likeCount: metrics.likeCount || 0,
                 retweetCount: metrics.retweetCount || 0,
                 replyCount: metrics.replyCount || 0,
@@ -398,14 +399,14 @@ const ManagerPostDetail = () => {
     }
   };
 
-  const handleViewOnSocial = (platform) => {
+  const handleViewOnSocial = (platform, postId) => {
     if (!post) return;
 
     let url;
     if (platform === 'facebook') {
       url = `https://www.facebook.com/${post.facebookPostId}`;
     } else if (platform === 'twitter') {
-      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${post.xTweetId}`;
+      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${postId}`;
     }
     if (url) {
       window.open(url, '_blank');

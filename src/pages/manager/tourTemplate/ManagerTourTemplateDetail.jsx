@@ -249,6 +249,7 @@ const ManagerTourTemplateDetails = () => {
             setSocialMetrics(prev => ({
               ...prev,
               twitter: data.map(metrics => ({
+                xTweetId: metrics.xTweetId,
                 likeCount: metrics.likeCount || 0,
                 retweetCount: metrics.retweetCount || 0,
                 replyCount: metrics.replyCount || 0,

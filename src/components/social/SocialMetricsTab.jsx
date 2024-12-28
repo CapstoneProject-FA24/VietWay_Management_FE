@@ -45,7 +45,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                       <Button
                         variant="contained"
                         size="small"
-                        onClick={() => handleViewOnSocial('twitter')}
+                        onClick={() => handleViewOnSocial('twitter', metrics.xTweetId)}
                         sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
                       >
                         Chi tiết
