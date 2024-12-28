@@ -425,9 +425,7 @@ const ManagerTourTemplateDetails = () => {
         </Tabs>
       </Box>
 
-      {currentTab === 0 && (
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1, mt: 3 }}>
             <Typography>Đăng Tour du lịch tại:</Typography>
             <Button
               variant="contained"
@@ -458,6 +456,8 @@ const ManagerTourTemplateDetails = () => {
             </Button>
           </Box>
 
+      {currentTab === 0 && (
+        <Box sx={{ p: 3 }}>
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Box sx={{ display: 'flex', minWidth: '100%', height: '450px', mb: 3 }}>

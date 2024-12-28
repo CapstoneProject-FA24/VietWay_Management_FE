@@ -673,9 +673,7 @@ const ManagerAttractionDetail = () => {
         </Tabs>
       </Box>
 
-      {currentTab === 0 && (
-        <Box sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: 1 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, alignItems: 'center', mb: -6, mt: 3 }}>
             <Typography>Đăng điểm tham quan:</Typography>
             <Button
               variant="contained"
@@ -709,7 +707,9 @@ const ManagerAttractionDetail = () => {
               {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
             </Button>
           </Box>
-          
+
+      {currentTab === 0 && (
+        <Box sx={{ p: 3 }}>
           {attraction?.status === AttractionStatus.Approved && isEditing ? (
             <AttractionUpdateForm
               attraction={attraction}

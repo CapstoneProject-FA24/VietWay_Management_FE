@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton, Select, MenuItem, FormControl, FormHelperText, InputLabel, Collapse, Paper } from '@mui/material';
+import { Box, Typography, Chip, Button, TextField, Table, TableBody, TableCell, TableHead, TableRow, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Tooltip, CircularProgress, IconButton, Select, MenuItem, FormControl, FormHelperText, InputLabel, Collapse, Paper, Tabs, Tab } from '@mui/material';
 import { ArrowBack, Delete, Edit, Cancel, Save } from '@mui/icons-material';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
@@ -39,6 +39,7 @@ const ManagerPostDetail = () => {
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [currentTab, setCurrentTab] = useState(0);
 
   const loadPost = async () => {
     try {
@@ -437,9 +438,7 @@ const ManagerPostDetail = () => {
       setPost(updatedPost);
     } catch (error) {
       setSnackbar({
-        open: true,
-        severity: 'error',
-        hide: 5000,
+        open: true, severity: 'error', hide: 5000,
         message: `Lỗi khi đăng bài lên ${platform === 'facebook' ? 'Facebook' : 'Twitter'}: ${error.response?.data?.message || error.message}`,
       });
     } finally {
@@ -468,64 +467,117 @@ const ManagerPostDetail = () => {
     }));
   };
 
-  const renderSocialMetricsTable = () => (
-    <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', my: 3 }}>
-      <Table size="small">
-        <TableHead>
-          <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Nền tảng</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại/Chia sẻ</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận/Trả lời</TableCell>
-            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
-            {post.xTweetId && (
-              <>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
-              </>
-            )}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {post.xTweetId && socialMetrics.twitter && (
-            <TableRow>
-              <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <XIcon sx={{ fontSize: 20 }} /> Twitter </Box>
-              </TableCell>
-              <TableCell align="center">{socialMetrics.twitter.likeCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.retweetCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.replyCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.impressionCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.quoteCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.twitter.bookmarkCount || 0}</TableCell>
-            </TableRow>
-          )}
-          {post.facebookPostId && socialMetrics.facebook && (
-            <TableRow>
-              <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> <FacebookIcon sx={{ fontSize: 20 }} /> Facebook </Box>
-              </TableCell>
-              <TableCell align="center">
-                <Tooltip title={
-                  <Box>
-                    {Object.entries(socialMetrics.facebook.reactionDetails).map(([type, count]) => (
-                      <Typography key={type} variant="body2"> {type}: {count} </Typography>
-                    ))}
-                  </Box>
-                }>
-                  <span>{socialMetrics.facebook.reactionCount || 0}</span>
-                </Tooltip>
-              </TableCell>
-              <TableCell align="center">{socialMetrics.facebook.shareCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.facebook.commentCount || 0}</TableCell>
-              <TableCell align="center">{socialMetrics.facebook.impressionCount || 0}</TableCell>
-              {post.xTweetId && (
-                <> <TableCell align="center">-</TableCell> <TableCell align="center">-</TableCell> </>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
+  const SocialMetricsTab = () => (
+    <Box>
+      {post?.xTweetId && (
+        <>
+          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <XIcon /> Twitter Metrics
+          </Typography>
+          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Đăng lại</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trả lời</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    {new Date(post.xTweetCreatedAt).toLocaleDateString('vi-VN')}
+                  </TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.likeCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.retweetCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.replyCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.impressionCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.quoteCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.twitter?.bookmarkCount || 0}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleViewOnSocial('twitter')}
+                      sx={{ backgroundColor: '#000000', '&:hover': { backgroundColor: '#2c2c2c' } }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Box>
+        </>
+      )}
+
+      {post?.facebookPostId && (
+        <>
+          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FacebookIcon /> Facebook Metrics
+          </Typography>
+          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, overflow: 'auto', mb: 4 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableCell sx={{ fontWeight: 'bold' }}>Ngày đăng</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt thích</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Chia sẻ</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>
+                    {new Date(post.facebookPostCreatedAt).toLocaleDateString('vi-VN')}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={
+                      <Box>
+                        {Object.entries(socialMetrics.facebook?.reactionDetails || {}).map(([type, count]) => (
+                          <Typography key={type} variant="body2">{type}: {count}</Typography>
+                        ))}
+                      </Box>
+                    }>
+                      <span>{socialMetrics.facebook?.reactionCount || 0}</span>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell align="center">{socialMetrics.facebook?.shareCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.facebook?.commentCount || 0}</TableCell>
+                  <TableCell align="center">{socialMetrics.facebook?.impressionCount || 0}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleViewOnSocial('facebook')}
+                      sx={{ backgroundColor: '#1877F2', '&:hover': { backgroundColor: '#0d6efd' } }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </Box>
+        </>
+      )}
+
+      {!post?.xTweetId && !post?.facebookPostId && (
+        <Typography variant="body1" sx={{ textAlign: 'center', color: 'text.secondary', mt: 3 }}>
+          Chưa có bài đăng trên mạng xã hội
+        </Typography>
+      )}
     </Box>
   );
 
@@ -585,152 +637,16 @@ const ManagerPostDetail = () => {
                   {renderActionButtons()}
                 </Box>
               </Box>
-              {((post.xTweetId || post.facebookPostId) && !isEditMode) && renderSocialMetricsTable()}
-              {isEditMode ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <TextField
-                    label="Tiêu đề *"
-                    value={editablePost?.title || ''}
-                    fullWidth
-                    margin="normal"
-                    onChange={(e) => handleFieldChange('title', e.target.value)}
-                    error={!!fieldErrors.title}
-                    helperText={fieldErrors.title}
-                  />
-                  <Box sx={commonStyles.boxContainer}>
-                    <Box sx={commonStyles.flexContainer}>
-                      <FormControl fullWidth margin="normal" error={!!fieldErrors.category}>
-                        <InputLabel>Danh mục *</InputLabel>
-                        <Select
-                          value={editablePost?.postCategoryId || ''}
-                          label="Danh mục *"
-                          onChange={(e) => {
-                            const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
-                            if (selectedCategory) {
-                              setEditablePost(prev => ({
-                                ...prev,
-                                postCategoryId: selectedCategory.postCategoryId,
-                                postCategoryName: selectedCategory.name
-                              }));
-                            }
-                          }}
-                        >
-                          {categoryOptions.map(category => (
-                            <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
-                              {category.name}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {fieldErrors.category && (<FormHelperText>{fieldErrors.category}</FormHelperText>)}
-                      </FormControl>
-                    </Box>
-                    <Box sx={commonStyles.flexContainer}>
-                      <FormControl fullWidth margin="normal" error={!!fieldErrors.provinceId}>
-                        <InputLabel>Tỉnh/Thành phố *</InputLabel>
-                        <Select
-                          value={editablePost?.provinceId || ''}
-                          label="Tỉnh/Thành phố *"
-                          onChange={(e) => {
-                            const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
-                            if (selectedProvince) {
-                              setEditablePost(prev => ({
-                                ...prev,
-                                provinceId: selectedProvince.value,
-                                provinceName: selectedProvince.label
-                              }));
-                            }
-                          }}
-                        >
-                          {provinceOptions.map(option => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                        {fieldErrors.provinceId && (<FormHelperText>{fieldErrors.provinceId}</FormHelperText>)}
-                      </FormControl>
-                    </Box>
-                  </Box>
-                  <TextField
-                    label="Mô tả *"
-                    value={editablePost?.description || ''}
-                    onChange={(e) => handleFieldChange('description', e.target.value)}
-                    fullWidth
-                    margin="normal"
-                    multiline
-                    rows={3}
-                    error={!!fieldErrors.description}
-                    helperText={fieldErrors.description}
-                  />
-                  <Box sx={commonStyles.imageContainer}>
-                    <Typography variant="subtitle1" sx={{ marginBottom: '0.5rem', fontWeight: 600 }}>Ảnh *</Typography>
-                    {fieldErrors.image && (
-                      <Typography color="error" variant="caption" sx={{ display: 'block', mt: 1 }}>
-                        {fieldErrors.image}
-                      </Typography>
-                    )}
-                    <Box sx={{
-                      position: 'relative', width: '100%', height: '300px',
-                      border: fieldErrors.image ? '2px dashed red' : '2px dashed #ccc', borderRadius: '8px', display: 'flex',
-                      justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
-                    }}>
-                      {editablePost?.image ? (
-                        <img src={editablePost.image} alt={editablePost.title} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                      ) : (
-                        <img src="/add-image.png" alt="Add image" style={{ width: '100px', height: '100px', opacity: 0.5 }} />
-                      )}
-                      <Button
-                        variant="outlined"
-                        component="label"
-                        sx={{
-                          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                          opacity: 0, transition: 'opacity 0.3s ease', '&:hover': { opacity: 1 },
-                          backgroundColor: 'rgba(255, 255, 255, 0.8)', color: '#000', border: '1px solid #ccc',
-                        }}
-                      >
-                        {editablePost?.image ? 'Đổi ảnh khác' : 'Chọn ảnh cho bài viết'}
-                        <input type="file" hidden accept="image/*" onChange={handleImageChange} />
-                      </Button>
-                    </Box>
-                  </Box>
-                  <Box sx={commonStyles.editorContainer}>
-                    <Typography sx={{ ...commonStyles.labelTypography, mb: 1 }}>Nội dung *</Typography>
-                    <FormControl sx={{ width: '100%' }}>
-                      <ReactQuill
-                        value={editablePost?.content || ''}
-                        onChange={(value) => handleFieldChange('content', value)}
-                        theme="snow"
-                        className={fieldErrors.content ? "ql-error" : ""}
-                        modules={{
-                          toolbar: [
-                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }], [{ 'font': [] }],
-                            [{ 'size': ['small', false, 'large', 'huge'] }], ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' }, { 'script': 'super' }], [{ 'align': [] }],
-                            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                            [{ 'direction': 'rtl' }], ['blockquote', 'code-block'], ['link', 'image', 'video', 'formula'], ['clean']
-                          ],
-                          clipboard: { matchVisual: false }
-                        }}
-                      />
-                      {fieldErrors.content && (
-                        <FormHelperText error>{fieldErrors.content}</FormHelperText>
-                      )}
-                    </FormControl>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleSaveChanges}
-                      disabled={isSubmitting}
-                      startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : ''}
-                    >
-                      {isSubmitting ? 'Đang lưu...' : 'Lưu'}
-                    </Button>
-                  </Box>
-                </Box>
-              ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+              <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
+                <Tabs value={currentTab} onChange={handleTabChange}>
+                  <Tab label="Thông tin chung" />
+                  <Tab label="Thống kê mạng xã hội" />
+                </Tabs>
+              </Box>
+
+              {currentTab === 0 && (
+                <Box sx={{ p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
                     <Chip
                       label={statusInfo.text}
@@ -772,6 +688,8 @@ const ManagerPostDetail = () => {
                   />
                 </Box>
               )}
+
+              {currentTab === 1 && <SocialMetricsTab />}
             </Box>
           </Box>
         </Box>
