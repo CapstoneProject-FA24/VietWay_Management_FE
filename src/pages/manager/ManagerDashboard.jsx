@@ -7,21 +7,19 @@ import AttractionsOutlinedIcon from '@mui/icons-material/AttractionsOutlined';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import TourOutlinedIcon from '@mui/icons-material/TourOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AirplaneTicketOutlinedIcon from '@mui/icons-material/AirplaneTicketOutlined';
 import AttractionReviewChart from '@components/manager/attraction/AttractionReviewChart';
 import BookingChart from '@components/manager/tour/BookingChart';
-import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateChart';
 import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReviewChart';
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
-import TourTemplateChart from '@components/manager/tour/TourTemplateChart';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
-import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport } from '@services/ReportService';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
 import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
 import ProvinceCategoryPostChart from '@components/promoting/ProvinceCategoryPostChart';
+import PromotionSummary from '@components/promoting/PromotionSummary';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -78,42 +76,52 @@ const ManagerDashboard = () => {
     endDate: dayjs()
   });
 
+  const [socialMediaData, setSocialMediaData] = useState(null);
+  const [promotionData, setPromotionData] = useState(null);
+
   useEffect(() => {
     loadDashboardData();
   }, [appliedGlobalDateRange]);
 
   const loadDashboardData = async () => {
     try {
-      // Get first day of the start month
       const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
-      
-      // Get end date based on whether it's current month
       let endDate;
-      if (appliedGlobalDateRange.endDate.month() === dayjs().month() && 
-          appliedGlobalDateRange.endDate.year() === dayjs().year()) {
-        // If current month, use current date
+      if (appliedGlobalDateRange.endDate.month() === dayjs().month() &&
+        appliedGlobalDateRange.endDate.year() === dayjs().year()) {
         endDate = dayjs().format('MM/DD/YYYY');
       } else {
-        // If not current month, use last day of that month
         endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
       }
 
-      // Fetch all reports in parallel
-      const [summaryData, bookingData, ratingData, revenueData] = await Promise.all([
+      // Update Promise.all to include new API calls
+      const [
+        summaryData,
+        bookingData,
+        ratingData,
+        revenueData,
+        socialMedia,
+        promotion
+      ] = await Promise.all([
         fetchReportSummary(startDate, endDate),
         fetchBookingReport(startDate, endDate),
         fetchRatingReport(startDate, endDate),
-        fetchRevenueReport(startDate, endDate)
+        fetchRevenueReport(startDate, endDate),
+        fetchSocialMediaSummary(startDate, endDate),
+        fetchPromotionSummary(startDate, endDate)
       ]);
-      console.log(bookingData);
+
       setSummaryStats(summaryData);
       setBookingStats(bookingData);
       setRatingStats(ratingData);
       setRevenueStats(revenueData);
+      setSocialMediaData(socialMedia);
+      setPromotionData(promotion);
     } catch (error) {
       console.error('Error loading dashboard data:', getErrorMessage(error));
     }
   };
+
 
   const handleGlobalStartDateChange = (newValue) => {
     setGlobalDateRange(prev => ({
@@ -259,12 +267,24 @@ const ManagerDashboard = () => {
           </Grid>
         </Grid>
 
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ mt: 1 }}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Phân bố bài viết theo tỉnh thành
             </Typography>
             <ProvinceCategoryPostChart />
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 1 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Thống kê
+            </Typography>
+            <PromotionSummary
+              socialMediaData={socialMediaData}
+              promotionData={promotionData}
+            />
           </Paper>
         </Grid>
       </Box>

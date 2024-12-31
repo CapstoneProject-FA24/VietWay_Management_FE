@@ -153,3 +153,76 @@ export const fetchRevenueReport = async (startDate, endDate) => {
         throw error;
     }
 };
+
+export const fetchSocialMediaSummary = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-summary?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            dates: data.dates,
+            facebook: {
+                comments: data.facebookComments,
+                shares: data.facebookShares,
+                reactions: data.facebookReactions,
+                impressions: data.facebookImpressions,
+                score: data.facebookScore
+            },
+            twitter: {
+                retweets: data.xRetweets,
+                replies: data.xReplies,
+                likes: data.xLikes,
+                impressions: data.xImpressions,
+                score: data.xScore
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching social media summary:', error);
+        throw error;
+    }
+};
+
+export const fetchPromotionSummary = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/promotion-summary?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            facebook: {
+                impressions: data.facebookImpressionCount,
+                referrals: data.facebookReferralCount,
+                comments: data.facebookCommentCount,
+                shares: data.facebookShareCount,
+                reactions: data.facebookReactionCount
+            },
+            twitter: {
+                retweets: data.xRetweetCount,
+                replies: data.xReplyCount,
+                likes: data.xLikeCount,
+                impressions: data.xImpressionCount,
+                referrals: data.xReferralCount
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching promotion summary:', error);
+        throw error;
+    }
+};
