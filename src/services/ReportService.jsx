@@ -226,3 +226,38 @@ export const fetchPromotionSummary = async (startDate, endDate) => {
         throw error;
     }
 };
+
+export const fetchSocialMediaByProvince = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-province?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return data.map(province => ({
+            provinceId: province.provinceId,
+            provinceName: province.provinceName,
+            totalSitePost: province.totalSitePost,
+            totalAttraction: province.totalAttraction,
+            totalTourTemplate: province.totalTourTemplate,
+            totalXPost: province.totalXPost,
+            totalFacebookPost: province.totalFacebookPost,
+            averageScore: province.averageScore,
+            averageFacebookScore: province.averageFacebookScore,
+            averageXScore: province.averageXScore,
+            averageTourTemplateScore: province.averageTourTemplateScore,
+            averageAttractionScore: province.averageAttractionScore,
+            averageSitePostScore: province.averageSitePostScore
+        }));
+    } catch (error) {
+        console.error('Error fetching social media by province:', error);
+        throw error;
+    }
+};

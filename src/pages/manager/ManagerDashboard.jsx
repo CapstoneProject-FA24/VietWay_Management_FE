@@ -15,11 +15,12 @@ import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReview
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
-import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary } from '@services/ReportService';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
 import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
 import ProvinceCategoryPostChart from '@components/promoting/ProvinceCategoryPostChart';
 import PromotionSummary from '@components/promoting/PromotionSummary';
+import SocialMediaSummaryByProvince from '@components/promoting/SocialMediaSummaryByProvince';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -78,6 +79,7 @@ const ManagerDashboard = () => {
 
   const [socialMediaData, setSocialMediaData] = useState(null);
   const [promotionData, setPromotionData] = useState(null);
+  const [provinceData, setProvinceData] = useState([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -94,21 +96,22 @@ const ManagerDashboard = () => {
         endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
       }
 
-      // Update Promise.all to include new API calls
       const [
         summaryData,
         bookingData,
         ratingData,
         revenueData,
         socialMedia,
-        promotion
+        promotion,
+        provinceMediaData
       ] = await Promise.all([
         fetchReportSummary(startDate, endDate),
         fetchBookingReport(startDate, endDate),
         fetchRatingReport(startDate, endDate),
         fetchRevenueReport(startDate, endDate),
         fetchSocialMediaSummary(startDate, endDate),
-        fetchPromotionSummary(startDate, endDate)
+        fetchPromotionSummary(startDate, endDate),
+        fetchSocialMediaByProvince(startDate, endDate)
       ]);
 
       setSummaryStats(summaryData);
@@ -117,6 +120,7 @@ const ManagerDashboard = () => {
       setRevenueStats(revenueData);
       setSocialMediaData(socialMedia);
       setPromotionData(promotion);
+      setProvinceData(provinceMediaData);
     } catch (error) {
       console.error('Error loading dashboard data:', getErrorMessage(error));
     }
@@ -285,6 +289,15 @@ const ManagerDashboard = () => {
               socialMediaData={socialMediaData}
               promotionData={promotionData}
             />
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 1 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Thống kê mức độ quan tâm của khách hàng đến các tỉnh thành
+            </Typography>
+            <SocialMediaSummaryByProvince data={provinceData} />
           </Paper>
         </Grid>
       </Box>
