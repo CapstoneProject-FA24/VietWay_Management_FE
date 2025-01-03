@@ -43,7 +43,7 @@ const TourTemplateReviewChart = ({ ratingData }) => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
                     <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-                        Thông kê đánh giá của các tour
+                        Thống kê đánh giá của các tour
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Sắp xếp theo đánh giá trung bình và số lượng đánh giá

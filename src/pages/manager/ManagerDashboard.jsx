@@ -15,12 +15,14 @@ import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReview
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
-import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince } from '@services/ReportService';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince, fetchSocialMediaByPostCategory, fetchSocialMediaByAttractionCategory } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
 import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
 import ProvinceCategoryPostChart from '@components/promoting/ProvinceCategoryPostChart';
 import PromotionSummary from '@components/promoting/PromotionSummary';
 import SocialMediaSummaryByProvince from '@components/promoting/SocialMediaSummaryByProvince';
+import SocialMediaPostCategory from '@components/promoting/SocialMediaPostCategory';
+import SocialMediaAttractionCategory from '@components/promoting/SocialMediaAttractionCategory';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -80,6 +82,8 @@ const ManagerDashboard = () => {
   const [socialMediaData, setSocialMediaData] = useState(null);
   const [promotionData, setPromotionData] = useState(null);
   const [provinceData, setProvinceData] = useState([]);
+  const [postCategoryData, setPostCategoryData] = useState([]);
+  const [attractionCategoryData, setAttractionCategoryData] = useState([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -103,7 +107,9 @@ const ManagerDashboard = () => {
         revenueData,
         socialMedia,
         promotion,
-        provinceMediaData
+        provinceMediaData,
+        postCategoryMediaData,
+        attractionCategoryMediaData
       ] = await Promise.all([
         fetchReportSummary(startDate, endDate),
         fetchBookingReport(startDate, endDate),
@@ -111,7 +117,9 @@ const ManagerDashboard = () => {
         fetchRevenueReport(startDate, endDate),
         fetchSocialMediaSummary(startDate, endDate),
         fetchPromotionSummary(startDate, endDate),
-        fetchSocialMediaByProvince(startDate, endDate)
+        fetchSocialMediaByProvince(startDate, endDate),
+        fetchSocialMediaByPostCategory(startDate, endDate),
+        fetchSocialMediaByAttractionCategory(startDate, endDate)
       ]);
 
       setSummaryStats(summaryData);
@@ -121,6 +129,8 @@ const ManagerDashboard = () => {
       setSocialMediaData(socialMedia);
       setPromotionData(promotion);
       setProvinceData(provinceMediaData);
+      setPostCategoryData(postCategoryMediaData);
+      setAttractionCategoryData(attractionCategoryMediaData);
     } catch (error) {
       console.error('Error loading dashboard data:', getErrorMessage(error));
     }
@@ -155,8 +165,6 @@ const ManagerDashboard = () => {
     { title: 'Bài viết mới', value: summaryStats.newPost, icon: <ArticleOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
     { title: 'Đánh giá trung bình', value: summaryStats.averageTourRating.toFixed(1), icon: <StarHalfIcon sx={{ fontSize: 42, color: 'grey' }} /> },
   ];
-
-  const chartHeight = '500px';
 
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
@@ -271,19 +279,19 @@ const ManagerDashboard = () => {
           </Grid>
         </Grid>
 
-        <Grid item xs={12} sx={{ mt: 1 }}>
+        {/* <Grid item xs={12} sx={{ mt: 1 }}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Phân bố bài viết theo tỉnh thành
             </Typography>
             <ProvinceCategoryPostChart />
           </Paper>
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={12} sx={{ mt: 1 }}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Thống kê
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+              Thống kê tương tác trên mạng xã hội
             </Typography>
             <PromotionSummary
               socialMediaData={socialMediaData}
@@ -294,10 +302,28 @@ const ManagerDashboard = () => {
 
         <Grid item xs={12} sx={{ mt: 1 }}>
           <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
               Thống kê mức độ quan tâm của khách hàng đến các tỉnh thành
             </Typography>
             <SocialMediaSummaryByProvince data={provinceData} />
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 1 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+              Thống kê mức độ quan tâm theo danh mục bài viết
+            </Typography>
+            <SocialMediaPostCategory data={postCategoryData} />
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 1 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+              Thống kê mức độ quan tâm theo loại điểm tham quan
+            </Typography>
+            <SocialMediaAttractionCategory data={attractionCategoryData} />
           </Paper>
         </Grid>
       </Box>

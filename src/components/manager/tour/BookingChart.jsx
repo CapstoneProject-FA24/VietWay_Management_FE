@@ -44,7 +44,7 @@ const BookingChart = ({ bookingData }) => {
 
     // Define colors and labels for each status
     const statusConfig = [
-        { key: 'pending', label: 'Chờ xác nhận', color: '#ffc107' },
+        { key: 'pending', label: 'Chờ xác nhận', color: '#ff7300' },
         { key: 'deposited', label: 'Đã đặt cọc', color: '#2196f3' },
         { key: 'paid', label: 'Đã thanh toán', color: '#4caf50' },
         { key: 'completed', label: 'Đã hoàn thành', color: '#9c27b0' },

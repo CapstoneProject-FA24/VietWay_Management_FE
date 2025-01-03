@@ -114,7 +114,7 @@ const SocialMediaSummaryByProvince = ({ data }) => {
                     </FormControl>
                 </Box>
             </Box>
-            <ResponsiveContainer width="100%" height={500}>
+            <ResponsiveContainer width="100%" height={400}>
                 <BarChart
                     data={getAllProvincesData(chartType, viewMode)}
                     layout="horizontal"
@@ -144,8 +144,22 @@ const SocialMediaSummaryByProvince = ({ data }) => {
                             style: { fontSize: 16 },
                             dx: 100,
                         }} />
-                    <Tooltip formatter={(value) => value.toFixed(2)} />
-                    <Legend />
+                    <Tooltip 
+                        formatter={(value, name, props) => {
+                            const provinceData = data.find(p => p.provinceName === props.payload.name);
+                            return [
+                                <div>
+                                    <div>Điểm: {value.toFixed(2)}</div>
+                                    <div style={{ color: 'grey', marginTop: '10px' }}>Số bài viết tại Vietway: {provinceData.totalSitePost}</div>
+                                    <div style={{ color: 'grey' }}>Số điểm tham quan: {provinceData.totalAttraction}</div>
+                                    <div style={{ color: 'grey' }}>Số tour: {provinceData.totalTourTemplate}</div>
+                                    <div style={{ color: 'grey', marginTop: '10px' }}>Số nội dung trên Facebook: {provinceData.totalFacebookPost}</div>
+                                    <div style={{ color: 'grey' }}>Số nội dung trên X: {provinceData.totalXPost}</div>
+                                </div>
+                            ];
+                        }}
+                    />
+                    {/* <Legend /> */}
                     {chartType === 'average' && <Bar dataKey="Trung bình" fill="#0a9d15" />}
                     {chartType === 'facebook' && <Bar dataKey="Facebook" fill="#1877F2" />}
                     {chartType === 'twitter' && <Bar dataKey="X (Twitter)" fill="#000000" />}

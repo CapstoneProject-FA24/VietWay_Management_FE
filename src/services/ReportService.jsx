@@ -261,3 +261,65 @@ export const fetchSocialMediaByProvince = async (startDate, endDate) => {
         throw error;
     }
 };
+
+export const fetchSocialMediaByAttractionCategory = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-attraction-category?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return data.map(category => ({
+            categoryId: category.attractionCategoryId,
+            categoryName: category.attractionCategoryName,
+            totalAttraction: category.totalAttraction,
+            totalXPost: category.totalXPost,
+            totalFacebookPost: category.totalFacebookPost,
+            averageScore: category.averageScore,
+            averageFacebookScore: category.averageFacebookScore,
+            averageXScore: category.averageXScore,
+            averageAttractionScore: category.averageAttractionScore
+        }));
+    } catch (error) {
+        console.error('Error fetching social media by attraction category:', error);
+        throw error;
+    }
+};
+
+export const fetchSocialMediaByPostCategory = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-post-category?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return data.map(category => ({
+            categoryId: category.postCategoryId,
+            categoryName: category.postCategoryName,
+            totalSitePost: category.totalSitePost,
+            totalXPost: category.totalXPost,
+            totalFacebookPost: category.totalFacebookPost,
+            averageScore: category.averageScore,
+            averageFacebookScore: category.averageFacebookScore,
+            averageXScore: category.averageXScore,
+            averageSitePostScore: category.averageSitePostScore
+        }));
+    } catch (error) {
+        console.error('Error fetching social media by post category:', error);
+        throw error;
+    }
+};
