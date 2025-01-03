@@ -81,18 +81,18 @@ const SocialMediaPostCategory = ({ data }) => {
             }[chartType]
           }`}
         </Typography>
-        <FormControl sx={{ minWidth: 200, maxWidth: 300 }}>
-          <InputLabel>Biểu đồ</InputLabel>
+        <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
+          <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
           <Select
             sx={{ fontSize: '0.9rem' }}
             value={chartType}
-            label="Biểu đồ"
+            label="Thống kê điểm mức độ quan tâm . ."
             onChange={(e) => setChartType(e.target.value)}
           >
-            <MenuItem value="average">ĐĐGMĐQT trung bình</MenuItem>
-            <MenuItem value="facebook">ĐĐGMĐQT trên Facebook</MenuItem>
-            <MenuItem value="twitter">ĐĐGMĐQT trên X (Twitter)</MenuItem>
-            <MenuItem value="post">ĐĐGMĐQT của các bài viết</MenuItem>
+            <MenuItem value="average">Trung bình</MenuItem>
+            <MenuItem value="facebook">Trên Facebook</MenuItem>
+            <MenuItem value="twitter">Trên X (Twitter)</MenuItem>
+            <MenuItem value="post">Của các bài viết</MenuItem>
           </Select>
         </FormControl>
       </Box>
