@@ -71,7 +71,7 @@ const ProvinceCategoryPostChart = () => {
           <XAxis dataKey="province" type="category" />
           <YAxis />
           <Tooltip />
-          <Legend />
+          {/* <Legend /> */}
           {Object.keys(processedData[0] || {})
             .filter(key => key !== 'province')
             .map((category, index) => (

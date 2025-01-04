@@ -15,7 +15,7 @@ import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReview
 import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
-import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince, fetchSocialMediaByPostCategory, fetchSocialMediaByAttractionCategory } from '@services/ReportService';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince, fetchSocialMediaByPostCategory, fetchSocialMediaByAttractionCategory, fetchSocialMediaByTourCategory } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
 import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
 import ProvinceCategoryPostChart from '@components/promoting/ProvinceCategoryPostChart';
@@ -23,6 +23,7 @@ import PromotionSummary from '@components/promoting/PromotionSummary';
 import SocialMediaSummaryByProvince from '@components/promoting/SocialMediaSummaryByProvince';
 import SocialMediaPostCategory from '@components/promoting/SocialMediaPostCategory';
 import SocialMediaAttractionCategory from '@components/promoting/SocialMediaAttractionCategory';
+import SocialMediaTourCategory from '@components/promoting/SocialMediaTourCategory';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -84,6 +85,7 @@ const ManagerDashboard = () => {
   const [provinceData, setProvinceData] = useState([]);
   const [postCategoryData, setPostCategoryData] = useState([]);
   const [attractionCategoryData, setAttractionCategoryData] = useState([]);
+  const [tourCategoryData, setTourCategoryData] = useState([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -109,7 +111,8 @@ const ManagerDashboard = () => {
         promotion,
         provinceMediaData,
         postCategoryMediaData,
-        attractionCategoryMediaData
+        attractionCategoryMediaData,
+        tourCategoryMediaData
       ] = await Promise.all([
         fetchReportSummary(startDate, endDate),
         fetchBookingReport(startDate, endDate),
@@ -119,7 +122,8 @@ const ManagerDashboard = () => {
         fetchPromotionSummary(startDate, endDate),
         fetchSocialMediaByProvince(startDate, endDate),
         fetchSocialMediaByPostCategory(startDate, endDate),
-        fetchSocialMediaByAttractionCategory(startDate, endDate)
+        fetchSocialMediaByAttractionCategory(startDate, endDate),
+        fetchSocialMediaByTourCategory(startDate, endDate)
       ]);
 
       setSummaryStats(summaryData);
@@ -131,6 +135,7 @@ const ManagerDashboard = () => {
       setProvinceData(provinceMediaData);
       setPostCategoryData(postCategoryMediaData);
       setAttractionCategoryData(attractionCategoryMediaData);
+      setTourCategoryData(tourCategoryMediaData);
     } catch (error) {
       console.error('Error loading dashboard data:', getErrorMessage(error));
     }
@@ -324,6 +329,15 @@ const ManagerDashboard = () => {
               Thống kê mức độ quan tâm theo loại điểm tham quan
             </Typography>
             <SocialMediaAttractionCategory data={attractionCategoryData} />
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} sx={{ mt: 1 }}>
+          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+              Thống kê mức độ quan tâm theo loại tour
+            </Typography>
+            <SocialMediaTourCategory data={tourCategoryData} />
           </Paper>
         </Grid>
       </Box>

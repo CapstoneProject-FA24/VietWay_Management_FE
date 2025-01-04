@@ -130,7 +130,7 @@ const SocialMediaPostCategory = ({ data }) => {
                 dx: 100,
               }} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
+              {/* <Legend /> */}
               {chartType === 'average' && <Bar dataKey="Trung bình" fill="#0a9d15" />}
               {chartType === 'facebook' && <Bar dataKey="Facebook" fill="#1877F2" />}
               {chartType === 'twitter' && <Bar dataKey="X (Twitter)" fill="#000000" />}

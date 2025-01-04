@@ -323,3 +323,35 @@ export const fetchSocialMediaByPostCategory = async (startDate, endDate) => {
         throw error;
     }
 };
+
+export const fetchSocialMediaByTourCategory = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-tour-category?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        console.log(data);
+        return data.map(category => ({
+            categoryId: category.tourCategoryId,
+            categoryName: category.tourCategoryName,
+            totalTourTemplate: category.totalTourTemplate,
+            totalXPost: category.totalXPost,
+            totalFacebookPost: category.totalFacebookPost,
+            averageScore: category.averageScore,
+            averageFacebookScore: category.averageFacebookScore,
+            averageXScore: category.averageXScore,
+            averageTourTemplateScore: category.averageTourTemplateScore
+        }));
+    } catch (error) {
+        console.error('Error fetching social media by tour category:', error);
+        throw error;
+    }
+};

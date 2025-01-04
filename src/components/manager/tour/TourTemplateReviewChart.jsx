@@ -57,13 +57,21 @@ const TourTemplateReviewChart = ({ ratingData }) => {
                         <BarChart
                             data={filteredData}
                             layout="vertical"
-                            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                            margin={{ top: 5, right: 60, left: 0, bottom: 10 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                                type="number" 
+                            <XAxis
+                                type="number"
                                 domain={[0, 5]}
                                 tickCount={6}
+                                label={{
+                                    value: "Sao",
+                                    position: "right",
+                                    offset: 20,
+                                    style: { fontSize: 15 },
+                                    dx: -5,
+                                    dy: -15
+                                }}
                             />
                             <YAxis
                                 dataKey="tourTemplateName"
@@ -74,15 +82,15 @@ const TourTemplateReviewChart = ({ ratingData }) => {
                                     const text = payload.value;
                                     const maxLength = 55;
                                     const displayText = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-                                    
+
                                     return (
                                         <g transform={`translate(${x},${y})`}>
-                                            <text 
-                                                x={0} 
-                                                y={0} 
-                                                dy={4} 
-                                                textAnchor="end" 
-                                                fill="#666666" 
+                                            <text
+                                                x={0}
+                                                y={0}
+                                                dy={4}
+                                                textAnchor="end"
+                                                fill="#666666"
                                                 fontSize={12.5}
                                             >
                                                 {displayText}
@@ -92,7 +100,7 @@ const TourTemplateReviewChart = ({ ratingData }) => {
                                 }}
                             />
                             <Tooltip content={<CustomTooltip />} />
-                            <Legend />
+                            {/* <Legend /> */}
                             <Bar
                                 dataKey="averageRating"
                                 fill={barColor}

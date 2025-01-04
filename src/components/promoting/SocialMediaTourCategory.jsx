@@ -29,14 +29,14 @@ const CustomTooltip = ({ active, payload, label }) => {
         <Typography variant="body2">
           {`${payload[0].name}: ${payload[0].value.toFixed(2)}`}
         </Typography>
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          Số điểm tham quan: {data.totalAttraction}
-        </Typography>
         <Typography variant="body2">
           Số bài viết trên Facebook: {data.totalFacebookPost}
         </Typography>
         <Typography variant="body2">
           Số bài viết trên X (Twitter): {data.totalXPost}
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          Số tour du lịch: {data.totalTourTemplate}
         </Typography>
       </Box>
     );
@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const SocialMediaAttractionCategory = ({ data }) => {
+const SocialMediaTourCategory = ({ data }) => {
   const [chartType, setChartType] = useState('average');
 
   if (!data || data.length === 0) {
@@ -56,13 +56,13 @@ const SocialMediaAttractionCategory = ({ data }) => {
       'average': { key: 'Trung bình', value: 'averageScore' },
       'facebook': { key: 'Facebook', value: 'averageFacebookScore' },
       'twitter': { key: 'X (Twitter)', value: 'averageXScore' },
-      'attraction': { key: 'Điểm tham quan', value: 'averageAttractionScore' }
+      'tour': { key: 'Tour', value: 'averageTourTemplateScore' }
     };
 
     return data.map(category => ({
       name: category.categoryName,
       [metricMap[type].key]: parseFloat(category[metricMap[type].value].toFixed(2)),
-      totalAttraction: category.totalAttraction,
+      totalTourTemplate: category.totalTourTemplate,
       totalFacebookPost: category.totalFacebookPost,
       totalXPost: category.totalXPost
     }));
@@ -72,14 +72,13 @@ const SocialMediaAttractionCategory = ({ data }) => {
     <Box>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
-          {`Điểm đánh giá mức độ quan tâm ${
-            {
+          {`Điểm đánh giá mức độ quan tâm ${{
               'average': 'trung bình',
               'facebook': 'trên Facebook',
               'twitter': 'trên X (Twitter)',
-              'attraction': 'của các điểm tham quan'
+              'tour': 'của các tour'
             }[chartType]
-          }`}
+            }`}
         </Typography>
         <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
           <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
@@ -92,22 +91,22 @@ const SocialMediaAttractionCategory = ({ data }) => {
             <MenuItem value="average">Trung bình</MenuItem>
             <MenuItem value="facebook">Trên Facebook</MenuItem>
             <MenuItem value="twitter">Trên X (Twitter)</MenuItem>
-            <MenuItem value="attraction">Của các điểm tham quan</MenuItem>
+            <MenuItem value="tour">Của các tour</MenuItem>
           </Select>
         </FormControl>
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart 
-              data={getChartData(chartType)} 
+            <BarChart
+              data={getChartData(chartType)}
               margin={{
                 top: 50,
                 right: 10,
                 left: -10,
                 bottom: 0,
               }}
-              barCategoryGap={10} 
+              barCategoryGap={10}
               barGap={0}
             >
               <CartesianGrid strokeDasharray="3 3" />
@@ -135,7 +134,7 @@ const SocialMediaAttractionCategory = ({ data }) => {
               {chartType === 'average' && <Bar dataKey="Trung bình" fill="#0a9d15" />}
               {chartType === 'facebook' && <Bar dataKey="Facebook" fill="#1877F2" />}
               {chartType === 'twitter' && <Bar dataKey="X (Twitter)" fill="#000000" />}
-              {chartType === 'attraction' && <Bar dataKey="Điểm tham quan" fill="#de5e5e" />}
+              {chartType === 'tour' && <Bar dataKey="Tour" fill="#de5e5e" />}
             </BarChart>
           </ResponsiveContainer>
         </Grid>
@@ -144,4 +143,4 @@ const SocialMediaAttractionCategory = ({ data }) => {
   );
 };
 
-export default SocialMediaAttractionCategory;
+export default SocialMediaTourCategory;
