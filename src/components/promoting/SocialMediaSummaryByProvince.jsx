@@ -19,13 +19,19 @@ import {
     InputLabel
 } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import ProvinceSocialMetrics from './ProvinceSocialMetrics';
 
-const SocialMediaSummaryByProvince = ({ data }) => {
+const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
+    console.log(startDate);
     const [activeTab, setActiveTab] = useState(0);
     const [orderBy, setOrderBy] = useState('averageScore');
     const [order, setOrder] = useState('desc');
     const [chartType, setChartType] = useState('average');
     const [viewMode, setViewMode] = useState('all');
+    const [selectedProvince, setSelectedProvince] = useState(null);
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
@@ -67,6 +73,14 @@ const SocialMediaSummaryByProvince = ({ data }) => {
             }));
 
         return mode === 'top10' ? sortedData.slice(0, 10) : sortedData;
+    };
+
+    const handleProvinceClick = (provinceId, provinceName) => {
+        setSelectedProvince({ id: provinceId, name: provinceName });
+    };
+
+    const handleCloseDialog = () => {
+        setSelectedProvince(null);
     };
 
     const renderChart = () => (
@@ -131,10 +145,30 @@ const SocialMediaSummaryByProvince = ({ data }) => {
                         type="category"
                         dataKey="name"
                         interval={0}
-                        tick={{ fontSize: viewMode === 'top10' ? 15 : 12 }}
+                        tick={(props) => {
+                            const { x, y, payload } = props;
+                            const province = data.find(p => p.provinceName === payload.value);
+                            return (
+                                <g transform={`translate(${x},${y})`}>
+                                    <text
+                                        x={0}
+                                        y={0}
+                                        dy={2}
+                                        textAnchor="end"
+                                        fill="#666"
+                                        transform="rotate(-80)"
+                                        style={{ 
+                                            fontSize: viewMode === 'top10' ? 15 : 12,
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => handleProvinceClick(province.provinceId, province.provinceName)}
+                                    >
+                                        {payload.value}
+                                    </text>
+                                </g>
+                            );
+                        }}
                         height={100}
-                        angle={-60}
-                        textAnchor="end"
                     />
                     <YAxis type="number"
                         label={{
@@ -168,6 +202,25 @@ const SocialMediaSummaryByProvince = ({ data }) => {
                     {chartType === 'post' && <Bar dataKey="Bài viết" fill="#ff7300" />}
                 </BarChart>
             </ResponsiveContainer>
+
+            {/* Province Details Dialog */}
+            <Dialog
+                open={Boolean(selectedProvince)}
+                onClose={handleCloseDialog}
+                maxWidth="lg"
+                fullWidth
+            >
+                <DialogTitle>
+                    Thống kê chi tiết - {selectedProvince?.name}
+                </DialogTitle>
+                <DialogContent>
+                    {selectedProvince && (
+                        <ProvinceSocialMetrics
+                            provinceId={selectedProvince.id}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 

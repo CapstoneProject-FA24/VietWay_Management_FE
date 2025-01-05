@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Grid, Paper, Typography } from '@mui/material';
 import PromotionSummary from './PromotionSummary';
 import SocialMediaSummaryByProvince from './SocialMediaSummaryByProvince';
 import SocialMediaPostCategory from './SocialMediaPostCategory';
 import SocialMediaAttractionCategory from './SocialMediaAttractionCategory';
 import SocialMediaTourCategory from './SocialMediaTourCategory';
+import ProvinceSocialMetrics from './ProvinceSocialMetrics';
 
 const PromotionTab = ({ 
   socialMediaData, 
@@ -12,8 +13,12 @@ const PromotionTab = ({
   provinceData, 
   postCategoryData, 
   attractionCategoryData, 
-  tourCategoryData 
+  tourCategoryData, 
+  startDate, 
+  endDate 
 }) => {
+  const [selectedProvinceId, setSelectedProvinceId] = useState(null);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -61,6 +66,21 @@ const PromotionTab = ({
             Thống kê mức độ quan tâm theo loại tour
           </Typography>
           <SocialMediaTourCategory data={tourCategoryData} />
+        </Paper>
+      </Grid>
+
+      <Grid item xs={12}>
+        <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
+          <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2 }}>
+            Chi tiết tương tác theo tỉnh thành
+          </Typography>
+          {selectedProvinceId && (
+            <ProvinceSocialMetrics 
+              provinceId={selectedProvinceId}
+              startDate={startDate}
+              endDate={endDate}
+            />
+          )}
         </Paper>
       </Grid>
     </Grid>

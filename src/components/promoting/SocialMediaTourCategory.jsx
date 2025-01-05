@@ -114,8 +114,7 @@ const SocialMediaTourCategory = ({ data }) => {
                 dataKey="name"
                 height={180}
                 interval={0}
-                angle={-60}
-                textAnchor="end"
+                textAnchor="middle"
                 tick={{
                   fontSize: 12.5,
                   width: 210,

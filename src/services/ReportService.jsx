@@ -355,3 +355,88 @@ export const fetchSocialMediaByTourCategory = async (startDate, endDate) => {
         throw error;
     }
 };
+
+export const fetchSocialMediaProvinceDetail = async (provinceId, startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-province-detail/${provinceId}?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            provinceId: data.provinceId,
+            provinceName: data.provinceName,
+            totalSitePost: data.totalSitePost,
+            totalAttraction: data.totalAttraction,
+            totalTourTemplate: data.totalTourTemplate,
+            totalXPost: data.totalXPost,
+            totalFacebookPost: data.totalFacebookPost,
+            averageScore: data.averageScore,
+            averageFacebookScore: data.averageFacebookScore,
+            averageXScore: data.averageXScore,
+            averageTourTemplateScore: data.averageTourTemplateScore,
+            averageAttractionScore: data.averageAttractionScore,
+            averageSitePostScore: data.averageSitePostScore,
+            socialMediaSummary: {
+                dates: data.reportSocialMediaSummary.dates,
+                facebook: {
+                    comments: data.reportSocialMediaSummary.facebookComments,
+                    shares: data.reportSocialMediaSummary.facebookShares,
+                    reactions: data.reportSocialMediaSummary.facebookReactions,
+                    impressions: data.reportSocialMediaSummary.facebookImpressions,
+                    score: data.reportSocialMediaSummary.facebookScore
+                },
+                twitter: {
+                    retweets: data.reportSocialMediaSummary.xRetweets,
+                    replies: data.reportSocialMediaSummary.xReplies,
+                    likes: data.reportSocialMediaSummary.xLikes,
+                    impressions: data.reportSocialMediaSummary.xImpressions,
+                    score: data.reportSocialMediaSummary.xScore
+                }
+            },
+            attractionCategories: data.attractionCategories.map(category => ({
+                categoryId: category.attractionCategoryId,
+                categoryName: category.attractionCategoryName,
+                totalAttraction: category.totalAttraction,
+                totalXPost: category.totalXPost,
+                totalFacebookPost: category.totalFacebookPost,
+                averageScore: category.averageScore,
+                averageFacebookScore: category.averageFacebookScore,
+                averageXScore: category.averageXScore,
+                averageAttractionScore: category.averageAttractionScore
+            })),
+            tourCategories: data.tourTemplateCategories.map(category => ({
+                categoryId: category.tourCategoryId,
+                categoryName: category.tourCategoryName,
+                totalTourTemplate: category.totalTourTemplate,
+                totalXPost: category.totalXPost,
+                totalFacebookPost: category.totalFacebookPost,
+                averageScore: category.averageScore,
+                averageFacebookScore: category.averageFacebookScore,
+                averageXScore: category.averageXScore,
+                averageTourTemplateScore: category.averageTourTemplateScore
+            })),
+            postCategories: data.postCategories.map(category => ({
+                categoryId: category.postCategoryId,
+                categoryName: category.postCategoryName,
+                totalSitePost: category.totalSitePost,
+                totalXPost: category.totalXPost,
+                totalFacebookPost: category.totalFacebookPost,
+                averageScore: category.averageScore,
+                averageFacebookScore: category.averageFacebookScore,
+                averageXScore: category.averageXScore,
+                averageSitePostScore: category.averageSitePostScore
+            }))
+        };
+    } catch (error) {
+        console.error('Error fetching social media province detail:', error);
+        throw error;
+    }
+};
