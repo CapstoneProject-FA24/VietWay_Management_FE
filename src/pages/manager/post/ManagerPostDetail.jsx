@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faTag, faMapLocation } from '@fortawesome/free-solid-svg-icons';
 import SidebarManager from '@layouts/SidebarManager';
 import { fetchPostById, deletePost, changePostStatus, updatePost, updatePostImages } from '@services/PostService';
-import { sharePostOnFacebook, sharePostOnTwitter, getTwitterReactionsByPostId, getFacebookReactionsByPostId } from '@services/PublishedPostService';
+import { sharePostOnFacebook, sharePostOnTwitter, getTwitterReactionsByPostId, getFacebookReactions } from '@services/PublishedPostService';
 import { getPostStatusInfo } from '@services/StatusService';
 import 'react-quill/dist/quill.snow.css';
 import { PostStatus } from '@hooks/Statuses';
@@ -98,18 +98,24 @@ const ManagerPostDetail = () => {
 
   useEffect(() => {
     const fetchFacebookReactions = async () => {
-      if (post?.facebookPostId) {
+      const facebookPost = post?.socialPostDetail?.find(post => post.site === 0);
+      if (facebookPost) {
         try {
-          const data = await getFacebookReactionsByPostId(post.postId);
-          if (data) {
-            const totalReactions = data.postReactions ? Object.values(data.postReactions).reduce((sum, count) => sum + count, 0) : 0;
-
+          const data = await getFacebookReactions(post.postId, 2);
+          console.log(data);
+          
+          if (data && data.length > 0) {
             setSocialMetrics(prev => ({
               ...prev,
-              facebook: {
-                reactionCount: totalReactions, reactionDetails: data.postReactions || {}, shareCount: data.shareCount,
-                commentCount: data.commentCount, impressionCount: data.impressionCount
-              }
+              facebook: data.map(metrics => ({
+                reactionCount: metrics.reactionCount,
+                reactionDetails: metrics.reactionDetails || 0,
+                shareCount: metrics.shareCount || 0,
+                commentCount: metrics.commentCount || 0,
+                impressionCount: metrics.impressionCount || 0,
+                createdAt: metrics.createdAt,
+                facebookPostId: metrics.facebookPostId
+              }))
             }));
           }
         } catch (error) {
@@ -404,7 +410,7 @@ const ManagerPostDetail = () => {
 
     let url;
     if (platform === 'facebook') {
-      url = `https://www.facebook.com/${post.facebookPostId}`;
+      url = `https://www.facebook.com/${postId}`;
     } else if (platform === 'twitter') {
       url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${postId}`;
     }
@@ -635,14 +641,14 @@ const ManagerPostDetail = () => {
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', mt: 7 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                      <Tabs value={currentTab} onChange={handleTabChange}>
-                        <Tab label="Nội dung bài viết" />
-                        <Tab label="Thống kê mạng xã hội" />
-                      </Tabs>
-                    </Box>
-                    {(!isEditMode && post.status === PostStatus.Approved) && (
+                  {post.status === PostStatus.Approved ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                        <Tabs value={currentTab} onChange={handleTabChange}>
+                          <Tab label="Nội dung bài viết" />
+                          <Tab label="Thống kê mạng xã hội" />
+                        </Tabs>
+                      </Box>
                       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                         <Typography>Đăng bài:</Typography>
                         <Button
@@ -660,9 +666,10 @@ const ManagerPostDetail = () => {
                           {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
                         </Button>
                       </Box>
-                    )}
-                  </Box>
-                  {currentTab === 0 && (
+                    </Box>
+                  ) : null}
+
+                  {(post.status === PostStatus.Approved && currentTab === 0) || post.status !== PostStatus.Approved ? (
                     <Box sx={{ p: 3 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, position: 'relative' }}>
                         <Chip
@@ -701,10 +708,12 @@ const ManagerPostDetail = () => {
                         }}
                       />
                     </Box>
-                  )}
-                  {currentTab === 1 && (
+                  ) : null}
+
+                  {post.status === PostStatus.Approved && currentTab === 1 && (
                     <SocialMetricsTab
-                      post={post} socialMetrics={socialMetrics}
+                      post={post} 
+                      socialMetrics={socialMetrics}
                       handleViewOnSocial={handleViewOnSocial}
                     />
                   )}

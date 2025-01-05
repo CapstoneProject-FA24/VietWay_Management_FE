@@ -12,11 +12,9 @@ import {
     TrendingUp,
     Facebook,
 } from '@mui/icons-material';
-import XIcon from '@mui/icons-material/X'; // X (Twitter) icon
+import XIcon from '@mui/icons-material/X'; 
 
-// Component tổng hợp thông tin quảng cáo
 const PromotionSummary = ({ socialMediaData, promotionData }) => {
-    // Định dạng dữ liệu chuỗi thời gian mạng xã hội
     const timeSeriesData = socialMediaData?.dates?.map((date, index) => ({
         date: date,
         fbComments: socialMediaData.facebook.comments[index],

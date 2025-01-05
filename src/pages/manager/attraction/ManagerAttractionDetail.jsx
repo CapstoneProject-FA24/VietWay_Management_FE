@@ -26,7 +26,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import AttractionDeletePopup from '@components/attraction/AttractionDeletePopup';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import XIcon from '@mui/icons-material/X';
-import { shareAttractionOnTwitter, getTwitterReactionsByPostId } from '@services/PublishedPostService';
+import { shareAttractionOnTwitter, getTwitterReactionsByPostId, shareAttractionOnFacebook, getFacebookReactions } from '@services/PublishedPostService';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
 import { getErrorMessage } from '@hooks/Message';
 
@@ -146,19 +146,19 @@ const ManagerAttractionDetail = () => {
       const facebookPost = attraction?.socialPostDetail?.find(post => post.site === 0);
       if (facebookPost) {
         try {
-          const data = await getFacebookReactionsByPostId(attraction.attractionId);
-          if (data) {
-            const totalReactions = data.postReactions ? Object.values(data.postReactions).reduce((sum, count) => sum + count, 0) : 0;
-
+          const data = await getFacebookReactions(attraction.attractionId, 0);
+          if (data && data.length > 0) {
             setSocialMetrics(prev => ({
               ...prev,
-              facebook: {
-                reactionCount: totalReactions,
-                reactionDetails: data.postReactions || {},
-                shareCount: data.shareCount,
-                commentCount: data.commentCount,
-                impressionCount: data.impressionCount
-              }
+              facebook: data.map(metrics => ({
+                reactionCount: metrics.reactionCount,
+                reactionDetails: metrics.reactionDetails || 0,
+                shareCount: metrics.shareCount || 0,
+                commentCount: metrics.commentCount || 0,
+                impressionCount: metrics.impressionCount || 0,
+                createdAt: metrics.createdAt,
+                facebookPostId: metrics.facebookPostId
+              }))
             }));
           }
         } catch (error) {
@@ -367,23 +367,17 @@ const ManagerAttractionDetail = () => {
     }
   };
 
-  const handleViewOnSocial = (platform) => {
+  const handleViewOnSocial = (platform, postId) => {
     if (!attraction) return;
 
-    const socialPost = attraction.socialPostDetail?.find(post =>
-      platform === 'facebook' ? post.site === 0 : post.site === 1
-    );
-
-    if (socialPost) {
-      let url;
-      if (platform === 'facebook') {
-        url = `https://www.facebook.com/${socialPost.socialPostId}`;
-      } else if (platform === 'twitter') {
-        url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${socialPost.socialPostId}`;
-      }
-      if (url) {
-        window.open(url, '_blank');
-      }
+    let url;
+    if (platform === 'facebook') {
+      url = `https://www.facebook.com/${postId}`;
+    } else if (platform === 'twitter') {
+      url = `https://x.com/${import.meta.env.VITE_X_TWITTER_USERNAME}/status/${postId}`;
+    }
+    if (url) {
+      window.open(url, '_blank');
     }
   };
 
