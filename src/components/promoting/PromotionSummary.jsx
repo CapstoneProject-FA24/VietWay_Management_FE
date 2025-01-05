@@ -1,75 +1,68 @@
-import React from 'react';
-import { Box, Grid, Paper, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Grid, Paper, Typography, FormControl, Select, MenuItem } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import {
-    Visibility,
-    Share,
-    Comment,
-    ThumbUp,
-    Repeat,
-    Favorite,
-    Reply,
-    TrendingUp,
-    Facebook,
-} from '@mui/icons-material';
+import { Visibility, Share, Comment, ThumbUp, Repeat, Favorite, Reply, TrendingUp, Facebook, } from '@mui/icons-material';
 import XIcon from '@mui/icons-material/X'; 
 
 const PromotionSummary = ({ socialMediaData, promotionData }) => {
+    const [selectedMetrics, setSelectedMetrics] = useState('interactions');
+
+    const metricsOptions = [
+        { value: 'interactions', label: 'Tương tác (Chia sẻ / Retweet)', fbKey: 'fbShares', twKey: 'twRetweets' },
+        { value: 'comments', label: 'Bình luận / Trả lời', fbKey: 'fbComments', twKey: 'twReplies' },
+        { value: 'impressions', label: 'Lượt xem', fbKey: 'fbImpressions', twKey: 'twImpressions' },
+        { value: 'reactions', label: 'Phản ứng / Lượt thích', fbKey: 'fbReactions', twKey: 'twLikes' },
+        { value: 'scores', label: 'Điểm đánh giá mức độ quan tâm', fbKey: 'fbScore', twKey: 'twScore' },
+    ];
+
+    const currentMetric = metricsOptions.find(option => option.value === selectedMetrics);
+
     const timeSeriesData = socialMediaData?.dates?.map((date, index) => ({
         date: date,
-        fbComments: socialMediaData.facebook.comments[index],
-        fbShares: socialMediaData.facebook.shares[index],
-        fbReactions: socialMediaData.facebook.reactions[index],
-        fbImpressions: socialMediaData.facebook.impressions[index],
-        fbScore: socialMediaData.facebook.score[index],
-        twRetweets: socialMediaData.twitter.retweets[index],
-        twReplies: socialMediaData.twitter.replies[index],
-        twLikes: socialMediaData.twitter.likes[index],
-        twImpressions: socialMediaData.twitter.impressions[index],
-        twScore: socialMediaData.twitter.score[index],
+        [currentMetric.fbKey]: socialMediaData.facebook[currentMetric.fbKey.replace('fb', '').toLowerCase()][index],
+        [currentMetric.twKey]: socialMediaData.twitter[currentMetric.twKey.replace('tw', '').toLowerCase()][index],
     })) || [];
 
     return (
         <Box sx={{ p: 1 }}>
             <Grid container spacing={2}>
-                {/* Biểu đồ chỉ số Facebook */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom>
-                        Tương tác Facebook
-                    </Typography>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={timeSeriesData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
+                <Grid item xs={12}>
+                    <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="subtitle1">Chọn chỉ số so sánh:</Typography>
+                        <FormControl size="small" sx={{ minWidth: 300 }}>
+                            <Select
+                                value={selectedMetrics}
+                                onChange={(e) => setSelectedMetrics(e.target.value)}
+                            >
+                                {metricsOptions.map(option => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                        {option.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+                    <ResponsiveContainer width="100%" height={400}>
+                        <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="date" tick={{ fontSize: 13 }}/>
                             <YAxis tick={{ fontSize: 13 }}/>
                             <Tooltip />
                             <Legend />
-                            <Line type="monotone" dataKey="fbComments" name="Bình luận" stroke="#1a32c7" strokeWidth={2} />
-                            <Line type="monotone" dataKey="fbShares" name="Chia sẻ" stroke="#0a9d15" strokeWidth={2} />
-                            <Line type="monotone" dataKey="fbReactions" name="Phản ứng (biểu tượng cảm xúc)" stroke="#a100d5" strokeWidth={2} />
-                            <Line type="monotone" dataKey="fbImpressions" name="Lượt xem" stroke="#d55a00" strokeWidth={2} />
-                            <Line type="monotone" dataKey="fbScore" name="Điểm đánh giá mức độ quan tâm" stroke="#ff0000" strokeWidth={2} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </Grid>
-
-                {/* Biểu đồ chỉ số Twitter */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom>
-                        Tương tác X (Twitter)
-                    </Typography>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={timeSeriesData} margin={{ top: 0, right: 10, left: -25, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" tick={{ fontSize: 13 }}/>
-                            <YAxis tick={{ fontSize: 13 }}/>
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="twReplies" name="Trả lời" stroke="#1a32c7" strokeWidth={2} />
-                            <Line type="monotone" dataKey="twRetweets" name="Chia sẻ" stroke="#0a9d15" strokeWidth={2} />
-                            <Line type="monotone" dataKey="twLikes" name="Lượt thích" stroke="#a100d5" strokeWidth={2} />
-                            <Line type="monotone" dataKey="twImpressions" name="Lượt xem" stroke="#d55a00" strokeWidth={2} />
-                            <Line type="monotone" dataKey="twScore" name="Điểm đánh giá mức độ quan tâm" stroke="#ff0000" strokeWidth={2} />
+                            <Line 
+                                type="monotone" 
+                                dataKey={currentMetric.fbKey} 
+                                name="Facebook" 
+                                stroke="#1877F2" 
+                                strokeWidth={2} 
+                            />
+                            <Line 
+                                type="monotone" 
+                                dataKey={currentMetric.twKey} 
+                                name="X (Twitter)" 
+                                stroke="#000000" 
+                                strokeWidth={2} 
+                            />
                         </LineChart>
                     </ResponsiveContainer>
                 </Grid>

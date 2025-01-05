@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Paper } from '@mui/material';
+import { Box, Grid, Typography, Paper, Tabs, Tab } from '@mui/material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
@@ -24,6 +24,8 @@ import SocialMediaSummaryByProvince from '@components/promoting/SocialMediaSumma
 import SocialMediaPostCategory from '@components/promoting/SocialMediaPostCategory';
 import SocialMediaAttractionCategory from '@components/promoting/SocialMediaAttractionCategory';
 import SocialMediaTourCategory from '@components/promoting/SocialMediaTourCategory';
+import RevenueTab from '@components/admin/RevenueTab';
+import PromotionTab from '@components/promoting/PromotionTab';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -86,6 +88,7 @@ const ManagerDashboard = () => {
   const [postCategoryData, setPostCategoryData] = useState([]);
   const [attractionCategoryData, setAttractionCategoryData] = useState([]);
   const [tourCategoryData, setTourCategoryData] = useState([]);
+  const [currentTab, setCurrentTab] = useState(0);
 
   useEffect(() => {
     loadDashboardData();
@@ -159,6 +162,10 @@ const ManagerDashboard = () => {
 
   const handleGlobalApply = () => {
     setAppliedGlobalDateRange(globalDateRange);
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
   };
 
   const statCards = [
@@ -256,90 +263,44 @@ const ManagerDashboard = () => {
 
         </Grid>
 
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
-            {bookingStats.bookingByDay.dates[0]?.includes('Q') ? (
-              <BookingQuarterChart bookingData={bookingStats.bookingByDay} />
-            ) : (
-              <BookingChart bookingData={bookingStats.bookingByDay} />
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            <TourTemplateRevenue
-              revenueData={revenueStats.revenueByTourTemplate}
-              periodData={revenueStats.revenueByPeriod}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TourTemplateReviewChart
-              bookingData={bookingStats.bookingByTourTemplate}
-              ratingData={ratingStats.tourTemplateRatingInPeriod}
-            />
-          </Grid>
+        <Box sx={{ width: '100%', mt: 2 }}>
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            sx={{
+              borderBottom: 1,
+              borderColor: 'divider',
+              px: 2,
+              pt: 1
+            }}
+          >
+            <Tab label="Doanh thu" />
+            <Tab label="Quảng bá" />
+          </Tabs>
 
-          <Grid item xs={12}>
-            <AttractionReviewChart
-              ratingData={ratingStats.attractionRatingInPeriod}
-            />
-          </Grid>
-        </Grid>
+          {currentTab === 0 && (
+            <Box>
+              <RevenueTab
+                bookingStats={bookingStats}
+                ratingStats={ratingStats}
+                revenueStats={revenueStats}
+              />
+            </Box>
+          )}
 
-        {/* <Grid item xs={12} sx={{ mt: 1 }}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Phân bố bài viết theo tỉnh thành
-            </Typography>
-            <ProvinceCategoryPostChart />
-          </Paper>
-        </Grid> */}
-
-        <Grid item xs={12} sx={{ mt: 1 }}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-              Thống kê tương tác trên mạng xã hội
-            </Typography>
-            <PromotionSummary
-              socialMediaData={socialMediaData}
-              promotionData={promotionData}
-            />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} sx={{ mt: 1 }}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-              Thống kê mức độ quan tâm của khách hàng đến các tỉnh thành
-            </Typography>
-            <SocialMediaSummaryByProvince data={provinceData} />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} sx={{ mt: 1 }}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-              Thống kê mức độ quan tâm theo danh mục bài viết
-            </Typography>
-            <SocialMediaPostCategory data={postCategoryData} />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} sx={{ mt: 1 }}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-              Thống kê mức độ quan tâm theo loại điểm tham quan
-            </Typography>
-            <SocialMediaAttractionCategory data={attractionCategoryData} />
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} sx={{ mt: 1 }}>
-          <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
-              Thống kê mức độ quan tâm theo loại tour
-            </Typography>
-            <SocialMediaTourCategory data={tourCategoryData} />
-          </Paper>
-        </Grid>
+          {currentTab === 1 && (
+            <Box>
+              <PromotionTab
+                socialMediaData={socialMediaData}
+                promotionData={promotionData}
+                provinceData={provinceData}
+                postCategoryData={postCategoryData}
+                attractionCategoryData={attractionCategoryData}
+                tourCategoryData={tourCategoryData}
+              />
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );
