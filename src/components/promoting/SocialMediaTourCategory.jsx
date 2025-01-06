@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Grid, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
 import {
   BarChart,
   Bar,
@@ -10,6 +10,9 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import TourCategoryReport from '@components/manager/category/TourCategoryReport';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length > 0) {
@@ -46,6 +49,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const SocialMediaTourCategory = ({ data }) => {
   const [chartType, setChartType] = useState('average');
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   if (!data || data.length === 0) {
     return <Typography>No data available</Typography>;
@@ -66,6 +70,14 @@ const SocialMediaTourCategory = ({ data }) => {
       totalFacebookPost: category.totalFacebookPost,
       totalXPost: category.totalXPost
     }));
+  };
+
+  const handleCategoryClick = (categoryId, categoryName) => {
+    setSelectedCategory({ id: categoryId, name: categoryName });
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedCategory(null);
   };
 
   return (
@@ -104,22 +116,39 @@ const SocialMediaTourCategory = ({ data }) => {
                 top: 50,
                 right: 10,
                 left: -10,
-                bottom: 0,
+                bottom: 10,
               }}
-              barCategoryGap={10}
+              barCategoryGap={25}
               barGap={0}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="name"
-                height={180}
                 interval={0}
-                textAnchor="middle"
-                tick={{
-                  fontSize: 12.5,
-                  width: 210,
-                  wordWrap: 'break-word',
+                tick={(props) => {
+                  const { x, y, payload } = props;
+                  const category = data.find(c => c.categoryName === payload.value);
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={0}
+                        y={0}
+                        dy={16}
+                        textAnchor="end"
+                        fill="#666"
+                        transform="rotate(-45)"
+                        style={{ 
+                          fontSize: 14,
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => handleCategoryClick(category.categoryId, category.categoryName)}
+                      >
+                        {payload.value}
+                      </text>
+                    </g>
+                  );
                 }}
+                height={100}
               />
               <YAxis label={{
                 value: "Điểm đánh giá mức độ quan tâm",
@@ -138,6 +167,34 @@ const SocialMediaTourCategory = ({ data }) => {
           </ResponsiveContainer>
         </Grid>
       </Grid>
+
+      {/* Category Details Dialog */}
+      <Dialog
+        open={Boolean(selectedCategory)}
+        onClose={handleCloseDialog}
+        maxWidth="lg"
+        fullWidth
+      >
+        <Box sx={{ position: 'relative' }}>
+          <Button
+            onClick={handleCloseDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+              zIndex: 1
+            }}
+          >
+            Đóng
+          </Button>
+          {selectedCategory && (
+            <TourCategoryReport
+              categoryId={selectedCategory.id}
+            />
+          )}
+        </Box>
+      </Dialog>
     </Box>
   );
 };

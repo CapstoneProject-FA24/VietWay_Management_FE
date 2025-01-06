@@ -440,3 +440,181 @@ export const fetchSocialMediaProvinceDetail = async (provinceId, startDate, endD
         throw error;
     }
 };
+
+export const fetchSocialMediaAttractionCategoryDetail = async (categoryId, startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-attraction-category-detail/${categoryId}?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            categoryId: data.attractionCategoryId,
+            categoryName: data.attractionCategoryName,
+            totalAttraction: data.totalAttraction,
+            totalXPost: data.totalXPost,
+            totalFacebookPost: data.totalFacebookPost,
+            averageScore: data.averageScore,
+            averageFacebookScore: data.averageFacebookScore,
+            averageXScore: data.averageXScore,
+            averageAttractionScore: data.averageAttractionScore,
+            socialMediaSummary: {
+                dates: data.reportSocialMediaSummary.dates,
+                facebook: {
+                    comments: data.reportSocialMediaSummary.facebookComments,
+                    shares: data.reportSocialMediaSummary.facebookShares,
+                    reactions: data.reportSocialMediaSummary.facebookReactions,
+                    impressions: data.reportSocialMediaSummary.facebookImpressions,
+                    score: data.reportSocialMediaSummary.facebookScore
+                },
+                twitter: {
+                    retweets: data.reportSocialMediaSummary.xRetweets,
+                    replies: data.reportSocialMediaSummary.xReplies,
+                    likes: data.reportSocialMediaSummary.xLikes,
+                    impressions: data.reportSocialMediaSummary.xImpressions,
+                    score: data.reportSocialMediaSummary.xScore
+                }
+            },
+            provinces: data.provinces.map(province => ({
+                provinceId: province.provinceId,
+                provinceName: province.provinceName,
+                totalAttraction: province.totalAttraction,
+                totalXPost: province.totalXPost,
+                totalFacebookPost: province.totalFacebookPost,
+                averageScore: province.averageScore,
+                averageFacebookScore: province.averageFacebookScore,
+                averageXScore: province.averageXScore,
+                averageAttractionScore: province.averageAttractionScore
+            }))
+        };
+    } catch (error) {
+        console.error('Error fetching social media attraction category detail:', error);
+        throw error;
+    }
+};
+
+export const fetchSocialMediaPostCategoryDetail = async (categoryId, startDate, endDate) => {
+    const token = getCookie('token');
+    console.log(token);
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-post-category-detail/${categoryId}?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            categoryId: data.postCategoryId,
+            categoryName: data.postCategoryName,
+            totalSitePost: data.totalSitePost,
+            totalXPost: data.totalXPost,
+            totalFacebookPost: data.totalFacebookPost,
+            averageScore: data.averageScore,
+            averageFacebookScore: data.averageFacebookScore,
+            averageXScore: data.averageXScore,
+            averageSitePostScore: data.averageSitePostScore,
+            socialMediaSummary: {
+                dates: data.reportSocialMediaSummary.dates,
+                facebook: {
+                    comments: data.reportSocialMediaSummary.facebookComments,
+                    shares: data.reportSocialMediaSummary.facebookShares,
+                    reactions: data.reportSocialMediaSummary.facebookReactions,
+                    impressions: data.reportSocialMediaSummary.facebookImpressions,
+                    score: data.reportSocialMediaSummary.facebookScore
+                },
+                twitter: {
+                    retweets: data.reportSocialMediaSummary.xRetweets,
+                    replies: data.reportSocialMediaSummary.xReplies,
+                    likes: data.reportSocialMediaSummary.xLikes,
+                    impressions: data.reportSocialMediaSummary.xImpressions,
+                    score: data.reportSocialMediaSummary.xScore
+                }
+            },
+            provinces: data.provinces.map(province => ({
+                provinceId: province.provinceId,
+                provinceName: province.provinceName,
+                totalSitePost: province.totalSitePost,
+                totalXPost: province.totalXPost,
+                totalFacebookPost: province.totalFacebookPost,
+                averageScore: province.averageScore,
+                averageFacebookScore: province.averageFacebookScore,
+                averageXScore: province.averageXScore,
+                averageSitePostScore: province.averageSitePostScore
+            }))
+        };
+    } catch (error) {
+        console.error('Error fetching social media post category detail:', error);
+        throw error;
+    }
+};
+
+export const fetchSocialMediaTourCategoryDetail = async (categoryId, startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-tour-category-detail/${categoryId}?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            categoryId: data.tourCategoryId,
+            categoryName: data.tourCategoryName,
+            totalTourTemplate: data.totalTourTemplate,
+            totalXPost: data.totalXPost,
+            totalFacebookPost: data.totalFacebookPost,
+            averageScore: data.averageScore,
+            averageFacebookScore: data.averageFacebookScore,
+            averageXScore: data.averageXScore,
+            averageTourTemplateScore: data.averageTourTemplateScore,
+            socialMediaSummary: {
+                dates: data.reportSocialMediaSummary.dates,
+                facebook: {
+                    comments: data.reportSocialMediaSummary.facebookComments,
+                    shares: data.reportSocialMediaSummary.facebookShares,
+                    reactions: data.reportSocialMediaSummary.facebookReactions,
+                    impressions: data.reportSocialMediaSummary.facebookImpressions,
+                    score: data.reportSocialMediaSummary.facebookScore
+                },
+                twitter: {
+                    retweets: data.reportSocialMediaSummary.xRetweets,
+                    replies: data.reportSocialMediaSummary.xReplies,
+                    likes: data.reportSocialMediaSummary.xLikes,
+                    impressions: data.reportSocialMediaSummary.xImpressions,
+                    score: data.reportSocialMediaSummary.xScore
+                }
+            },
+            provinces: data.provinces.map(province => ({
+                provinceId: province.provinceId,
+                provinceName: province.provinceName,
+                totalTourTemplate: province.totalTourTemplate,
+                totalXPost: province.totalXPost,
+                totalFacebookPost: province.totalFacebookPost,
+                averageScore: province.averageScore,
+                averageFacebookScore: province.averageFacebookScore,
+                averageXScore: province.averageXScore,
+                averageTourTemplateScore: province.averageTourTemplateScore
+            }))
+        };
+    } catch (error) {
+        console.error('Error fetching social media tour category detail:', error);
+        throw error;
+    }
+};

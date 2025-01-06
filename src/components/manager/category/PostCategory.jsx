@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchPostCategory, deletePostCategory } from '@services/PostCategoryService';
+import PostCategoryReport from '@components/manager/category/PostCategoryReport';
 
 const PostCategory = ({ searchTerm, refreshTrigger }) => {
     const [postCategories, setPostCategories] = useState([]);
@@ -10,6 +11,7 @@ const PostCategory = ({ searchTerm, refreshTrigger }) => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [reportDialog, setReportDialog] = useState({ open: false, category: null });
 
     const loadCategories = async (search = '') => {
         try {
@@ -21,7 +23,7 @@ const PostCategory = ({ searchTerm, refreshTrigger }) => {
                 createdAt: item.createdAt,
                 displayDate: new Date(item.createdAt).toLocaleDateString('vi-VN')
             }));
-            
+
             if (refreshTrigger) {
                 setSortBy('createdAt');
                 setPostCategories(sortCategories(data, 'createdAt'));
@@ -82,6 +84,14 @@ const PostCategory = ({ searchTerm, refreshTrigger }) => {
         }
     };
 
+    const handleReportClick = (postCategory) => {
+        setReportDialog({ open: true, category: postCategory });
+    };
+
+    const handleReportClose = () => {
+        setReportDialog({ open: false, category: null });
+    };
+
     return (
         <>
             <FormControl sx={{ m: 1, minWidth: 120, mb: 2, float: 'right' }}>
@@ -117,13 +127,21 @@ const PostCategory = ({ searchTerm, refreshTrigger }) => {
                                     <TableCell align="left">{postCategory.name}</TableCell>
                                     <TableCell align="left">{postCategory.description}</TableCell>
                                     <TableCell align="center">{postCategory.displayDate}</TableCell>
-                                    <TableCell align="center">
+                                    <TableCell align="center" sx={{ width: '18rem' }}>
                                         <Button
-                                            startIcon={<DeleteIcon />}
                                             color="error"
+                                            variant="contained"
                                             onClick={() => handleDeleteClick(postCategory)}
                                         >
                                             Xóa
+                                        </Button>
+                                        <Button
+                                            sx={{ ml: 1 }}
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={() => handleReportClick(postCategory)}
+                                        >
+                                            Xem thống kê
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -160,6 +178,33 @@ const PostCategory = ({ searchTerm, refreshTrigger }) => {
                         Xóa
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={reportDialog.open}
+                onClose={handleReportClose}
+                maxWidth="lg"
+                fullWidth
+            >
+                <Box sx={{ position: 'relative' }}>
+                    <Button
+                        onClick={handleReportClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                            zIndex: 1
+                        }}
+                    >
+                        Đóng
+                    </Button>
+                    {reportDialog.category && (
+                        <PostCategoryReport
+                            categoryId={reportDialog.category.id}
+                        />
+                    )}
+                </Box>
             </Dialog>
         </>
     );

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchAttractionType, deleteAttractionType } from '@services/AttractionTypeService';
+import AttractionCategoryReport from '@components/manager/category/AttractionCategoryReport';
 
 const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
     const [attractionCategories, setAttractionCategories] = useState([]);
@@ -10,6 +11,7 @@ const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
+    const [reportDialog, setReportDialog] = useState({ open: false, category: null });
 
     useEffect(() => {
         loadCategories(searchTerm);
@@ -25,7 +27,7 @@ const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
                 createdAt: item.createdAt,
                 displayDate: new Date(item.createdAt).toLocaleDateString('vi-VN')
             }));
-            
+
             if (refreshTrigger) {
                 setSortBy('createdAt');
                 setAttractionCategories(sortCategories(data, 'createdAt'));
@@ -86,6 +88,14 @@ const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
         }
     };
 
+    const handleReportClick = (attractionCategory) => {
+        setReportDialog({ open: true, category: attractionCategory });
+    };
+
+    const handleReportClose = () => {
+        setReportDialog({ open: false, category: null });
+    };
+
     return (
         <>
             <FormControl sx={{ m: 1, minWidth: 120, mb: 2, float: 'right' }}>
@@ -121,13 +131,21 @@ const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
                                     <TableCell align="left">{attractionCategory.name}</TableCell>
                                     <TableCell align="left">{attractionCategory.description}</TableCell>
                                     <TableCell align="center">{attractionCategory.displayDate}</TableCell>
-                                    <TableCell align="center">
+                                    <TableCell align="center" sx={{ width: '18rem' }}>
                                         <Button
-                                            startIcon={<DeleteIcon />}
                                             color="error"
+                                            variant="contained"
                                             onClick={() => handleDeleteClick(attractionCategory)}
                                         >
                                             Xóa
+                                        </Button>
+                                        <Button
+                                            sx={{ ml: 1 }}
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={() => handleReportClick(attractionCategory)}
+                                        >
+                                            Xem thống kê
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -164,6 +182,33 @@ const AttractionCategory = ({ searchTerm, refreshTrigger }) => {
                         Xóa
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            <Dialog
+                open={reportDialog.open}
+                onClose={handleReportClose}
+                maxWidth="lg"
+                fullWidth
+            >
+                <Box sx={{ position: 'relative' }}>
+                    <Button
+                        onClick={handleReportClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                            zIndex: 1
+                        }}
+                    >
+                        Đóng
+                    </Button>
+                    {reportDialog.category && (
+                        <AttractionCategoryReport
+                            categoryId={reportDialog.category.id}
+                        />
+                    )}
+                </Box>
             </Dialog>
         </>
     );

@@ -68,21 +68,6 @@ const PromotionTab = ({
           <SocialMediaTourCategory data={tourCategoryData} />
         </Paper>
       </Grid>
-
-      <Grid item xs={12}>
-        <Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
-          <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2 }}>
-            Chi tiết tương tác theo tỉnh thành
-          </Typography>
-          {selectedProvinceId && (
-            <ProvinceSocialMetrics 
-              provinceId={selectedProvinceId}
-              startDate={startDate}
-              endDate={endDate}
-            />
-          )}
-        </Paper>
-      </Grid>
     </Grid>
   );
 };
