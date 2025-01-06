@@ -18,6 +18,8 @@ import { Helmet } from 'react-helmet';
 import HistoryIcon from '@mui/icons-material/History';
 import VersionHistory from '@components/common/VersionHistory';
 import { getErrorMessage } from '@hooks/Message';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularPostCategories } from '@services/PopularService';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -61,6 +63,8 @@ const PostDetail = () => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularPostCategories, setPopularPostCategories] = useState([]);
 
   const loadPost = async () => {
     try {
@@ -148,6 +152,21 @@ const PostDetail = () => {
       });
     }
   }, [post]);
+
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularPostCategoriesData = await fetchPopularPostCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -445,7 +464,9 @@ const PostDetail = () => {
                         <FormControl fullWidth margin="normal" error={!!fieldErrors.category}>
                           <InputLabel>Danh mục *</InputLabel>
                           <Select
-                            value={editablePost?.postCategoryId || ''} label="Danh mục *" disabled={isLoadingCategories}
+                            value={editablePost?.postCategoryId || ''} 
+                            label="Danh mục *" 
+                            disabled={isLoadingCategories}
                             onChange={(e) => {
                               const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
                               if (selectedCategory) {
@@ -455,7 +476,14 @@ const PostDetail = () => {
                             }}
                           >
                             {categoryOptions.map(category => (
-                              <MenuItem key={category.postCategoryId} value={category.postCategoryId}>{category.name}</MenuItem>
+                              <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  {category.name}
+                                  {popularPostCategories.includes(category.postCategoryId) && (
+                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                  )}
+                                </Box>
+                              </MenuItem>
                             ))}
                           </Select>
                           {fieldErrors.category && (<FormHelperText>{fieldErrors.category}</FormHelperText>)}
@@ -473,10 +501,18 @@ const PostDetail = () => {
                                 handleFieldChange('provinceName', selectedProvince.label);
                               }
                             }}
-                            label="Tỉnh/Thành phố *" disabled={isLoadingProvinces}
+                            label="Tỉnh/Thành phố *" 
+                            disabled={isLoadingProvinces}
                           >
                             {provinceOptions.map(option => (
-                              <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                              <MenuItem key={option.value} value={option.value}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  {typeof option.label === 'string' ? option.label : option.label}
+                                  {popularProvinces.includes(option.value) && (
+                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                  )}
+                                </Box>
+                              </MenuItem>
                             ))}
                           </Select>
                           {fieldErrors.provinceId && (<FormHelperText>{fieldErrors.provinceId}</FormHelperText>)}

@@ -12,6 +12,8 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import { fetchPostCategory } from '@services/PostCategoryService';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularPostCategories } from '@services/PopularService';
 
 const ManagePost = () => {
   const location = useLocation();
@@ -34,6 +36,8 @@ const ManagePost = () => {
     total: 0
   });
   const [categoryOptions, setCategoryOptions] = useState([]);
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularPostCategories, setPopularPostCategories] = useState([]);
 
   const animatedComponents = makeAnimated();
 
@@ -43,7 +47,14 @@ const ManagePost = () => {
         const categories = await fetchPostCategory();
         const formattedCategories = categories.map(cat => ({
           value: cat.postCategoryId,
-          label: cat.name
+          label: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {cat.name}
+              {popularPostCategories.includes(cat.postCategoryId) && (
+                <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+              )}
+            </div>
+          )
         }));
         setCategoryOptions(formattedCategories);
       } catch (error) {
@@ -51,7 +62,7 @@ const ManagePost = () => {
       }
     };
     fetchCategories();
-  }, []);
+  }, [popularPostCategories]);
 
   useEffect(() => {
     const loadPosts = async () => {
@@ -90,6 +101,21 @@ const ManagePost = () => {
   };
   fetchProvincesData();
 
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularPostCategoriesData = await fetchPopularPostCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
+
   const handleStatusTabChange = (event, newValue) => {
     setStatusTab(newValue);
   };
@@ -114,14 +140,26 @@ const ManagePost = () => {
     }
   };
 
+  const provinceOptions = provinces.map(province => ({
+    value: province.provinceId,
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {province.provinceName}
+        {popularProvinces.includes(province.provinceId) && (
+          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+        )}
+      </div>
+    )
+  }));
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
         <title>Quản lý bài viết</title>
       </Helmet>
       <SidebarStaff isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-      <Box sx={{ flexGrow: 1, mt: 1.5, p: 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
-        <Grid container spacing={2}>
+      <Box sx={{ flexGrow: 1, mt: 1.5, p: isSidebarOpen ? 3 : 5, transition: 'margin-left 0.3s', marginLeft: isSidebarOpen ? '280px' : '20px' }}>
+        <Grid container spacing={3} sx={{ mb: 3, ml: -5, pl: 2, pr: 2 }}>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>Quản lý bài viết</Typography>
             <Button component={Link} to={`${currentPage}/them`} variant="contained" color="primary" startIcon={<AddIcon />} sx={{ height: '55px', borderRadius: 2 }}>
@@ -134,14 +172,30 @@ const ManagePost = () => {
               <Typography sx={{ fontWeight: 600 }}>
                 Danh mục
               </Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={categoryOptions} onChange={(selectedOptions) => setTempCategories(selectedOptions)} value={tempCategories} placeholder="Chọn danh mục" />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti 
+                options={categoryOptions} 
+                onChange={(selectedOptions) => setTempCategories(selectedOptions)} 
+                value={tempCategories} 
+                placeholder="Chọn danh mục" 
+              />
             </Grid>
 
             <Grid item xs={12} md={4.5}>
               <Typography sx={{ fontWeight: 600 }}>
                 Tỉnh thành
               </Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))} onChange={setTempProvinces} value={tempProvinces} placeholder="Chọn tỉnh thành" />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti 
+                options={provinceOptions} 
+                onChange={setTempProvinces} 
+                value={tempProvinces} 
+                placeholder="Chọn tỉnh thành"
+              />
             </Grid>
 
             <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'flex-end' }}>

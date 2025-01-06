@@ -12,6 +12,8 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { Link, useLocation } from 'react-router-dom';
 import Helmet from 'react-helmet';
 import { fetchPostCategory } from '@services/PostCategoryService';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularPostCategories } from '@services/PopularService';
 
 const ManagerManagePost = () => {
   const location = useLocation();
@@ -34,6 +36,8 @@ const ManagerManagePost = () => {
     total: 0
   });
   const [categoryOptions, setCategoryOptions] = useState([]);
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularPostCategories, setPopularPostCategories] = useState([]);
 
   const animatedComponents = makeAnimated();
 
@@ -114,6 +118,21 @@ const ManagerManagePost = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularPostCategoriesData = await fetchPopularPostCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
@@ -131,14 +150,50 @@ const ManagerManagePost = () => {
               <Typography sx={{ fontWeight: 600 }}>
                 Danh mục
               </Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={categoryOptions} onChange={(selectedOptions) => setTempCategories(selectedOptions)} value={tempCategories} placeholder="Chọn danh mục" />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti 
+                options={categoryOptions.map(cat => ({
+                  value: cat.value,
+                  label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {cat.label}
+                      {popularPostCategories.includes(cat.value) && (
+                        <LocalFireDepartmentIcon style={{ color: 'red' }} />
+                      )}
+                    </div>
+                  )
+                }))}
+                onChange={(selectedOptions) => setTempCategories(selectedOptions)} 
+                value={tempCategories} 
+                placeholder="Chọn danh mục" 
+              />
             </Grid>
 
             <Grid item xs={12} md={4.5}>
               <Typography sx={{ fontWeight: 600 }}>
                 Tỉnh thành
               </Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))} onChange={setTempProvinces} value={tempProvinces} placeholder="Chọn tỉnh thành" />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti 
+                options={provinces.map(province => ({
+                  value: province.provinceId,
+                  label: (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {province.provinceName}
+                      {popularProvinces.includes(province.provinceId) && (
+                        <LocalFireDepartmentIcon style={{ color: 'red' }} />
+                      )}
+                    </div>
+                  )
+                }))} 
+                onChange={setTempProvinces} 
+                value={tempProvinces} 
+                placeholder="Chọn tỉnh thành" 
+              />
             </Grid>
 
             <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'flex-end' }}>

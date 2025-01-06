@@ -17,6 +17,8 @@ import { fetchAttractionType } from '@services/AttractionTypeService';
 import SidebarStaff from '@layouts/SidebarStaff';
 import TourMap from '@components/tour/TourMap';
 import '@styles/ReactQuill.css';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces } from '@services/PopularService';
 
 const AddAttraction = () => {
   const navigate = useNavigate();
@@ -37,6 +39,8 @@ const AddAttraction = () => {
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularTypes, setPopularTypes] = useState([]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -54,6 +58,21 @@ const AddAttraction = () => {
       }
     };
     fetchProvincesData();
+  }, []);
+
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvData = await fetchPopularProvinces();
+        setPopularProvinces(popularProvData.map(p => p.provinceId));
+
+        const popularTypesData = await fetchPopularProvinces(null, 1);
+        setPopularTypes(popularTypesData.map(t => t.provinceId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
   }, []);
 
   const handleFieldChange = (field, value) => {
@@ -100,8 +119,9 @@ const AddAttraction = () => {
     }
   };
 
-  const handleProvinceChange = (event) => {
-    setSelectedProvince(event.target.value);
+  const handleProvinceChange = async (event) => {
+    const newProvinceId = event.target.value;
+    setSelectedProvince(newProvinceId);
   };
 
   const handleSave = async (isDraft) => {
@@ -263,10 +283,22 @@ const AddAttraction = () => {
                 <Select
                   value={editableFields.type.value}
                   onChange={(e) => handleFieldChange('type', e.target.value)}
-                  variant="outlined" fullWidth sx={{ mr: 2 }} error={!!fieldErrors.attractionTypeId}
+                  variant="outlined" fullWidth sx={{ mr: 2 }} 
+                  error={!!fieldErrors.attractionTypeId}
                 >
                   {attractionTypes.map((type) => (
-                    <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
+                    <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>
+                      {type.attractionTypeName}
+                      {popularTypes.includes(type.attractionTypeId) && (
+                        <LocalFireDepartmentIcon 
+                          sx={{ 
+                            ml: 1,
+                            mb: -0.5, 
+                            color: '#FF0000'
+                          }} 
+                        />
+                      )}
+                    </MenuItem>
                   ))}
                 </Select>
                 {fieldErrors.attractionTypeId && (
@@ -280,12 +312,24 @@ const AddAttraction = () => {
               </Typography>
               <FormControl sx={{ width: '100%' }}>
                 <Select
-                  value={selectedProvince} onChange={handleProvinceChange}
+                  value={selectedProvince}
+                  onChange={handleProvinceChange}
                   variant="outlined" fullWidth sx={{ mr: 2, mb: 2 }}
                   error={!!fieldErrors.provinceId}
                 >
                   {provinces.map((province) => (
-                    <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
+                    <MenuItem key={province.provinceId} value={province.provinceId}>
+                      {province.provinceName}
+                      {popularProvinces.includes(province.provinceId) && (
+                        <LocalFireDepartmentIcon 
+                          sx={{ 
+                            ml: 1,
+                            mb: -0.5,
+                            color: '#FF0000'
+                          }} 
+                        />
+                      )}
+                    </MenuItem>
                   ))}
                 </Select>
                 {fieldErrors.provinceId && (

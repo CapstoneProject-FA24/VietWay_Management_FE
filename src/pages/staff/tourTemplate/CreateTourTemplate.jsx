@@ -16,6 +16,8 @@ import 'react-quill/dist/quill.snow.css';
 import '@styles/ReactQuill.css';
 import CloseIcon from '@mui/icons-material/Close';
 import { getErrorMessage } from '@hooks/Message';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularTourCategories } from '@services/PopularService';
 
 const quillModules = {
   toolbar: [
@@ -45,6 +47,8 @@ const CreateTourTemplate = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const handleSidebarToggle = () => { setIsSidebarOpen(!isSidebarOpen); };
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularTourCategories, setPopularTourCategories] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,6 +64,21 @@ const CreateTourTemplate = () => {
       }
     };
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularTourCategoriesData = await fetchPopularTourCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
   }, []);
 
   const roundToThousand = (price) => {
@@ -370,25 +389,54 @@ const CreateTourTemplate = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                 <Typography gutterBottom>Tour đi qua tỉnh/thành phố *</Typography>
                 <ReactSelect
-                  isMulti name="provinces" onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
-                  options={provinces.map(province => ({ value: province.provinceId, label: province.provinceName }))}
-                  className="basic-multi-select" classNamePrefix="select" value={tourTemplate.provinces} placeholder=''
+                  isMulti
+                  name="provinces"
+                  onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
+                  options={provinces.map(province => ({
+                    value: province.provinceId,
+                    label: (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {province.provinceName}
+                        {popularProvinces.includes(province.provinceId) && (
+                          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                        )}
+                      </div>
+                    )
+                  }))}
+                  className="basic-multi-select"
+                  classNamePrefix="select"
+                  value={tourTemplate.provinces}
+                  placeholder=''
                   styles={{
-                    control: (base) => ({ ...base, borderColor: fieldErrors.provinces ? 'red' : base.borderColor, height: '55px' })
+                    control: (base) => ({
+                      ...base,
+                      borderColor: fieldErrors.provinces ? 'red' : base.borderColor,
+                      height: '55px'
+                    })
                   }}
                 />
                 {fieldErrors.provinces && (
-                  <Typography color="error" variant="caption"> {fieldErrors.provinces} </Typography>
+                  <Typography color="error" variant="caption">{fieldErrors.provinces}</Typography>
                 )}
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
                 <Typography gutterBottom>Tour bắt đầu từ *</Typography>
                 <Select
-                  value={tourTemplate.startingProvinceId} onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
-                  error={!!fieldErrors.startingProvinceId} variant="outlined" fullWidth
+                  value={tourTemplate.startingProvinceId}
+                  onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
+                  error={!!fieldErrors.startingProvinceId}
+                  variant="outlined"
+                  fullWidth
                 >
                   {provinces.map((province) => (
-                    <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
+                    <MenuItem key={province.provinceId} value={province.provinceId}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {province.provinceName}
+                        {popularProvinces.includes(province.provinceId) && (
+                          <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                        )}
+                      </Box>
+                    </MenuItem>
                   ))}
                 </Select>
                 {fieldErrors.startingProvinceId && (
@@ -528,14 +576,20 @@ const CreateTourTemplate = () => {
                         <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Loại tour *</Typography>
                         <Select
                           labelId="tourCategory-select-label"
-                          id="tourCategory-select" sx={{ width: '100%' }}
+                          id="tourCategory-select"
+                          sx={{ width: '100%' }}
                           value={tourTemplate.tourCategory}
                           onChange={(e) => handleFieldChange('tourCategory', e.target.value)}
                           error={!!fieldErrors.tourCategory}
                         >
                           {tourCategories.map((tourCategory) => (
                             <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>
-                              {tourCategory.tourCategoryName}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {tourCategory.tourCategoryName}
+                                {popularTourCategories.includes(tourCategory.tourCategoryId) && (
+                                  <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                                )}
+                              </Box>
                             </MenuItem>
                           ))}
                         </Select>

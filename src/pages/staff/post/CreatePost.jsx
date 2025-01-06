@@ -12,6 +12,8 @@ import { createPost, updatePostImages } from '@services/PostService';
 import { Helmet } from 'react-helmet';
 import '@styles/ReactQuill.css';
 import { getErrorMessage } from '@hooks/Message';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularPostCategories } from '@services/PopularService';
 
 const commonStyles = {
   boxContainer: { display: 'flex', alignItems: 'center', gap: 2, mb: 2 },
@@ -44,31 +46,61 @@ const CreatePost = () => {
     provinceName: '', createDate: new Date().toISOString().split('T')[0], image: null
   });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularPostCategories, setPopularPostCategories] = useState([]);
 
   useEffect(() => {
-    const loadProvinces = async () => {
+    const loadData = async () => {
       setIsLoadingProvinces(true);
       try {
         const fetchedProvinces = await fetchProvinces({ pageSize: 63, pageIndex: 1 });
+        const fetchedPostCategories = await fetchPostCategory();
+        
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularPostCategoriesData = await fetchPopularPostCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+
         const formattedProvinces = fetchedProvinces.items.map(province => ({
           value: province.provinceId,
-          label: province.provinceName
+          label: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {province.provinceName}
+              {popularProvincesData.map(p => p.provinceId).includes(province.provinceId) && (
+                <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+              )}
+            </div>
+          )
         }));
-        const fetchedPostCategories = await fetchPostCategory();
+
         const formattedPostCategories = fetchedPostCategories.map(postCategory => ({
           value: postCategory.postCategoryId,
-          label: postCategory.name
+          label: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {postCategory.name}
+              {popularPostCategoriesData.map(c => c.postCategoryId).includes(postCategory.postCategoryId) && (
+                <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+              )}
+            </div>
+          )
         }));
+
         setProvinceOptions(formattedProvinces);
         setPostCategoryOptions(formattedPostCategories);
       } catch (error) {
-        console.error('Error loading provinces:', error);
-        setSnackbar({ open: true, message: 'Lỗi khi tải danh sách tỉnh thành', severity: 'error', hide: 5000 });
+        console.error('Error loading data:', error);
+        setSnackbar({ 
+          open: true, 
+          message: 'Lỗi khi tải dữ liệu', 
+          severity: 'error', 
+          hide: 5000 
+        });
       } finally {
         setIsLoadingProvinces(false);
       }
     };
-    loadProvinces();
+    loadData();
   }, []);
 
   const handleSidebarToggle = () => {
@@ -218,7 +250,9 @@ const CreatePost = () => {
                     >
                       {postCategoryOptions.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
-                          {option.label}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {option.label}
+                          </Box>
                         </MenuItem>
                       ))}
                     </Select>
@@ -231,11 +265,16 @@ const CreatePost = () => {
                   <FormControl fullWidth margin="normal" error={!!fieldErrors.provinceId}>
                     <InputLabel>Tỉnh/Thành phố *</InputLabel>
                     <Select
-                      value={newPost.provinceId} onChange={handleProvinceChange}
+                      value={newPost.provinceId}
+                      onChange={handleProvinceChange}
                       label="Tỉnh/Thành phố *"
                     >
                       {provinceOptions.map(option => (
-                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                        <MenuItem key={option.value} value={option.value}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {option.label}
+                          </Box>
+                        </MenuItem>
                       ))}
                     </Select>
                     {fieldErrors.provinceId && (

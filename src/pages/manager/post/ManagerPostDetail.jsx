@@ -21,6 +21,8 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchPostCategory } from '@services/PostCategoryService';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
 import { getErrorMessage } from '@hooks/Message';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularPostCategories } from '@services/PopularService';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -43,6 +45,8 @@ const ManagerPostDetail = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [currentTab, setCurrentTab] = useState(0);
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularPostCategories, setPopularPostCategories] = useState([]);
 
   const loadPost = async () => {
     try {
@@ -144,6 +148,21 @@ const ManagerPostDetail = () => {
       });
     }
   }, [post]);
+
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularPostCategoriesData = await fetchPopularPostCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -527,7 +546,12 @@ const ManagerPostDetail = () => {
                         >
                           {categoryOptions.map(category => (
                             <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
-                              {category.name}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {category.name}
+                                {popularPostCategories.includes(category.postCategoryId) && (
+                                  <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                )}
+                              </Box>
                             </MenuItem>
                           ))}
                         </Select>
@@ -553,7 +577,12 @@ const ManagerPostDetail = () => {
                         >
                           {provinceOptions.map(option => (
                             <MenuItem key={option.value} value={option.value}>
-                              {option.label}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                {typeof option.label === 'string' ? option.label : option.label}
+                                {popularProvinces.includes(option.value) && (
+                                  <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                )}
+                              </Box>
                             </MenuItem>
                           ))}
                         </Select>

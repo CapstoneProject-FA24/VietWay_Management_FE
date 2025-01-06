@@ -10,6 +10,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import TourMap from '@components/tour/TourMap';
 import { getCookie } from '@services/AuthenService';
 import { getErrorMessage } from '@hooks/Message';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularAttractionCategories } from '@services/PopularService';
 
 const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, currentSlide, setCurrentSlide, sliderRef, setSliderRef }) => {
   const [images, setImages] = useState([]);
@@ -24,6 +26,8 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
     open: false, message: '', severity: 'success', hide: 5000
   });
   const [fieldErrors, setFieldErrors] = useState({});
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularAttractionTypes, setPopularAttractionTypes] = useState([]);
 
   useEffect(() => {
     if (attraction) {
@@ -40,6 +44,21 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
       });
     }
   }, [attraction]);
+
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularAttractionTypesData = await fetchPopularAttractionCategories();
+        
+        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
+        setPopularAttractionTypes(popularAttractionTypesData.map(c => c.attractionCategoryId));
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
 
   const handleFieldChange = (field, value) => {
     setEditableFields(prev => ({
@@ -201,10 +220,18 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
             <Select
               value={editableFields.type.value}
               onChange={(e) => handleFieldChange('type', e.target.value)}
-              variant="outlined" fullWidth sx={{ mr: 2 }} error={!!fieldErrors.attractionTypeId}
+              variant="outlined" fullWidth sx={{ mr: 2 }} 
+              error={!!fieldErrors.attractionTypeId}
             >
               {attractionTypes.map((type) => (
-                <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>{type.attractionTypeName}</MenuItem>
+                <MenuItem key={type.attractionTypeId} value={type.attractionTypeId}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {type.attractionTypeName}
+                    {popularAttractionTypes.includes(type.attractionTypeId) && (
+                      <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                    )}
+                  </Box>
+                </MenuItem>
               ))}
             </Select>
             {fieldErrors.attractionTypeId && (
@@ -218,12 +245,20 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
           </Typography>
           <FormControl sx={{ width: '100%' }}>
             <Select
-              value={selectedProvince} onChange={handleProvinceChange}
+              value={selectedProvince}
+              onChange={handleProvinceChange}
               variant="outlined" fullWidth sx={{ mr: 2, mb: 2 }}
               error={!!fieldErrors.provinceId}
             >
               {provinces.map((province) => (
-                <MenuItem key={province.provinceId} value={province.provinceId}>{province.provinceName}</MenuItem>
+                <MenuItem key={province.provinceId} value={province.provinceId}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {province.provinceName}
+                    {popularProvinces.includes(province.provinceId) && (
+                      <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                    )}
+                  </Box>
+                </MenuItem>
               ))}
             </Select>
             {fieldErrors.provinceId && (
