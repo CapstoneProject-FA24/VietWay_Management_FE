@@ -170,8 +170,8 @@ const ProvinceCard = ({ province, onUpdate }) => {
                 maxWidth="lg"
                 fullWidth
             >
-                <DialogTitle>
-                    Thống kê tương tác mạng xã hội - {province.provinceName}
+                <DialogTitle sx={{ fontWeight: 'bold' }}>
+                    Thống kê tương tác mạng xã hội của tỉnh/thành phố {province.provinceName}
                 </DialogTitle>
                 <DialogContent>
                     <ProvinceSocialMetrics 

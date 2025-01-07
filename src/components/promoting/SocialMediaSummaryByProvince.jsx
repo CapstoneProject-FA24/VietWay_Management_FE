@@ -25,7 +25,6 @@ import DialogContent from '@mui/material/DialogContent';
 import ProvinceSocialMetrics from './ProvinceSocialMetrics';
 
 const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
-    console.log(startDate);
     const [activeTab, setActiveTab] = useState(0);
     const [orderBy, setOrderBy] = useState('averageScore');
     const [order, setOrder] = useState('desc');
@@ -87,17 +86,19 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
         <>
             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
-                    {`${viewMode === 'top10' ? 'Top 10 tỉnh thành' : 'Tất cả tỉnh thành'} - Điểm đánh giá mức độ quan tâm ${{
+                    {`Biểu đồ so sánh điểm đánh giá mức độ quan tâm ${{
                             'average': 'trung bình',
                             'facebook': 'trên Facebook',
                             'twitter': 'trên X (Twitter)',
-                            'tour': 'của các tour du lịch',
-                            'attraction': 'của các điểm tham quan',
-                            'post': 'của các bài viết'
+                            'tour': 'của các tour du lịch trên trang Vietway',
+                            'attraction': 'của các điểm tham quan trên trang Vietway',
+                            'post': 'của các bài viết trên trang Vietway'
                         }[chartType]
-                        }`}
+                        } của ${viewMode === 'top10' ? 'top 10 tỉnh thành' : 'tất cả tỉnh thành'} theo thời gian từ 
+                        ${new Date(startDate).toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' }).replace(', ', '/').replace('tháng','')} đến 
+                        ${new Date(endDate).toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' }).replace(', ', '/').replace('tháng','')}`}
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, ml: 1 }}>
                     <FormControl sx={{ minWidth: 120 }}>
                         <InputLabel>Chế độ xem</InputLabel>
                         <Select
@@ -110,7 +111,7 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
                             <MenuItem value="top10">Top 10</MenuItem>
                         </Select>
                     </FormControl>
-                    <FormControl sx={{ minWidth: 280, maxWidth: 400 }}>
+                    <FormControl sx={{ minWidth: 250, maxWidth: 400 }}>
                         <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
                         <Select
                             sx={{ fontSize: '0.9rem' }}
@@ -121,9 +122,9 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
                             <MenuItem value="average">Trung bình</MenuItem>
                             <MenuItem value="facebook">Trên Facebook</MenuItem>
                             <MenuItem value="twitter">Trên X (Twitter)</MenuItem>
-                            <MenuItem value="tour">Của các tour du lịch</MenuItem>
-                            <MenuItem value="attraction">Của các điểm tham quan</MenuItem>
-                            <MenuItem value="post">Của các bài viết</MenuItem>
+                            <MenuItem value="tour">Của các tour du lịch trên trang Vietway</MenuItem>
+                            <MenuItem value="attraction">Của các điểm tham quan trên trang Vietway</MenuItem>
+                            <MenuItem value="post">Của các bài viết trên trang Vietway</MenuItem>
                         </Select>
                     </FormControl>
                 </Box>

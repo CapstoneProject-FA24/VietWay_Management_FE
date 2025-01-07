@@ -41,22 +41,38 @@ const CustomTooltip = ({ active, payload, label }) => {
 const PostCategoryReport = ({ categoryId }) => {
     const [loading, setLoading] = useState(true);
     const [categoryData, setCategoryData] = useState(null);
-    const [selectedMetrics, setSelectedMetrics] = useState('average');
-    
+    const [selectedMetrics, setSelectedMetrics] = useState('interactions');
+    const [selectedProvinceMetric, setSelectedProvinceMetric] = useState('averageScore');
+
     const [startDate, setStartDate] = useState(dayjs().subtract(1, 'month'));
     const [endDate, setEndDate] = useState(dayjs());
     const [tempStartDate, setTempStartDate] = useState(dayjs().subtract(1, 'month'));
     const [tempEndDate, setTempEndDate] = useState(dayjs());
 
+    const metricsOptions = [
+        { value: 'interactions', label: 'Chia sẻ', fbKey: 'shares', twKey: 'retweets' },
+        { value: 'comments', label: 'Bình luận', fbKey: 'comments', twKey: 'replies' },
+        { value: 'impressions', label: 'Lượt xem', fbKey: 'impressions', twKey: 'impressions' },
+        { value: 'reactions', label: 'Phản ứng (biểu tượng cảm xúc)', fbKey: 'reactions', twKey: 'likes' },
+        { value: 'scores', label: 'Điểm đánh giá mức độ quan tâm', fbKey: 'score', twKey: 'score' },
+    ];
+
+    const provinceMetricsOptions = [
+        { value: 'averageScore', label: 'Trung bình' },
+        { value: 'averageFacebookScore', label: 'Trung bình trên Facebook' },
+        { value: 'averageXScore', label: 'Trung bình trên X' },
+        { value: 'averageTourTemplateScore', label: 'Trung bình trên Vietway' },
+    ];
+
     useEffect(() => {
         const loadCategoryData = async () => {
             if (!startDate || !endDate) return;
-            
+
             try {
                 setLoading(true);
                 const data = await fetchSocialMediaPostCategoryDetail(
-                    categoryId, 
-                    startDate.format('YYYY-MM-DD'), 
+                    categoryId,
+                    startDate.format('YYYY-MM-DD'),
                     endDate.format('YYYY-MM-DD')
                 );
                 setCategoryData(data);
@@ -77,14 +93,14 @@ const PostCategoryReport = ({ categoryId }) => {
         setEndDate(tempEndDate);
     };
 
-    const chartOptions = [
-        { value: 'average', label: 'Trung bình', key: 'averageScore' },
-        { value: 'facebook', label: 'Facebook', key: 'averageFacebookScore' },
-        { value: 'twitter', label: 'X (Twitter)', key: 'averageXScore' },
-        { value: 'post', label: 'Bài viết', key: 'averageSitePostScore' }
-    ];
+    const currentMetric = metricsOptions.find(option => option.value === selectedMetrics);
+    const selectedMetricLabel = currentMetric?.label || 'Chọn chỉ số so sánh';
 
-    const currentMetric = chartOptions.find(option => option.value === selectedMetrics);
+    const timeSeriesData = categoryData?.socialMediaSummary?.dates?.map((date, index) => ({
+        date,
+        facebook: categoryData.socialMediaSummary.facebook[currentMetric.fbKey][index] || 0,
+        twitter: categoryData.socialMediaSummary.twitter[currentMetric.twKey][index] || 0,
+    })) || [];
 
     if (loading) {
         return (
@@ -103,20 +119,17 @@ const PostCategoryReport = ({ categoryId }) => {
     }
 
     const summaryStats = [
-        { label: 'Tổng bài viết', value: categoryData?.totalSitePost || 0 },
-        { label: 'Tổng bài viết X', value: categoryData?.totalXPost || 0 },
-        { label: 'Tổng bài viết Facebook', value: categoryData?.totalFacebookPost || 0 },
-        { label: 'Điểm trung bình', value: (categoryData?.averageScore || 0).toFixed(2) },
-        { label: 'Điểm Facebook trung bình', value: (categoryData?.averageFacebookScore || 0).toFixed(2) },
-        { label: 'Điểm X trung bình', value: (categoryData?.averageXScore || 0).toFixed(2) },
-        { label: 'Điểm bài viết trung bình', value: (categoryData?.averageSitePostScore || 0).toFixed(2) },
+        { label: 'Tổng số bài viết', value: categoryData?.totalAttraction || 0 },
+        { label: 'Tổng bài đăng trên X', value: categoryData?.totalXPost || 0 },
+        { label: 'Tổng bài đăng trên Facebook', value: categoryData?.totalFacebookPost || 0 },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình', value: (categoryData?.averageScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên Facebook', value: (categoryData?.averageFacebookScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên X', value: (categoryData?.averageXScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên trang Vietway', value: (categoryData?.averageAttractionScore || 0).toFixed(2) },
     ];
 
-    const timeSeriesData = categoryData?.socialMediaSummary?.dates?.map((date, index) => ({
-        date,
-        facebook: categoryData.socialMediaSummary.facebook.score[index] || 0,
-        twitter: categoryData.socialMediaSummary.twitter.score[index] || 0,
-    })) || [];
+    const label = provinceMetricsOptions.find(option => option.value === selectedProvinceMetric)?.label;
+    const formattedLabel = label ? label.charAt(0).toLowerCase() + label.slice(1) : '';
 
     return (
         <Box sx={{ p: 1 }}>
@@ -124,9 +137,9 @@ const PostCategoryReport = ({ categoryId }) => {
                 {/* Date Range Selection */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2, mb: 2 }}>
-                        <Box sx={{ 
-                            display: 'flex', 
-                            gap: 2, 
+                        <Box sx={{
+                            display: 'flex',
+                            gap: 2,
                             alignItems: 'center',
                             flexWrap: 'wrap'
                         }}>
@@ -159,8 +172,8 @@ const PostCategoryReport = ({ categoryId }) => {
                                     }}
                                 />
                             </LocalizationProvider>
-                            <Button 
-                                variant="contained" 
+                            <Button
+                                variant="contained"
                                 onClick={handleApplyDateRange}
                                 disabled={!tempStartDate || !tempEndDate || tempEndDate.isBefore(tempStartDate)}
                             >
@@ -172,9 +185,12 @@ const PostCategoryReport = ({ categoryId }) => {
 
                 {/* Summary Statistics */}
                 <Grid item xs={12}>
+                    <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+                        {categoryData.categoryName}
+                    </Typography>
                     <Paper sx={{ p: 2, mb: 2 }}>
                         <Typography variant="h6" gutterBottom>
-                            Thống kê tổng quan - {categoryData.categoryName}
+                            Thống kê tổng quan
                         </Typography>
                         <Grid container spacing={2}>
                             {summaryStats.map((stat, index) => (
@@ -195,14 +211,30 @@ const PostCategoryReport = ({ categoryId }) => {
                 {timeSeriesData.length > 0 && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Biểu đồ theo thời gian
+                            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
+                                    <InputLabel>Chọn chỉ số so sánh</InputLabel>
+                                    <Select
+                                        value={selectedMetrics}
+                                        label="Chọn chỉ số so sánh"
+                                        onChange={(e) => setSelectedMetrics(e.target.value)}
+                                    >
+                                        {metricsOptions.map(option => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Box>
+                            <Typography variant="h6" textAlign="center" fontWeight={'bold'}>
+                                Biểu đồ so sánh {selectedMetrics === 'scores' ? "" : "số lượng"} {selectedMetricLabel.toLowerCase()} giữa Facebook và X(Twitter) theo thời gian
                             </Typography>
                             <ResponsiveContainer width="100%" height={400}>
                                 <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" tick={{ fontSize: 13 }}/>
-                                    <YAxis tick={{ fontSize: 13 }}/>
+                                    <XAxis dataKey="date" tick={{ fontSize: 13 }} />
+                                    <YAxis tick={{ fontSize: 13 }} />
                                     <Tooltip />
                                     <Legend />
                                     <Line type="monotone" dataKey="facebook" name="Facebook" stroke="#1877F2" strokeWidth={2} />
@@ -218,18 +250,15 @@ const PostCategoryReport = ({ categoryId }) => {
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2 }}>
                             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
-                                    Thống kê theo tỉnh thành
-                                </Typography>
                                 <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
                                     <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
                                     <Select
                                         sx={{ fontSize: '0.9rem' }}
-                                        value={selectedMetrics}
-                                        label="Thống kê điểm mức độ quan tâm"
-                                        onChange={(e) => setSelectedMetrics(e.target.value)}
+                                        value={selectedProvinceMetric}
+                                        label="Thống kê điểm mức độ quan tâm . ."
+                                        onChange={(e) => setSelectedProvinceMetric(e.target.value)}
                                     >
-                                        {chartOptions.map(option => (
+                                        {provinceMetricsOptions.map(option => (
                                             <MenuItem key={option.value} value={option.value}>
                                                 {option.label}
                                             </MenuItem>
@@ -237,9 +266,12 @@ const PostCategoryReport = ({ categoryId }) => {
                                     </Select>
                                 </FormControl>
                             </Box>
+                            <Typography variant="h6" textAlign="center" fontWeight={'bold'}>
+                                Biểu đồ so sánh điểm đánh giá mức độ quan tâm {formattedLabel} giữa các tỉnh thành từ {startDate.format('MM/YYYY')} đến {endDate.format('MM/YYYY')}
+                            </Typography>
                             <ResponsiveContainer width="100%" height={400}>
-                                <BarChart 
-                                    data={categoryData.provinces} 
+                                <BarChart
+                                    data={categoryData.provinces}
                                     margin={{
                                         top: 50,
                                         right: 10,
@@ -262,7 +294,7 @@ const PostCategoryReport = ({ categoryId }) => {
                                             wordWrap: 'break-word'
                                         }}
                                     />
-                                    <YAxis 
+                                    <YAxis
                                         label={{
                                             value: "Điểm đánh giá mức độ quan tâm",
                                             position: "top",
@@ -272,14 +304,14 @@ const PostCategoryReport = ({ categoryId }) => {
                                         }}
                                     />
                                     <Tooltip content={<CustomTooltip />} />
-                                    <Bar 
-                                        dataKey={currentMetric.key}
-                                        name={currentMetric.label}
+                                    <Bar
+                                        dataKey={selectedProvinceMetric}
+                                        name={provinceMetricsOptions.find(option => option.value === selectedProvinceMetric)?.label}
                                         fill={
-                                            selectedMetrics === 'average' ? '#0a9d15' :
-                                            selectedMetrics === 'facebook' ? '#1877F2' :
-                                            selectedMetrics === 'twitter' ? '#000000' :
-                                            '#ff7300'
+                                            selectedProvinceMetric === 'averageScore' ? '#0a9d15' :
+                                                selectedProvinceMetric === 'averageFacebookScore' ? '#1877F2' :
+                                                    selectedProvinceMetric === 'averageXScore' ? '#000000' :
+                                                        '#ff7300'
                                         }
                                     />
                                 </BarChart>

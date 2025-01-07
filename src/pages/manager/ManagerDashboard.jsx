@@ -286,6 +286,7 @@ const ManagerDashboard = () => {
                 postCategoryData={postCategoryData}
                 attractionCategoryData={attractionCategoryData}
                 tourCategoryData={tourCategoryData}
+                startDate={appliedGlobalDateRange.startDate} endDate={appliedGlobalDateRange.endDate}
               />
             </Box>
           )}

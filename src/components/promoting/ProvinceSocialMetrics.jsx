@@ -191,8 +191,8 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
                 {!loading && provinceData && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2, mb: 2 }}>
-                            <Typography variant="h6" gutterBottom>
-                                Thống kê tổng quan - {provinceData.provinceName}
+                            <Typography variant="h6" fontWeight={"bold"} gutterBottom>
+                                Thống kê tổng quan
                             </Typography>
                             <Grid container spacing={2}>
                                 {summaryStats.map((stat, index) => (
@@ -251,14 +251,14 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
                             <Paper sx={{ p: 2 }}>
                                 <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
-                                        {categoryType === 'attractionCategories' ? 'Thống kê theo loại địa điểm' :
-                                         categoryType === 'tourCategories' ? 'Thống kê theo loại tour' :
-                                         'Thống kê theo loại bài viết'} - {
+                                        {categoryType === 'attractionCategories' ? 'Biểu đồ so sánh điểm mức độ quan tâm' :
+                                         categoryType === 'tourCategories' ? 'Biểu đồ so sánh điểm mức độ quan tâm' :
+                                         'Biểu đồ so sánh điểm mức độ quan tâm'} - {
                                             {
-                                                'average': 'Điểm trung bình',
-                                                'facebook': 'Điểm Facebook',
-                                                'twitter': 'Điểm X (Twitter)',
-                                                'post': 'Điểm bài viết'
+                                                'average': 'trung bình',
+                                                'facebook': 'trung bình trên Facebook',
+                                                'twitter': 'trung bình trên X (Twitter)',
+                                                'post': 'điểm trung bình của các điểm tham quan'
                                             }[selectedMetrics]
                                         }
                                     </Typography>

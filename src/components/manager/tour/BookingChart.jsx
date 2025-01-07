@@ -53,7 +53,7 @@ const BookingChart = ({ bookingData }) => {
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: 550 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2 }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2, color: '#0051cd' }}>
                 Thống kê số lượng booking
             </Typography>
             <ResponsiveContainer width="100%" height="90%">

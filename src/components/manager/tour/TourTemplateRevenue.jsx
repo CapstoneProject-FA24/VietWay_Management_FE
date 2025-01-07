@@ -28,7 +28,7 @@ const TourTemplateRevenue = ({ revenueData }) => {
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
-                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, color: '#0051cd' }}>
                         Thống kê doanh thu theo tour
                     </Typography>
                     <Typography variant="body2" color="text.secondary">

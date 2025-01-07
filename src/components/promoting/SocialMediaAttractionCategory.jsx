@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Box, Typography, Grid, FormControl, InputLabel, Select, MenuItem, Button  } from '@mui/material';
 import {
   BarChart,
   Bar,
@@ -10,6 +10,9 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import AttractionCategoryReport from '@components/manager/category/AttractionCategoryReport';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length > 0) {
@@ -44,12 +47,21 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const SocialMediaAttractionCategory = ({ data }) => {
+const SocialMediaAttractionCategory = ({ data, startDate, endDate }) => {
   const [chartType, setChartType] = useState('average');
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   if (!data || data.length === 0) {
     return <Typography>No data available</Typography>;
   }
+
+  const handleCategoryClick = (categoryId, categoryName) => {
+    setSelectedCategory({ id: categoryId, name: categoryName });
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedCategory(null);
+  };
 
   const getChartData = (type) => {
     const metricMap = {
@@ -72,14 +84,15 @@ const SocialMediaAttractionCategory = ({ data }) => {
     <Box>
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
-          {`Điểm đánh giá mức độ quan tâm ${
-            {
-              'average': 'trung bình',
-              'facebook': 'trên Facebook',
-              'twitter': 'trên X (Twitter)',
-              'attraction': 'của các điểm tham quan'
-            }[chartType]
-          }`}
+          {`Biểu đồ so sánh điểm đánh giá mức độ quan tâm ${{
+            'average': 'trung bình',
+            'facebook': 'trên Facebook',
+            'twitter': 'trên X (Twitter)',
+            'attraction': 'trên trang Vietway'
+          }[chartType]
+            } giữa các loại điểm tham quan 
+            ${new Date(startDate).toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' }).replace(', ', '/').replace('tháng', '')} đến 
+            ${new Date(endDate).toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' }).replace(', ', '/').replace('tháng', '')}`}
         </Typography>
         <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
           <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
@@ -92,36 +105,52 @@ const SocialMediaAttractionCategory = ({ data }) => {
             <MenuItem value="average">Trung bình</MenuItem>
             <MenuItem value="facebook">Trên Facebook</MenuItem>
             <MenuItem value="twitter">Trên X (Twitter)</MenuItem>
-            <MenuItem value="attraction">Của các điểm tham quan</MenuItem>
+            <MenuItem value="attraction">Trên trang Vietway</MenuItem>
           </Select>
         </FormControl>
       </Box>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart 
-              data={getChartData(chartType)} 
+            <BarChart
+              data={getChartData(chartType)}
               margin={{
                 top: 50,
                 right: 10,
                 left: -10,
                 bottom: 0,
               }}
-              barCategoryGap={10} 
+              barCategoryGap={10}
               barGap={0}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="name"
-                height={180}
                 interval={0}
-                angle={-60}
-                textAnchor="end"
-                tick={{
-                  fontSize: 12.5,
-                  width: 210,
-                  wordWrap: 'break-word',
+                tick={(props) => {
+                  const { x, y, payload } = props;
+                  const category = data.find(c => c.categoryName === payload.value);
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      <text
+                        x={0}
+                        y={0}
+                        dy={16}
+                        textAnchor="end"
+                        fill="#666"
+                        transform="rotate(-45)"
+                        style={{
+                          fontSize: 14,
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => handleCategoryClick(category.categoryId, category.categoryName)}
+                      >
+                        {payload.value}
+                      </text>
+                    </g>
+                  );
                 }}
+                height={120}
               />
               <YAxis label={{
                 value: "Điểm đánh giá mức độ quan tâm",
@@ -140,6 +169,32 @@ const SocialMediaAttractionCategory = ({ data }) => {
           </ResponsiveContainer>
         </Grid>
       </Grid>
+      <Dialog
+        open={Boolean(selectedCategory)}
+        onClose={handleCloseDialog}
+        maxWidth="lg"
+        fullWidth
+      >
+        <Box sx={{ position: 'relative' }}>
+          <Button
+            onClick={handleCloseDialog}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+              zIndex: 1
+            }}
+          >
+            Đóng
+          </Button>
+          {selectedCategory && (
+            <AttractionCategoryReport
+              categoryId={selectedCategory.id}
+            />
+          )}
+        </Box>
+      </Dialog>
     </Box>
   );
 };

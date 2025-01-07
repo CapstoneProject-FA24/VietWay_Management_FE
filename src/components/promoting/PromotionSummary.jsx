@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { Box, Grid, Paper, Typography, FormControl, Select, MenuItem } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Visibility, Share, Comment, ThumbUp, Repeat, Favorite, Reply, TrendingUp, Facebook, } from '@mui/icons-material';
-import XIcon from '@mui/icons-material/X'; 
+import XIcon from '@mui/icons-material/X';
 
 const PromotionSummary = ({ socialMediaData, promotionData }) => {
     const [selectedMetrics, setSelectedMetrics] = useState('interactions');
 
     const metricsOptions = [
-        { value: 'interactions', label: 'Tương tác (Chia sẻ / Retweet)', fbKey: 'fbShares', twKey: 'twRetweets' },
-        { value: 'comments', label: 'Bình luận / Trả lời', fbKey: 'fbComments', twKey: 'twReplies' },
+        { value: 'interactions', label: 'Chia sẻ', fbKey: 'fbShares', twKey: 'twRetweets' },
+        { value: 'comments', label: 'Bình luận', fbKey: 'fbComments', twKey: 'twReplies' },
         { value: 'impressions', label: 'Lượt xem', fbKey: 'fbImpressions', twKey: 'twImpressions' },
-        { value: 'reactions', label: 'Phản ứng / Lượt thích', fbKey: 'fbReactions', twKey: 'twLikes' },
+        { value: 'reactions', label: 'Phản ứng (biểu tượng cảm xúc)', fbKey: 'fbReactions', twKey: 'twLikes' },
         { value: 'scores', label: 'Điểm đánh giá mức độ quan tâm', fbKey: 'fbScore', twKey: 'twScore' },
     ];
 
@@ -22,6 +22,8 @@ const PromotionSummary = ({ socialMediaData, promotionData }) => {
         [currentMetric.fbKey]: socialMediaData.facebook[currentMetric.fbKey.replace('fb', '').toLowerCase()][index],
         [currentMetric.twKey]: socialMediaData.twitter[currentMetric.twKey.replace('tw', '').toLowerCase()][index],
     })) || [];
+
+    const selectedMetricLabel = metricsOptions.find(option => option.value === selectedMetrics)?.label || 'Chọn chỉ số so sánh';
 
     return (
         <Box sx={{ p: 1 }}>
@@ -42,26 +44,34 @@ const PromotionSummary = ({ socialMediaData, promotionData }) => {
                             </Select>
                         </FormControl>
                     </Box>
+                    <Typography variant="h6" textAlign="center" fontWeight={'bold'}>Biểu đồ so sánh {selectedMetrics == 'scores' ? "" : "số lượng"} {selectedMetricLabel.toLocaleLowerCase()} giữa Facebook và X(Twitter) theo thời gian</Typography>
                     <ResponsiveContainer width="100%" height={400}>
-                        <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <LineChart data={timeSeriesData} margin={{ top: 50, right: 30, left: 20, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" tick={{ fontSize: 13 }}/>
-                            <YAxis tick={{ fontSize: 13 }}/>
+                            <XAxis dataKey="date" tick={{ fontSize: 13 }} />
+                            <YAxis tick={{ fontSize: 13 }}
+                                label={{
+                                    value: `${selectedMetrics == 'scores' ? 'Điểm đánh giá mức độ quan tâm' : 'Lượt'}`,
+                                    position: "top",
+                                    offset: 20,
+                                    style: { fontSize: 16 },
+                                    dx: selectedMetrics == 'scores' ? 80 : 30,
+                                }} />
                             <Tooltip />
                             <Legend />
-                            <Line 
-                                type="monotone" 
-                                dataKey={currentMetric.fbKey} 
-                                name="Facebook" 
-                                stroke="#1877F2" 
-                                strokeWidth={2} 
+                            <Line
+                                type="monotone"
+                                dataKey={currentMetric.fbKey}
+                                name="Facebook"
+                                stroke="#1877F2"
+                                strokeWidth={2}
                             />
-                            <Line 
-                                type="monotone" 
-                                dataKey={currentMetric.twKey} 
-                                name="X (Twitter)" 
-                                stroke="#000000" 
-                                strokeWidth={2} 
+                            <Line
+                                type="monotone"
+                                dataKey={currentMetric.twKey}
+                                name="X (Twitter)"
+                                stroke="#000000"
+                                strokeWidth={2}
                             />
                         </LineChart>
                     </ResponsiveContainer>
