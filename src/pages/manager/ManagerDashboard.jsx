@@ -168,7 +168,7 @@ const ManagerDashboard = () => {
   ];
 
   return (
-    <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh', maxWidth: '98vw' }}>
       <Helmet>
         <title>Dashboard</title>
       </Helmet>

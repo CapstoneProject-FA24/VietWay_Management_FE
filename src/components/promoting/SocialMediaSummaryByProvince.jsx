@@ -228,7 +228,7 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
     const renderDataTable = () => (
         <Box>
             <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant='h5' textAlign='center' width={'100%'} fontWeight={'bold'} marginTop={2}>
+                <Typography variant='h5' textAlign='center' fontWeight={'bold'} marginTop={2}>
                     Bảng dữ liệu chi tiết mức độ quan tâm của khách hàng với các tỉnh thành
                 </Typography>
                 <FormControl sx={{ minWidth: 250 }}>
@@ -247,7 +247,7 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+                            <TableCell sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>
                                 <TableSortLabel
                                     active={orderBy === 'provinceName'}
                                     direction={orderBy === 'provinceName' ? order : 'asc'}
@@ -256,12 +256,12 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
                                     Tỉnh thành
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>Số bài trên Vietway</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>Số bài trên Facebook</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>Số bài trên X</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>ĐĐGMĐQT tham quan</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>Tour du lịch</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>Số bài viết</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>Số điểm tham quan</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>Số tour mẫu</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>Số bài trên Facebook</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>Số bài trên X</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>
                                 <TableSortLabel
                                     active={orderBy === 'averageScore'}
                                     direction={orderBy === 'averageScore' ? order : 'asc'}
@@ -270,11 +270,11 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
                                     ĐĐGMĐQT trung bình
                                 </TableSortLabel>
                             </TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>ĐĐGMĐQT trên Facebook</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>ĐĐGMĐQT trên X</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>ĐĐGMĐQT tour</TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>ĐĐGMĐQT điểm tham quan </TableCell>
-                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.85rem' }}>ĐĐGMĐQT bài viết</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>ĐĐGMĐQT trên Facebook</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>ĐĐGMĐQT trên X</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>ĐĐGMĐQT tour</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>ĐĐGMĐQT điểm tham quan </TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '0.82rem' }}>ĐĐGMĐQT bài viết</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -283,17 +283,17 @@ const SocialMediaSummaryByProvince = ({ data, startDate, endDate }) => {
                                 <TableCell component="th" scope="row">
                                     {province.provinceName}
                                 </TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.totalSitePost}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.totalFacebookPost}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.totalXPost}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.totalAttraction}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.totalTourTemplate}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.averageScore.toFixed(2)}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.averageFacebookScore.toFixed(2)}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.averageXScore.toFixed(2)}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.averageTourTemplateScore.toFixed(2)}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.averageAttractionScore.toFixed(2)}</TableCell>
-                                <TableCell align="center" sx={{ fontSize: '0.85rem' }}>{province.averageSitePostScore.toFixed(2)}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.totalSitePost}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.totalAttraction}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.totalTourTemplate}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.totalFacebookPost}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.totalXPost}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.averageScore.toFixed(2)}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.averageFacebookScore.toFixed(2)}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.averageXScore.toFixed(2)}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.averageTourTemplateScore.toFixed(2)}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.averageAttractionScore.toFixed(2)}</TableCell>
+                                <TableCell align="center" sx={{ fontSize: '0.82rem' }}>{province.averageSitePostScore.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
