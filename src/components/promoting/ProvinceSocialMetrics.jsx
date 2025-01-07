@@ -102,14 +102,14 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
         { label: 'Tổng bài viết trên website', value: provinceData?.totalSitePost || 0 },
         { label: 'Tổng điểm địa điểm', value: provinceData?.totalAttraction || 0 },
         { label: 'Tổng tour du lịch', value: provinceData?.totalTourTemplate || 0 },
-        { label: 'Tổng bài viết X', value: provinceData?.totalXPost || 0 },
-        { label: 'Tổng bài viết Facebook', value: provinceData?.totalFacebookPost || 0 },
-        { label: 'Điểm trung bình', value: (provinceData?.averageScore || 0).toFixed(2) },
-        { label: 'Điểm Facebook trung bình', value: (provinceData?.averageFacebookScore || 0).toFixed(2) },
-        { label: 'Điểm X trung bình', value: (provinceData?.averageXScore || 0).toFixed(2) },
-        { label: 'Điểm tour du lịch trung bình', value: (provinceData?.averageTourTemplateScore || 0).toFixed(2) },
-        { label: 'Điểm địa điểm trung bình', value: (provinceData?.averageAttractionScore || 0).toFixed(2) },
-        { label: 'Điểm bài viết trung bình', value: (provinceData?.averageSitePostScore || 0).toFixed(2) },
+        { label: 'Tổng bài đăng trên X', value: provinceData?.totalXPost || 0 },
+        { label: 'Tổng bài đăng trên Facebook', value: provinceData?.totalFacebookPost || 0 },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình', value: (provinceData?.averageScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên Facebook', value: (provinceData?.averageFacebookScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên X', value: (provinceData?.averageXScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình của các tour du lịch trên trang Vietway', value: (provinceData?.averageTourTemplateScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình của các điểm tham quan trên trang Vietway', value: (provinceData?.averageAttractionScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình của các bài viết trên trang Vietway', value: (provinceData?.averageSitePostScore || 0).toFixed(2) },
     ];
 
     // Prepare data for charts with null checks
