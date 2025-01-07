@@ -28,6 +28,8 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
   const [fieldErrors, setFieldErrors] = useState({});
   const [popularProvinces, setPopularProvinces] = useState([]);
   const [popularAttractionTypes, setPopularAttractionTypes] = useState([]);
+  const [hotProvinces, setHotProvinces] = useState([]);
+  const [hotCategories, setHotCategories] = useState([]);
 
   useEffect(() => {
     if (attraction) {
@@ -42,6 +44,15 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
         type: { value: attraction.attractionTypeId },
         placeId: { value: attraction.googlePlaceId || '' }
       });
+      
+      if (attraction.attractionTypeId) {
+        handleCategoryChange(attraction.attractionTypeId);
+      }
+      if (attraction.provinceId) {
+        fetchPopularAttractionCategories(attraction.provinceId)
+          .then(data => setHotCategories(data.map(c => c.attractionCategoryId)))
+          .catch(error => console.error('Error fetching initial hot categories:', error));
+      }
     }
   }, [attraction]);
 
@@ -97,8 +108,16 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
     setImages(prevImages => [...prevImages, ...files]);
   };
 
-  const handleProvinceChange = (event) => {
-    setSelectedProvince(event.target.value);
+  const handleProvinceChange = async (event) => {
+    const newProvinceId = event.target.value;
+    setSelectedProvince(newProvinceId);
+    
+    try {
+      const hotCategoriesData = await fetchPopularAttractionCategories(newProvinceId);
+      setHotCategories(hotCategoriesData.map(c => c.attractionCategoryId));
+    } catch (error) {
+      console.error('Error fetching hot categories:', error);
+    }
   };
 
   const modules = {
@@ -209,6 +228,15 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
     }
   };
 
+  const handleCategoryChange = async (categoryId) => {
+    try {
+      const hotProvinceData = await fetchPopularProvinces(categoryId, 0);
+      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+    } catch (error) {
+      console.error('Error fetching hot provinces:', error);
+    }
+  };
+
   return (
     <Box sx={{ p: 3, flexGrow: 1, mt: 5 }}>
       <Box sx={{ display: 'flex', gap: 3 }}>
@@ -219,8 +247,11 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
           <FormControl sx={{ width: '100%' }}>
             <Select
               value={editableFields.type.value}
-              onChange={(e) => handleFieldChange('type', e.target.value)}
-              variant="outlined" fullWidth sx={{ mr: 2 }} 
+              onChange={(e) => {
+                handleFieldChange('type', e.target.value);
+                handleCategoryChange(e.target.value);
+              }}
+              variant="outlined" fullWidth sx={{ mr: 2 }}
               error={!!fieldErrors.attractionTypeId}
             >
               {attractionTypes.map((type) => (
@@ -228,7 +259,16 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {type.attractionTypeName}
                     {popularAttractionTypes.includes(type.attractionTypeId) && (
-                      <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                      <LocalFireDepartmentIcon 
+                        sx={{ color: 'red', ml: 1 }}
+                        titleAccess="Loại điểm tham quan đang được quan tâm nhiều nhất"
+                      />
+                    )}
+                    {hotCategories.includes(type.attractionTypeId) && (
+                      <LocalFireDepartmentIcon 
+                        sx={{ color: '#ff8f00', ml: 1 }}
+                        titleAccess="Loại điểm tham quan đang được quan tâm nhiều nhất tại tỉnh thành này"
+                      />
                     )}
                   </Box>
                 </MenuItem>
@@ -255,7 +295,16 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     {province.provinceName}
                     {popularProvinces.includes(province.provinceId) && (
-                      <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                      <LocalFireDepartmentIcon 
+                        sx={{ color: 'red', ml: 1 }}
+                        titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                      />
+                    )}
+                    {hotProvinces.includes(province.provinceId) && (
+                      <LocalFireDepartmentIcon 
+                        sx={{ color: '#ff8f00', ml: 1 }}
+                        titleAccess="Tỉnh thành đang quan tâm đến loại điểm tham quan này nhiều nhất"
+                      />
                     )}
                   </Box>
                 </MenuItem>

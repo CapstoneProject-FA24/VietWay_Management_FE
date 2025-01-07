@@ -65,6 +65,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
     const [fieldErrors, setFieldErrors] = useState({});
 
+    const [hotProvinces, setHotProvinces] = useState([]);
+    const [hotCategories, setHotCategories] = useState([]);
+
     const handleCloseSnackbar = (event, reason) => {
         if (reason === 'clickaway') {
             return;
@@ -120,27 +123,63 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         fetchPopularData();
     }, []);
 
-    const handleFieldChange = (field, value) => {
-        setEditableFields(prev => ({
-            ...prev,
-            [field]: { value }
-        }));
-
-        if (field === 'duration') {
-            const selectedDuration = tourDurations.find(d => d.durationId === value);
-            if (selectedDuration) {
-                const numberOfDays = selectedDuration.dayNumber;
-                const newSchedule = Array.from({ length: numberOfDays }, (_, index) => {
-                    const existingDay = tourTemplate.schedule.find(s => s.dayNumber === (index + 1));
-                    if (existingDay) {
-                        return existingDay;
-                    }
-                    return { dayNumber: index + 1, title: '', description: '', attractions: [], isEditing: true };
-                });
-                setTourTemplate(prev => ({ ...prev, schedule: newSchedule }));
-            }
+    const handleCategoryChange = async (categoryId) => {
+        console.log("Category changed to:", categoryId);
+        try {
+            const hotProvinceData = await fetchPopularProvinces(categoryId, 1); // 1 for tour category type
+            console.log("Hot provinces data:", hotProvinceData);
+            setHotProvinces(hotProvinceData.map(p => p.provinceId));
+        } catch (error) {
+            console.error('Error fetching hot provinces:', error);
         }
     };
+
+    const handleProvinceChange = async (provinceId) => {
+        console.log("Province changed to:", provinceId);
+        try {
+            const hotCategoriesData = await fetchPopularTourCategories(provinceId);
+            console.log("Hot categories data:", hotCategoriesData);
+            setHotCategories(hotCategoriesData.map(c => c.tourCategoryId));
+        } catch (error) {
+            console.error('Error fetching hot categories:', error);
+        }
+    };
+
+    const handleFieldChange = (field, value) => {
+        if (field === 'tourCategory') {
+            handleCategoryChange(value);
+        }
+        if (field === 'startingProvinceId') {
+            handleProvinceChange(value);
+        }
+        if (field === 'provinces' && value.length > 0) {
+            const lastSelectedProvince = value[value.length - 1].value;
+            handleProvinceChange(lastSelectedProvince);
+        }
+
+        setEditableFields(prev => ({
+            ...prev,
+            [field]: { ...prev[field], value }
+        }));
+        setFieldErrors(prev => ({ ...prev, [field]: undefined }));
+    };
+
+    useEffect(() => {
+        const fetchPopularData = async () => {
+            try {
+                // Fetch initial hot data based on current values
+                if (editableFields.tourCategory.value) {
+                    await handleCategoryChange(editableFields.tourCategory.value);
+                }
+                if (editableFields.startingProvinceId.value) {
+                    await handleProvinceChange(editableFields.startingProvinceId.value);
+                }
+            } catch (error) {
+                console.error('Error fetching initial hot data:', error);
+            }
+        };
+        fetchPopularData();
+    }, []);
 
     const handleImageUpload = (index, event) => {
         const file = event.target.files[0];
@@ -417,7 +456,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Typography gutterBottom>Tour đi tham quan tỉnh/thành phố *</Typography>
                     <ReactSelect
                         isMulti
-                        name="provinces"
+                        value={editableFields.provinces.value}
                         onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
                         options={provinces.map(province => ({
                             value: province.provinceId,
@@ -425,14 +464,22 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     {province.provinceName}
                                     {popularProvinces.includes(province.provinceId) && (
-                                        <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                        <LocalFireDepartmentIcon 
+                                            sx={{ color: 'red' }}
+                                            titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                                        />
+                                    )}
+                                    {hotProvinces.includes(province.provinceId) && (
+                                        <LocalFireDepartmentIcon 
+                                            sx={{ color: '#ff8f00' }}
+                                            titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
+                                        />
                                     )}
                                 </div>
                             )
                         }))}
                         className="basic-multi-select"
                         classNamePrefix="select"
-                        value={editableFields.provinces.value}
                         placeholder=''
                         styles={{
                             control: (base) => ({
@@ -451,17 +498,25 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Select
                         value={editableFields.startingProvinceId.value}
                         onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
-                        displayEmpty
+                        error={!!fieldErrors.startingProvinceId}
+                        variant="outlined"
                         fullWidth
-                        sx={{ backgroundColor: 'white' }}
-                        error={!!fieldErrors.tourName}
                     >
                         {provinces.map((province) => (
                             <MenuItem key={province.provinceId} value={province.provinceId}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     {province.provinceName}
                                     {popularProvinces.includes(province.provinceId) && (
-                                        <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                                        <LocalFireDepartmentIcon 
+                                            sx={{ color: 'red', ml: 1 }}
+                                            titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                                        />
+                                    )}
+                                    {hotProvinces.includes(province.provinceId) && (
+                                        <LocalFireDepartmentIcon 
+                                            sx={{ color: '#ff8f00', ml: 1 }}
+                                            titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
+                                        />
                                     )}
                                 </Box>
                             </MenuItem>
@@ -504,7 +559,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
                             <FormControl sx={{ width: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', width: '100%' }}>
                                     <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng *</Typography>
                                     <Select
                                         sx={{ width: '100%' }} value={editableFields.duration.value}
@@ -525,7 +580,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '35%' }}>
                             <FormControl sx={{ width: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', width: '100%' }}>
                                     <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Loại tour *</Typography>
                                     <Select
                                         value={editableFields.tourCategory.value}
@@ -539,7 +594,16 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                     {category.tourCategoryName}
                                                     {popularTourCategories.includes(category.tourCategoryId) && (
-                                                        <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                                                        <LocalFireDepartmentIcon 
+                                                            sx={{ color: 'red', ml: 1 }}
+                                                            titleAccess="Loại tour đang được quan tâm nhiều nhất"
+                                                        />
+                                                    )}
+                                                    {hotCategories.includes(category.tourCategoryId) && (
+                                                        <LocalFireDepartmentIcon 
+                                                            sx={{ color: '#ff8f00', ml: 1 }}
+                                                            titleAccess="Loại tour đang được quan tâm nhiều nhất tại tỉnh thành này"
+                                                        />
                                                     )}
                                                 </Box>
                                             </MenuItem>
@@ -553,7 +617,7 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
                             <FormControl sx={{ width: '100%' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', width: '100%' }}>
                                     <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Phương tiện *</Typography>
                                     <Select
                                         value={editableFields.transportation.value} error={!!fieldErrors.transportation}

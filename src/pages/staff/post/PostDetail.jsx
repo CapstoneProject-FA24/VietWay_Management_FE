@@ -65,6 +65,8 @@ const PostDetail = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [popularProvinces, setPopularProvinces] = useState([]);
   const [popularPostCategories, setPopularPostCategories] = useState([]);
+  const [hotProvinces, setHotProvinces] = useState([]);
+  const [hotCategories, setHotCategories] = useState([]);
 
   const loadPost = async () => {
     try {
@@ -156,17 +158,24 @@ const PostDetail = () => {
   useEffect(() => {
     const fetchPopularData = async () => {
       try {
-        const popularProvincesData = await fetchPopularProvinces();
-        const popularPostCategoriesData = await fetchPopularPostCategories();
+        const popularProvData = await fetchPopularProvinces();
+        const popularCategoriesData = await fetchPopularPostCategories();
         
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+        setPopularProvinces(popularProvData.map(p => p.provinceId));
+        setPopularPostCategories(popularCategoriesData.map(c => c.postCategoryId));
+
+        if (post?.postCategoryId) {
+          await handleCategoryChange(post.postCategoryId);
+        }
+        if (post?.provinceId) {
+          await handleProvinceChange(post.provinceId);
+        }
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
     };
     fetchPopularData();
-  }, []);
+  }, [post]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -317,13 +326,31 @@ const PostDetail = () => {
   };
 
   const handleFieldChange = (field, value) => {
+    if (field === 'postCategoryId') {
+      handleCategoryChange(value);
+    }
+    if (field === 'provinceId') {
+      handleProvinceChange(value);
+    }
     setEditablePost(prev => ({ ...prev, [field]: value }));
+    setFieldErrors(prev => ({ ...prev, [field]: undefined }));
+  };
 
-    if (field in editableFields) {
-      setEditableFields(prev => ({
-        ...prev,
-        [field]: { ...prev[field], value }
-      }));
+  const handleCategoryChange = async (categoryId) => {
+    try {
+      const hotProvinceData = await fetchPopularProvinces(categoryId, 2); // 2 for post type
+      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+    } catch (error) {
+      console.error('Error fetching hot provinces:', error);
+    }
+  };
+
+  const handleProvinceChange = async (provinceId) => {
+    try {
+      const hotCategoriesData = await fetchPopularPostCategories(provinceId);
+      setHotCategories(hotCategoriesData.map(c => c.postCategoryId));
+    } catch (error) {
+      console.error('Error fetching hot categories:', error);
     }
   };
 
@@ -461,61 +488,69 @@ const PostDetail = () => {
                     />
                     <Box sx={commonStyles.boxContainer}>
                       <Box sx={commonStyles.flexContainer}>
-                        <FormControl fullWidth margin="normal" error={!!fieldErrors.category}>
+                        <FormControl fullWidth margin="normal" error={!!fieldErrors.postCategoryId}>
                           <InputLabel>Danh mục *</InputLabel>
                           <Select
-                            value={editablePost?.postCategoryId || ''} 
-                            label="Danh mục *" 
-                            disabled={isLoadingCategories}
-                            onChange={(e) => {
-                              const selectedCategory = categoryOptions.find(cat => cat.postCategoryId === e.target.value);
-                              if (selectedCategory) {
-                                handleFieldChange('postCategoryId', selectedCategory.postCategoryId);
-                                handleFieldChange('postCategoryName', selectedCategory.name);
-                              }
-                            }}
+                            value={editablePost.postCategoryId || ''}
+                            onChange={(e) => handleFieldChange('postCategoryId', e.target.value)}
+                            label="Danh mục *"
                           >
-                            {categoryOptions.map(category => (
+                            {categoryOptions.map((category) => (
                               <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   {category.name}
                                   {popularPostCategories.includes(category.postCategoryId) && (
-                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: 'red' }}
+                                      titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
+                                    />
+                                  )}
+                                  {hotCategories.includes(category.postCategoryId) && (
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: '#ff8f00' }}
+                                      titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
+                                    />
                                   )}
                                 </Box>
                               </MenuItem>
                             ))}
                           </Select>
-                          {fieldErrors.category && (<FormHelperText>{fieldErrors.category}</FormHelperText>)}
+                          {fieldErrors.postCategoryId && (
+                            <FormHelperText>{fieldErrors.postCategoryId}</FormHelperText>
+                          )}
                         </FormControl>
                       </Box>
                       <Box sx={commonStyles.flexContainer}>
                         <FormControl fullWidth margin="normal" error={!!fieldErrors.provinceId}>
                           <InputLabel>Tỉnh/Thành phố *</InputLabel>
                           <Select
-                            value={editablePost?.provinceId || ''}
-                            onChange={(e) => {
-                              const selectedProvince = provinceOptions.find(p => p.value === e.target.value);
-                              if (selectedProvince) {
-                                handleFieldChange('provinceId', selectedProvince.value);
-                                handleFieldChange('provinceName', selectedProvince.label);
-                              }
-                            }}
-                            label="Tỉnh/Thành phố *" 
-                            disabled={isLoadingProvinces}
+                            value={editablePost.provinceId || ''}
+                            onChange={(e) => handleFieldChange('provinceId', e.target.value)}
+                            label="Tỉnh/Thành phố *"
                           >
-                            {provinceOptions.map(option => (
-                              <MenuItem key={option.value} value={option.value}>
+                            {provinceOptions.map((province) => (
+                              <MenuItem key={province.value} value={province.value}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                  {typeof option.label === 'string' ? option.label : option.label}
-                                  {popularProvinces.includes(option.value) && (
-                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                  {province.label}
+                                  {popularProvinces.includes(province.value) && (
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: 'red' }}
+                                      titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                                    />
+                                  )}
+                                  {hotProvinces.includes(province.value) && (
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: '#ff8f00' }}
+                                      titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
+                                    />
                                   )}
                                 </Box>
                               </MenuItem>
                             ))}
                           </Select>
-                          {fieldErrors.provinceId && (<FormHelperText>{fieldErrors.provinceId}</FormHelperText>)}
+                          {fieldErrors.provinceId && (
+                            <FormHelperText>{fieldErrors.provinceId}</FormHelperText>
+                          )}
                         </FormControl>
                       </Box>
                     </Box>

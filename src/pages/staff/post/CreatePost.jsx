@@ -48,6 +48,8 @@ const CreatePost = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [popularProvinces, setPopularProvinces] = useState([]);
   const [popularPostCategories, setPopularPostCategories] = useState([]);
+  const [hotProvinces, setHotProvinces] = useState([]);
+  const [hotCategories, setHotCategories] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,7 +70,16 @@ const CreatePost = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {province.provinceName}
               {popularProvincesData.map(p => p.provinceId).includes(province.provinceId) && (
-                <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                <LocalFireDepartmentIcon 
+                  sx={{ color: 'red' }}
+                  titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                />
+              )}
+              {hotProvinces.includes(province.provinceId) && (
+                <LocalFireDepartmentIcon 
+                  sx={{ color: '#ff8f00' }}
+                  titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
+                />
               )}
             </div>
           )
@@ -80,7 +91,16 @@ const CreatePost = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {postCategory.name}
               {popularPostCategoriesData.map(c => c.postCategoryId).includes(postCategory.postCategoryId) && (
-                <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                <LocalFireDepartmentIcon 
+                  sx={{ color: 'red' }}
+                  titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
+                />
+              )}
+              {hotCategories.includes(postCategory.postCategoryId) && (
+                <LocalFireDepartmentIcon 
+                  sx={{ color: '#ff8f00' }}
+                  titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
+                />
               )}
             </div>
           )
@@ -101,23 +121,30 @@ const CreatePost = () => {
       }
     };
     loadData();
-  }, []);
+  }, [hotProvinces, hotCategories]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleFieldChange = (field, value) => {
+    if (field === 'category') {
+      handleCategoryChange(value);
+    }
     setNewPost(prev => ({ ...prev, [field]: value }));
+    setFieldErrors(prev => ({ ...prev, [field]: undefined }));
   };
 
-  const handleProvinceChange = (event) => {
-    const selectedProvince = provinceOptions.find(
-      option => option.value === event.target.value
-    );
-    if (selectedProvince) {
-      handleFieldChange('provinceId', selectedProvince.value);
-      handleFieldChange('provinceName', selectedProvince.label);
+  const handleProvinceChange = async (event) => {
+    const provinceId = event.target.value;
+    setNewPost(prev => ({ ...prev, provinceId }));
+    setFieldErrors(prev => ({ ...prev, provinceId: undefined }));
+
+    try {
+      const hotCategoriesData = await fetchPopularPostCategories(provinceId);
+      setHotCategories(hotCategoriesData.map(c => c.postCategoryId));
+    } catch (error) {
+      console.error('Error fetching hot categories:', error);
     }
   };
 
@@ -212,6 +239,15 @@ const CreatePost = () => {
 
   const handleCloseSnackbar = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
+  const handleCategoryChange = async (categoryId) => {
+    try {
+      const hotProvinceData = await fetchPopularProvinces(categoryId, 2);
+      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+    } catch (error) {
+      console.error('Error fetching hot provinces:', error);
+    }
   };
 
   return (

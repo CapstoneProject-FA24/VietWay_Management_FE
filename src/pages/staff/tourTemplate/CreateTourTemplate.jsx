@@ -49,6 +49,8 @@ const CreateTourTemplate = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', hide: 5000 });
   const [popularProvinces, setPopularProvinces] = useState([]);
   const [popularTourCategories, setPopularTourCategories] = useState([]);
+  const [hotProvinces, setHotProvinces] = useState([]);
+  const [hotCategories, setHotCategories] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,11 +71,11 @@ const CreateTourTemplate = () => {
   useEffect(() => {
     const fetchPopularData = async () => {
       try {
-        const popularProvincesData = await fetchPopularProvinces();
-        const popularTourCategoriesData = await fetchPopularTourCategories();
-        
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+        const popularProvData = await fetchPopularProvinces();
+        setPopularProvinces(popularProvData.map(p => p.provinceId));
+
+        const popularCategoriesData = await fetchPopularTourCategories();
+        setPopularTourCategories(popularCategoriesData.map(c => c.tourCategoryId));
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
@@ -102,8 +104,20 @@ const CreateTourTemplate = () => {
   }, [tourTemplate.duration, tourDurations]);
 
   const handleFieldChange = (field, value) => {
-    setTourTemplate(prev => ({ ...prev, [field]: value }));
+    console.log("Field changed:", field, value);
+    
+    if (field === 'tourCategory') {
+      handleCategoryChange(value);
+    }
+    if (field === 'startingProvinceId') {
+      handleProvinceChange(value);
+    }
+    if (field === 'provinces' && value.length > 0) {
+      const lastSelectedProvince = value[value.length - 1].value;
+      handleProvinceChange(lastSelectedProvince);
+    }
 
+    setTourTemplate(prev => ({ ...prev, [field]: value }));
     setFieldErrors(prev => ({ ...prev, [field]: undefined }));
 
     if (field === 'duration') {
@@ -369,6 +383,24 @@ const CreateTourTemplate = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  const handleCategoryChange = async (categoryId) => {
+    try {
+      const hotProvinceData = await fetchPopularProvinces(categoryId, 1);
+      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+    } catch (error) {
+      console.error('Error fetching hot provinces:', error);
+    }
+  };
+
+  const handleProvinceChange = async (provinceId) => {
+    try {
+      const hotCategoriesData = await fetchPopularTourCategories(provinceId);
+      setHotCategories(hotCategoriesData.map(c => c.tourCategoryId));
+    } catch (error) {
+      console.error('Error fetching hot categories:', error);
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '100vh' }}>
       <Helmet><title>Tạo tour mẫu mới</title></Helmet>
@@ -398,7 +430,16 @@ const CreateTourTemplate = () => {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {province.provinceName}
                         {popularProvinces.includes(province.provinceId) && (
-                          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                          <LocalFireDepartmentIcon 
+                            sx={{ color: 'red' }}
+                            titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                          />
+                        )}
+                        {hotProvinces.includes(province.provinceId) && (
+                          <LocalFireDepartmentIcon 
+                            sx={{ color: '#ff8f00' }}
+                            titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
+                          />
                         )}
                       </div>
                     )
@@ -433,7 +474,16 @@ const CreateTourTemplate = () => {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {province.provinceName}
                         {popularProvinces.includes(province.provinceId) && (
-                          <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                          <LocalFireDepartmentIcon 
+                            sx={{ color: 'red', ml: 1 }}
+                            titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                          />
+                        )}
+                        {hotProvinces.includes(province.provinceId) && (
+                          <LocalFireDepartmentIcon 
+                            sx={{ color: '#ff8f00', ml: 1 }}
+                            titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
+                          />
                         )}
                       </Box>
                     </MenuItem>
@@ -549,7 +599,7 @@ const CreateTourTemplate = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, mb: 4, width: '100%' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
                     <FormControl sx={{ width: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', width: '100%' }}>
                         <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Thời lượng *</Typography>
                         <Select
                           labelId="duration-select-label"
@@ -572,7 +622,7 @@ const CreateTourTemplate = () => {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '35%' }}>
                     <FormControl sx={{ width: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', width: '100%' }}>
                         <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Loại tour *</Typography>
                         <Select
                           labelId="tourCategory-select-label"
@@ -587,7 +637,16 @@ const CreateTourTemplate = () => {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 {tourCategory.tourCategoryName}
                                 {popularTourCategories.includes(tourCategory.tourCategoryId) && (
-                                  <LocalFireDepartmentIcon sx={{ color: 'red', ml: 1 }} />
+                                  <LocalFireDepartmentIcon 
+                                    sx={{ color: 'red' }}
+                                    titleAccess="Loại tour đang được quan tâm nhiều nhất"
+                                  />
+                                )}
+                                {hotCategories.includes(tourCategory.tourCategoryId) && (
+                                  <LocalFireDepartmentIcon 
+                                    sx={{ color: '#ff8f00', ml: -1 }}
+                                    titleAccess="Loại tour đang được quan tâm nhiều nhất tại tỉnh thành này"
+                                  />
                                 )}
                               </Box>
                             </MenuItem>
@@ -601,7 +660,7 @@ const CreateTourTemplate = () => {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '30%' }}>
                     <FormControl sx={{ width: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'left', width: '100%' }}>
                         <Typography sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Phương tiện *</Typography>
                         <Select
                           labelId="transportation-select-label"

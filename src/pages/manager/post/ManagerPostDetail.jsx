@@ -47,6 +47,8 @@ const ManagerPostDetail = () => {
   const [currentTab, setCurrentTab] = useState(0);
   const [popularProvinces, setPopularProvinces] = useState([]);
   const [popularPostCategories, setPopularPostCategories] = useState([]);
+  const [hotProvinces, setHotProvinces] = useState([]);
+  const [hotCategories, setHotCategories] = useState([]);
 
   const loadPost = async () => {
     try {
@@ -152,17 +154,24 @@ const ManagerPostDetail = () => {
   useEffect(() => {
     const fetchPopularData = async () => {
       try {
-        const popularProvincesData = await fetchPopularProvinces();
-        const popularPostCategoriesData = await fetchPopularPostCategories();
+        const popularProvData = await fetchPopularProvinces();
+        const popularCategoriesData = await fetchPopularPostCategories();
         
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+        setPopularProvinces(popularProvData.map(p => p.provinceId));
+        setPopularPostCategories(popularCategoriesData.map(c => c.postCategoryId));
+
+        if (post?.postCategoryId) {
+          await handleCategoryChange(post.postCategoryId);
+        }
+        if (post?.provinceId) {
+          await handleProvinceChange(post.provinceId);
+        }
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
     };
     fetchPopularData();
-  }, []);
+  }, [post]);
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -439,6 +448,12 @@ const ManagerPostDetail = () => {
   };
 
   const handleFieldChange = (field, value) => {
+    if (field === 'postCategoryId') {
+      handleCategoryChange(value);
+    }
+    if (field === 'provinceId') {
+      handleProvinceChange(value);
+    }
     setEditablePost(prev => ({
       ...prev,
       [field]: value
@@ -465,6 +480,24 @@ const ManagerPostDetail = () => {
       </DialogActions>
     </Dialog>
   );
+
+  const handleCategoryChange = async (categoryId) => {
+    try {
+      const hotProvinceData = await fetchPopularProvinces(categoryId, 2);
+      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+    } catch (error) {
+      console.error('Error fetching hot provinces:', error);
+    }
+  };
+
+  const handleProvinceChange = async (provinceId) => {
+    try {
+      const hotCategoriesData = await fetchPopularPostCategories(provinceId);
+      setHotCategories(hotCategoriesData.map(c => c.postCategoryId));
+    } catch (error) {
+      console.error('Error fetching hot categories:', error);
+    }
+  };
 
   if (!post) return null;
   const statusInfo = getPostStatusInfo(post.status);
@@ -514,7 +547,7 @@ const ManagerPostDetail = () => {
         </Box>
         <Box sx={{ flexGrow: 1, p: 3 }}>
           <Box maxWidth="89vw">
-            <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -6, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
+            <Box elevation={2} sx={{ p: 1, mb: 3, marginTop: -2, height: '100%', width: isSidebarOpen ? 'calc(95vw - 260px)' : 'calc(95vw - 20px)' }}>
               {isEditMode ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                   <TextField
@@ -541,6 +574,7 @@ const ManagerPostDetail = () => {
                                 postCategoryId: selectedCategory.postCategoryId,
                                 postCategoryName: selectedCategory.name
                               }));
+                              handleCategoryChange(selectedCategory.postCategoryId);
                             }
                           }}
                         >
@@ -549,13 +583,24 @@ const ManagerPostDetail = () => {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 {category.name}
                                 {popularPostCategories.includes(category.postCategoryId) && (
-                                  <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                  <LocalFireDepartmentIcon 
+                                    sx={{ color: 'red', ml: 1 }}
+                                    titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
+                                  />
+                                )}
+                                {hotCategories.includes(category.postCategoryId) && (
+                                  <LocalFireDepartmentIcon 
+                                    sx={{ color: '#ff8f00', ml: 1 }}
+                                    titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
+                                  />
                                 )}
                               </Box>
                             </MenuItem>
                           ))}
                         </Select>
-                        {fieldErrors.category && (<FormHelperText>{fieldErrors.category}</FormHelperText>)}
+                        {fieldErrors.category && (
+                          <FormHelperText>{fieldErrors.category}</FormHelperText>
+                        )}
                       </FormControl>
                     </Box>
                     <Box sx={commonStyles.flexContainer}>
@@ -572,6 +617,7 @@ const ManagerPostDetail = () => {
                                 provinceId: selectedProvince.value,
                                 provinceName: selectedProvince.label
                               }));
+                              handleProvinceChange(selectedProvince.value);
                             }
                           }}
                         >
@@ -580,13 +626,24 @@ const ManagerPostDetail = () => {
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 {typeof option.label === 'string' ? option.label : option.label}
                                 {popularProvinces.includes(option.value) && (
-                                  <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                  <LocalFireDepartmentIcon 
+                                    sx={{ color: 'red', ml: 1 }}
+                                    titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                                  />
+                                )}
+                                {hotProvinces.includes(option.value) && (
+                                  <LocalFireDepartmentIcon 
+                                    sx={{ color: '#ff8f00', ml: 1 }}
+                                    titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
+                                  />
                                 )}
                               </Box>
                             </MenuItem>
                           ))}
                         </Select>
-                        {fieldErrors.provinceId && (<FormHelperText>{fieldErrors.provinceId}</FormHelperText>)}
+                        {fieldErrors.provinceId && (
+                          <FormHelperText>{fieldErrors.provinceId}</FormHelperText>
+                        )}
                       </FormControl>
                     </Box>
                   </Box>

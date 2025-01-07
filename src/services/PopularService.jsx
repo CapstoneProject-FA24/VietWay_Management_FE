@@ -5,14 +5,12 @@ const baseURL = import.meta.env.VITE_API_URL;
 
 export const fetchPopularProvinces = async (categoryId = null, categoryType = null) => {
     const token = getCookie('token');
+    const queryParams = new URLSearchParams();
+    if (categoryType == 0) queryParams.append('attractionCategory', categoryId);
+    if (categoryType == 1) queryParams.append('tourCategory', categoryId);
+    if (categoryType == 2) queryParams.append('postCategory', categoryId);
     try {
-        let url = `${baseURL}/api/popular/provinces`;
-        
-        if (categoryId && categoryType) {
-            url += `?categoryId=${categoryId}&categoryType=${categoryType}`;
-        }
-
-        const response = await axios.get(url, {
+        const response = await axios.get(`${baseURL}/api/popular/provinces?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -34,10 +32,12 @@ export const fetchPopularProvinces = async (categoryId = null, categoryType = nu
     }
 };
 
-export const fetchPopularAttractionCategories = async () => {
+export const fetchPopularAttractionCategories = async (provinceId) => {
     const token = getCookie('token');
+    const queryParams = new URLSearchParams();
+    if (provinceId) queryParams.append('provinceId', provinceId);
     try {
-        const response = await axios.get(`${baseURL}/api/popular/attraction-categories`, {
+        const response = await axios.get(`${baseURL}/api/popular/attraction-categories?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -59,10 +59,12 @@ export const fetchPopularAttractionCategories = async () => {
     }
 };
 
-export const fetchPopularPostCategories = async () => {
+export const fetchPopularPostCategories = async (provinceId) => {
     const token = getCookie('token');
+    const queryParams = new URLSearchParams();
+    if (provinceId) queryParams.append('provinceId', provinceId);
     try {
-        const response = await axios.get(`${baseURL}/api/popular/post-categories`, {
+        const response = await axios.get(`${baseURL}/api/popular/post-categories?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -84,10 +86,12 @@ export const fetchPopularPostCategories = async () => {
     }
 };
 
-export const fetchPopularTourCategories = async () => {
+export const fetchPopularTourCategories = async (provinceId) => {
     const token = getCookie('token');
+    const queryParams = new URLSearchParams();
+    if (provinceId) queryParams.append('provinceId', provinceId);
     try {
-        const response = await axios.get(`${baseURL}/api/popular/tour-categories`, {
+        const response = await axios.get(`${baseURL}/api/popular/tour-categories?${queryParams.toString()}`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
