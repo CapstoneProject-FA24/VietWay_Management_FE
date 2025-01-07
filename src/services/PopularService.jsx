@@ -6,9 +6,8 @@ const baseURL = import.meta.env.VITE_API_URL;
 export const fetchPopularProvinces = async (categoryId = null, categoryType = null) => {
     const token = getCookie('token');
     const queryParams = new URLSearchParams();
-    if (categoryType == 0) queryParams.append('attractionCategory', categoryId);
-    if (categoryType == 1) queryParams.append('tourCategory', categoryId);
-    if (categoryType == 2) queryParams.append('postCategory', categoryId);
+    if (categoryId) queryParams.append('categoryId', categoryId);
+    if (categoryType) queryParams.append('categoryType', categoryType);
     try {
         const response = await axios.get(`${baseURL}/api/popular/provinces?${queryParams.toString()}`, {
             headers: {

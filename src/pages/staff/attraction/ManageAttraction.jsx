@@ -14,7 +14,7 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-import { fetchPopularProvinces } from '@services/PopularService';
+import { fetchPopularProvinces, fetchPopularAttractionCategories } from '@services/PopularService';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -52,8 +52,8 @@ const ManageAttraction = () => {
                 const popularProvData = await fetchPopularProvinces();
                 setPopularProvinces(popularProvData.map(p => p.provinceId));
 
-                const popularTypesData = await fetchPopularProvinces(null, 1);
-                setPopularTypes(popularTypesData.map(t => t.provinceId));
+                const popularTypesData = await fetchPopularAttractionCategories();
+                setPopularTypes(popularTypesData.map(t => t.attractionCategoryId));
             } catch (error) {
                 console.error('Error fetching popular data:', error);
             }
