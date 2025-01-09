@@ -124,8 +124,8 @@ const ManagerManagePost = () => {
         const popularProvincesData = await fetchPopularProvinces();
         const popularPostCategoriesData = await fetchPopularPostCategories();
         
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+        setPopularProvinces(popularProvincesData);
+        setPopularPostCategories(popularPostCategoriesData);
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }

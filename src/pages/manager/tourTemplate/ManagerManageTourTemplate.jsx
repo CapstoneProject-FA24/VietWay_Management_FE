@@ -54,8 +54,8 @@ const ManagerManageTourTemplate = () => {
                 const popularProvincesData = await fetchPopularProvinces();
                 const popularTourCategoriesData = await fetchPopularTourCategories();
                 
-                setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-                setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+                setPopularProvinces(popularProvincesData);
+                setPopularTourCategories(popularTourCategoriesData);
             } catch (error) {
                 console.error('Error fetching popular data:', error);
             }

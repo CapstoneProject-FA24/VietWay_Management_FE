@@ -57,8 +57,8 @@ const ManageTourTemplate = () => {
                 const popularProvincesData = await fetchPopularProvinces();
                 const popularTourCategoriesData = await fetchPopularTourCategories();
                 
-                setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-                setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+                setPopularProvinces(popularProvincesData);
+                setPopularTourCategories(popularTourCategoriesData);
             } catch (error) {
                 console.error('Error fetching popular data:', error);
             }
@@ -106,7 +106,7 @@ const ManageTourTemplate = () => {
         label: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {category.tourCategoryName}
-                {popularTourCategories.includes(category.tourCategoryId) && (
+                {popularTourCategories.includes(category.tourCategoryId.toString()) && (
                     <LocalFireDepartmentIcon sx={{ color: 'red' }} />
                 )}
             </div>
@@ -123,7 +123,7 @@ const ManageTourTemplate = () => {
         label: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {province.provinceName}
-                {popularProvinces.includes(province.provinceId) && (
+                {popularProvinces.includes(province.provinceId.toString()) && (
                     <LocalFireDepartmentIcon sx={{ color: 'red' }} />
                 )}
             </div>

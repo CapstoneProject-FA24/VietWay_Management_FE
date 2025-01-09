@@ -157,8 +157,8 @@ const ManageTour = () => {
         const popularProvincesData = await fetchPopularProvinces();
         const popularTourCategoriesData = await fetchPopularTourCategories();
         
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+        setPopularProvinces(popularProvincesData);
+        setPopularTourCategories(popularTourCategoriesData);
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
@@ -173,7 +173,7 @@ const ManageTour = () => {
     label: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {province.provinceName}
-        {popularProvinces.includes(province.provinceId) && (
+        {popularProvinces.includes(province.provinceId.toString()) && (
           <LocalFireDepartmentIcon sx={{ color: 'red' }} />
         )}
       </div>
@@ -190,7 +190,7 @@ const ManageTour = () => {
     label: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {category.tourCategoryName}
-        {popularTourCategories.includes(category.tourCategoryId) && (
+        {popularTourCategories.includes(category.tourCategoryId.toString()) && (
           <LocalFireDepartmentIcon sx={{ color: 'red' }} />
         )}
       </div>
@@ -304,7 +304,38 @@ const ManageTour = () => {
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography sx={{ fontWeight: 600 }}>Thời lượng</Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={durationOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")} value={durationOptions.filter(option => tempFilters.duration.includes(option.value))} />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti 
+                options={durationOptions} 
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")} 
+                value={durationOptions.filter(option => tempFilters.duration.includes(option.value))}
+                styles={{
+                  menu: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white',
+                    zIndex: 2
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+                    color: state.isSelected ? 'white' : 'black',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white'
+                  }),
+                  menuPortal: (provided) => ({
+                    ...provided,
+                    zIndex: 9999
+                  })
+                }}
+                menuPortalTarget={document.body}
+              />
             </FormControl>
           </Grid>
 

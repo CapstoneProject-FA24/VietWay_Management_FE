@@ -47,10 +47,10 @@ const ManagerManageAttraction = () => {
         const fetchPopularData = async () => {
             try {
                 const popularProvData = await fetchPopularProvinces();
-                setPopularProvinces(popularProvData.map(p => p.provinceId));
+                setPopularProvinces(popularProvData);
 
                 const popularTypesData = await fetchPopularAttractionCategories();
-                setPopularTypes(popularTypesData.map(t => t.attractionCategoryId));
+                setPopularTypes(popularTypesData);
             } catch (error) {
                 console.error('Error fetching popular data:', error);
             }

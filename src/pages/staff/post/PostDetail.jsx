@@ -339,7 +339,7 @@ const PostDetail = () => {
   const handleCategoryChange = async (categoryId) => {
     try {
       const hotProvinceData = await fetchPopularProvinces(categoryId, 2); // 2 for post type
-      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+      setHotProvinces(hotProvinceData);
     } catch (error) {
       console.error('Error fetching hot provinces:', error);
     }
@@ -348,7 +348,7 @@ const PostDetail = () => {
   const handleProvinceChange = async (provinceId) => {
     try {
       const hotCategoriesData = await fetchPopularPostCategories(provinceId);
-      setHotCategories(hotCategoriesData.map(c => c.postCategoryId));
+      setHotCategories(hotCategoriesData);
     } catch (error) {
       console.error('Error fetching hot categories:', error);
     }
@@ -494,22 +494,14 @@ const PostDetail = () => {
                             value={editablePost.postCategoryId || ''}
                             onChange={(e) => handleFieldChange('postCategoryId', e.target.value)}
                             label="Danh mục *"
+                            error={!!fieldErrors.category}
                           >
-                            {categoryOptions.map((category) => (
+                            {categoryOptions.map(category => (
                               <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   {category.name}
-                                  {popularPostCategories.includes(category.postCategoryId) && (
-                                    <LocalFireDepartmentIcon 
-                                      sx={{ color: 'red' }}
-                                      titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
-                                    />
-                                  )}
-                                  {hotCategories.includes(category.postCategoryId) && (
-                                    <LocalFireDepartmentIcon 
-                                      sx={{ color: '#ff8f00' }}
-                                      titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
-                                    />
+                                  {hotCategories.includes(category.postCategoryId.toString()) && (
+                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
                                   )}
                                 </Box>
                               </MenuItem>
@@ -527,22 +519,14 @@ const PostDetail = () => {
                             value={editablePost.provinceId || ''}
                             onChange={(e) => handleFieldChange('provinceId', e.target.value)}
                             label="Tỉnh/Thành phố *"
+                            error={!!fieldErrors.provinceId}
                           >
-                            {provinceOptions.map((province) => (
+                            {provinceOptions.map(province => (
                               <MenuItem key={province.value} value={province.value}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   {province.label}
-                                  {popularProvinces.includes(province.value) && (
-                                    <LocalFireDepartmentIcon 
-                                      sx={{ color: 'red' }}
-                                      titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
-                                    />
-                                  )}
-                                  {hotProvinces.includes(province.value) && (
-                                    <LocalFireDepartmentIcon 
-                                      sx={{ color: '#ff8f00' }}
-                                      titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
-                                    />
+                                  {hotProvinces.includes(province.value.toString()) && (
+                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
                                   )}
                                 </Box>
                               </MenuItem>

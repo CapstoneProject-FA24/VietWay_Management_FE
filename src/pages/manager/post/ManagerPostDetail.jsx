@@ -157,8 +157,8 @@ const ManagerPostDetail = () => {
         const popularProvData = await fetchPopularProvinces();
         const popularCategoriesData = await fetchPopularPostCategories();
         
-        setPopularProvinces(popularProvData.map(p => p.provinceId));
-        setPopularPostCategories(popularCategoriesData.map(c => c.postCategoryId));
+        setPopularProvinces(popularProvData);
+        setPopularPostCategories(popularCategoriesData);
 
         if (post?.postCategoryId) {
           await handleCategoryChange(post.postCategoryId);
@@ -484,7 +484,7 @@ const ManagerPostDetail = () => {
   const handleCategoryChange = async (categoryId) => {
     try {
       const hotProvinceData = await fetchPopularProvinces(categoryId, 2);
-      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+      setHotProvinces(hotProvinceData);
     } catch (error) {
       console.error('Error fetching hot provinces:', error);
     }
@@ -493,7 +493,7 @@ const ManagerPostDetail = () => {
   const handleProvinceChange = async (provinceId) => {
     try {
       const hotCategoriesData = await fetchPopularPostCategories(provinceId);
-      setHotCategories(hotCategoriesData.map(c => c.postCategoryId));
+      setHotCategories(hotCategoriesData);
     } catch (error) {
       console.error('Error fetching hot categories:', error);
     }

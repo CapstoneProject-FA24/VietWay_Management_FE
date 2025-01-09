@@ -4,6 +4,7 @@ import { getCookie } from '@services/AuthenService';
 const baseURL = import.meta.env.VITE_API_URL;
 
 export const fetchPopularProvinces = async (categoryId = null, categoryType = null) => {
+    console.log(categoryId, categoryType);
     const token = getCookie('token');
     const queryParams = new URLSearchParams();
     if (categoryId) queryParams.append('categoryId', categoryId);
@@ -20,10 +21,8 @@ export const fetchPopularProvinces = async (categoryId = null, categoryType = nu
         if (!data || !Array.isArray(data)) {
             throw new Error('Invalid response structure: data not found or not an array');
         }
-
-        return data.map(item => ({
-            provinceId: item.provinceId
-        }));
+        console.log(data);
+        return data;
 
     } catch (error) {
         console.error('Error fetching popular provinces:', error);
@@ -48,9 +47,7 @@ export const fetchPopularAttractionCategories = async (provinceId) => {
             throw new Error('Invalid response structure: data not found or not an array');
         }
 
-        return data.map(item => ({
-            attractionCategoryId: item.attractionCategoryId
-        }));
+        return data;
 
     } catch (error) {
         console.error('Error fetching popular attraction categories:', error);
@@ -75,9 +72,7 @@ export const fetchPopularPostCategories = async (provinceId) => {
             throw new Error('Invalid response structure: data not found or not an array');
         }
 
-        return data.map(item => ({
-            postCategoryId: item.postCategoryId
-        }));
+        return data;
 
     } catch (error) {
         console.error('Error fetching popular post categories:', error);
@@ -102,9 +97,7 @@ export const fetchPopularTourCategories = async (provinceId) => {
             throw new Error('Invalid response structure: data not found or not an array');
         }
 
-        return data.map(item => ({
-            tourCategoryId: item.tourCategoryId
-        }));
+        return data;
 
     } catch (error) {
         console.error('Error fetching popular tour categories:', error);

@@ -61,15 +61,15 @@ const CreatePost = () => {
         const popularProvincesData = await fetchPopularProvinces();
         const popularPostCategoriesData = await fetchPopularPostCategories();
         
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularPostCategories(popularPostCategoriesData.map(c => c.postCategoryId));
+        setPopularProvinces(popularProvincesData);
+        setPopularPostCategories(popularPostCategoriesData);
 
         const formattedProvinces = fetchedProvinces.items.map(province => ({
           value: province.provinceId,
           label: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {province.provinceName}
-              {popularProvincesData.map(p => p.provinceId).includes(province.provinceId) && (
+              {popularProvincesData.includes(province.provinceId) && (
                 <LocalFireDepartmentIcon 
                   sx={{ color: 'red' }}
                   titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
@@ -90,7 +90,7 @@ const CreatePost = () => {
           label: (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {postCategory.name}
-              {popularPostCategoriesData.map(c => c.postCategoryId).includes(postCategory.postCategoryId) && (
+              {popularPostCategoriesData.includes(postCategory.postCategoryId) && (
                 <LocalFireDepartmentIcon 
                   sx={{ color: 'red' }}
                   titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
@@ -142,7 +142,7 @@ const CreatePost = () => {
 
     try {
       const hotCategoriesData = await fetchPopularPostCategories(provinceId);
-      setHotCategories(hotCategoriesData.map(c => c.postCategoryId));
+      setHotCategories(hotCategoriesData);
     } catch (error) {
       console.error('Error fetching hot categories:', error);
     }
@@ -244,7 +244,7 @@ const CreatePost = () => {
   const handleCategoryChange = async (categoryId) => {
     try {
       const hotProvinceData = await fetchPopularProvinces(categoryId, 2);
-      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+      setHotProvinces(hotProvinceData);
     } catch (error) {
       console.error('Error fetching hot provinces:', error);
     }

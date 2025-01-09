@@ -66,10 +66,10 @@ const AddAttraction = () => {
     const fetchPopularData = async () => {
       try {
         const popularProvData = await fetchPopularProvinces();
-        setPopularProvinces(popularProvData.map(p => p.provinceId));
+        setPopularProvinces(popularProvData);
 
         const popularTypesData = await fetchPopularAttractionCategories();
-        setPopularTypes(popularTypesData.map(t => t.attractionCategoryId));
+        setPopularTypes(popularTypesData);
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
@@ -127,7 +127,7 @@ const AddAttraction = () => {
     
     try {
       const hotCategoriesData = await fetchPopularAttractionCategories(newProvinceId);
-      setHotCategories(hotCategoriesData.map(c => c.attractionCategoryId));
+      setHotCategories(hotCategoriesData);
     } catch (error) {
       console.error('Error fetching hot categories:', error);
     }
@@ -253,7 +253,7 @@ const AddAttraction = () => {
   const handleCategoryChange = async (categoryId, categoryType) => {
     try {
       const hotProvinceData = await fetchPopularProvinces(categoryId, categoryType);
-      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+      setHotProvinces(hotProvinceData);
     } catch (error) {
       console.error('Error fetching hot provinces:', error);
     }

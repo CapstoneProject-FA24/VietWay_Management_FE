@@ -114,8 +114,8 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 const popularProvincesData = await fetchPopularProvinces();
                 const popularTourCategoriesData = await fetchPopularTourCategories();
                 
-                setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-                setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+                setPopularProvinces(popularProvincesData);
+                setPopularTourCategories(popularTourCategoriesData);
             } catch (error) {
                 console.error('Error fetching popular data:', error);
             }
@@ -124,22 +124,18 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
     }, []);
 
     const handleCategoryChange = async (categoryId) => {
-        console.log("Category changed to:", categoryId);
         try {
-            const hotProvinceData = await fetchPopularProvinces(categoryId, 1); // 1 for tour category type
-            console.log("Hot provinces data:", hotProvinceData);
-            setHotProvinces(hotProvinceData.map(p => p.provinceId));
+            const hotProvinceData = await fetchPopularProvinces(categoryId, 1);
+            setHotProvinces(hotProvinceData);
         } catch (error) {
             console.error('Error fetching hot provinces:', error);
         }
     };
 
     const handleProvinceChange = async (provinceId) => {
-        console.log("Province changed to:", provinceId);
         try {
             const hotCategoriesData = await fetchPopularTourCategories(provinceId);
-            console.log("Hot categories data:", hotCategoriesData);
-            setHotCategories(hotCategoriesData.map(c => c.tourCategoryId));
+            setHotCategories(hotCategoriesData);
         } catch (error) {
             console.error('Error fetching hot categories:', error);
         }

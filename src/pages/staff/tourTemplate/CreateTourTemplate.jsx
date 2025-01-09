@@ -71,11 +71,11 @@ const CreateTourTemplate = () => {
   useEffect(() => {
     const fetchPopularData = async () => {
       try {
-        const popularProvData = await fetchPopularProvinces();
-        setPopularProvinces(popularProvData.map(p => p.provinceId));
-
-        const popularCategoriesData = await fetchPopularTourCategories();
-        setPopularTourCategories(popularCategoriesData.map(c => c.tourCategoryId));
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularTourCategoriesData = await fetchPopularTourCategories();
+        
+        setPopularProvinces(popularProvincesData);
+        setPopularTourCategories(popularTourCategoriesData);
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
@@ -419,7 +419,7 @@ const CreateTourTemplate = () => {
             </Box>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-                <Typography gutterBottom>Tour đi qua tỉnh/thành phố *</Typography>
+                <Typography gutterBottom sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Tour đi qua tỉnh/thành phố *</Typography>
                 <ReactSelect
                   isMulti
                   name="provinces"
@@ -429,10 +429,10 @@ const CreateTourTemplate = () => {
                     label: (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {province.provinceName}
-                        {popularProvinces.includes(province.provinceId) && (
+                        {popularProvinces.includes(province.provinceId.toString()) && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: 'red' }}
-                            titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                            titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
                           />
                         )}
                         {hotProvinces.includes(province.provinceId) && (
@@ -461,7 +461,7 @@ const CreateTourTemplate = () => {
                 )}
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%' }}>
-                <Typography gutterBottom>Tour bắt đầu từ *</Typography>
+                <Typography gutterBottom sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Tour bắt đầu từ *</Typography>
                 <Select
                   value={tourTemplate.startingProvinceId}
                   onChange={(e) => handleFieldChange('startingProvinceId', e.target.value)}
@@ -473,10 +473,10 @@ const CreateTourTemplate = () => {
                     <MenuItem key={province.provinceId} value={province.provinceId}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {province.provinceName}
-                        {popularProvinces.includes(province.provinceId) && (
+                        {popularProvinces.includes(province.provinceId.toString()) && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: 'red', ml: 1 }}
-                            titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                            titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
                           />
                         )}
                         {hotProvinces.includes(province.provinceId) && (
@@ -495,7 +495,7 @@ const CreateTourTemplate = () => {
               </Box>
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', mt: 2, mb: 3 }}>
-              <Typography gutterBottom> Tên tour *</Typography>
+              <Typography gutterBottom sx={{ color: '#05073C', fontWeight: 600, minWidth: 'fit-content', mr: 1 }}>Tên tour *</Typography>
               <TextField
                 value={tourTemplate.tourName}
                 onChange={(e) => handleFieldChange('tourName', e.target.value)}
@@ -636,7 +636,7 @@ const CreateTourTemplate = () => {
                             <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 {tourCategory.tourCategoryName}
-                                {popularTourCategories.includes(tourCategory.tourCategoryId) && (
+                                {popularTourCategories.includes(tourCategory.tourCategoryId.toString()) && (
                                   <LocalFireDepartmentIcon 
                                     sx={{ color: 'red' }}
                                     titleAccess="Loại tour đang được quan tâm nhiều nhất"

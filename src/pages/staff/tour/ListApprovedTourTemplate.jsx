@@ -53,8 +53,8 @@ const ListApprovedTourTemplate = () => {
         const popularProvincesData = await fetchPopularProvinces();
         const popularTourCategoriesData = await fetchPopularTourCategories();
         
-        setPopularProvinces(popularProvincesData.map(p => p.provinceId));
-        setPopularTourCategories(popularTourCategoriesData.map(c => c.tourCategoryId));
+        setPopularProvinces(popularProvincesData);
+        setPopularTourCategories(popularTourCategoriesData);
       } catch (error) {
         console.error('Error fetching popular data:', error);
       }
@@ -102,8 +102,11 @@ const ListApprovedTourTemplate = () => {
     label: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {province.provinceName}
-        {popularProvinces.includes(province.provinceId) && (
-          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+        {popularProvinces.includes(province.provinceId.toString()) && (
+          <LocalFireDepartmentIcon 
+            sx={{ color: 'red' }} 
+            titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
+          />
         )}
       </div>
     )
@@ -114,8 +117,11 @@ const ListApprovedTourTemplate = () => {
     label: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {category.tourCategoryName}
-        {popularTourCategories.includes(category.tourCategoryId) && (
-          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+        {popularTourCategories.includes(category.tourCategoryId.toString()) && (
+          <LocalFireDepartmentIcon 
+            sx={{ color: 'red' }} 
+            titleAccess="Loại tour đang được quan tâm nhiều nhất"
+          />
         )}
       </div>
     )
