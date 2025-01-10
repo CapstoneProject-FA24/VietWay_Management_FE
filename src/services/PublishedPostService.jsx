@@ -22,7 +22,8 @@ export const getTwitterReactionsByPostId = async (entityId, entityType) => {
             quoteCount: tweet.quoteCount || 0,
             bookmarkCount: tweet.bookmarkCount || 0,
             impressionCount: tweet.impressionCount || 0,
-            createdAt: tweet.createdAt
+            createdAt: tweet.createdAt,
+            hashtags: tweet.hashtags
         }));
     } catch (error) {
         console.error('Error fetching Twitter reactions:', error.response);
@@ -50,7 +51,8 @@ export const getFacebookReactions = async (entityId, entityType) => {
             reactionCount: Object.values(metrics.postReactions).reduce((a, b) => a + b, 0),
             reactionDetails: metrics.postReactions,
             createdAt: metrics.createdAt,
-            facebookPostId: metrics.facebookPostId
+            facebookPostId: metrics.facebookPostId,
+            hashtags: metrics.hashtags
         }));
     } catch (error) {
         console.error('Error fetching Facebook reactions:', error.response);

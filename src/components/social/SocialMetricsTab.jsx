@@ -22,6 +22,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Trích dẫn</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Dấu trang</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Hashtags</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}></TableCell>
               </TableRow>
             </TableHead>
@@ -42,7 +43,29 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                     <TableCell align="center">{metrics.impressionCount}</TableCell>
                     <TableCell align="center">{metrics.quoteCount}</TableCell>
                     <TableCell align="center">{metrics.bookmarkCount}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ width: '27%'}}>
+                      {metrics.hashtags?.length > 0 ? (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center' }}>
+                          {metrics.hashtags.map((tag, idx) => (
+                            <Typography 
+                              key={idx} 
+                              sx={{ 
+                                bgcolor: '#e0e0e0', 
+                                px: 1, 
+                                py: 0.5, 
+                                borderRadius: 1,
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              #{tag}
+                            </Typography>
+                          ))}
+                        </Box>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell align="center" sx={{ width: '7rem'}}>
                       <Button
                         variant="contained"
                         size="small"
@@ -56,7 +79,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} align="center">
+                  <TableCell colSpan={9} align="center">
                     Chưa có dữ liệu thống kê
                   </TableCell>
                 </TableRow>
@@ -81,6 +104,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Chia sẻ</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Bình luận</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}>Lượt xem</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>Hashtags</TableCell>
                 <TableCell align="center" sx={{ fontWeight: 'bold' }}></TableCell>
               </TableRow>
             </TableHead>
@@ -112,7 +136,29 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                     <TableCell align="center">{metrics.shareCount}</TableCell>
                     <TableCell align="center">{metrics.commentCount}</TableCell>
                     <TableCell align="center">{metrics.impressionCount}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" sx={{ width: '30%'}}>
+                      {metrics.hashtags?.length > 0 ? (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center' }}>
+                          {metrics.hashtags.map((tag, idx) => (
+                            <Typography 
+                              key={idx} 
+                              sx={{ 
+                                bgcolor: '#e0e0e0', 
+                                px: 1, 
+                                py: 0.5, 
+                                borderRadius: 1,
+                                fontSize: '0.75rem'
+                              }}
+                            >
+                              #{tag}
+                            </Typography>
+                          ))}
+                        </Box>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell align="center" sx={{ width: '7rem'}}>
                       <Button
                         variant="contained"
                         size="small"
@@ -126,7 +172,7 @@ const SocialMetricsTab = ({ post, socialMetrics, handleViewOnSocial }) => (
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     Chưa có dữ liệu thống kê
                   </TableCell>
                 </TableRow>

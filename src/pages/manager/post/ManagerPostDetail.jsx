@@ -86,7 +86,8 @@ const ManagerPostDetail = () => {
                 impressionCount: metrics.impressionCount || 0,
                 quoteCount: metrics.quoteCount || 0,
                 bookmarkCount: metrics.bookmarkCount || 0,
-                createdAt: metrics.createdAt
+                createdAt: metrics.createdAt,
+                hashtags: metrics.hashtags
               }))
             }));
           }
@@ -110,7 +111,6 @@ const ManagerPostDetail = () => {
       if (facebookPost) {
         try {
           const data = await getFacebookReactions(post.postId, 2);
-          console.log(data);
           
           if (data && data.length > 0) {
             setSocialMetrics(prev => ({
@@ -122,7 +122,8 @@ const ManagerPostDetail = () => {
                 commentCount: metrics.commentCount || 0,
                 impressionCount: metrics.impressionCount || 0,
                 createdAt: metrics.createdAt,
-                facebookPostId: metrics.facebookPostId
+                facebookPostId: metrics.facebookPostId,
+                hashtags: metrics.hashtags
               }))
             }));
           }
