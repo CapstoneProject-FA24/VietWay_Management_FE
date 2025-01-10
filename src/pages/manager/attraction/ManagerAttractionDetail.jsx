@@ -354,8 +354,11 @@ const ManagerAttractionDetail = () => {
         setSnackbar({ open: true, message: 'Đã đăng địa điểm lên Twitter thành công', severity: 'success', hide: 5000 });
       }
       // Refresh data if needed
-      await loadAttraction();
+      const updatedAttraction = await fetchAttractionById(attraction.attractionId);
+      setAttraction(updatedAttraction);
+      
     } catch (error) {
+      console.log(error);
       setSnackbar({
         open: true, severity: 'error', hide: 5000,
         message: getErrorMessage(error),
