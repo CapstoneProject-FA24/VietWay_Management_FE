@@ -6,6 +6,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import DateRangeSelector from '@components/common/DateRangeSelector';
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length > 0) {
@@ -42,23 +43,28 @@ const TourCategoryReport = ({ categoryId }) => {
     const [loading, setLoading] = useState(true);
     const [categoryData, setCategoryData] = useState(null);
     const [selectedMetrics, setSelectedMetrics] = useState('interactions');
-    
-    const [startDate, setStartDate] = useState(dayjs().subtract(1, 'month'));
-    const [endDate, setEndDate] = useState(dayjs());
-    const [tempStartDate, setTempStartDate] = useState(dayjs().subtract(1, 'month'));
-    const [tempEndDate, setTempEndDate] = useState(dayjs());
     const [selectedProvinceMetric, setSelectedProvinceMetric] = useState('averageScore');
+    
+    const [dateRange, setDateRange] = useState({
+        startDate: dayjs().subtract(1, 'month'),
+        endDate: dayjs()
+    });
+
+    const [appliedDateRange, setAppliedDateRange] = useState({
+        startDate: dayjs().subtract(1, 'month'),
+        endDate: dayjs()
+    });
 
     useEffect(() => {
         const loadCategoryData = async () => {
-            if (!startDate || !endDate) return;
+            if (!appliedDateRange.startDate || !appliedDateRange.endDate) return;
             
             try {
                 setLoading(true);
                 const data = await fetchSocialMediaTourCategoryDetail(
                     categoryId, 
-                    startDate.format('YYYY-MM-DD'), 
-                    endDate.format('YYYY-MM-DD')
+                    appliedDateRange.startDate.format('YYYY-MM-DD'), 
+                    appliedDateRange.endDate.format('YYYY-MM-DD')
                 );
                 setCategoryData(data);
             } catch (error) {
@@ -71,11 +77,25 @@ const TourCategoryReport = ({ categoryId }) => {
         if (categoryId) {
             loadCategoryData();
         }
-    }, [categoryId, startDate, endDate]);
+    }, [categoryId, appliedDateRange]);
+
+    const handleStartDateChange = (newValue) => {
+        setDateRange(prev => ({
+            ...prev,
+            startDate: newValue,
+            endDate: newValue.isAfter(prev.endDate) ? newValue : prev.endDate
+        }));
+    };
+
+    const handleEndDateChange = (newValue) => {
+        setDateRange(prev => ({
+            ...prev,
+            endDate: newValue
+        }));
+    };
 
     const handleApplyDateRange = () => {
-        setStartDate(tempStartDate);
-        setEndDate(tempEndDate);
+        setAppliedDateRange(dateRange);
     };
 
     const metricsOptions = [
@@ -134,56 +154,20 @@ const TourCategoryReport = ({ categoryId }) => {
     return (
         <Box sx={{ p: 1 }}>
             <Grid container spacing={2}>
-                {/* Date Range Selection */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2, mb: 2 }}>
-                        <Box sx={{ 
-                            display: 'flex', 
-                            gap: 2, 
-                            alignItems: 'center',
-                            flexWrap: 'wrap'
-                        }}>
-                            <Typography variant="subtitle1">
-                                Chọn khoảng thời gian:
-                            </Typography>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    label="Từ ngày"
-                                    value={tempStartDate}
-                                    onChange={(newValue) => setTempStartDate(newValue)}
-                                    format="DD/MM/YYYY"
-                                    slotProps={{
-                                        textField: {
-                                            size: "small",
-                                            sx: { width: 200 }
-                                        }
-                                    }}
-                                />
-                                <DatePicker
-                                    label="Đến ngày"
-                                    value={tempEndDate}
-                                    onChange={(newValue) => setTempEndDate(newValue)}
-                                    format="DD/MM/YYYY"
-                                    slotProps={{
-                                        textField: {
-                                            size: "small",
-                                            sx: { width: 200 }
-                                        }
-                                    }}
-                                />
-                            </LocalizationProvider>
-                            <Button 
-                                variant="contained" 
-                                onClick={handleApplyDateRange}
-                                disabled={!tempStartDate || !tempEndDate || tempEndDate.isBefore(tempStartDate)}
-                            >
-                                Áp dụng
-                            </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <DateRangeSelector
+                                startDate={dateRange.startDate}
+                                endDate={dateRange.endDate}
+                                onStartDateChange={handleStartDateChange}
+                                onEndDateChange={handleEndDateChange}
+                                onApply={handleApplyDateRange}
+                            />
                         </Box>
                     </Paper>
                 </Grid>
 
-                {/* Summary Statistics */}
                 <Grid item xs={12}>
                     <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold' }}>
                         {categoryData.categoryName}
@@ -207,7 +191,6 @@ const TourCategoryReport = ({ categoryId }) => {
                     </Paper>
                 </Grid>
 
-                {/* Time Series Chart */}
                 {timeSeriesData.length > 0 && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2 }}>
@@ -254,7 +237,6 @@ const TourCategoryReport = ({ categoryId }) => {
                     </Grid>
                 )}
 
-                {/* Provinces Chart */}
                 {categoryData.provinces?.length > 0 && (
                     <Grid item xs={12}>
                         <Paper sx={{ p: 2 }}>
@@ -276,7 +258,7 @@ const TourCategoryReport = ({ categoryId }) => {
                                 </FormControl>
                             </Box>
                             <Typography variant="h6" textAlign="center" fontWeight={'bold'}>
-                                Biểu đồ so sánh điểm đánh giá mức độ quan tâm {formattedLabel} giữa các tỉnh thành từ {startDate.format('MM/YYYY')} đến {endDate.format('MM/YYYY')}
+                                Biểu đồ so sánh điểm đánh giá mức độ quan tâm {formattedLabel} giữa các tỉnh thành từ {appliedDateRange.startDate.format('MM/YYYY')} đến {appliedDateRange.endDate.format('MM/YYYY')}
                             </Typography>
                             <ResponsiveContainer width="100%" height={400}>
                                 <BarChart 

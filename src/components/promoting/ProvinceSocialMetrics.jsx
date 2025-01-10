@@ -6,6 +6,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import DateRangeSelector from '@components/common/DateRangeSelector';
 
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length > 0) {
@@ -45,30 +46,27 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
     const [provinceData, setProvinceData] = useState(null);
     const [selectedMetrics, setSelectedMetrics] = useState('average');
     
-    // Update date states with default values
-    const [startDate, setStartDate] = useState(() => {
-        return initialStartDate ? dayjs(initialStartDate) : dayjs().subtract(1, 'month');
+    // Update date states to match dashboard pattern
+    const [dateRange, setDateRange] = useState({
+        startDate: initialStartDate ? dayjs(initialStartDate) : dayjs().subtract(1, 'month'),
+        endDate: initialEndDate ? dayjs(initialEndDate) : dayjs()
     });
-    const [endDate, setEndDate] = useState(() => {
-        return initialEndDate ? dayjs(initialEndDate) : dayjs();
-    });
-    const [tempStartDate, setTempStartDate] = useState(() => {
-        return initialStartDate ? dayjs(initialStartDate) : dayjs().subtract(1, 'month');
-    });
-    const [tempEndDate, setTempEndDate] = useState(() => {
-        return initialEndDate ? dayjs(initialEndDate) : dayjs();
+
+    const [appliedDateRange, setAppliedDateRange] = useState({
+        startDate: initialStartDate ? dayjs(initialStartDate) : dayjs().subtract(1, 'month'),
+        endDate: initialEndDate ? dayjs(initialEndDate) : dayjs()
     });
 
     useEffect(() => {
         const loadProvinceData = async () => {
-            if (!startDate || !endDate) return;
+            if (!appliedDateRange.startDate || !appliedDateRange.endDate) return;
             
             try {
                 setLoading(true);
                 const data = await fetchSocialMediaProvinceDetail(
                     provinceId, 
-                    startDate.format('YYYY-MM-DD'), 
-                    endDate.format('YYYY-MM-DD')
+                    appliedDateRange.startDate.format('YYYY-MM-DD'), 
+                    appliedDateRange.endDate.format('YYYY-MM-DD')
                 );
                 setProvinceData(data);
             } catch (error) {
@@ -81,11 +79,25 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
         if (provinceId) {
             loadProvinceData();
         }
-    }, [provinceId, startDate, endDate]);
+    }, [provinceId, appliedDateRange]);
+
+    const handleStartDateChange = (newValue) => {
+        setDateRange(prev => ({
+            ...prev,
+            startDate: newValue,
+            endDate: newValue.isAfter(prev.endDate) ? newValue : prev.endDate
+        }));
+    };
+
+    const handleEndDateChange = (newValue) => {
+        setDateRange(prev => ({
+            ...prev,
+            endDate: newValue
+        }));
+    };
 
     const handleApplyDateRange = () => {
-        setStartDate(tempStartDate);
-        setEndDate(tempEndDate);
+        setAppliedDateRange(dateRange);
     };
 
     const chartOptions = [
@@ -138,51 +150,17 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
     return (
         <Box sx={{ p: 1 }}>
             <Grid container spacing={2}>
-                {/* Date Range Selection */}
+                {/* Replace the existing date selection with DateRangeSelector */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2, mb: 2 }}>
-                        <Box sx={{ 
-                            display: 'flex', 
-                            gap: 2, 
-                            alignItems: 'center',
-                            flexWrap: 'wrap'
-                        }}>
-                            <Typography variant="subtitle1">
-                                Chọn khoảng thời gian:
-                            </Typography>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker
-                                    label="Từ ngày"
-                                    value={tempStartDate}
-                                    onChange={(newValue) => setTempStartDate(newValue)}
-                                    format="DD/MM/YYYY"
-                                    slotProps={{
-                                        textField: {
-                                            size: "small",
-                                            sx: { width: 200 }
-                                        }
-                                    }}
-                                />
-                                <DatePicker
-                                    label="Đến ngày"
-                                    value={tempEndDate}
-                                    onChange={(newValue) => setTempEndDate(newValue)}
-                                    format="DD/MM/YYYY"
-                                    slotProps={{
-                                        textField: {
-                                            size: "small",
-                                            sx: { width: 200 }
-                                        }
-                                    }}
-                                />
-                            </LocalizationProvider>
-                            <Button 
-                                variant="contained" 
-                                onClick={handleApplyDateRange}
-                                disabled={!tempStartDate || !tempEndDate || tempEndDate.isBefore(tempStartDate)}
-                            >
-                                Áp dụng
-                            </Button>
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <DateRangeSelector
+                                startDate={dateRange.startDate}
+                                endDate={dateRange.endDate}
+                                onStartDateChange={handleStartDateChange}
+                                onEndDateChange={handleEndDateChange}
+                                onApply={handleApplyDateRange}
+                            />
                         </Box>
                     </Paper>
                 </Grid>
