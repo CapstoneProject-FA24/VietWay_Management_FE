@@ -386,7 +386,15 @@ const CreateTourTemplate = () => {
   const handleCategoryChange = async (categoryId) => {
     try {
       const hotProvinceData = await fetchPopularProvinces(categoryId, 1);
-      setHotProvinces(hotProvinceData.map(p => p.provinceId));
+      setHotProvinces(hotProvinceData);
+      
+      setTourTemplate(prev => ({
+        ...prev,
+        provinces: prev.provinces.map(province => ({
+          ...province,
+          isHot: hotProvinceData.includes(province.value)
+        }))
+      }));
     } catch (error) {
       console.error('Error fetching hot provinces:', error);
     }
@@ -395,7 +403,7 @@ const CreateTourTemplate = () => {
   const handleProvinceChange = async (provinceId) => {
     try {
       const hotCategoriesData = await fetchPopularTourCategories(provinceId);
-      setHotCategories(hotCategoriesData.map(c => c.tourCategoryId));
+      setHotCategories(hotCategoriesData);
     } catch (error) {
       console.error('Error fetching hot categories:', error);
     }
@@ -429,7 +437,7 @@ const CreateTourTemplate = () => {
                     label: (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {province.provinceName}
-                        {popularProvinces.includes(province.provinceId.toString()) && (
+                        {popularProvinces.includes(province.provinceId) && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: 'red' }}
                             titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
@@ -446,7 +454,20 @@ const CreateTourTemplate = () => {
                   }))}
                   className="basic-multi-select"
                   classNamePrefix="select"
-                  value={tourTemplate.provinces}
+                  value={tourTemplate.provinces.map(province => ({
+                    ...province,
+                    label: (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {province.label}
+                        {province.isHot && (
+                          <LocalFireDepartmentIcon 
+                            sx={{ color: '#ff8f00' }}
+                            titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
+                          />
+                        )}
+                      </div>
+                    )
+                  }))}
                   placeholder=''
                   styles={{
                     control: (base) => ({
@@ -473,7 +494,7 @@ const CreateTourTemplate = () => {
                     <MenuItem key={province.provinceId} value={province.provinceId}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         {province.provinceName}
-                        {popularProvinces.includes(province.provinceId.toString()) && (
+                        {popularProvinces.includes(province.provinceId) && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: 'red', ml: 1 }}
                             titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
@@ -481,7 +502,7 @@ const CreateTourTemplate = () => {
                         )}
                         {hotProvinces.includes(province.provinceId) && (
                           <LocalFireDepartmentIcon 
-                            sx={{ color: '#ff8f00', ml: 1 }}
+                            sx={{ color: '#ff8f00' }}
                             titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
                           />
                         )}
@@ -636,7 +657,7 @@ const CreateTourTemplate = () => {
                             <MenuItem key={tourCategory.tourCategoryId} value={tourCategory.tourCategoryId}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 {tourCategory.tourCategoryName}
-                                {popularTourCategories.includes(tourCategory.tourCategoryId.toString()) && (
+                                {popularTourCategories.includes(tourCategory.tourCategoryId) && (
                                   <LocalFireDepartmentIcon 
                                     sx={{ color: 'red' }}
                                     titleAccess="Loại tour đang được quan tâm nhiều nhất"

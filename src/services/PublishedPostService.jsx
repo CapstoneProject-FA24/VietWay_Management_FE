@@ -58,14 +58,17 @@ export const getFacebookReactions = async (entityId, entityType) => {
     }
 };
 
-export const sharePostOnTwitter = async (postId) => {
+export const sharePostOnTwitter = async (postId, hashtags = []) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/published-posts/post/${postId}/twitter`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+        const response = await axios.post(`${baseURL}/api/published-posts/post/${postId}/twitter`, 
+            hashtags,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error sharing post on Twitter:', error);
@@ -73,14 +76,17 @@ export const sharePostOnTwitter = async (postId) => {
     }
 };
 
-export const sharePostOnFacebook = async (postId) => {
+export const sharePostOnFacebook = async (postId, hashtags = []) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/published-posts/post/${postId}/facebook`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+        const response = await axios.post(`${baseURL}/api/published-posts/post/${postId}/facebook`, 
+            hashtags,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error sharing post on Facebook:', error);
@@ -88,14 +94,18 @@ export const sharePostOnFacebook = async (postId) => {
     }
 };
 
-export const shareAttractionOnTwitter = async (attractionId) => {
+export const shareAttractionOnTwitter = async (attractionId, hashtags = []) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/published-posts/attraction/${attractionId}/twitter`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+        const response = await axios.post(
+            `${baseURL}/api/published-posts/attraction/${attractionId}/twitter`, 
+            hashtags,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error sharing attraction on Twitter:', error.response);
@@ -103,29 +113,37 @@ export const shareAttractionOnTwitter = async (attractionId) => {
     }
 };
 
-export const shareTemplateOnTwitter = async (templateId) => {
+export const shareTemplateOnTwitter = async (templateId, hashtags = []) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/twitter`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+        const response = await axios.post(
+            `${baseURL}/api/published-posts/tour-template/${templateId}/twitter`, 
+            hashtags,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
-        console.error('Error sharing post on Twitter:', error);
+        console.error('Error sharing template on Twitter:', error.response);
         throw error;
     }
 };
 
-export const shareAttractionOnFacebook = async (attractionId) => {
+export const shareAttractionOnFacebook = async (attractionId, hashtags = []) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/published-posts/attraction/${attractionId}/facebook`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+        const response = await axios.post(
+            `${baseURL}/api/published-posts/attraction/${attractionId}/facebook`, 
+            hashtags,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             }
-        });
+        );
         return response.data;
     } catch (error) {
         console.error('Error sharing attraction on Facebook:', error.response);
@@ -133,17 +151,39 @@ export const shareAttractionOnFacebook = async (attractionId) => {
     }
 };
 
-export const shareTemplateOnFacebook = async (templateId) => {
+export const shareTemplateOnFacebook = async (templateId, hashtags = []) => {
     const token = getCookie('token');
     try {
-        const response = await axios.post(`${baseURL}/api/published-posts/tour-template/${templateId}/facebook`, {}, {
+        const response = await axios.post(
+            `${baseURL}/api/published-posts/tour-template/${templateId}/facebook`, 
+            hashtags,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error sharing template on Facebook:', error.response);
+        throw error;
+    }
+};
+
+export const getHashtags = async () => {
+    const token = getCookie('token');
+    try {
+        const response = await axios.get(`${baseURL}/api/published-posts/hashtag`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
-        return response.data;
+        return response.data.data.map(hashtag => ({
+            id: hashtag.hashtagId,
+            name: hashtag.hashtagName.replace('#', '')
+        }));
     } catch (error) {
-        console.error('Error sharing template on Facebook:', error.response);
+        console.error('Error fetching hashtags:', error.response);
         throw error;
     }
 };

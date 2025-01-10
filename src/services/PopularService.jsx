@@ -21,7 +21,6 @@ export const fetchPopularProvinces = async (categoryId = null, categoryType = nu
         if (!data || !Array.isArray(data)) {
             throw new Error('Invalid response structure: data not found or not an array');
         }
-        console.log(data);
         return data;
 
     } catch (error) {
@@ -101,6 +100,23 @@ export const fetchPopularTourCategories = async (provinceId) => {
 
     } catch (error) {
         console.error('Error fetching popular tour categories:', error);
+        throw error;
+    }
+};
+
+export const getPopularHashtags = async (isTwitter) => {
+    const token = getCookie('token');
+    const queryParams = new URLSearchParams();
+    if (isTwitter) queryParams.append('isTwitter', isTwitter);
+    try {
+        const response = await axios.get(`${baseURL}/api/popular/hashtags?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return response.data.data;
+    } catch (error) {
+        console.error('Error fetching popular hashtags:', error.response);
         throw error;
     }
 };

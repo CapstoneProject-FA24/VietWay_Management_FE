@@ -161,8 +161,8 @@ const PostDetail = () => {
         const popularProvData = await fetchPopularProvinces();
         const popularCategoriesData = await fetchPopularPostCategories();
         
-        setPopularProvinces(popularProvData.map(p => p.provinceId));
-        setPopularPostCategories(popularCategoriesData.map(c => c.postCategoryId));
+        setPopularProvinces(popularProvData);
+        setPopularPostCategories(popularCategoriesData);
 
         if (post?.postCategoryId) {
           await handleCategoryChange(post.postCategoryId);
@@ -500,8 +500,17 @@ const PostDetail = () => {
                               <MenuItem key={category.postCategoryId} value={category.postCategoryId}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   {category.name}
+                                  {popularPostCategories.includes(category.postCategoryId.toString()) && (
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: 'red' }}
+                                      titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
+                                    />
+                                  )}
                                   {hotCategories.includes(category.postCategoryId.toString()) && (
-                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: '#ff8f00' }}
+                                      titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
+                                    />
                                   )}
                                 </Box>
                               </MenuItem>
@@ -525,8 +534,17 @@ const PostDetail = () => {
                               <MenuItem key={province.value} value={province.value}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                   {province.label}
+                                  {popularProvinces.includes(province.value.toString()) && (
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: 'red' }}
+                                      titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                                    />
+                                  )}
                                   {hotProvinces.includes(province.value.toString()) && (
-                                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                                    <LocalFireDepartmentIcon 
+                                      sx={{ color: '#ff8f00' }}
+                                      titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
+                                    />
                                   )}
                                 </Box>
                               </MenuItem>

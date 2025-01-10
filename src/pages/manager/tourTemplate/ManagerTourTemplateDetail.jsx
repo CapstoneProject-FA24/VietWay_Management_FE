@@ -29,6 +29,7 @@ import XIcon from '@mui/icons-material/X';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
 import { shareTemplateOnTwitter, getTwitterReactionsByPostId, getFacebookReactions, shareTemplateOnFacebook } from '@services/PublishedPostService';
 import { getErrorMessage } from '@hooks/Message';
+import HashtagPopup from '@components/social/HashtagPopup';
 
 const ManagerTourTemplateDetails = () => {
   const [tourTemplate, setTourTemplate] = useState(null);
@@ -56,6 +57,7 @@ const ManagerTourTemplateDetails = () => {
   });
   const [socialMetrics, setSocialMetrics] = useState({});
   const [currentTab, setCurrentTab] = useState(0);
+  const [isHashtagPopupOpen, setIsHashtagPopupOpen] = useState({ open: false, platform: null });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,34 +183,28 @@ const ManagerTourTemplateDetails = () => {
     setIsHistoryOpen(!isHistoryOpen);
   };
 
-  const handleShareToSocial = async (platform) => {
+  const handleShareToSocial = (platform) => {
+    setIsHashtagPopupOpen({ open: true, platform });
+  };
+
+  const handleHashtagConfirm = async (hashtags) => {
+    const platform = isHashtagPopupOpen.platform;
     setIsPublishing(prev => ({ ...prev, [platform]: true }));
+    
     try {
       if (platform === 'facebook') {
-        await shareTemplateOnFacebook(tourTemplate.tourTemplateId);
-        setSnackbar({
-          open: true,
-          message: 'Đã đăng tour mẫu lên Facebook thành công',
-          severity: 'success',
-          hide: 5000
-        });
+        await shareTemplateOnFacebook(tourTemplate.tourTemplateId, hashtags);
+        setSnackbar({ open: true, message: 'Đã đăng mẫu tour lên Facebook thành công', severity: 'success', hide: 5000 });
       } else if (platform === 'twitter') {
-        await shareTemplateOnTwitter(tourTemplate.tourTemplateId);
-        setSnackbar({
-          open: true,
-          message: 'Đã đăng tour mẫu lên Twitter thành công',
-          severity: 'success',
-          hide: 5000
-        });
+        await shareTemplateOnTwitter(tourTemplate.tourTemplateId, hashtags);
+        setSnackbar({ open: true, message: 'Đã đăng mẫu tour lên Twitter thành công', severity: 'success', hide: 5000 });
       }
+      // Refresh data
       const updatedTemplate = await fetchTourTemplateById(tourTemplate.tourTemplateId);
       setTourTemplate(updatedTemplate);
     } catch (error) {
-      console.log(error);
       setSnackbar({
-        open: true,
-        severity: 'error',
-        hide: 5000,
+        open: true, severity: 'error', hide: 5000,
         message: getErrorMessage(error),
       });
     } finally {
@@ -388,15 +384,19 @@ const ManagerTourTemplateDetails = () => {
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
             <Typography>Đăng bài:</Typography>
             <Button
-              variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
-              onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
+              variant="contained" 
+              startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
+              onClick={() => handleShareToSocial('facebook')} 
+              disabled={isPublishing.facebook}
               sx={{ backgroundColor: '#1877F2', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
             >
               {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
             </Button>
             <Button
-              variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
-              onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
+              variant="contained" 
+              startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
+              onClick={() => handleShareToSocial('twitter')} 
+              disabled={isPublishing.twitter}
               sx={{ backgroundColor: '#000000', height: '35px', '&:hover': { backgroundColor: '#2c2c2c' }, fontSize: '13px', p: 1.5 }}
             >
               {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
@@ -689,6 +689,12 @@ const ManagerTourTemplateDetails = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <HashtagPopup
+        open={isHashtagPopupOpen.open}
+        onClose={() => setIsHashtagPopupOpen({ open: false, platform: null })}
+        onConfirm={handleHashtagConfirm}
+        title={`Thêm hashtag cho ${isHashtagPopupOpen.platform === 'facebook' ? 'Facebook' : 'Twitter'}`}
+      />
     </Box>
   );
 };

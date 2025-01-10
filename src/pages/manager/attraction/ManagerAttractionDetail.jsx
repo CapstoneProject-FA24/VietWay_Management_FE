@@ -29,6 +29,7 @@ import XIcon from '@mui/icons-material/X';
 import { shareAttractionOnTwitter, getTwitterReactionsByPostId, shareAttractionOnFacebook, getFacebookReactions } from '@services/PublishedPostService';
 import SocialMetricsTab from '@components/social/SocialMetricsTab';
 import { getErrorMessage } from '@hooks/Message';
+import HashtagPopup from '@components/social/HashtagPopup';
 
 const ManagerAttractionDetail = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -57,6 +58,7 @@ const ManagerAttractionDetail = () => {
     twitter: false
   });
   const [currentTab, setCurrentTab] = useState(0);
+  const [isHashtagPopupOpen, setIsHashtagPopupOpen] = useState({ open: false, platform: null });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -333,33 +335,27 @@ const ManagerAttractionDetail = () => {
     setIsEditing(false);
   };
 
-  const handleShareToSocial = async (platform) => {
+  const handleShareToSocial = (platform) => {
+    setIsHashtagPopupOpen({ open: true, platform });
+  };
+
+  const handleHashtagConfirm = async (hashtags) => {
+    const platform = isHashtagPopupOpen.platform;
     setIsPublishing(prev => ({ ...prev, [platform]: true }));
+    
     try {
       if (platform === 'facebook') {
-        await shareAttractionOnFacebook(attraction.attractionId);
-        setSnackbar({
-          open: true,
-          message: 'Đã đăng điểm tham quan lên Facebook thành công',
-          severity: 'success',
-          hide: 5000
-        });
+        await shareAttractionOnFacebook(attraction.attractionId, hashtags);
+        setSnackbar({ open: true, message: 'Đã đăng địa điểm lên Facebook thành công', severity: 'success', hide: 5000 });
       } else if (platform === 'twitter') {
-        await shareAttractionOnTwitter(attraction.attractionId);
-        setSnackbar({
-          open: true,
-          message: 'Đã đăng điểm tham quan lên Twitter thành công',
-          severity: 'success',
-          hide: 5000
-        });
+        await shareAttractionOnTwitter(attraction.attractionId, hashtags);
+        setSnackbar({ open: true, message: 'Đã đăng địa điểm lên Twitter thành công', severity: 'success', hide: 5000 });
       }
-      const updatedAttraction = await fetchAttractionById(attraction.attractionId);
-      setAttraction(updatedAttraction);
+      // Refresh data if needed
+      await loadAttraction();
     } catch (error) {
       setSnackbar({
-        open: true,
-        severity: 'error',
-        hide: 5000,
+        open: true, severity: 'error', hide: 5000,
         message: getErrorMessage(error),
       });
     } finally {
@@ -772,6 +768,12 @@ const ManagerAttractionDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <HashtagPopup
+        open={isHashtagPopupOpen.open}
+        onClose={() => setIsHashtagPopupOpen({ open: false, platform: null })}
+        onConfirm={handleHashtagConfirm}
+        title={`Thêm hashtag cho ${isHashtagPopupOpen.platform === 'facebook' ? 'Facebook' : 'Twitter'}`}
+      />
     </Box>
   );
 };

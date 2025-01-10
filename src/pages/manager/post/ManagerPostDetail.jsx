@@ -23,6 +23,7 @@ import SocialMetricsTab from '@components/social/SocialMetricsTab';
 import { getErrorMessage } from '@hooks/Message';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import { fetchPopularProvinces, fetchPopularPostCategories } from '@services/PopularService';
+import HashtagPopup from '@components/social/HashtagPopup';
 
 const ManagerPostDetail = () => {
   const { id } = useParams();
@@ -49,6 +50,7 @@ const ManagerPostDetail = () => {
   const [popularPostCategories, setPopularPostCategories] = useState([]);
   const [hotProvinces, setHotProvinces] = useState([]);
   const [hotCategories, setHotCategories] = useState([]);
+  const [isHashtagPopupOpen, setIsHashtagPopupOpen] = useState({ open: false, platform: null });
 
   const loadPost = async () => {
     try {
@@ -411,26 +413,8 @@ const ManagerPostDetail = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const handleShareToSocial = async (platform) => {
-    setIsPublishing(prev => ({ ...prev, [platform]: true }));
-    try {
-      if (platform === 'facebook') {
-        await sharePostOnFacebook(post.postId);
-        setSnackbar({ open: true, message: 'Đã đăng bài viết lên Facebook thành công', severity: 'success', hide: 5000 });
-      } else if (platform === 'twitter') {
-        await sharePostOnTwitter(post.postId);
-        setSnackbar({ open: true, message: 'Đã đăng bài viết lên Twitter thành công', severity: 'success', hide: 5000 });
-      }
-      const updatedPost = await fetchPostById(post.postId);
-      setPost(updatedPost);
-    } catch (error) {
-      setSnackbar({
-        open: true, severity: 'error', hide: 5000,
-        message: getErrorMessage(error),
-      });
-    } finally {
-      setIsPublishing(prev => ({ ...prev, [platform]: false }));
-    }
+  const handleShareToSocial = (platform) => {
+    setIsHashtagPopupOpen({ open: true, platform });
   };
 
   const handleViewOnSocial = (platform, postId) => {
@@ -496,6 +480,31 @@ const ManagerPostDetail = () => {
       setHotCategories(hotCategoriesData);
     } catch (error) {
       console.error('Error fetching hot categories:', error);
+    }
+  };
+
+  const handleHashtagConfirm = async (hashtags) => {
+    const platform = isHashtagPopupOpen.platform;
+    setIsPublishing(prev => ({ ...prev, [platform]: true }));
+    
+    try {
+      if (platform === 'facebook') {
+        await sharePostOnFacebook(post.postId, hashtags);
+        setSnackbar({ open: true, message: 'Đã đăng bài viết lên Facebook thành công', severity: 'success', hide: 5000 });
+      } else if (platform === 'twitter') {
+        await sharePostOnTwitter(post.postId, hashtags);
+        setSnackbar({ open: true, message: 'Đã đăng bài viết lên Twitter thành công', severity: 'success', hide: 5000 });
+      }
+      // Refresh data
+      const updatedPost = await fetchPostById(post.postId);
+      setPost(updatedPost);
+    } catch (error) {
+      setSnackbar({
+        open: true, severity: 'error', hide: 5000,
+        message: getErrorMessage(error),
+      });
+    } finally {
+      setIsPublishing(prev => ({ ...prev, [platform]: false }));
     }
   };
 
@@ -738,15 +747,19 @@ const ManagerPostDetail = () => {
                       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end' }}>
                         <Typography>Đăng bài:</Typography>
                         <Button
-                          variant="contained" startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
-                          onClick={() => handleShareToSocial('facebook')} disabled={isPublishing.facebook}
+                          variant="contained" 
+                          startIcon={isPublishing.facebook ? <CircularProgress size={15} color="inherit" /> : <FacebookIcon />}
+                          onClick={() => handleShareToSocial('facebook')} 
+                          disabled={isPublishing.facebook}
                           sx={{ backgroundColor: '#1877F2', height: '35px', '&:hover': { backgroundColor: '#466bb4' }, fontSize: '13px', p: 1.5 }}
                         >
                           {isPublishing.facebook ? 'Đang đăng...' : 'Facebook'}
                         </Button>
                         <Button
-                          variant="contained" startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
-                          onClick={() => handleShareToSocial('twitter')} disabled={isPublishing.twitter}
+                          variant="contained" 
+                          startIcon={isPublishing.twitter ? <CircularProgress size={15} color="inherit" /> : <XIcon sx={{ height: '17px' }} />}
+                          onClick={() => handleShareToSocial('twitter')} 
+                          disabled={isPublishing.twitter}
                           sx={{ backgroundColor: '#000000', height: '35px', '&:hover': { backgroundColor: '#2c2c2c' }, fontSize: '13px', p: 1.5 }}
                         >
                           {isPublishing.twitter ? 'Đang đăng...' : 'Twitter'}
@@ -843,6 +856,13 @@ const ManagerPostDetail = () => {
         </DialogActions>
       </Dialog>
       <CancelConfirmationDialog />
+      <HashtagPopup
+        open={isHashtagPopupOpen.open}
+        onClose={() => setIsHashtagPopupOpen({ open: false, platform: null })}
+        onConfirm={handleHashtagConfirm}
+        isTwitter={isHashtagPopupOpen.platform === 'twitter'}
+        title={`Thêm hashtag cho ${isHashtagPopupOpen.platform === 'facebook' ? 'Facebook' : 'Twitter'}`}
+      />
     </Box>
   );
 };

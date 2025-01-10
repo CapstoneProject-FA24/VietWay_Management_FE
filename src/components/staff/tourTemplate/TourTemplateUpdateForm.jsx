@@ -116,17 +116,49 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                 
                 setPopularProvinces(popularProvincesData);
                 setPopularTourCategories(popularTourCategoriesData);
+
+                // Get hot provinces based on initial category
+                let hotProvincesData = [];
+                if (initialTourTemplate.tourCategoryId) {
+                    hotProvincesData = await fetchPopularProvinces(initialTourTemplate.tourCategoryId, 1);
+                    setHotProvinces(hotProvincesData);
+                }
+
+                // Update the provinces with both popular and hot status
+                setEditableFields(prev => ({
+                    ...prev,
+                    provinces: {
+                        ...prev.provinces,
+                        value: prev.provinces.value.map(province => ({
+                            ...province,
+                            isPopular: popularProvincesData.includes(province.value),
+                            isHot: hotProvincesData.includes(province.value)
+                        }))
+                    }
+                }));
             } catch (error) {
                 console.error('Error fetching popular data:', error);
             }
         };
         fetchPopularData();
-    }, []);
+    }, [initialTourTemplate.tourCategoryId]);
 
     const handleCategoryChange = async (categoryId) => {
         try {
             const hotProvinceData = await fetchPopularProvinces(categoryId, 1);
             setHotProvinces(hotProvinceData);
+            
+            // Update selected provinces with new hot status
+            setEditableFields(prev => ({
+                ...prev,
+                provinces: {
+                    ...prev.provinces,
+                    value: prev.provinces.value.map(province => ({
+                        ...province,
+                        isHot: hotProvinceData.includes(province.value)
+                    }))
+                }
+            }));
         } catch (error) {
             console.error('Error fetching hot provinces:', error);
         }
@@ -159,23 +191,6 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
         }));
         setFieldErrors(prev => ({ ...prev, [field]: undefined }));
     };
-
-    useEffect(() => {
-        const fetchPopularData = async () => {
-            try {
-                // Fetch initial hot data based on current values
-                if (editableFields.tourCategory.value) {
-                    await handleCategoryChange(editableFields.tourCategory.value);
-                }
-                if (editableFields.startingProvinceId.value) {
-                    await handleProvinceChange(editableFields.startingProvinceId.value);
-                }
-            } catch (error) {
-                console.error('Error fetching initial hot data:', error);
-            }
-        };
-        fetchPopularData();
-    }, []);
 
     const handleImageUpload = (index, event) => {
         const file = event.target.files[0];
@@ -452,20 +467,18 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                     <Typography gutterBottom>Tour đi tham quan tỉnh/thành phố *</Typography>
                     <ReactSelect
                         isMulti
-                        value={editableFields.provinces.value}
-                        onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
-                        options={provinces.map(province => ({
-                            value: province.provinceId,
+                        value={editableFields.provinces.value.map(province => ({
+                            value: province.value,
                             label: (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    {province.provinceName}
-                                    {popularProvinces.includes(province.provinceId) && (
+                                    {province.label}
+                                    {province.isPopular && (
                                         <LocalFireDepartmentIcon 
                                             sx={{ color: 'red' }}
                                             titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
                                         />
                                     )}
-                                    {hotProvinces.includes(province.provinceId) && (
+                                    {province.isHot && (
                                         <LocalFireDepartmentIcon 
                                             sx={{ color: '#ff8f00' }}
                                             titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
@@ -474,6 +487,30 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                                 </div>
                             )
                         }))}
+                        onChange={(selectedOptions) => handleFieldChange('provinces', selectedOptions)}
+                        options={provinces.map(province => ({
+                            value: province.provinceId,
+                            label: province.provinceName,
+                            isPopular: popularProvinces.includes(province.provinceId),
+                            isHot: hotProvinces.includes(province.provinceId)
+                        }))}
+                        formatOptionLabel={(option, { context }) => (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {option.label}
+                                {option.isPopular && (
+                                    <LocalFireDepartmentIcon 
+                                        sx={{ color: 'red' }}
+                                        titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
+                                    />
+                                )}
+                                {option.isHot && (
+                                    <LocalFireDepartmentIcon 
+                                        sx={{ color: '#ff8f00' }}
+                                        titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
+                                    />
+                                )}
+                            </div>
+                        )}
                         className="basic-multi-select"
                         classNamePrefix="select"
                         placeholder=''
@@ -518,6 +555,9 @@ const TourTemplateUpdateForm = ({ tourTemplate: initialTourTemplate, onSave, onC
                             </MenuItem>
                         ))}
                     </Select>
+                    {fieldErrors.startingProvinceId && (
+                        <FormHelperText error>{fieldErrors.startingProvinceId}</FormHelperText>
+                    )}
                 </Box>
             </Box>
 

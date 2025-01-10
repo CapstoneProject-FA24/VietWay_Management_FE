@@ -42,7 +42,7 @@ const ManageTourTemplate = () => {
     const navigate = useNavigate();
     const [popularProvinces, setPopularProvinces] = useState([]);
     const [popularTourCategories, setPopularTourCategories] = useState([]);
-    
+
     useEffect(() => {
         fetchData();
     }, [page, pageSize, searchTerm, selectedCategories, selectedProvinces, selectedDuration, statusTab]);
@@ -56,7 +56,7 @@ const ManageTourTemplate = () => {
             try {
                 const popularProvincesData = await fetchPopularProvinces();
                 const popularTourCategoriesData = await fetchPopularTourCategories();
-                
+
                 setPopularProvinces(popularProvincesData);
                 setPopularTourCategories(popularTourCategoriesData);
             } catch (error) {
@@ -78,6 +78,7 @@ const ManageTourTemplate = () => {
                 statuses: statusTab == "all" ? [0, 1, 2, 3] : [parseInt(statusTab)]
             };
             const result = await fetchTourTemplates(params);
+            console.log(result);
             setTourTemplates(result.data);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
@@ -264,14 +265,20 @@ const ManageTourTemplate = () => {
                     </Grid>
                 </Grid>
                 <Grid container spacing={2}>
-                    {sortedTourTemplates.map(tourTemplate => (
-                        <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
-                            <TourTemplateCard
-                                tour={tourTemplate}
-                                isOpen={isSidebarOpen}
-                            />
+                    {sortedTourTemplates && sortedTourTemplates.length > 0 ? (
+                        sortedTourTemplates.map(tourTemplate => (
+                            <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
+                                <TourTemplateCard
+                                    tour={tourTemplate}
+                                    isOpen={isSidebarOpen}
+                                />
+                            </Grid>
+                        ))
+                    ) : (
+                        <Grid item xs={12} sx={{textAlign: 'center'}}>
+                            <div>Không tìm thấy tour mẫu phù hợp.</div>
                         </Grid>
-                    ))}
+                    )}
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                     <Pagination

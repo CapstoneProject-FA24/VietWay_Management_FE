@@ -50,7 +50,7 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
       }
       if (attraction.provinceId) {
         fetchPopularAttractionCategories(attraction.provinceId)
-          .then(data => setHotCategories(data.map(c => c.attractionCategoryId)))
+          .then(data => setHotCategories(data))
           .catch(error => console.error('Error fetching initial hot categories:', error));
       }
     }
