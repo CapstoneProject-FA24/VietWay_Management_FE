@@ -85,7 +85,7 @@ const SocialMediaHashtag = ({ data, startDate, endDate }) => {
           <BarChart
             data={chartData}
             margin={{
-              top: 20,
+              top: 35,
               right: 30,
               left: 20,
               bottom: 5,
@@ -109,13 +109,13 @@ const SocialMediaHashtag = ({ data, startDate, endDate }) => {
             />
             <Tooltip content={<CustomTooltip />} />
             {chartType === 'average' && <Bar dataKey="ĐĐGMĐQT trung bình" fill="#0a9d15" />}
-            {chartType === 'facebook' && <Bar dataKey="ĐĐGMĐQT trung bình trên facebook" fill="#1877F2" />}
+            {chartType === 'facebook' && <Bar dataKey="ĐĐGMĐQT trung bình trên Facebook" fill="#1877F2" />}
             {chartType === 'twitter' && <Bar dataKey="ĐĐGMĐQT trung bình trên X (Twitter)" fill="#000000" />}
           </BarChart>
         </ResponsiveContainer>
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ mt: 5 }}>
         <Typography variant="h6" sx={{ fontSize: '1.2rem', mb: 2 }}>
           {`Biểu đồ tỷ lệ nhấp chuột (CTR) theo hashtag 
           ${new Date(startDate).toLocaleDateString('vi-VN', { month: '2-digit', year: 'numeric' }).replace(', ', '/').replace('tháng', '')} đến 
@@ -125,7 +125,7 @@ const SocialMediaHashtag = ({ data, startDate, endDate }) => {
           <BarChart
             data={ctrChartData}
             margin={{
-              top: 20,
+              top: 35,
               right: 30,
               left: 20,
               bottom: 5,
@@ -144,7 +144,7 @@ const SocialMediaHashtag = ({ data, startDate, endDate }) => {
                 position: "top",
                 offset: 20,
                 style: { fontSize: 16 },
-                dx: 100,
+                dx: 50,
               }}
             />
             <Tooltip content={<CustomTooltip />} />

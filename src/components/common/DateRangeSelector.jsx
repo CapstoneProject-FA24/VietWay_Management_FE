@@ -3,6 +3,7 @@ import { Box, Button } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/vi';
 import dayjs from 'dayjs';
 
 const DateRangeSelector = ({ 
@@ -12,34 +13,46 @@ const DateRangeSelector = ({
   onEndDateChange, 
   onApply 
 }) => {
+  const now = dayjs();
+
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <DatePicker
-          views={['month', 'year']}
+          label="Từ ngày"
           value={startDate}
           onChange={onStartDateChange}
-          maxDate={endDate}
-          slotProps={{ textField: { size: 'small' } }}
-          label="Từ tháng"
           format="MM/YYYY"
-          sx={{ width: 150 }}
+          views={['month', 'year']}
+          maxDate={endDate}
+          slotProps={{
+            textField: {
+              size: "small",
+              error: startDate > endDate,
+              helperText: startDate > endDate ? "Ngày bắt đầu phải nhỏ hơn ngày kết thúc" : ""
+            }
+          }}
         />
         <DatePicker
-          views={['month', 'year']}
+          label="Đến ngày"
           value={endDate}
           onChange={onEndDateChange}
-          minDate={startDate}
-          maxDate={dayjs()}
-          slotProps={{ textField: { size: 'small' } }}
-          label="Đến tháng"
           format="MM/YYYY"
-          sx={{ width: 150 }}
+          views={['month', 'year']}
+          minDate={startDate}
+          maxDate={now}
+          slotProps={{
+            textField: {
+              size: "small",
+              error: endDate > now,
+              helperText: endDate > now ? "Ngày kết thúc không được lớn hơn hiện tại" : ""
+            }
+          }}
         />
-        <Button
-          variant="contained"
+        <Button 
+          variant="contained" 
           onClick={onApply}
-          sx={{ height: 40 }}
+          disabled={startDate > endDate || endDate > now}
         >
           Áp dụng
         </Button>
