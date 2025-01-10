@@ -114,13 +114,18 @@ const HashtagPopup = ({ open, onClose, onConfirm, title = "Thêm hashtag", isTwi
   };
 
   const handleInputChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value.replace(/\s/g, '');
     setInputValue(value);
     setShowSuggestions(true);
   };
 
+  const formatHashtag = (tag) => {
+    const cleanTag = tag.replace(/^#/, '').trim();
+    return `#${cleanTag}`;
+  };
+
   const handleAddHashtag = (tag) => {
-    const formattedTag = tag.startsWith('#') ? tag : `#${tag}`;
+    const formattedTag = formatHashtag(tag);
     if (!selectedHashtags.includes(formattedTag)) {
       setSelectedHashtags([...selectedHashtags, formattedTag]);
       setInputValue('');

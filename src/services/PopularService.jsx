@@ -4,7 +4,6 @@ import { getCookie } from '@services/AuthenService';
 const baseURL = import.meta.env.VITE_API_URL;
 
 export const fetchPopularProvinces = async (categoryId = null, categoryType = null) => {
-    console.log(categoryId, categoryType);
     const token = getCookie('token');
     const queryParams = new URLSearchParams();
     if (categoryId) queryParams.append('categoryId', categoryId);
