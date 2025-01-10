@@ -11,7 +11,7 @@ import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined
 import AirplaneTicketOutlinedIcon from '@mui/icons-material/AirplaneTicketOutlined';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
-import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince, fetchSocialMediaByPostCategory, fetchSocialMediaByAttractionCategory, fetchSocialMediaByTourCategory } from '@services/ReportService';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince, fetchSocialMediaByPostCategory, fetchSocialMediaByAttractionCategory, fetchSocialMediaByTourCategory, fetchSocialMediaHashtag } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
 import RevenueTab from '@components/admin/RevenueTab';
 import PromotionTab from '@components/promoting/PromotionTab';
@@ -77,6 +77,7 @@ const ManagerDashboard = () => {
   const [postCategoryData, setPostCategoryData] = useState([]);
   const [attractionCategoryData, setAttractionCategoryData] = useState([]);
   const [tourCategoryData, setTourCategoryData] = useState([]);
+  const [hashtagData, setHashtagData] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
 
   useEffect(() => {
@@ -84,53 +85,106 @@ const ManagerDashboard = () => {
   }, [appliedGlobalDateRange]);
 
   const loadDashboardData = async () => {
-    try {
-      const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
-      let endDate;
-      if (appliedGlobalDateRange.endDate.month() === dayjs().month() &&
-        appliedGlobalDateRange.endDate.year() === dayjs().year()) {
-        endDate = dayjs().format('MM/DD/YYYY');
-      } else {
-        endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
-      }
-
-      const [
-        summaryData,
-        bookingData,
-        ratingData,
-        revenueData,
-        socialMedia,
-        promotion,
-        provinceMediaData,
-        postCategoryMediaData,
-        attractionCategoryMediaData,
-        tourCategoryMediaData
-      ] = await Promise.all([
-        fetchReportSummary(startDate, endDate),
-        fetchBookingReport(startDate, endDate),
-        fetchRatingReport(startDate, endDate),
-        fetchRevenueReport(startDate, endDate),
-        fetchSocialMediaSummary(startDate, endDate),
-        fetchPromotionSummary(startDate, endDate),
-        fetchSocialMediaByProvince(startDate, endDate),
-        fetchSocialMediaByPostCategory(startDate, endDate),
-        fetchSocialMediaByAttractionCategory(startDate, endDate),
-        fetchSocialMediaByTourCategory(startDate, endDate)
-      ]);
-
-      setSummaryStats(summaryData);
-      setBookingStats(bookingData);
-      setRatingStats(ratingData);
-      setRevenueStats(revenueData);
-      setSocialMediaData(socialMedia);
-      setPromotionData(promotion);
-      setProvinceData(provinceMediaData);
-      setPostCategoryData(postCategoryMediaData);
-      setAttractionCategoryData(attractionCategoryMediaData);
-      setTourCategoryData(tourCategoryMediaData);
-    } catch (error) {
-      console.error('Error loading dashboard data:', getErrorMessage(error));
+    const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
+    let endDate;
+    if (appliedGlobalDateRange.endDate.month() === dayjs().month() &&
+      appliedGlobalDateRange.endDate.year() === dayjs().year()) {
+      endDate = dayjs().format('MM/DD/YYYY');
+    } else {
+      endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
     }
+
+    // Array of fetch operations with their corresponding state setters
+    const fetchOperations = [
+      { 
+        fetch: () => fetchReportSummary(startDate, endDate),
+        setter: setSummaryStats,
+        defaultValue: {
+          newCustomer: 0, newBooking: 0, newTour: 0, revenue: 0,
+          newAttraction: 0, newPost: 0, averageTourRating: 0
+        }
+      },
+      { 
+        fetch: () => fetchBookingReport(startDate, endDate),
+        setter: setBookingStats,
+        defaultValue: {
+          totalBooking: 0,
+          bookingByDay: { dates: [], pendingBookings: [], depositedBookings: [], 
+            paidBookings: [], completedBookings: [], cancelledBookings: [] },
+          bookingByTourTemplate: [],
+          bookingByTourCategory: [],
+          bookingByParticipantCount: []
+        }
+      },
+      { 
+        fetch: () => fetchRatingReport(startDate, endDate),
+        setter: setRatingStats,
+        defaultValue: {
+          attractionRatingInPeriod: [],
+          tourTemplateRatingInPeriod: [],
+          attractionRatingTotal: [],
+          tourTemplateRatingTotal: []
+        }
+      },
+      { 
+        fetch: () => fetchRevenueReport(startDate, endDate),
+        setter: setRevenueStats,
+        defaultValue: {
+          totalRevenue: 0,
+          revenueByPeriod: { periods: [], revenue: [], refund: [] },
+          revenueByTourTemplate: [],
+          revenueByTourCategory: []
+        }
+      },
+      { 
+        fetch: () => fetchSocialMediaSummary(startDate, endDate),
+        setter: setSocialMediaData,
+        defaultValue: null
+      },
+      { 
+        fetch: () => fetchPromotionSummary(startDate, endDate),
+        setter: setPromotionData,
+        defaultValue: null
+      },
+      { 
+        fetch: () => fetchSocialMediaByProvince(startDate, endDate),
+        setter: setProvinceData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaByPostCategory(startDate, endDate),
+        setter: setPostCategoryData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaByAttractionCategory(startDate, endDate),
+        setter: setAttractionCategoryData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaByTourCategory(startDate, endDate),
+        setter: setTourCategoryData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaHashtag(startDate, endDate),
+        setter: setHashtagData,
+        defaultValue: []
+      }
+    ];
+
+    // Execute all fetch operations independently
+    await Promise.allSettled(
+      fetchOperations.map(async ({ fetch, setter, defaultValue }) => {
+        try {
+          const data = await fetch();
+          setter(data);
+        } catch (error) {
+          console.error('Error fetching data:', getErrorMessage(error));
+          setter(defaultValue);
+        }
+      })
+    );
   };
 
 
@@ -286,6 +340,7 @@ const ManagerDashboard = () => {
                 postCategoryData={postCategoryData}
                 attractionCategoryData={attractionCategoryData}
                 tourCategoryData={tourCategoryData}
+                hashtagData={hashtagData}
                 startDate={appliedGlobalDateRange.startDate} endDate={appliedGlobalDateRange.endDate}
               />
             </Box>

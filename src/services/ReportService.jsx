@@ -618,3 +618,33 @@ export const fetchSocialMediaTourCategoryDetail = async (categoryId, startDate, 
         throw error;
     }
 };
+
+export const fetchSocialMediaHashtag = async (startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+        
+        const response = await axios.get(`${baseURL}/api/reports/social-media-hashtag?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const data = response.data.data;
+        return data.map(hashtag => ({
+            hashtagId: hashtag.hashtagId,
+            hashtagName: hashtag.hashtagName,
+            totalXPost: hashtag.totalXPost,
+            totalFacebookPost: hashtag.totalFacebookPost,
+            averageScore: hashtag.averageScore,
+            averageFacebookScore: hashtag.averageFacebookScore,
+            averageXScore: hashtag.averageXScore,
+            facebookCTR: hashtag.facebookCTR,
+            xctr: hashtag.xctr
+        }));
+    } catch (error) {
+        console.error('Error fetching social media hashtag:', error);
+        throw error;
+    }
+};
