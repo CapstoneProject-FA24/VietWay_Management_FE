@@ -7,7 +7,7 @@ import {
 import { getHashtags } from '@services/PublishedPostService';
 import HashtagReport from '@components/manager/hashtag/HashtagReport'; // You'll need to create this component
 
-const HashtagList = ({ searchTerm }) => {
+const HashtagList = ({ searchTerm, refreshTrigger }) => {
     const [hashtags, setHashtags] = useState([]);
     const [sortBy, setSortBy] = useState('id');
     const [page, setPage] = useState(0);
@@ -16,15 +16,18 @@ const HashtagList = ({ searchTerm }) => {
 
     const loadHashtags = async (search = '') => {
         try {
-            const data = await getHashtags();
+            const data = await getHashtags(search);
             const mappedData = data.map(tag => ({
                 ...tag,
                 displayDate: new Date(tag.createdAt).toLocaleDateString('vi-VN')
             }));
-            const filteredData = search
-                ? mappedData.filter(tag => tag.name.toLowerCase().includes(search.toLowerCase()))
-                : mappedData;
-            setHashtags(sortHashtags(filteredData, sortBy));
+
+            if (refreshTrigger) {
+                setSortBy('createdAt');
+                setHashtags(sortHashtags(mappedData, 'createdAt'));
+            } else {
+                setHashtags(sortHashtags(mappedData, sortBy));
+            }
         } catch (error) {
             console.error('Error loading hashtags:', error);
         }
@@ -45,7 +48,7 @@ const HashtagList = ({ searchTerm }) => {
 
     useEffect(() => {
         loadHashtags(searchTerm);
-    }, [searchTerm]);
+    }, [searchTerm, refreshTrigger]);
 
     const handleSort = (event) => {
         const sortValue = event.target.value;
