@@ -17,9 +17,13 @@ const HashtagList = ({ searchTerm }) => {
     const loadHashtags = async (search = '') => {
         try {
             const data = await getHashtags();
+            const mappedData = data.map(tag => ({
+                ...tag,
+                displayDate: new Date(tag.createdAt).toLocaleDateString('vi-VN')
+            }));
             const filteredData = search
-                ? data.filter(tag => tag.name.toLowerCase().includes(search.toLowerCase()))
-                : data;
+                ? mappedData.filter(tag => tag.name.toLowerCase().includes(search.toLowerCase()))
+                : mappedData;
             setHashtags(sortHashtags(filteredData, sortBy));
         } catch (error) {
             console.error('Error loading hashtags:', error);
@@ -32,6 +36,8 @@ const HashtagList = ({ searchTerm }) => {
                 return a.id - b.id;
             } else if (sortValue === 'name') {
                 return a.name.localeCompare(b.name);
+            } else if (sortValue === 'createdAt') {
+                return new Date(b.createdAt) - new Date(a.createdAt);
             }
             return 0;
         });
@@ -71,6 +77,7 @@ const HashtagList = ({ searchTerm }) => {
                 >
                     <MenuItem value="id">Mã A-Z</MenuItem>
                     <MenuItem value="name">Tên A-Z</MenuItem>
+                    <MenuItem value="createdAt">Mới nhất</MenuItem>
                 </Select>
             </FormControl>
 
@@ -80,6 +87,7 @@ const HashtagList = ({ searchTerm }) => {
                         <TableRow>
                             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Mã</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Tên Hashtag</TableCell>
+                            <TableCell align="center" sx={{ fontWeight: 'bold' }}>Ngày tạo</TableCell>
                             <TableCell align="center" sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -90,7 +98,8 @@ const HashtagList = ({ searchTerm }) => {
                                 <TableRow key={hashtag.id}>
                                     <TableCell align="center">{hashtag.id}</TableCell>
                                     <TableCell align="center">#{hashtag.name}</TableCell>
-                                    <TableCell align="center">
+                                    <TableCell align="center">{hashtag.displayDate}</TableCell>
+                                    <TableCell align="center" sx={{ width: '12rem'}}>
                                         <Button
                                             color="primary"
                                             variant="contained"

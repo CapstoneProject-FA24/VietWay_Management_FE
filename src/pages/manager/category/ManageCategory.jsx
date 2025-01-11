@@ -171,14 +171,14 @@ const ManageCategory = () => {
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
-        <title>Quản lý danh mục</title>
+        <title>Quản lý danh mục và hashtag</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       <Box sx={{ flexGrow: 1, mt: 1.5, p: 3, marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>
-            Quản lý Danh mục và hashtag
+          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', textAlign: 'center', width: '100%' }}>
+            Quản lý danh mục và hashtag
           </Typography>
         </Box>
 

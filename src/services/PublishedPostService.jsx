@@ -172,17 +172,21 @@ export const shareTemplateOnFacebook = async (templateId, hashtags = []) => {
     }
 };
 
-export const getHashtags = async () => {
+export const getHashtags = async (nameSearch = '') => {
     const token = getCookie('token');
     try {
         const response = await axios.get(`${baseURL}/api/published-posts/hashtag`, {
+            params: {
+                nameSearch: nameSearch
+            },
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
         return response.data.data.map(hashtag => ({
             id: hashtag.hashtagId,
-            name: hashtag.hashtagName.replace('#', '')
+            name: hashtag.hashtagName.replace('#', ''),
+            createdAt: hashtag.createdAt
         }));
     } catch (error) {
         console.error('Error fetching hashtags:', error.response);
