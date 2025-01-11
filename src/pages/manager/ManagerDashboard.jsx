@@ -81,10 +81,36 @@ const ManagerDashboard = () => {
   const [currentTab, setCurrentTab] = useState(0);
 
   useEffect(() => {
-    loadDashboardData();
+    // Only load cached data on initial mount
+    loadCachedData();
+    
+    // Check if using default date range (last 6 months to now)
+    const isDefaultDateRange = 
+      appliedGlobalDateRange.startDate.isSame(dayjs().subtract(6, 'month'), 'day') &&
+      appliedGlobalDateRange.endDate.isSame(dayjs(), 'day');
+
+    loadDashboardData(isDefaultDateRange);
   }, [appliedGlobalDateRange]);
 
-  const loadDashboardData = async () => {
+  const loadCachedData = () => {
+    const cachedData = localStorage.getItem('dashboardData');
+    if (cachedData) {
+      const parsed = JSON.parse(cachedData);
+      setSummaryStats(parsed.summaryStats);
+      setBookingStats(parsed.bookingStats);
+      setRatingStats(parsed.ratingStats);
+      setRevenueStats(parsed.revenueStats);
+      setSocialMediaData(parsed.socialMediaData);
+      setPromotionData(parsed.promotionData);
+      setProvinceData(parsed.provinceData);
+      setPostCategoryData(parsed.postCategoryData);
+      setAttractionCategoryData(parsed.attractionCategoryData);
+      setTourCategoryData(parsed.tourCategoryData);
+      setHashtagData(parsed.hashtagData);
+    }
+  };
+
+  const loadDashboardData = async (shouldCache = false) => {
     const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
     let endDate;
     if (appliedGlobalDateRange.endDate.month() === dayjs().month() &&
@@ -173,18 +199,39 @@ const ManagerDashboard = () => {
       }
     ];
 
-    // Execute all fetch operations independently
-    await Promise.allSettled(
+    // Execute all fetch operations and collect results
+    const results = await Promise.allSettled(
       fetchOperations.map(async ({ fetch, setter, defaultValue }) => {
         try {
           const data = await fetch();
           setter(data);
+          return { key: setter.name, data };
         } catch (error) {
           console.error('Error fetching data:', getErrorMessage(error));
           setter(defaultValue);
+          return { key: setter.name, data: defaultValue };
         }
       })
     );
+
+    // Only save to localStorage if using default date range
+    if (shouldCache) {
+      const dashboardData = {
+        summaryStats: results[0].value?.data || fetchOperations[0].defaultValue,
+        bookingStats: results[1].value?.data || fetchOperations[1].defaultValue,
+        ratingStats: results[2].value?.data || fetchOperations[2].defaultValue,
+        revenueStats: results[3].value?.data || fetchOperations[3].defaultValue,
+        socialMediaData: results[4].value?.data || fetchOperations[4].defaultValue,
+        promotionData: results[5].value?.data || fetchOperations[5].defaultValue,
+        provinceData: results[6].value?.data || fetchOperations[6].defaultValue,
+        postCategoryData: results[7].value?.data || fetchOperations[7].defaultValue,
+        attractionCategoryData: results[8].value?.data || fetchOperations[8].defaultValue,
+        tourCategoryData: results[9].value?.data || fetchOperations[9].defaultValue,
+        hashtagData: results[10].value?.data || fetchOperations[10].defaultValue,
+      };
+
+      localStorage.setItem('dashboardData', JSON.stringify(dashboardData));
+    }
   };
 
 
