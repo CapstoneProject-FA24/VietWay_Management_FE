@@ -25,7 +25,7 @@ const ManagerManagePost = () => {
   const [provinces, setProvinces] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [tempSearchTerm, setTempSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState('newest');
+  const [sortOrder, setSortOrder] = useState('aToZ');
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedProvinces, setSelectedProvinces] = useState([]);
   const [tempCategories, setTempCategories] = useState([]);
@@ -242,7 +242,10 @@ const ManagerManagePost = () => {
                 onChange={(e) => setSortOrder(e.target.value)}
                 variant="outlined"
                 sx={{ width: '227px', ml: 2, height: '40px' }}
+                defaultValue="aToZ"
               >
+                <MenuItem value="aToZ">A đến Z</MenuItem>
+                <MenuItem value="zToA">Z đến A</MenuItem>
                 <MenuItem value="newest">Mới nhất</MenuItem>
                 <MenuItem value="oldest">Cũ nhất</MenuItem>
               </Select>
