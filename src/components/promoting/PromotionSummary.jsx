@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Grid, Paper, Typography, FormControl, Select, MenuItem } from '@mui/material';
+import { Box, Grid, Paper, Typography, FormControl, Select, MenuItem, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Visibility, Share, Comment, ThumbUp, Repeat, Favorite, Reply, TrendingUp, Facebook, } from '@mui/icons-material';
 import XIcon from '@mui/icons-material/X';
@@ -77,87 +77,74 @@ const PromotionSummary = ({ socialMediaData, promotionData }) => {
                     </ResponsiveContainer>
                 </Grid>
 
-                {/* Thống kê tổng hợp */}
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom sx={{
-                        color: '#1877F2',  // Facebook blue
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        borderBottom: '1px solid #eee',
-                        pb: 1, ml: 7
-                    }}>
-                        <Facebook />
-                        Tổng kết Facebook
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2, ml: 7 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Visibility sx={{ color: '#666' }} />
-                            <Typography>Tổng lượt xem: <strong>{promotionData?.facebook?.impressions?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <TrendingUp sx={{ color: '#666' }} />
-                            <Typography>Tổng lượt giới thiệu: <strong>{promotionData?.facebook?.referrals?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Comment sx={{ color: '#666' }} />
-                            <Typography>Tổng bình luận: <strong>{promotionData?.facebook?.comments?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Share sx={{ color: '#666' }} />
-                            <Typography>Tổng chia sẻ: <strong>{promotionData?.facebook?.shares?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <ThumbUp sx={{ color: '#666' }} />
-                            <Typography>Tổng phản ứng: <strong>{promotionData?.facebook?.reactions?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-                    </Box>
-                </Grid>
-
-                <Grid item xs={12} md={6}>
-                    <Typography variant="h6" gutterBottom sx={{
-                        color: '#000',  // X (Twitter) black
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        borderBottom: '1px solid #eee',
-                        pb: 1, ml: 7
-                    }}>
-                        <XIcon />
-                        Tổng kết X (Twitter)
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2, ml: 7 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Visibility sx={{ color: '#666' }} />
-                            <Typography>Tổng lượt xem: <strong>{promotionData?.twitter?.impressions?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <TrendingUp sx={{ color: '#666' }} />
-                            <Typography>Tổng lượt giới thiệu: <strong>{promotionData?.twitter?.referrals?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Repeat sx={{ color: '#666' }} />
-                            <Typography>Tổng retweet: <strong>{promotionData?.twitter?.retweets?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Reply sx={{ color: '#666' }} />
-                            <Typography>Tổng trả lời: <strong>{promotionData?.twitter?.replies?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Favorite sx={{ color: '#666' }} />
-                            <Typography>Tổng lượt thích: <strong>{promotionData?.twitter?.likes?.toLocaleString() || 0}</strong></Typography>
-                        </Box>
-                    </Box>
+                {/* Replace the two Grid items with a single table */}
+                <Grid item xs={12}>
+                    <Paper sx={{ p: 2, mt: 2 }}>
+                        <Typography variant="h6" gutterBottom textAlign="center">
+                            Bảng tổng kết số liệu
+                        </Typography>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Chỉ số</TableCell>
+                                    <TableCell align="center">
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                            <Facebook sx={{ color: '#1877F2' }} />
+                                            Facebook
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                            <XIcon />
+                                            X (Twitter)
+                                        </Box>
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Visibility sx={{ color: '#666' }} />
+                                            Lượt xem
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">{promotionData?.facebook?.impressions?.toLocaleString() || 0}</TableCell>
+                                    <TableCell align="center">{promotionData?.twitter?.impressions?.toLocaleString() || 0}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Comment sx={{ color: '#666' }} />
+                                            Bình luận
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">{promotionData?.facebook?.comments?.toLocaleString() || 0}</TableCell>
+                                    <TableCell align="center">{promotionData?.twitter?.retweets?.toLocaleString() || 0}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Share sx={{ color: '#666' }} />
+                                            Chia sẻ
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">{promotionData?.facebook?.shares?.toLocaleString() || 0}</TableCell>
+                                    <TableCell align="center">{promotionData?.twitter?.replies?.toLocaleString() || 0}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <ThumbUp sx={{ color: '#666' }} />
+                                            Phản ứng/Lượt thích
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="center">{promotionData?.facebook?.reactions?.toLocaleString() || 0}</TableCell>
+                                    <TableCell align="center">{promotionData?.twitter?.likes?.toLocaleString() || 0}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </Paper>
                 </Grid>
             </Grid>
         </Box>

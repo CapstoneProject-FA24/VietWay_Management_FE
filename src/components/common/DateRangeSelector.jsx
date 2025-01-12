@@ -14,6 +14,7 @@ const DateRangeSelector = ({
   onApply 
 }) => {
   const now = dayjs();
+  const yesterday = now.subtract(1, 'day');
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
@@ -38,19 +39,19 @@ const DateRangeSelector = ({
           onChange={onEndDateChange}
           format="DD/MM/YYYY"
           minDate={startDate}
-          maxDate={now}
+          maxDate={yesterday}
           slotProps={{
             textField: {
               size: "small",
-              error: endDate > now,
-              helperText: endDate > now ? "Ngày kết thúc không được lớn hơn hiện tại" : ""
+              error: endDate > yesterday,
+              helperText: endDate > yesterday ? "Ngày kết thúc không được lớn hơn hôm qua" : ""
             }
           }}
         />
         <Button 
           variant="contained" 
           onClick={onApply}
-          disabled={startDate > endDate || endDate > now}
+          disabled={startDate > endDate || endDate > yesterday}
         >
           Áp dụng
         </Button>
