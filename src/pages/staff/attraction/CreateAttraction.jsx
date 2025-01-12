@@ -43,6 +43,10 @@ const AddAttraction = () => {
   const [popularTypes, setPopularTypes] = useState([]);
   const [hotProvinces, setHotProvinces] = useState([]);
   const [hotCategories, setHotCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState({
+    draft: false,
+    submit: false
+  });
 
   const handleSidebarToggle = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -134,6 +138,11 @@ const AddAttraction = () => {
   };
 
   const handleSave = async (isDraft) => {
+    setIsLoading(prev => ({
+      ...prev,
+      [isDraft ? 'draft' : 'submit']: true
+    }));
+
     try {
       const errors = {};
 
@@ -236,6 +245,11 @@ const AddAttraction = () => {
         });
       }
       console.error('Error creating attraction:', error);
+    } finally {
+      setIsLoading(prev => ({
+        ...prev,
+        [isDraft ? 'draft' : 'submit']: false
+      }));
     }
   };
 
@@ -320,7 +334,7 @@ const AddAttraction = () => {
                           titleAccess="Loại điểm tham quan đang được quan tâm nhiều nhất"
                         />
                       )}
-                      {hotCategories.includes(type.attractionTypeId) && (
+                      {/* {hotCategories.includes(type.attractionTypeId) && (
                         <LocalFireDepartmentIcon 
                           sx={{ 
                             ml: 1,
@@ -329,7 +343,7 @@ const AddAttraction = () => {
                           }}
                           titleAccess="Loại điểm tham quan đang được quan tâm nhiều nhất tại tỉnh thành này"
                         />
-                      )}
+                      )} */}
                     </MenuItem>
                   ))}
                 </Select>
@@ -362,7 +376,7 @@ const AddAttraction = () => {
                           titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
                         />
                       )}
-                      {hotProvinces.includes(province.provinceId) && (
+                      {/* {hotProvinces.includes(province.provinceId) && (
                         <LocalFireDepartmentIcon 
                           sx={{ 
                             ml: 1,
@@ -371,7 +385,7 @@ const AddAttraction = () => {
                           }}
                           titleAccess="Tỉnh thành đang quan tâm đến loại điểm tham quan này nhiều nhất"
                         />
-                      )}
+                      )} */}
                     </MenuItem>
                   ))}
                 </Select>
@@ -521,8 +535,22 @@ const AddAttraction = () => {
             />
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-            <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Gửi duyệt </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => handleSave(true)} 
+              disabled={isLoading.draft}
+              sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}
+            >
+              {isLoading.draft ? 'Đang lưu...' : 'Lưu bản nháp'}
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => handleSave(false)}
+              disabled={isLoading.submit}
+              sx={{ p: 1.5 }}
+            >
+              {isLoading.submit ? 'Đang gửi...' : 'Gửi duyệt'}
+            </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Box sx={{ mt: 1, width: '32rem' }}>
