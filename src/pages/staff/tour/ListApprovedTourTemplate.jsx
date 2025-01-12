@@ -13,6 +13,8 @@ import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularTourCategories } from '@services/PopularService';
 
 const ListApprovedTourTemplate = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -33,6 +35,8 @@ const ListApprovedTourTemplate = () => {
   const [tempProvinces, setTempProvinces] = useState([]);
   const [tempDuration, setTempDuration] = useState([]);
   const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularTourCategories, setPopularTourCategories] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,6 +46,21 @@ const ListApprovedTourTemplate = () => {
   useEffect(() => {
     sortTourTemplates();
   }, [tourTemplates, sortOrder]);
+
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularTourCategoriesData = await fetchPopularTourCategories();
+        
+        setPopularProvinces(popularProvincesData);
+        setPopularTourCategories(popularTourCategoriesData);
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -78,19 +97,39 @@ const ListApprovedTourTemplate = () => {
     fetchProvincesData();
   }, []);
 
+  const provinceOptions = provinces.map(province => ({
+    value: province.provinceId,
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {province.provinceName}
+        {popularProvinces.includes(province.provinceId.toString()) && (
+          <LocalFireDepartmentIcon 
+            sx={{ color: 'red' }} 
+            titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
+          />
+        )}
+      </div>
+    )
+  }));
+
   const categoryOptions = tourCategories.map(category => ({
     value: category.tourCategoryId,
-    label: category.tourCategoryName
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {category.tourCategoryName}
+        {popularTourCategories.includes(category.tourCategoryId.toString()) && (
+          <LocalFireDepartmentIcon 
+            sx={{ color: 'red' }} 
+            titleAccess="Loại tour đang được quan tâm nhiều nhất"
+          />
+        )}
+      </div>
+    )
   }));
 
   const durationOptions = tourDurations.map(duration => ({
     value: duration.durationId,
     label: duration.durationName
-  }));
-
-  const provinceOptions = provinces.map(province => ({
-    value: province.provinceId,
-    label: province.provinceName
   }));
 
   const animatedComponents = makeAnimated();

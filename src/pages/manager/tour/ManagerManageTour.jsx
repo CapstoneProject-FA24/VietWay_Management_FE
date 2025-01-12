@@ -20,6 +20,8 @@ import { TourStatus } from "@hooks/Statuses";
 import { getTourStatusInfo } from "@services/StatusService";
 import { Tabs, Tab } from "@mui/material";
 import Pagination from '@mui/material/Pagination';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularTourCategories } from '@services/PopularService';
 
 const ManagerManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -52,6 +54,9 @@ const ManagerManageTour = () => {
 
   const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [tempSearchCode, setTempSearchCode] = useState("");
+
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularTourCategories, setPopularTourCategories] = useState([]);
 
   const handleSearchByName = () => {
     setPagination(prev => ({
@@ -144,21 +149,50 @@ const ManagerManageTour = () => {
     pagination.pageSize
   ]);
 
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularTourCategoriesData = await fetchPopularTourCategories();
+        
+        setPopularProvinces(popularProvincesData);
+        setPopularTourCategories(popularTourCategoriesData);
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
+
   const animatedComponents = makeAnimated();
+
+  const tourTypeOptions = tourCategories.map(category => ({
+    value: category.tourCategoryId,
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {category.tourCategoryName}
+        {popularTourCategories.includes(category.tourCategoryId) && (
+          <LocalFireDepartmentIcon style={{ color: 'red' }} />
+        )}
+      </div>
+    )
+  }));
 
   const provinceOptions = provinces.map(province => ({
     value: province.provinceId,
-    label: province.provinceName
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {province.provinceName}
+        {popularProvinces.includes(province.provinceId) && (
+          <LocalFireDepartmentIcon style={{ color: 'red' }} />
+        )}
+      </div>
+    )
   }));
 
   const durationOptions = tourDurations.map(duration => ({
     value: duration.durationId,
     label: duration.durationName
-  }));
-
-  const tourTypeOptions = tourCategories.map(category => ({
-    value: category.tourCategoryId,
-    label: category.tourCategoryName
   }));
 
   const handleTempFilterChange = (selectedOptions, filterType) => {
@@ -261,6 +295,11 @@ const ManagerManageTour = () => {
                 onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, 'tourType')}
                 styles={customSelectStyles}
                 menuPortalTarget={document.body}
+                formatOptionLabel={({ label, value }) => (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {label}
+                  </div>
+                )}
               />
             </FormControl>
           </Grid>
@@ -293,6 +332,11 @@ const ManagerManageTour = () => {
                 onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, 'location')}
                 styles={customSelectStyles}
                 menuPortalTarget={document.body}
+                formatOptionLabel={({ label, value }) => (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {label}
+                  </div>
+                )}
               />
             </FormControl>
           </Grid>

@@ -13,6 +13,8 @@ import { fetchAttractions } from '@services/AttractionService';
 import { fetchProvinces } from '@services/ProvinceService';
 import { fetchAttractionType } from '@services/AttractionTypeService';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularAttractionCategories } from '@services/PopularService';
 
 const ManageAttraction = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -33,6 +35,8 @@ const ManageAttraction = () => {
     const [attrTypes, setAttrTypes] = useState([]);
     const [attrProvinces, setAttrProvinces] = useState([]);
     const [sortedAttractions, setSortedAttractions] = useState([]);
+    const [popularProvinces, setPopularProvinces] = useState([]);
+    const [popularTypes, setPopularTypes] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -41,6 +45,21 @@ const ManageAttraction = () => {
     useEffect(() => {
         sortAttractions();
     }, [attractions, sortOrder]);
+
+    useEffect(() => {
+        const fetchPopularData = async () => {
+            try {
+                const popularProvData = await fetchPopularProvinces();
+                setPopularProvinces(popularProvData);
+
+                const popularTypesData = await fetchPopularAttractionCategories();
+                setPopularTypes(popularTypesData);
+            } catch (error) {
+                console.error('Error fetching popular data:', error);
+            }
+        };
+        fetchPopularData();
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -141,6 +160,70 @@ const ManageAttraction = () => {
     const handleDeleteAttraction = (attractionId) => {
     };
 
+    const customStyles = {
+        option: (provided, state) => ({
+            ...provided,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '8px 12px',
+        })
+    };
+
+    const CustomProvinceOption = ({ children, ...props }) => {
+        const isPopular = popularProvinces.includes(props.data.value);
+        return (
+            <div
+                {...props.innerProps}
+                style={{
+                    padding: '8px 12px',
+                    background: props.isFocused ? '#f0f0f0' : 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer'
+                }}
+            >
+                <span>{children}</span>
+                {isPopular && (
+                    <LocalFireDepartmentIcon 
+                        sx={{ 
+                            fontSize: '20px',
+                            color: '#FF0000'
+                        }} 
+                    />
+                )}
+            </div>
+        );
+    };
+
+    const CustomTypeOption = ({ children, ...props }) => {
+        const isPopular = popularTypes.includes(props.data.value);
+        return (
+            <div
+                {...props.innerProps}
+                style={{
+                    padding: '8px 12px',
+                    background: props.isFocused ? '#f0f0f0' : 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer'
+                }}
+            >
+                <span>{children}</span>
+                {isPopular && (
+                    <LocalFireDepartmentIcon 
+                        sx={{ 
+                            fontSize: '20px',
+                            color: '#FF0000'
+                        }} 
+                    />
+                )}
+            </div>
+        );
+    };
+
     return (
         <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
             <Helmet>
@@ -162,16 +245,34 @@ const ManageAttraction = () => {
                         <Typography sx={{ fontWeight: 600 }}>
                             Tỉnh/Thành phố
                         </Typography>
-                        <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
-                            isMulti options={provinceOptions} onChange={setAttrProvinces} value={attrProvinces}
+                        <ReactSelect 
+                            closeMenuOnSelect={false} 
+                            components={{
+                                ...animatedComponents,
+                                Option: CustomProvinceOption
+                            }}
+                            styles={customStyles}
+                            isMulti 
+                            options={provinceOptions} 
+                            onChange={setAttrProvinces} 
+                            value={attrProvinces}
                         />
                     </Grid>
                     <Grid item xs={4.7}>
                         <Typography sx={{ fontWeight: 600 }}>
                             Loại điểm tham quan
                         </Typography>
-                        <ReactSelect closeMenuOnSelect={false} components={animatedComponents}
-                            isMulti options={typeOptions} onChange={setAttrTypes} value={attrTypes}
+                        <ReactSelect 
+                            closeMenuOnSelect={false} 
+                            components={{
+                                ...animatedComponents,
+                                Option: CustomTypeOption
+                            }}
+                            styles={customStyles}
+                            isMulti 
+                            options={typeOptions} 
+                            onChange={setAttrTypes} 
+                            value={attrTypes}
                         />
                     </Grid>
                     <Grid item xs={2.6} sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', height: '100%' }}>

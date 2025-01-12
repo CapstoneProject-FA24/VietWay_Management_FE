@@ -56,6 +56,7 @@ export const fetchAttractionById = async (id) => {
             }
         });
         const data = response.data.data;
+
         const attraction = {
             attractionId: data.attractionId,
             name: data.name,
@@ -66,7 +67,6 @@ export const fetchAttractionById = async (id) => {
             googlePlaceId: data.googlePlaceId,
             status: data.status,
             createdDate: data.createdDate,
-            creatorName: data.creatorName,
             provinceId: data.province.provinceId,
             provinceName: data.province.provinceName,
             attractionTypeId: data.attractionType.attractionCategoryId,
@@ -74,7 +74,8 @@ export const fetchAttractionById = async (id) => {
             images: data.images.map(image => ({
                 imageId: image.imageId,
                 url: image.imageUrl
-            }))
+            })),
+            socialPostDetail: data.socialPostDetail || []
         };
         return attraction;
     } catch (error) {
@@ -245,7 +246,6 @@ export const deleteAttraction = async (attractionId) => {
 };
 
 export const fetchApprovedttractions = async (params) => {
-    console.log(params);
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();

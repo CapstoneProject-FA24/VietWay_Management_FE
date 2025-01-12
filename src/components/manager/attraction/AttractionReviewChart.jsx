@@ -42,7 +42,7 @@ const AttractionReviewChart = ({ ratingData }) => {
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
-                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, color: '#0051cd' }}>
                         Thống kê đánh giá của các điểm tham quan
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -57,13 +57,21 @@ const AttractionReviewChart = ({ ratingData }) => {
                         <BarChart
                             data={filteredData}
                             layout="vertical"
-                            margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+                            margin={{ top: 5, right: 60, left: 0, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                                type="number" 
+                            <XAxis
+                                type="number"
                                 domain={[0, 5]}
                                 tickCount={6}
+                                label={{
+                                    value: "Sao",
+                                    position: "right",
+                                    offset: 20,
+                                    style: { fontSize: 15 },
+                                    dx: -5,
+                                    dy: -15
+                                }}
                             />
                             <YAxis
                                 dataKey="attractionName"
@@ -74,15 +82,15 @@ const AttractionReviewChart = ({ ratingData }) => {
                                     const text = payload.value;
                                     const maxLength = 60;
                                     const displayText = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-                                    
+
                                     return (
                                         <g transform={`translate(${x},${y})`}>
-                                            <text 
-                                                x={0} 
-                                                y={0} 
-                                                dy={4} 
-                                                textAnchor="end" 
-                                                fill="#666666" 
+                                            <text
+                                                x={0}
+                                                y={0}
+                                                dy={4}
+                                                textAnchor="end"
+                                                fill="#666666"
                                                 fontSize={12.5}
                                             >
                                                 {displayText}
@@ -92,7 +100,7 @@ const AttractionReviewChart = ({ ratingData }) => {
                                 }}
                             />
                             <Tooltip content={<CustomTooltip />} />
-                            <Legend />
+                            {/* <Legend /> */}
                             <Bar
                                 dataKey="averageRating"
                                 fill={barColor}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Paper } from '@mui/material';
+import { Box, Grid, Typography, Paper, Tabs, Tab } from '@mui/material';
 import SidebarManager from '@layouts/SidebarManager';
 import { Helmet } from 'react-helmet';
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined';
@@ -7,20 +7,14 @@ import AttractionsOutlinedIcon from '@mui/icons-material/AttractionsOutlined';
 import LocalAtmIcon from '@mui/icons-material/LocalAtm';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
 import TourOutlinedIcon from '@mui/icons-material/TourOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AirplaneTicketOutlinedIcon from '@mui/icons-material/AirplaneTicketOutlined';
-import AttractionReviewChart from '@components/manager/attraction/AttractionReviewChart';
-import BookingChart from '@components/manager/tour/BookingChart';
-import TourUsingTemplateChart from '@components/manager/tour/TourUsingTemplateChart';
-import TourTemplateReviewChart from '@components/manager/tour/TourTemplateReviewChart';
-import TourTemplateRevenue from '@components/manager/tour/TourTemplateRevenue';
-import TourTemplateChart from '@components/manager/tour/TourTemplateChart';
 import DateRangeSelector from '@components/common/DateRangeSelector';
 import dayjs from 'dayjs';
-import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport } from '@services/ReportService';
+import { fetchReportSummary, fetchBookingReport, fetchRatingReport, fetchRevenueReport, fetchSocialMediaSummary, fetchPromotionSummary, fetchSocialMediaByProvince, fetchSocialMediaByPostCategory, fetchSocialMediaByAttractionCategory, fetchSocialMediaByTourCategory, fetchSocialMediaHashtag } from '@services/ReportService';
 import { getErrorMessage } from '@hooks/Message';
-import BookingQuarterChart from '@components/manager/tour/BookingQuarterChart';
+import RevenueTab from '@components/admin/RevenueTab';
+import PromotionTab from '@components/promoting/PromotionTab';
 
 const ManagerDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -68,51 +62,178 @@ const ManagerDashboard = () => {
   });
 
   const [globalDateRange, setGlobalDateRange] = useState({
-    startDate: dayjs().subtract(6, 'month'),
-    endDate: dayjs()
+    startDate: dayjs().subtract(1, 'month'),
+    endDate: dayjs().subtract(1, 'day')
   });
 
   const [appliedGlobalDateRange, setAppliedGlobalDateRange] = useState({
-    startDate: dayjs().subtract(6, 'month'),
-    endDate: dayjs()
+    startDate: dayjs().subtract(1, 'month'),
+    endDate: dayjs().subtract(1, 'day')
   });
 
+  const [socialMediaData, setSocialMediaData] = useState(null);
+  const [promotionData, setPromotionData] = useState(null);
+  const [provinceData, setProvinceData] = useState([]);
+  const [postCategoryData, setPostCategoryData] = useState([]);
+  const [attractionCategoryData, setAttractionCategoryData] = useState([]);
+  const [tourCategoryData, setTourCategoryData] = useState([]);
+  const [hashtagData, setHashtagData] = useState([]);
+  const [currentTab, setCurrentTab] = useState(0);
+
   useEffect(() => {
-    loadDashboardData();
+    // Only load cached data on initial mount
+    loadCachedData();
+    
+    // Check if using default date range (last 6 months to now)
+    const isDefaultDateRange = 
+      appliedGlobalDateRange.startDate.isSame(dayjs().subtract(6, 'month'), 'day') &&
+      appliedGlobalDateRange.endDate.isSame(dayjs(), 'day');
+
+    loadDashboardData(isDefaultDateRange);
   }, [appliedGlobalDateRange]);
 
-  const loadDashboardData = async () => {
-    try {
-      // Get first day of the start month
-      const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
-      
-      // Get end date based on whether it's current month
-      let endDate;
-      if (appliedGlobalDateRange.endDate.month() === dayjs().month() && 
-          appliedGlobalDateRange.endDate.year() === dayjs().year()) {
-        // If current month, use current date
-        endDate = dayjs().format('MM/DD/YYYY');
-      } else {
-        // If not current month, use last day of that month
-        endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
-      }
-
-      // Fetch all reports in parallel
-      const [summaryData, bookingData, ratingData, revenueData] = await Promise.all([
-        fetchReportSummary(startDate, endDate),
-        fetchBookingReport(startDate, endDate),
-        fetchRatingReport(startDate, endDate),
-        fetchRevenueReport(startDate, endDate)
-      ]);
-      console.log(bookingData);
-      setSummaryStats(summaryData);
-      setBookingStats(bookingData);
-      setRatingStats(ratingData);
-      setRevenueStats(revenueData);
-    } catch (error) {
-      console.error('Error loading dashboard data:', getErrorMessage(error));
+  const loadCachedData = () => {
+    const cachedData = localStorage.getItem('dashboardData');
+    if (cachedData) {
+      const parsed = JSON.parse(cachedData);
+      setSummaryStats(parsed.summaryStats);
+      setBookingStats(parsed.bookingStats);
+      setRatingStats(parsed.ratingStats);
+      setRevenueStats(parsed.revenueStats);
+      setSocialMediaData(parsed.socialMediaData);
+      setPromotionData(parsed.promotionData);
+      setProvinceData(parsed.provinceData);
+      setPostCategoryData(parsed.postCategoryData);
+      setAttractionCategoryData(parsed.attractionCategoryData);
+      setTourCategoryData(parsed.tourCategoryData);
+      setHashtagData(parsed.hashtagData);
     }
   };
+
+  const loadDashboardData = async (shouldCache = false) => {
+    const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
+    let endDate;
+    if (appliedGlobalDateRange.endDate.month() === dayjs().month() &&
+      appliedGlobalDateRange.endDate.year() === dayjs().year()) {
+      endDate = dayjs().format('MM/DD/YYYY');
+    } else {
+      endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
+    }
+
+    // Array of fetch operations with their corresponding state setters
+    const fetchOperations = [
+      { 
+        fetch: () => fetchReportSummary(startDate, endDate),
+        setter: setSummaryStats,
+        defaultValue: {
+          newCustomer: 0, newBooking: 0, newTour: 0, revenue: 0,
+          newAttraction: 0, newPost: 0, averageTourRating: 0
+        }
+      },
+      { 
+        fetch: () => fetchBookingReport(startDate, endDate),
+        setter: setBookingStats,
+        defaultValue: {
+          totalBooking: 0,
+          bookingByDay: { dates: [], pendingBookings: [], depositedBookings: [], 
+            paidBookings: [], completedBookings: [], cancelledBookings: [] },
+          bookingByTourTemplate: [],
+          bookingByTourCategory: [],
+          bookingByParticipantCount: []
+        }
+      },
+      { 
+        fetch: () => fetchRatingReport(startDate, endDate),
+        setter: setRatingStats,
+        defaultValue: {
+          attractionRatingInPeriod: [],
+          tourTemplateRatingInPeriod: [],
+          attractionRatingTotal: [],
+          tourTemplateRatingTotal: []
+        }
+      },
+      { 
+        fetch: () => fetchRevenueReport(startDate, endDate),
+        setter: setRevenueStats,
+        defaultValue: {
+          totalRevenue: 0,
+          revenueByPeriod: { periods: [], revenue: [], refund: [] },
+          revenueByTourTemplate: [],
+          revenueByTourCategory: []
+        }
+      },
+      { 
+        fetch: () => fetchSocialMediaSummary(startDate, endDate),
+        setter: setSocialMediaData,
+        defaultValue: null
+      },
+      { 
+        fetch: () => fetchPromotionSummary(startDate, endDate),
+        setter: setPromotionData,
+        defaultValue: null
+      },
+      { 
+        fetch: () => fetchSocialMediaByProvince(startDate, endDate),
+        setter: setProvinceData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaByPostCategory(startDate, endDate),
+        setter: setPostCategoryData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaByAttractionCategory(startDate, endDate),
+        setter: setAttractionCategoryData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaByTourCategory(startDate, endDate),
+        setter: setTourCategoryData,
+        defaultValue: []
+      },
+      { 
+        fetch: () => fetchSocialMediaHashtag(startDate, endDate),
+        setter: setHashtagData,
+        defaultValue: []
+      }
+    ];
+
+    // Execute all fetch operations and collect results
+    const results = await Promise.allSettled(
+      fetchOperations.map(async ({ fetch, setter, defaultValue }) => {
+        try {
+          const data = await fetch();
+          setter(data);
+          return { key: setter.name, data };
+        } catch (error) {
+          console.error('Error fetching data:', getErrorMessage(error));
+          setter(defaultValue);
+          return { key: setter.name, data: defaultValue };
+        }
+      })
+    );
+
+    // Only save to localStorage if using default date range
+    if (shouldCache) {
+      const dashboardData = {
+        summaryStats: results[0].value?.data || fetchOperations[0].defaultValue,
+        bookingStats: results[1].value?.data || fetchOperations[1].defaultValue,
+        ratingStats: results[2].value?.data || fetchOperations[2].defaultValue,
+        revenueStats: results[3].value?.data || fetchOperations[3].defaultValue,
+        socialMediaData: results[4].value?.data || fetchOperations[4].defaultValue,
+        promotionData: results[5].value?.data || fetchOperations[5].defaultValue,
+        provinceData: results[6].value?.data || fetchOperations[6].defaultValue,
+        postCategoryData: results[7].value?.data || fetchOperations[7].defaultValue,
+        attractionCategoryData: results[8].value?.data || fetchOperations[8].defaultValue,
+        tourCategoryData: results[9].value?.data || fetchOperations[9].defaultValue,
+        hashtagData: results[10].value?.data || fetchOperations[10].defaultValue,
+      };
+
+      localStorage.setItem('dashboardData', JSON.stringify(dashboardData));
+    }
+  };
+
 
   const handleGlobalStartDateChange = (newValue) => {
     setGlobalDateRange(prev => ({
@@ -133,6 +254,10 @@ const ManagerDashboard = () => {
     setAppliedGlobalDateRange(globalDateRange);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
+  };
+
   const statCards = [
     { title: 'Doanh thu', value: `${summaryStats.revenue.toLocaleString()} đ`, icon: <LocalAtmIcon sx={{ fontSize: 42, color: 'grey' }} /> },
     { title: 'Khách hàng mới', value: summaryStats.newCustomer, icon: <PersonOutlineOutlinedIcon sx={{ fontSize: 42, color: 'grey' }} /> },
@@ -143,10 +268,8 @@ const ManagerDashboard = () => {
     { title: 'Đánh giá trung bình', value: summaryStats.averageTourRating.toFixed(1), icon: <StarHalfIcon sx={{ fontSize: 42, color: 'grey' }} /> },
   ];
 
-  const chartHeight = '500px';
-
   return (
-    <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh', maxWidth: '98vw' }}>
       <Helmet>
         <title>Dashboard</title>
       </Helmet>
@@ -230,33 +353,46 @@ const ManagerDashboard = () => {
 
         </Grid>
 
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12}>
-            {bookingStats.bookingByDay.dates[0]?.includes('Q') ? (
-              <BookingQuarterChart bookingData={bookingStats.bookingByDay} />
-            ) : (
-              <BookingChart bookingData={bookingStats.bookingByDay} />
-            )}
-          </Grid>
-          <Grid item xs={12}>
-            <TourTemplateRevenue
-              revenueData={revenueStats.revenueByTourTemplate}
-              periodData={revenueStats.revenueByPeriod}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TourTemplateReviewChart
-              bookingData={bookingStats.bookingByTourTemplate}
-              ratingData={ratingStats.tourTemplateRatingInPeriod}
-            />
-          </Grid>
+        <Box sx={{ width: '100%', mt: 2 }}>
+          <Tabs
+            value={currentTab}
+            onChange={handleTabChange}
+            sx={{
+              borderBottom: 1,
+              borderColor: 'divider',
+              px: 2,
+              pt: 1
+            }}
+          >
+            <Tab label="Doanh thu" />
+            <Tab label="Quảng bá" />
+          </Tabs>
 
-          <Grid item xs={12}>
-            <AttractionReviewChart
-              ratingData={ratingStats.attractionRatingInPeriod}
-            />
-          </Grid>
-        </Grid>
+          {currentTab === 0 && (
+            <Box>
+              <RevenueTab
+                bookingStats={bookingStats}
+                ratingStats={ratingStats}
+                revenueStats={revenueStats}
+              />
+            </Box>
+          )}
+
+          {currentTab === 1 && (
+            <Box>
+              <PromotionTab
+                socialMediaData={socialMediaData}
+                promotionData={promotionData}
+                provinceData={provinceData}
+                postCategoryData={postCategoryData}
+                attractionCategoryData={attractionCategoryData}
+                tourCategoryData={tourCategoryData}
+                hashtagData={hashtagData}
+                startDate={appliedGlobalDateRange.startDate} endDate={appliedGlobalDateRange.endDate}
+              />
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );

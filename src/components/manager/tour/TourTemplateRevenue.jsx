@@ -28,7 +28,7 @@ const TourTemplateRevenue = ({ revenueData }) => {
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
-                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600 }}>
+                    <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, color: '#0051cd' }}>
                         Thống kê doanh thu theo tour
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -43,12 +43,20 @@ const TourTemplateRevenue = ({ revenueData }) => {
                         <BarChart
                             data={filteredData}
                             layout="vertical"
-                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                            margin={{ top: 5, right: 80, left: 20, bottom: 5 }}
                         >
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                                type="number" 
+                            <XAxis
+                                type="number"
                                 tickFormatter={(value) => `${(value / 1000000).toFixed(1)} triệu`}
+                                label={{
+                                    value: "VNĐ",
+                                    position: "right",
+                                    offset: 20,
+                                    style: { fontSize: 15 },
+                                    dx: 15,
+                                    dy: -17
+                                }}
                             />
                             <YAxis
                                 dataKey="tourTemplateName"
@@ -59,15 +67,15 @@ const TourTemplateRevenue = ({ revenueData }) => {
                                     const text = payload.value;
                                     const maxLength = 50;
                                     const displayText = text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-                                    
+
                                     return (
                                         <g transform={`translate(${x},${y})`}>
-                                            <text 
-                                                x={0} 
-                                                y={0} 
-                                                dy={4} 
-                                                textAnchor="end" 
-                                                fill="#666666" 
+                                            <text
+                                                x={0}
+                                                y={0}
+                                                dy={4}
+                                                textAnchor="end"
+                                                fill="#666666"
                                                 fontSize={12.5}
                                             >
                                                 {displayText}
@@ -78,10 +86,10 @@ const TourTemplateRevenue = ({ revenueData }) => {
                             />
                             <Tooltip content={<CustomTooltip />} />
                             <Legend />
-                            <Bar 
-                                dataKey="totalRevenue" 
-                                name="Doanh thu" 
-                                fill="#2196f3" 
+                            <Bar
+                                dataKey="totalRevenue"
+                                name="Doanh thu"
+                                fill="#2196f3"
                             />
                         </BarChart>
                     </ResponsiveContainer>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Alert } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Select, MenuItem, FormControl, InputLabel, TablePagination, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Snackbar, Alert, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetchTourCategory, deleteTourCategory } from '@services/TourCategoryService';
 import { getErrorMessage } from '@hooks/Message';
+import TourCategoryReport from '@components/manager/category/TourCategoryReport';
 
 const TourCategory = ({ searchTerm, refreshTrigger }) => {
     const [tourCategories, setTourCategories] = useState([]);
@@ -12,6 +13,7 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [deleteDialog, setDeleteDialog] = useState({ open: false, category: null });
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [reportDialog, setReportDialog] = useState({ open: false, category: null });
 
     const loadCategories = async (search = '') => {
         try {
@@ -24,7 +26,7 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
                 createdAt: item.createdAt,
                 displayDate: new Date(item.createdAt).toLocaleDateString('vi-VN')
             }));
-            
+
             if (refreshTrigger) {
                 setSortBy('createdAt');
                 setTourCategories(sortCategories(data, 'createdAt'));
@@ -106,6 +108,14 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
         setSnackbar({ ...snackbar, open: false });
     };
 
+    const handleReportClick = (tourCategory) => {
+        setReportDialog({ open: true, category: tourCategory });
+    };
+
+    const handleReportClose = () => {
+        setReportDialog({ open: false, category: null });
+    };
+
     return (
         <>
             <FormControl sx={{ m: 1, minWidth: 120, mb: 2, float: 'right' }}>
@@ -141,13 +151,21 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
                                     <TableCell align="left">{tourCategory.name}</TableCell>
                                     <TableCell align="left">{tourCategory.description}</TableCell>
                                     <TableCell align="center">{tourCategory.displayDate}</TableCell>
-                                    <TableCell align="center">
+                                    <TableCell align="center" sx={{ width: '18rem' }}>
                                         <Button
-                                            startIcon={<DeleteIcon />}
                                             color="error"
+                                            variant="contained"
                                             onClick={() => handleDeleteClick(tourCategory)}
                                         >
                                             Xóa
+                                        </Button>
+                                        <Button
+                                            sx={{ ml: 1 }}
+                                            color="primary"
+                                            variant="contained"
+                                            onClick={() => handleReportClick(tourCategory)}
+                                        >
+                                            Xem thống kê
                                         </Button>
                                     </TableCell>
                                 </TableRow>
@@ -163,7 +181,7 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     labelRowsPerPage="Số hàng mỗi trang"
-                    labelDisplayedRows={({ from, to, count }) => 
+                    labelDisplayedRows={({ from, to, count }) =>
                         `${from}-${to} trong ${count}`}
                 />
             </TableContainer>
@@ -187,15 +205,43 @@ const TourCategory = ({ searchTerm, refreshTrigger }) => {
                 </DialogActions>
             </Dialog>
 
+            {/* Add Report Dialog */}
+            <Dialog
+                open={reportDialog.open}
+                onClose={handleReportClose}
+                maxWidth="lg"
+                fullWidth
+            >
+                <Box sx={{ position: 'relative' }}>
+                    <Button
+                        onClick={handleReportClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                            zIndex: 1
+                        }}
+                    >
+                        Đóng
+                    </Button>
+                    {reportDialog.category && (
+                        <TourCategoryReport
+                            categoryId={reportDialog.category.id}
+                        />
+                    )}
+                </Box>
+            </Dialog>
+
             {/* Snackbar Notification */}
-            <Snackbar 
-                open={snackbar.open} 
-                autoHideDuration={3000} 
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
                 onClose={handleSnackbarClose}
                 anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
-                <Alert 
-                    onClose={handleSnackbarClose} 
+                <Alert
+                    onClose={handleSnackbarClose}
                     severity={snackbar.severity}
                     sx={{ width: '100%' }} variant='filled'
                 >

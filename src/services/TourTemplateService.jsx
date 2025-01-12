@@ -49,7 +49,9 @@ export const fetchTourTemplates = async (params) => {
             imageUrl: item.imageUrl,
             transportation: item.transportation,
             startingProvince: item.startingProvince,
+            isPopular: item.isPopular
         }));
+        
         return ({
             data: templates,
             pageIndex: response.data?.data?.pageIndex,
@@ -71,6 +73,7 @@ export const fetchTourTemplateById = async (id) => {
                 'Authorization': `Bearer ${token}`
             }
         });
+
         return {
             tourTemplateId: response.data.data.tourTemplateId,
             code: response.data.data.code,
@@ -91,7 +94,8 @@ export const fetchTourTemplateById = async (id) => {
             transportation: response.data.data.transportation,
             provinces: response.data.data.provinces,
             schedule: response.data.data.schedules,
-            imageUrls: response.data.data.images
+            imageUrls: response.data.data.images,
+            socialPostDetail: response.data.data.socialPostDetail || []
         };
     } catch (error) {
         console.error('Error fetching tour template:', error);

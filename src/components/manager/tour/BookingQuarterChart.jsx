@@ -40,7 +40,7 @@ const BookingQuarterChart = ({ bookingData }) => {
 
     // Define colors and labels for each status
     const statusConfig = [
-        { key: 'pending', label: 'Chờ xác nhận', color: '#ffc107' },
+        { key: 'pending', label: 'Chờ xác nhận', color: '#ff7300' },
         { key: 'deposited', label: 'Đã đặt cọc', color: '#2196f3' },
         { key: 'paid', label: 'Đã thanh toán', color: '#4caf50' },
         { key: 'completed', label: 'Đã hoàn thành', color: '#9c27b0' },
@@ -49,7 +49,7 @@ const BookingQuarterChart = ({ bookingData }) => {
 
     return (
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: 400 }}>
-            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2 }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, mb: 2, color: '#0051cd' }}>
                 Thống kê số lượng booking theo quý
             </Typography>
             <ResponsiveContainer width="100%" height="85%">

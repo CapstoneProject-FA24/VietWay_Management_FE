@@ -21,6 +21,8 @@ import { TourStatus } from "@hooks/Statuses";
 import { getTourStatusInfo } from "@services/StatusService";
 import { Tabs, Tab } from "@mui/material";
 import Pagination from '@mui/material/Pagination';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularTourCategories } from '@services/PopularService';
 
 const ManageTour = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -53,6 +55,9 @@ const ManageTour = () => {
 
   const [tempSearchTerm, setTempSearchTerm] = useState("");
   const [tempSearchCode, setTempSearchCode] = useState("");
+
+  const [popularProvinces, setPopularProvinces] = useState([]);
+  const [popularTourCategories, setPopularTourCategories] = useState([]);
 
   const handleSearchByName = () => {
     setPagination(prev => ({
@@ -146,11 +151,33 @@ const ManageTour = () => {
     pagination.pageSize
   ]);
 
+  useEffect(() => {
+    const fetchPopularData = async () => {
+      try {
+        const popularProvincesData = await fetchPopularProvinces();
+        const popularTourCategoriesData = await fetchPopularTourCategories();
+        
+        setPopularProvinces(popularProvincesData);
+        setPopularTourCategories(popularTourCategoriesData);
+      } catch (error) {
+        console.error('Error fetching popular data:', error);
+      }
+    };
+    fetchPopularData();
+  }, []);
+
   const animatedComponents = makeAnimated();
 
   const provinceOptions = provinces.map(province => ({
     value: province.provinceId,
-    label: province.provinceName
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {province.provinceName}
+        {popularProvinces.includes(province.provinceId.toString()) && (
+          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+        )}
+      </div>
+    )
   }));
 
   const durationOptions = tourDurations.map(duration => ({
@@ -160,7 +187,14 @@ const ManageTour = () => {
 
   const tourTypeOptions = tourCategories.map(category => ({
     value: category.tourCategoryId,
-      label: category.tourCategoryName
+    label: (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {category.tourCategoryName}
+        {popularTourCategories.includes(category.tourCategoryId.toString()) && (
+          <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+        )}
+      </div>
+    )
   }));
 
   const handleTempFilterChange = (selectedOptions, filterType) => {
@@ -232,21 +266,112 @@ const ManageTour = () => {
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography sx={{ fontWeight: 600 }}>Loại tour</Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={tourTypeOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "tourType")} value={tourTypeOptions.filter(option => tempFilters.tourType.includes(option.value))} />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti
+                styles={{
+                  menu: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white',
+                    zIndex: 2
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+                    color: state.isSelected ? 'white' : 'black',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white'
+                  }),
+                  menuPortal: (provided) => ({
+                    ...provided,
+                    zIndex: 9999
+                  })
+                }}
+                menuPortalTarget={document.body}
+                options={tourTypeOptions} 
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "tourType")} 
+                value={tourTypeOptions.filter(option => tempFilters.tourType.includes(option.value))} 
+              />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography sx={{ fontWeight: 600 }}>Thời lượng</Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={durationOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")} value={durationOptions.filter(option => tempFilters.duration.includes(option.value))} />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti 
+                options={durationOptions} 
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "duration")} 
+                value={durationOptions.filter(option => tempFilters.duration.includes(option.value))}
+                styles={{
+                  menu: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white',
+                    zIndex: 2
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+                    color: state.isSelected ? 'white' : 'black',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white'
+                  }),
+                  menuPortal: (provided) => ({
+                    ...provided,
+                    zIndex: 9999
+                  })
+                }}
+                menuPortalTarget={document.body}
+              />
             </FormControl>
           </Grid>
 
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
               <Typography sx={{ fontWeight: 600 }}>Địa điểm</Typography>
-              <ReactSelect closeMenuOnSelect={false} components={animatedComponents} isMulti options={provinceOptions} onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "location")} value={provinceOptions.filter(option => tempFilters.location.includes(option.value))} />
+              <ReactSelect 
+                closeMenuOnSelect={false} 
+                components={animatedComponents} 
+                isMulti
+                styles={{
+                  menu: (provided) => ({
+                    ...provided, backgroundColor: 'white', zIndex: 2
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    backgroundColor: state.isSelected ? '#1976d2' : state.isFocused ? '#f5f5f5' : 'white',
+                    color: state.isSelected ? 'white' : 'black',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }),
+                  control: (provided) => ({
+                    ...provided,
+                    backgroundColor: 'white'
+                  }),
+                  menuPortal: (provided) => ({
+                    ...provided,
+                    zIndex: 9999
+                  })
+                }}
+                menuPortalTarget={document.body}
+                options={provinceOptions} 
+                onChange={(selectedOptions) => handleTempFilterChange(selectedOptions, "location")} 
+                value={provinceOptions.filter(option => tempFilters.location.includes(option.value))} 
+              />
             </FormControl>
           </Grid>
 

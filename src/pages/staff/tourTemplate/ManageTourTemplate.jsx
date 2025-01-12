@@ -13,6 +13,8 @@ import { fetchProvinces } from '@services/ProvinceService';
 import { fetchTourDuration } from '@services/DurationService';
 import { fetchTourCategory } from '@services/TourCategoryService';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { fetchPopularProvinces, fetchPopularTourCategories } from '@services/PopularService';
 
 const ManageTourTemplate = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -38,7 +40,9 @@ const ManageTourTemplate = () => {
     const [tempDuration, setTempDuration] = useState([]);
     const [sortedTourTemplates, setSortedTourTemplates] = useState([]);
     const navigate = useNavigate();
-    
+    const [popularProvinces, setPopularProvinces] = useState([]);
+    const [popularTourCategories, setPopularTourCategories] = useState([]);
+
     useEffect(() => {
         fetchData();
     }, [page, pageSize, searchTerm, selectedCategories, selectedProvinces, selectedDuration, statusTab]);
@@ -46,6 +50,21 @@ const ManageTourTemplate = () => {
     useEffect(() => {
         sortTourTemplates();
     }, [tourTemplates, sortOrder]);
+
+    useEffect(() => {
+        const fetchPopularData = async () => {
+            try {
+                const popularProvincesData = await fetchPopularProvinces();
+                const popularTourCategoriesData = await fetchPopularTourCategories();
+
+                setPopularProvinces(popularProvincesData);
+                setPopularTourCategories(popularTourCategoriesData);
+            } catch (error) {
+                console.error('Error fetching popular data:', error);
+            }
+        };
+        fetchPopularData();
+    }, []);
 
     const fetchData = async () => {
         try {
@@ -59,6 +78,7 @@ const ManageTourTemplate = () => {
                 statuses: statusTab == "all" ? [0, 1, 2, 3] : [parseInt(statusTab)]
             };
             const result = await fetchTourTemplates(params);
+            console.log(result);
             setTourTemplates(result.data);
             setTotalPages(Math.ceil(result.total / pageSize));
         } catch (error) {
@@ -84,7 +104,14 @@ const ManageTourTemplate = () => {
 
     const categoryOptions = tourCategories.map(category => ({
         value: category.tourCategoryId,
-        label: category.tourCategoryName
+        label: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {category.tourCategoryName}
+                {popularTourCategories.includes(category.tourCategoryId.toString()) && (
+                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                )}
+            </div>
+        )
     }));
 
     const durationOptions = tourDurations.map(duration => ({
@@ -94,7 +121,14 @@ const ManageTourTemplate = () => {
 
     const provinceOptions = provinces.map(province => ({
         value: province.provinceId,
-        label: province.provinceName
+        label: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {province.provinceName}
+                {popularProvinces.includes(province.provinceId.toString()) && (
+                    <LocalFireDepartmentIcon sx={{ color: 'red' }} />
+                )}
+            </div>
+        )
     }));
 
     const handleStatusTabChange = (event, newValue) => {
@@ -231,14 +265,20 @@ const ManageTourTemplate = () => {
                     </Grid>
                 </Grid>
                 <Grid container spacing={2}>
-                    {sortedTourTemplates.map(tourTemplate => (
-                        <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
-                            <TourTemplateCard
-                                tour={tourTemplate}
-                                isOpen={isSidebarOpen}
-                            />
+                    {sortedTourTemplates && sortedTourTemplates.length > 0 ? (
+                        sortedTourTemplates.map(tourTemplate => (
+                            <Grid item xs={12} sm={6} md={4} key={tourTemplate.tourTemplateId}>
+                                <TourTemplateCard
+                                    tour={tourTemplate}
+                                    isOpen={isSidebarOpen}
+                                />
+                            </Grid>
+                        ))
+                    ) : (
+                        <Grid item xs={12} sx={{textAlign: 'center'}}>
+                            <div>Không tìm thấy tour mẫu phù hợp.</div>
                         </Grid>
-                    ))}
+                    )}
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                     <Pagination

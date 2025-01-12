@@ -10,6 +10,7 @@ import TourDuration from '@components/manager/category/TourDuration';
 import TourCategory from '@components/manager/category/TourCategory';
 import PostCategory from '@components/manager/category/PostCategory';
 import AttractionCategory from '@components/manager/category/AttractionCategory';
+import HashtagList from '@components/manager/hashtag/HashtagList';
 
 const ManageCategory = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -37,7 +38,8 @@ const ManageCategory = () => {
     { label: 'Loại Tour', endpoint: 'tour-categories' },
     { label: 'Loại Điểm Tham Quan', endpoint: 'attraction-types' },
     { label: 'Loại Bài Viết', endpoint: 'post-categories' },
-    { label: 'Thời Lượng Tour', endpoint: 'tour-durations' }
+    { label: 'Thời Lượng Tour', endpoint: 'tour-durations' },
+    { label: 'Hashtags', endpoint: 'hashtags' }
   ];
 
   useEffect(() => {
@@ -114,6 +116,11 @@ const ManageCategory = () => {
         refreshTrigger={lastCreatedType === 'tour-durations' ? refreshTrigger : 0} 
       />;
     }
+    if (activeTab === 4) {
+      return <HashtagList 
+        searchTerm={appliedSearches['hashtags']} 
+      />;
+    }
 
     return (
       <Grid container spacing={2}>
@@ -164,14 +171,14 @@ const ManageCategory = () => {
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
-        <title>Quản lý danh mục</title>
+        <title>Quản lý danh mục và hashtag</title>
       </Helmet>
       <SidebarManager isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
       <Box sx={{ flexGrow: 1, mt: 1.5, p: 3, marginLeft: isSidebarOpen ? '280px' : '20px' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main' }}>
-            Quản lý Danh mục
+          <Typography sx={{ fontSize: '2.7rem', fontWeight: 600, color: 'primary.main', textAlign: 'center', width: '100%' }}>
+            Quản lý danh mục và hashtag
           </Typography>
         </Box>
 
@@ -201,13 +208,15 @@ const ManageCategory = () => {
               Tìm kiếm
             </Button>
           </Box>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleOpenCreate}
-          >
-            Thêm mới
-          </Button>
+          {activeTab !== 4 && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleOpenCreate}
+            >
+              Thêm mới
+            </Button>
+          )}
         </Box>
         {renderContent()}
       </Box>

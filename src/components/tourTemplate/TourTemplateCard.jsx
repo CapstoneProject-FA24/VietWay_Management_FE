@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Button, IconButton, useTheme, useMediaQuery, Chip } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
-import { CalendarToday, Category, Launch, AddBoxOutlined } from '@mui/icons-material';
+import { CalendarToday, Category, Launch, AddBoxOutlined, LocalFireDepartment } from '@mui/icons-material';
+import Tooltip from '@mui/material/Tooltip';
 import { getTourTemplateStatusInfo } from '@services/StatusService';
 import { getCookie } from '@services/AuthenService';
 
@@ -29,6 +30,22 @@ const TourTemplateCard = ({ tour, isOpen }) => {
                     fontWeight: 700, borderRadius: 5, padding: '4px'
                 }}
             />
+            {tour.isPopular && (
+                <Tooltip title="Tour mẫu đang hot" arrow>
+                    <Box
+                        component="img"
+                        src="/hot-icon.png"
+                        sx={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            width: '28px',
+                            height: '28px',
+                            filter: 'drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.2))'
+                        }}
+                    />
+                </Tooltip>
+            )}
             <CardMedia
                 component="img"
                 sx={{

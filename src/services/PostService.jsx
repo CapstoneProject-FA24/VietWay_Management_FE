@@ -48,6 +48,7 @@ export const fetchPostById = async (id) => {
     try {
         const response = await axios.get(`${baseURL}/api/posts/${id}`);
         const item = response.data.data;
+        
         return {
             postId: item.postId,
             title: item.title,
@@ -60,8 +61,7 @@ export const fetchPostById = async (id) => {
             description: item.description,
             createdAt: item.createAt,
             status: item.status,
-            xTweetId: item.xTweetId,
-            facebookPostId: item.facebookPostId
+            socialPostDetail: item.socialPostDetail || []
         };
     } catch (error) {
         console.error('Error fetching post:', error);
@@ -149,36 +149,6 @@ export const changePostStatus = async (postId, status, reason) => {
     }
 };
 
-export const sharePostOnTwitter = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.post(`${baseURL}/api/posts/${postId}/twitter`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error sharing post on Twitter:', error);
-        throw error;
-    }
-};
-
-export const sharePostOnFacebook = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.post(`${baseURL}/api/posts/${postId}/facebook`, {}, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error sharing post on Twitter:', error);
-        throw error;
-    }
-};
-
 export const updatePostImages = async (postId, newImages) => {
     const token = getCookie('token');
     try {
@@ -198,48 +168,6 @@ export const updatePostImages = async (postId, newImages) => {
         return response.data;
     } catch (error) {
         console.error('Error updating post images:', error.response);
-        throw error;
-    }
-};
-
-export const getTwitterReactionsByPostId = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.get(`${baseURL}/api/posts/${postId}/twitter/reactions-by-post-id`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return {
-            retweetCount: response.data.data.retweetCount,
-            replyCount: response.data.data.replyCount,
-            likeCount: response.data.data.likeCount,
-            quoteCount: response.data.data.quoteCount,
-            bookmarkCount: response.data.data.bookmarkCount,
-            impressionCount: response.data.data.impressionCount
-        };
-    } catch (error) {
-        console.error('Error fetching Twitter reactions:', error.response);
-        throw error;
-    }
-};
-
-export const getFacebookReactionsByPostId = async (postId) => {
-    const token = getCookie('token');
-    try {
-        const response = await axios.get(`${baseURL}/api/posts/${postId}/facebook/metrics`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        return {
-            impressionCount: response.data.data.impressionCount,
-            shareCount: response.data.data.shareCount,
-            commentCount: response.data.data.commentCount,
-            postReactions: response.data.data.postReactions
-        };
-    } catch (error) {
-        console.error('Error fetching Facebook reactions:', error.response);
         throw error;
     }
 };
