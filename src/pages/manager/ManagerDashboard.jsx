@@ -111,14 +111,8 @@ const ManagerDashboard = () => {
   };
 
   const loadDashboardData = async (shouldCache = false) => {
-    const startDate = appliedGlobalDateRange.startDate.startOf('month').format('MM/DD/YYYY');
-    let endDate;
-    if (appliedGlobalDateRange.endDate.month() === dayjs().month() &&
-      appliedGlobalDateRange.endDate.year() === dayjs().year()) {
-      endDate = dayjs().format('MM/DD/YYYY');
-    } else {
-      endDate = appliedGlobalDateRange.endDate.endOf('month').format('MM/DD/YYYY');
-    }
+    const startDate = appliedGlobalDateRange.startDate.format('MM/DD/YYYY');
+    const endDate = appliedGlobalDateRange.endDate.format('MM/DD/YYYY');
 
     // Array of fetch operations with their corresponding state setters
     const fetchOperations = [

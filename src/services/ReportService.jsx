@@ -357,6 +357,7 @@ export const fetchSocialMediaByTourCategory = async (startDate, endDate) => {
 };
 
 export const fetchSocialMediaProvinceDetail = async (provinceId, startDate, endDate) => {
+    console.log(startDate, endDate);
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
