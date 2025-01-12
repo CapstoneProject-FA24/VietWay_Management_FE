@@ -598,12 +598,12 @@ const ManagerPostDetail = () => {
                                     titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
                                   />
                                 )}
-                                {hotCategories.includes(category.postCategoryId) && (
+                                {/* {hotCategories.includes(category.postCategoryId) && (
                                   <LocalFireDepartmentIcon 
                                     sx={{ color: '#ff8f00', ml: 1 }}
                                     titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
                                   />
-                                )}
+                                )} */}
                               </Box>
                             </MenuItem>
                           ))}
@@ -641,12 +641,12 @@ const ManagerPostDetail = () => {
                                     titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
                                   />
                                 )}
-                                {hotProvinces.includes(option.value) && (
+                                {/* {hotProvinces.includes(option.value) && (
                                   <LocalFireDepartmentIcon 
                                     sx={{ color: '#ff8f00', ml: 1 }}
                                     titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
                                   />
-                                )}
+                                )} */}
                               </Box>
                             </MenuItem>
                           ))}

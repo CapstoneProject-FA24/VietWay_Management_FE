@@ -51,6 +51,10 @@ const CreateTourTemplate = () => {
   const [popularTourCategories, setPopularTourCategories] = useState([]);
   const [hotProvinces, setHotProvinces] = useState([]);
   const [hotCategories, setHotCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState({
+    draft: false,
+    submit: false
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -197,6 +201,11 @@ const CreateTourTemplate = () => {
   };
 
   const handleSubmit = async (isDraft) => {
+    setIsLoading(prev => ({
+      ...prev,
+      [isDraft ? 'draft' : 'submit']: true
+    }));
+
     try {
       if (!validatePrice(tourTemplate.minPrice || null, tourTemplate.maxPrice || null)) {
         return;
@@ -362,6 +371,11 @@ const CreateTourTemplate = () => {
         open: true, severity: 'error',
         message: getErrorMessage(error),
       });
+    } finally {
+      setIsLoading(prev => ({
+        ...prev,
+        [isDraft ? 'draft' : 'submit']: false
+      }));
     }
   };
 
@@ -443,12 +457,12 @@ const CreateTourTemplate = () => {
                             titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
                           />
                         )}
-                        {hotProvinces.includes(province.provinceId) && (
+                        {/* {hotProvinces.includes(province.provinceId) && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: '#ff8f00' }}
                             titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
                           />
-                        )}
+                        )} */}
                       </div>
                     )
                   }))}
@@ -459,12 +473,12 @@ const CreateTourTemplate = () => {
                     label: (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {province.label}
-                        {province.isHot && (
+                        {/* {province.isHot && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: '#ff8f00' }}
                             titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
                           />
-                        )}
+                        )} */}
                       </div>
                     )
                   }))}
@@ -500,12 +514,12 @@ const CreateTourTemplate = () => {
                             titleAccess="Tỉnh/thành phố đang được quan tâm nhiều nhất"
                           />
                         )}
-                        {hotProvinces.includes(province.provinceId) && (
+                        {/* {hotProvinces.includes(province.provinceId) && (
                           <LocalFireDepartmentIcon 
                             sx={{ color: '#ff8f00' }}
                             titleAccess="Tỉnh thành đang quan tâm đến loại tour này nhiều nhất"
                           />
-                        )}
+                        )} */}
                       </Box>
                     </MenuItem>
                   ))}
@@ -663,12 +677,12 @@ const CreateTourTemplate = () => {
                                     titleAccess="Loại tour đang được quan tâm nhiều nhất"
                                   />
                                 )}
-                                {hotCategories.includes(tourCategory.tourCategoryId) && (
+                               {/*  {hotCategories.includes(tourCategory.tourCategoryId) && (
                                   <LocalFireDepartmentIcon 
                                     sx={{ color: '#ff8f00', ml: -1 }}
                                     titleAccess="Loại tour đang được quan tâm nhiều nhất tại tỉnh thành này"
                                   />
-                                )}
+                                )} */}
                               </Box>
                             </MenuItem>
                           ))}
@@ -843,10 +857,28 @@ const CreateTourTemplate = () => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button
-              variant="contained" fullWidth onClick={() => handleSubmit(true)}
-              sx={{ backgroundColor: 'gray', height: '50px', '&:hover': { backgroundColor: '#4F4F4F' }, width: 'fit-content' }}
-            >Lưu bản nháp</Button>
-            <Button variant="contained" fullWidth sx={{ height: '50px', width: 'fit-content' }} onClick={() => handleSubmit(false)} >Gửi duyệt</Button>
+              variant="contained"
+              fullWidth
+              onClick={() => handleSubmit(true)}
+              disabled={isLoading.draft}
+              sx={{ 
+                backgroundColor: 'gray', 
+                height: '50px', 
+                '&:hover': { backgroundColor: '#4F4F4F' }, 
+                width: 'fit-content' 
+              }}
+            >
+              {isLoading.draft ? 'Đang lưu...' : 'Lưu bản nháp'}
+            </Button>
+            <Button 
+              variant="contained"
+              fullWidth 
+              sx={{ height: '50px', width: 'fit-content' }}
+              onClick={() => handleSubmit(false)}
+              disabled={isLoading.submit}
+            >
+              {isLoading.submit ? 'Đang gửi...' : 'Gửi duyệt'}
+            </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Box sx={{ mt: 1, width: '35rem' }}>

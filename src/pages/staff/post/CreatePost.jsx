@@ -50,6 +50,10 @@ const CreatePost = () => {
   const [popularPostCategories, setPopularPostCategories] = useState([]);
   const [hotProvinces, setHotProvinces] = useState([]);
   const [hotCategories, setHotCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState({
+    draft: false,
+    submit: false
+  });
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,12 +79,12 @@ const CreatePost = () => {
                   titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
                 />
               )}
-              {hotProvinces.includes(province.provinceId) && (
+              {/* {hotProvinces.includes(province.provinceId) && (
                 <LocalFireDepartmentIcon 
                   sx={{ color: '#ff8f00' }}
                   titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
                 />
-              )}
+              )} */}
             </div>
           )
         }));
@@ -96,12 +100,12 @@ const CreatePost = () => {
                   titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
                 />
               )}
-              {hotCategories.includes(postCategory.postCategoryId) && (
+              {/* {hotCategories.includes(postCategory.postCategoryId) && (
                 <LocalFireDepartmentIcon 
                   sx={{ color: '#ff8f00' }}
                   titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
                 />
-              )}
+              )} */}
             </div>
           )
         }));
@@ -160,6 +164,11 @@ const CreatePost = () => {
   };
 
   const handleCreatePost = async (isDraft = false) => {
+    setIsLoading(prev => ({
+      ...prev,
+      [isDraft ? 'draft' : 'submit']: true
+    }));
+
     try {
       const errors = {};
 
@@ -234,6 +243,11 @@ const CreatePost = () => {
     } catch (error) {
       console.error('Error creating post:', error);
       setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error', hide: 5000 });
+    } finally {
+      setIsLoading(prev => ({
+        ...prev,
+        [isDraft ? 'draft' : 'submit']: false
+      }));
     }
   };
 
@@ -381,10 +395,21 @@ const CreatePost = () => {
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
                 <Button
-                  variant="contained" onClick={() => handleCreatePost(true)}
+                  variant="contained" 
+                  onClick={() => handleCreatePost(true)}
+                  disabled={isLoading.draft}
                   sx={{ mr: 1, backgroundColor: 'grey' }}
-                >Lưu nháp</Button>
-                <Button variant="contained" color="primary" onClick={() => handleCreatePost(false)}>Gửi duyệt</Button>
+                >
+                  {isLoading.draft ? 'Đang lưu...' : 'Lưu nháp'}
+                </Button>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  onClick={() => handleCreatePost(false)}
+                  disabled={isLoading.submit}
+                >
+                  {isLoading.submit ? 'Đang gửi...' : 'Gửi duyệt'}
+                </Button>
               </Box>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>

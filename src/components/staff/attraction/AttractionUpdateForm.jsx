@@ -30,6 +30,10 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
   const [popularAttractionTypes, setPopularAttractionTypes] = useState([]);
   const [hotProvinces, setHotProvinces] = useState([]);
   const [hotCategories, setHotCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState({
+    draft: false,
+    submit: false
+  });
 
   useEffect(() => {
     if (attraction) {
@@ -132,6 +136,11 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
   };
 
   const handleSave = async (isDraft) => {
+    setIsLoading(prev => ({
+      ...prev,
+      [isDraft ? 'draft' : 'submit']: true
+    }));
+
     try {
       const errors = {};
       if (!isDraft) {
@@ -194,6 +203,11 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
         message: getErrorMessage(error),
       });
       console.error('Error creating attraction:', error);
+    } finally {
+      setIsLoading(prev => ({
+        ...prev,
+        [isDraft ? 'draft' : 'submit']: false
+      }));
     }
   };
 
@@ -264,12 +278,12 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
                         titleAccess="Loại điểm tham quan đang được quan tâm nhiều nhất"
                       />
                     )}
-                    {hotCategories.includes(type.attractionTypeId) && (
+                    {/* {hotCategories.includes(type.attractionTypeId) && (
                       <LocalFireDepartmentIcon 
                         sx={{ color: '#ff8f00', ml: 1 }}
                         titleAccess="Loại điểm tham quan đang được quan tâm nhiều nhất tại tỉnh thành này"
                       />
-                    )}
+                    )} */}
                   </Box>
                 </MenuItem>
               ))}
@@ -300,12 +314,12 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
                         titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
                       />
                     )}
-                    {hotProvinces.includes(province.provinceId) && (
+                   {/*  {hotProvinces.includes(province.provinceId) && (
                       <LocalFireDepartmentIcon 
                         sx={{ color: '#ff8f00', ml: 1 }}
                         titleAccess="Tỉnh thành đang quan tâm đến loại điểm tham quan này nhiều nhất"
                       />
-                    )}
+                    )} */}
                   </Box>
                 </MenuItem>
               ))}
@@ -470,9 +484,23 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
         <>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
             {(attraction.status !== 1 && attraction.status !== 2) && (
-              <Button variant="contained" onClick={() => handleSave(true)} sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}> Lưu bản nháp </Button>
+              <Button 
+                variant="contained" 
+                onClick={() => handleSave(true)} 
+                disabled={isLoading.draft}
+                sx={{ backgroundColor: 'grey', p: 1.5, mr: 2 }}
+              >
+                {isLoading.draft ? 'Đang lưu...' : 'Lưu bản nháp'}
+              </Button>
             )}
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}>{(attraction.status === 0 || attraction.status === 3) ? 'Gửi duyệt' : 'Lưu'}</Button>
+            <Button 
+              variant="contained" 
+              onClick={() => handleSave(false)}
+              disabled={isLoading.submit}
+              sx={{ p: 1.5 }}
+            >
+              {isLoading.submit ? 'Đang gửi...' : (attraction.status === 0 || attraction.status === 3) ? 'Gửi duyệt' : 'Lưu'}
+            </Button>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Box sx={{ mt: 1, width: '32rem' }}>
@@ -485,7 +513,14 @@ const AttractionUpdateForm = ({ attraction, provinces, attractionTypes, onSave, 
       {getCookie('role') === 'quan-ly' && (
         <>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 5 }}>
-            <Button variant="contained" onClick={() => handleSave(false)} sx={{ p: 1.5 }}> Lưu </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => handleSave(false)}
+              disabled={isLoading.submit}
+              sx={{ p: 1.5 }}
+            >
+              {isLoading.submit ? 'Đang lưu...' : 'Lưu'}
+            </Button>
           </Box>
         </>
       )}

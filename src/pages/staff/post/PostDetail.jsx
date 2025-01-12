@@ -67,6 +67,10 @@ const PostDetail = () => {
   const [popularPostCategories, setPopularPostCategories] = useState([]);
   const [hotProvinces, setHotProvinces] = useState([]);
   const [hotCategories, setHotCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState({
+    draft: false,
+    submit: false
+  });
 
   const loadPost = async () => {
     try {
@@ -197,7 +201,11 @@ const PostDetail = () => {
   };
 
   const handleSaveChanges = async (isDraft) => {
-    setIsSubmitting(true);
+    setIsLoading(prev => ({
+      ...prev,
+      [isDraft ? 'draft' : 'submit']: true
+    }));
+
     try {
       const errors = {};
 
@@ -277,7 +285,10 @@ const PostDetail = () => {
       console.error('Error creating post:', error);
       setSnackbar({ open: true, message: getErrorMessage(error), severity: 'error', hide: 5000 });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(prev => ({
+        ...prev,
+        [isDraft ? 'draft' : 'submit']: false
+      }));
     }
   };
 
@@ -506,12 +517,12 @@ const PostDetail = () => {
                                       titleAccess="Loại bài viết đang được quan tâm nhiều nhất"
                                     />
                                   )}
-                                  {hotCategories.includes(category.postCategoryId.toString()) && (
+                                 {/*  {hotCategories.includes(category.postCategoryId.toString()) && (
                                     <LocalFireDepartmentIcon 
                                       sx={{ color: '#ff8f00' }}
                                       titleAccess="Loại bài viết đang được quan tâm nhiều nhất tại tỉnh thành này"
                                     />
-                                  )}
+                                  )} */}
                                 </Box>
                               </MenuItem>
                             ))}
@@ -540,12 +551,12 @@ const PostDetail = () => {
                                       titleAccess="Tỉnh thành đang được quan tâm nhiều nhất"
                                     />
                                   )}
-                                  {hotProvinces.includes(province.value.toString()) && (
+                                 {/*  {hotProvinces.includes(province.value.toString()) && (
                                     <LocalFireDepartmentIcon 
                                       sx={{ color: '#ff8f00' }}
                                       titleAccess="Tỉnh thành đang quan tâm đến loại bài viết này nhiều nhất"
                                     />
-                                  )}
+                                  )} */}
                                 </Box>
                               </MenuItem>
                             ))}
@@ -619,18 +630,21 @@ const PostDetail = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                       {(post.status === PostStatus.Draft || post.status === PostStatus.Rejected) && (
                         <Button
-                          variant="contained" sx={{ backgroundColor: 'grey', mr: 1 }}
-                          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : ''}
-                          onClick={() => handleSaveChanges(true)} disabled={isSubmitting}
+                          variant="contained" 
+                          sx={{ backgroundColor: 'grey', mr: 1 }}
+                          onClick={() => handleSaveChanges(true)} 
+                          disabled={isLoading.draft}
                         >
-                          {isSubmitting ? 'Đang lưu...' : 'Lưu nháp'}
+                          {isLoading.draft ? 'Đang lưu...' : 'Lưu nháp'}
                         </Button>
                       )}
                       <Button
-                        variant="contained" color="primary" onClick={() => handleSaveChanges(false)} disabled={isSubmitting}
-                        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : ''}
+                        variant="contained" 
+                        color="primary" 
+                        onClick={() => handleSaveChanges(false)}
+                        disabled={isLoading.submit}
                       >
-                        {isSubmitting ? 'Đang gửi...' : ((post.status === PostStatus.Draft || post.status === PostStatus.Rejected) ? 'Gửi duyệt' : 'Lưu')}
+                        {isLoading.submit ? 'Đang gửi...' : ((post.status === PostStatus.Draft || post.status === PostStatus.Rejected) ? 'Gửi duyệt' : 'Lưu')}
                       </Button>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
