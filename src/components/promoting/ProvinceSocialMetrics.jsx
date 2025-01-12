@@ -45,19 +45,11 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
     const [provinceData, setProvinceData] = useState(null);
     const [selectedMetrics, setSelectedMetrics] = useState('average');
     
-    // Update date states with default values
-    const [startDate, setStartDate] = useState(() => {
-        return initialStartDate ? dayjs(initialStartDate) : dayjs().subtract(1, 'month');
-    });
-    const [endDate, setEndDate] = useState(() => {
-        return initialEndDate ? dayjs(initialEndDate) : dayjs();
-    });
-    const [tempStartDate, setTempStartDate] = useState(() => {
-        return initialStartDate ? dayjs(initialStartDate) : dayjs().subtract(1, 'month');
-    });
-    const [tempEndDate, setTempEndDate] = useState(() => {
-        return initialEndDate ? dayjs(initialEndDate) : dayjs();
-    });
+    // Updated default dates
+    const [startDate, setStartDate] = useState(dayjs().subtract(1, 'month'));
+    const [endDate, setEndDate] = useState(dayjs().subtract(1, 'day'));
+    const [tempStartDate, setTempStartDate] = useState(dayjs().subtract(1, 'month'));
+    const [tempEndDate, setTempEndDate] = useState(dayjs().subtract(1, 'day'));
 
     useEffect(() => {
         const loadProvinceData = async () => {
@@ -127,18 +119,10 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
         );
     }
 
-    if (!provinceData) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-                <Typography>Không có dữ liệu</Typography>
-            </Box>
-        );
-    }
-
     return (
         <Box sx={{ p: 1 }}>
             <Grid container spacing={2}>
-                {/* Date Range Selection */}
+                {/* Date Range Selection - Always show */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2, mb: 2 }}>
                         <Box sx={{ 
@@ -187,38 +171,88 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
                     </Paper>
                 </Grid>
 
-                {/* Summary Statistics */}
-                {!loading && provinceData && (
-                    <Grid item xs={12}>
-                        <Paper sx={{ p: 2, mb: 2 }}>
-                            <Typography variant="h6" fontWeight={"bold"} gutterBottom>
-                                Thống kê tổng quan
-                            </Typography>
-                            <Grid container spacing={2}>
-                                {summaryStats.map((stat, index) => (
-                                    <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                                        <Typography variant="subtitle2" color="textSecondary">
-                                            {stat.label}:
-                                        </Typography>
-                                        <Typography variant="h6">
-                                            {stat.value}
-                                        </Typography>
-                                    </Grid>
-                                ))}
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                )}
+                {/* Summary Statistics - Always show */}
+                <Grid item xs={12}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                        <Typography variant="h6" fontWeight={"bold"} gutterBottom>
+                            Thống kê tổng quan
+                        </Typography>
+                        <Grid container spacing={2}>
+                            {summaryStats.map((stat, index) => (
+                                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                                    <Typography variant="subtitle2" color="textSecondary">
+                                        {stat.label}:
+                                    </Typography>
+                                    <Typography variant="h6">
+                                        {stat.value}
+                                    </Typography>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Paper>
+                </Grid>
 
-                {/* Time Series Chart */}
-                {timeSeriesData.length > 0 && (
-                    <Grid item xs={12}>
+                {/* Time Series Chart - Always show */}
+                <Grid item xs={12}>
+                    <Paper sx={{ p: 2 }}>
+                        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Typography variant="subtitle1">Chọn chỉ số so sánh:</Typography>
+                            <FormControl size="small" sx={{ minWidth: 300 }}>
+                                <Select
+                                    value={selectedMetrics}
+                                    onChange={(e) => setSelectedMetrics(e.target.value)}
+                                >
+                                    {chartOptions.map(option => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Box>
+                        <ResponsiveContainer width="100%" height={400}>
+                            {timeSeriesData.length > 0 ? (
+                                <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" tick={{ fontSize: 13 }}/>
+                                    <YAxis tick={{ fontSize: 13 }}/>
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey={currentMetric.fbKey} name="Facebook" stroke="#1877F2" strokeWidth={2} />
+                                    <Line type="monotone" dataKey={currentMetric.twKey} name="X (Twitter)" stroke="#000000" strokeWidth={2} />
+                                </LineChart>
+                            ) : (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                    <Typography color="text.secondary">Không có dữ liệu</Typography>
+                                </Box>
+                            )}
+                        </ResponsiveContainer>
+                    </Paper>
+                </Grid>
+
+                {/* Category Charts - Always show */}
+                {['attractionCategories', 'tourCategories', 'postCategories'].map((categoryType) => (
+                    <Grid item xs={12} key={categoryType}>
                         <Paper sx={{ p: 2 }}>
-                            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Typography variant="subtitle1">Chọn chỉ số so sánh:</Typography>
-                                <FormControl size="small" sx={{ minWidth: 300 }}>
+                            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
+                                    {categoryType === 'attractionCategories' ? 'Biểu đồ so sánh điểm mức độ quan tâm' :
+                                     categoryType === 'tourCategories' ? 'Biểu đồ so sánh điểm mức độ quan tâm' :
+                                     'Biểu đồ so sánh điểm mức độ quan tâm'} - {
+                                        {
+                                            'average': 'trung bình',
+                                            'facebook': 'trung bình trên Facebook',
+                                            'twitter': 'trung bình trên X (Twitter)',
+                                            'post': 'điểm trung bình của các điểm tham quan'
+                                        }[selectedMetrics]
+                                    }
+                                </Typography>
+                                <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
+                                    <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
                                     <Select
+                                        sx={{ fontSize: '0.9rem' }}
                                         value={selectedMetrics}
+                                        label="Thống kê điểm mức độ quan tâm"
                                         onChange={(e) => setSelectedMetrics(e.target.value)}
                                     >
                                         {chartOptions.map(option => (
@@ -230,55 +264,7 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
                                 </FormControl>
                             </Box>
                             <ResponsiveContainer width="100%" height={400}>
-                                <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" tick={{ fontSize: 13 }}/>
-                                    <YAxis tick={{ fontSize: 13 }}/>
-                                    <Tooltip />
-                                    <Legend />
-                                    <Line type="monotone" dataKey={currentMetric.fbKey} name="Facebook" stroke="#1877F2" strokeWidth={2} />
-                                    <Line type="monotone" dataKey={currentMetric.twKey} name="X (Twitter)" stroke="#000000" strokeWidth={2} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </Paper>
-                    </Grid>
-                )}
-
-                {/* Category Charts */}
-                {['attractionCategories', 'tourCategories', 'postCategories'].map((categoryType) => (
-                    provinceData[categoryType]?.length > 0 && (
-                        <Grid item xs={12} key={categoryType}>
-                            <Paper sx={{ p: 2 }}>
-                                <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Typography variant="h6" sx={{ fontSize: '1.2rem' }}>
-                                        {categoryType === 'attractionCategories' ? 'Biểu đồ so sánh điểm mức độ quan tâm' :
-                                         categoryType === 'tourCategories' ? 'Biểu đồ so sánh điểm mức độ quan tâm' :
-                                         'Biểu đồ so sánh điểm mức độ quan tâm'} - {
-                                            {
-                                                'average': 'trung bình',
-                                                'facebook': 'trung bình trên Facebook',
-                                                'twitter': 'trung bình trên X (Twitter)',
-                                                'post': 'điểm trung bình của các điểm tham quan'
-                                            }[selectedMetrics]
-                                        }
-                                    </Typography>
-                                    <FormControl sx={{ minWidth: 250, maxWidth: 300 }}>
-                                        <InputLabel>Thống kê điểm mức độ quan tâm</InputLabel>
-                                        <Select
-                                            sx={{ fontSize: '0.9rem' }}
-                                            value={selectedMetrics}
-                                            label="Thống kê điểm mức độ quan tâm"
-                                            onChange={(e) => setSelectedMetrics(e.target.value)}
-                                        >
-                                            {chartOptions.map(option => (
-                                                <MenuItem key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </Box>
-                                <ResponsiveContainer width="100%" height={400}>
+                                {provinceData?.[categoryType]?.length > 0 ? (
                                     <BarChart 
                                         data={provinceData[categoryType]} 
                                         margin={{
@@ -324,10 +310,14 @@ const ProvinceSocialMetrics = ({ provinceId, initialStartDate, initialEndDate })
                                             }
                                         />
                                     </BarChart>
-                                </ResponsiveContainer>
-                            </Paper>
-                        </Grid>
-                    )
+                                ) : (
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                        <Typography color="text.secondary">Không có dữ liệu</Typography>
+                                    </Box>
+                                )}
+                            </ResponsiveContainer>
+                        </Paper>
+                    </Grid>
                 ))}
             </Grid>
         </Box>

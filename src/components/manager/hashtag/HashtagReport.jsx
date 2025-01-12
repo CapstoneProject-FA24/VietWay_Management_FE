@@ -1,49 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Grid, Paper, Typography, FormControl, Select, MenuItem, CircularProgress, InputLabel, Button } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { fetchSocialMediaHashtagDetail } from '@services/ReportService';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
-// Temporary mock data function - replace with actual API call later
-const fetchHashtagReport = async (hashtagId, startDate, endDate) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Generate dates between start and end
-    const dates = [];
-    let currentDate = dayjs(startDate);
-    while (currentDate.isBefore(dayjs(endDate)) || currentDate.isSame(dayjs(endDate))) {
-        dates.push(currentDate.format('YYYY-MM-DD'));
-        currentDate = currentDate.add(1, 'day');
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length > 0) {
+        const data = payload[0].payload;
+        return (
+            <Box sx={{
+                backgroundColor: 'white',
+                padding: '10px',
+                border: '1px solid #ccc',
+                borderRadius: '4px'
+            }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {label}
+                </Typography>
+                <Typography variant="body2">
+                    {`${payload[0].name}: ${payload[0].value.toFixed(2)}`}
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                    Số bài viết trên Facebook: {data.totalFacebookPost || 0}
+                </Typography>
+                <Typography variant="body2">
+                    Số bài viết trên X (Twitter): {data.totalXPost || 0}
+                </Typography>
+            </Box>
+        );
     }
-
-    // Generate random data for each metric
-    const generateRandomData = () => dates.map(() => Math.floor(Math.random() * 100));
-
-    return {
-        hashtagId: hashtagId,
-        hashtagName: `#trending${hashtagId}`,
-        totalXPost: Math.floor(Math.random() * 1000),
-        totalFacebookPost: Math.floor(Math.random() * 1000),
-        averageScore: (Math.random() * 5).toFixed(2),
-        averageFacebookScore: (Math.random() * 5).toFixed(2),
-        averageXScore: (Math.random() * 5).toFixed(2),
-        reportSocialMediaSummary: {
-            dates: dates,
-            facebookComments: generateRandomData(),
-            facebookShares: generateRandomData(),
-            facebookReactions: generateRandomData(),
-            facebookImpressions: generateRandomData(),
-            facebookScore: generateRandomData(),
-            xRetweets: generateRandomData(),
-            xReplies: generateRandomData(),
-            xLikes: generateRandomData(),
-            xImpressions: generateRandomData(),
-            xScore: generateRandomData()
-        }
-    };
+    return null;
 };
 
 const HashtagReport = ({ hashtagId }) => {
@@ -51,16 +40,16 @@ const HashtagReport = ({ hashtagId }) => {
     const [hashtagData, setHashtagData] = useState(null);
     const [selectedMetrics, setSelectedMetrics] = useState('interactions');
     const [startDate, setStartDate] = useState(dayjs().subtract(1, 'month'));
-    const [endDate, setEndDate] = useState(dayjs());
+    const [endDate, setEndDate] = useState(dayjs().subtract(1, 'day'));
     const [tempStartDate, setTempStartDate] = useState(dayjs().subtract(1, 'month'));
-    const [tempEndDate, setTempEndDate] = useState(dayjs());
+    const [tempEndDate, setTempEndDate] = useState(dayjs().subtract(1, 'day'));
 
     const metricsOptions = [
-        { value: 'interactions', label: 'Chia sẻ', fbKey: 'facebookShares', twKey: 'xRetweets' },
-        { value: 'comments', label: 'Bình luận', fbKey: 'facebookComments', twKey: 'xReplies' },
-        { value: 'impressions', label: 'Lượt xem', fbKey: 'facebookImpressions', twKey: 'xImpressions' },
-        { value: 'reactions', label: 'Phản ứng', fbKey: 'facebookReactions', twKey: 'xLikes' },
-        { value: 'scores', label: 'Điểm đánh giá mức độ quan tâm', fbKey: 'facebookScore', twKey: 'xScore' },
+        { value: 'interactions', label: 'Chia sẻ', fbKey: 'shares', twKey: 'retweets' },
+        { value: 'comments', label: 'Bình luận', fbKey: 'comments', twKey: 'replies' },
+        { value: 'impressions', label: 'Lượt xem', fbKey: 'impressions', twKey: 'impressions' },
+        { value: 'reactions', label: 'Phản ứng', fbKey: 'reactions', twKey: 'likes' },
+        { value: 'scores', label: 'Điểm đánh giá mức độ quan tâm', fbKey: 'score', twKey: 'score' },
     ];
 
     useEffect(() => {
@@ -69,7 +58,7 @@ const HashtagReport = ({ hashtagId }) => {
 
             try {
                 setLoading(true);
-                const data = await fetchHashtagReport(
+                const data = await fetchSocialMediaHashtagDetail(
                     hashtagId,
                     startDate.format('YYYY-MM-DD'),
                     endDate.format('YYYY-MM-DD')
@@ -100,35 +89,35 @@ const HashtagReport = ({ hashtagId }) => {
         );
     }
 
-    if (!hashtagData) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-                <Typography>Không có dữ liệu</Typography>
-            </Box>
-        );
-    }
-
     const currentMetric = metricsOptions.find(option => option.value === selectedMetrics);
     const selectedMetricLabel = currentMetric?.label || 'Chọn chỉ số so sánh';
 
-    const timeSeriesData = hashtagData.reportSocialMediaSummary.dates.map((date, index) => ({
+    const timeSeriesData = hashtagData?.socialMediaSummary?.dates?.map((date, index) => ({
         date,
-        facebook: hashtagData.reportSocialMediaSummary[currentMetric.fbKey][index] || 0,
-        twitter: hashtagData.reportSocialMediaSummary[currentMetric.twKey][index] || 0,
-    }));
+        facebook: hashtagData.socialMediaSummary.facebook[currentMetric.fbKey][index] || 0,
+        twitter: hashtagData.socialMediaSummary.twitter[currentMetric.twKey][index] || 0,
+    })) || [];
 
     const summaryStats = [
-        { label: 'Tổng bài đăng trên X', value: hashtagData.totalXPost },
-        { label: 'Tổng bài đăng trên Facebook', value: hashtagData.totalFacebookPost },
-        { label: 'Điểm đánh giá mức độ quan tâm trung bình', value: hashtagData.averageScore },
-        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên Facebook', value: hashtagData.averageFacebookScore },
-        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên X', value: hashtagData.averageXScore },
+        { label: 'Tổng bài đăng trên X', value: hashtagData?.totalXPost || 0 },
+        { label: 'Tổng bài đăng trên Facebook', value: hashtagData?.totalFacebookPost || 0 },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình', value: (hashtagData?.averageScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên Facebook', value: (hashtagData?.averageFacebookScore || 0).toFixed(2) },
+        { label: 'Điểm đánh giá mức độ quan tâm trung bình trên X', value: (hashtagData?.averageXScore || 0).toFixed(2) },
+        { label: 'Tỷ lệ nhấp chuột trên Facebook (%)', value: ((hashtagData?.facebookCTR || 0) * 100).toFixed(2) },
+        { label: 'Tỷ lệ nhấp chuột trên X (%)', value: ((hashtagData?.xctr || 0) * 100).toFixed(2) },
     ];
+
+    const ctrData = [{
+        name: hashtagData?.hashtagName || '',
+        'Facebook CTR': ((hashtagData?.facebookCTR || 0) * 100),
+        'X CTR': ((hashtagData?.xctr || 0) * 100),
+    }];
 
     return (
         <Box sx={{ p: 1 }}>
             <Grid container spacing={2}>
-                {/* Date Range Selection */}
+                {/* Date Range Selection - Always show */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2, mb: 2 }}>
                         <Box sx={{
@@ -177,11 +166,15 @@ const HashtagReport = ({ hashtagId }) => {
                     </Paper>
                 </Grid>
 
-                {/* Summary Statistics */}
+                {/* Hashtag Name - Always show */}
                 <Grid item xs={12}>
                     <Typography variant="h5" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold' }}>
-                        {hashtagData.hashtagName}
+                        #{hashtagData?.hashtagName || 'Không có dữ liệu'}
                     </Typography>
+                </Grid>
+
+                {/* Summary Statistics - Always show */}
+                <Grid item xs={12}>
                     <Paper sx={{ p: 2, mb: 2 }}>
                         <Typography variant="h6" gutterBottom>
                             Thống kê tổng quan
@@ -201,7 +194,7 @@ const HashtagReport = ({ hashtagId }) => {
                     </Paper>
                 </Grid>
 
-                {/* Time Series Chart */}
+                {/* Time Series Chart - Always show */}
                 <Grid item xs={12}>
                     <Paper sx={{ p: 2 }}>
                         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -224,15 +217,55 @@ const HashtagReport = ({ hashtagId }) => {
                             Biểu đồ so sánh {selectedMetrics === 'scores' ? "" : "số lượng"} {selectedMetricLabel.toLowerCase()} giữa Facebook và X(Twitter) theo thời gian
                         </Typography>
                         <ResponsiveContainer width="100%" height={400}>
-                            <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="date" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Line type="monotone" dataKey="facebook" name="Facebook" stroke="#1877F2" strokeWidth={2} />
-                                <Line type="monotone" dataKey="twitter" name="X (Twitter)" stroke="#000000" strokeWidth={2} />
-                            </LineChart>
+                            {timeSeriesData.length > 0 ? (
+                                <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="date" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="facebook" name="Facebook" stroke="#1877F2" strokeWidth={2} />
+                                    <Line type="monotone" dataKey="twitter" name="X (Twitter)" stroke="#000000" strokeWidth={2} />
+                                </LineChart>
+                            ) : (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                    <Typography color="text.secondary">Không có dữ liệu</Typography>
+                                </Box>
+                            )}
+                        </ResponsiveContainer>
+                    </Paper>
+                </Grid>
+
+                {/* CTR Chart - Always show */}
+                <Grid item xs={12}>
+                    <Paper sx={{ p: 2 }}>
+                        <Typography variant="h6" textAlign="center" gutterBottom fontWeight="bold">
+                            Biểu đồ tỷ lệ nhấp chuột (CTR)
+                        </Typography>
+                        <ResponsiveContainer width="100%" height={400}>
+                            {hashtagData ? (
+                                <BarChart data={ctrData} margin={{ top: 35, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis dataKey="name" tickFormatter={(value) => `#${value}`} />
+                                    <YAxis
+                                        label={{
+                                            value: "Tỷ lệ nhấp chuột (%)",
+                                            position: "top",
+                                            offset: 20,
+                                            style: { fontSize: 16 },
+                                            dx: 50,
+                                        }}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend />
+                                    <Bar dataKey="Facebook CTR" fill="#1877F2" />
+                                    <Bar dataKey="X CTR" fill="#000000" />
+                                </BarChart>
+                            ) : (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                    <Typography color="text.secondary">Không có dữ liệu</Typography>
+                                </Box>
+                            )}
                         </ResponsiveContainer>
                     </Paper>
                 </Grid>

@@ -62,13 +62,13 @@ const ManagerDashboard = () => {
   });
 
   const [globalDateRange, setGlobalDateRange] = useState({
-    startDate: dayjs().subtract(6, 'month'),
-    endDate: dayjs()
+    startDate: dayjs().subtract(1, 'month'),
+    endDate: dayjs().subtract(1, 'day')
   });
 
   const [appliedGlobalDateRange, setAppliedGlobalDateRange] = useState({
-    startDate: dayjs().subtract(6, 'month'),
-    endDate: dayjs()
+    startDate: dayjs().subtract(1, 'month'),
+    endDate: dayjs().subtract(1, 'day')
   });
 
   const [socialMediaData, setSocialMediaData] = useState(null);

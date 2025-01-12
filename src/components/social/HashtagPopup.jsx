@@ -240,7 +240,7 @@ const HashtagPopup = ({ open, onClose, onConfirm, title = "Thêm hashtag", isTwi
                     {suggestion.isPopular && (
                       <LocalFireDepartmentIcon 
                         sx={{ color: 'red' }}
-                        titleAccess="Hashtag phổ biến"
+                        titleAccess="Hashtag được dùng nhiều"
                       />
                     )}
                   </Box>

@@ -648,3 +648,51 @@ export const fetchSocialMediaHashtag = async (startDate, endDate) => {
         throw error;
     }
 };
+
+export const fetchSocialMediaHashtagDetail = async (hashtagId, startDate, endDate) => {
+    const token = getCookie('token');
+    try {
+        const queryParams = new URLSearchParams();
+        if (startDate) queryParams.append('startDate', startDate);
+        if (endDate) queryParams.append('endDate', endDate);
+
+        const response = await axios.get(`${baseURL}/api/reports/social-media-hashtag-detail/${hashtagId}?${queryParams.toString()}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = response.data.data;
+        return {
+            hashtagId: data.hashtagId,
+            hashtagName: data.hashtagName,
+            totalXPost: data.totalXPost,
+            totalFacebookPost: data.totalFacebookPost,
+            averageScore: data.averageScore,
+            averageFacebookScore: data.averageFacebookScore,
+            averageXScore: data.averageXScore,
+            facebookCTR: data.facebookCTR,
+            xctr: data.xctr,
+            socialMediaSummary: {
+                dates: data.reportSocialMediaSummary.dates,
+                facebook: {
+                    comments: data.reportSocialMediaSummary.facebookComments,
+                    shares: data.reportSocialMediaSummary.facebookShares,
+                    reactions: data.reportSocialMediaSummary.facebookReactions,
+                    impressions: data.reportSocialMediaSummary.facebookImpressions,
+                    score: data.reportSocialMediaSummary.facebookScore
+                },
+                twitter: {
+                    retweets: data.reportSocialMediaSummary.xRetweets,
+                    replies: data.reportSocialMediaSummary.xReplies,
+                    likes: data.reportSocialMediaSummary.xLikes,
+                    impressions: data.reportSocialMediaSummary.xImpressions,
+                    score: data.reportSocialMediaSummary.xScore
+                }
+            }
+        };
+    } catch (error) {
+        console.error('Error fetching social media hashtag detail:', error);
+        throw error;
+    }
+};
