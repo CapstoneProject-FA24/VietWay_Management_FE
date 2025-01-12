@@ -23,9 +23,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const AttractionReviewChart = ({ ratingData }) => {
-    // Filter and sort data
+   console.log(ratingData);
     const filteredData = ratingData
-        .filter(item => item.totalRating > 0)
+        .filter(item => item.totalRating >= 0)
         .sort((a, b) => {
             // Primary sort by average rating (descending)
             if (b.averageRating !== a.averageRating) {
@@ -43,7 +43,7 @@ const AttractionReviewChart = ({ ratingData }) => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Box>
                     <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, color: '#0051cd' }}>
-                        Thống kê đánh giá của các điểm tham quan
+                        Thống kê đánh giá trung bình của các điểm tham quan
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Sắp xếp theo đánh giá trung bình và số lượng đánh giá
