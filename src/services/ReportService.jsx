@@ -75,7 +75,7 @@ export const fetchBookingReport = async (startDate, endDate) => {
     }
 };
 
-export const fetchRatingReport = async (startDate, endDate, isAscending = true) => {
+export const fetchRatingReport = async (startDate, endDate, isAscending = false) => {
     const token = getCookie('token');
     try {
         const queryParams = new URLSearchParams();
