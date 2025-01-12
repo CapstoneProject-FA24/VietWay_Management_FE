@@ -133,6 +133,24 @@ const ManagerManagePost = () => {
     fetchPopularData();
   }, []);
 
+  // Add this function to sort posts
+  const getSortedPosts = () => {
+    if (!posts) return [];
+    
+    const sortedPosts = [...posts];
+    switch (sortOrder) {
+      case 'zToA':
+        return sortedPosts.sort((a, b) => b.title.localeCompare(a.title));
+      case 'newest':
+        return sortedPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      case 'oldest':
+        return sortedPosts.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      case 'aToZ':
+      default:
+        return sortedPosts.sort((a, b) => a.title.localeCompare(b.title));
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', width: '98vw', minHeight: '100vh' }}>
       <Helmet>
@@ -271,7 +289,7 @@ const ManagerManagePost = () => {
           {posts.length > 0 ? (
             <>
               <Grid container spacing={2}>
-                {posts.map((post) => (
+                {getSortedPosts().map((post) => (
                   <Grid item xs={12} sm={6} md={4} key={post.id}>
                     <PostsCard post={post} />
                   </Grid>
