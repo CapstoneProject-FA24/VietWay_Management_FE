@@ -52,7 +52,7 @@ const SocialMediaPostCategory = ({ data, startDate, endDate }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   if (!data || data.length === 0) {
-    return <Typography>No data available</Typography>;
+    return <Typography>Không có thông tin phù hợp</Typography>;
   }
 
   const getChartData = (type) => {
